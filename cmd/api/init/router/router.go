@@ -1,17 +1,22 @@
 package router
 
 import (
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth"
+	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth/delivery/http"
+	user "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/delivery/http"
 	"github.com/gorilla/mux"
 )
 
 // Initialize router and describes all app's endpoints
-func InitRouter() {
-	authRepo := 
+func InitRouter(auth *auth.Handler, user *user.Handler) *mux.Router {
 
-	r := mux.NewRouter().PathPrefix("/api").Subrouter()
-	auth := r.PathPrefix("/auth").Subrouter()
-	{
-		auth.HandleFunc("/signup", )
-	}
+	r := mux.NewRouter()
+
+	apiRouter := r.PathPrefix("/api").Subrouter()
+
+	authRouter := apiRouter.PathPrefix("/auth").Subrouter()
+	authRouter.Methods("POST").Path("/singin").HandlerFunc(auth.SignIn)
+	authRouter.Methods("POST").Path("/sighup").HandlerFunc(auth.SignUp)
+	authRouter.Methods("GET").Path("/logout").HandlerFunc(auth.LogOut)
+
+	return r
 }

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"os"
@@ -37,7 +38,7 @@ func initServerConfigFromEnv() (cfgServer, error) {
 	return cfg, nil
 }
 
-func (s *Server) RunServer(handler http.Handler) error {
+func (s *Server) Run(handler http.Handler) error {
 	cfgSer, err := initServerConfigFromEnv()
 	if err != nil {
 		return err
@@ -52,4 +53,8 @@ func (s *Server) RunServer(handler http.Handler) error {
 	}
 
 	return nil
+}
+
+func (s *Server) Shutdown(ctx context.Context) error {
+	return s.httpServer.Shutdown(ctx)
 }

@@ -1,9 +1,10 @@
 package auth
 
 import (
-	"Hamster/internal/models"
 	"context"
 	"errors"
+
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 )
 
 var (
