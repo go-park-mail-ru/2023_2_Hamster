@@ -17,4 +17,6 @@ func main() {
 			log.Errorf("Error Closing database connection: %v", err)
 		}
 	}()
+
+	router, err := 
 }
