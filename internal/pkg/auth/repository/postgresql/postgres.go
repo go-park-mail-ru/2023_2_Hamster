@@ -14,9 +14,10 @@ type AuthRepo struct {
 	db *sql.DB
 }
 
-func NewAuthRepo(db *sql.DB) *AuthRepo {
+func userRepository(db *sql.DB) *AuthRepo {
 	return &AuthRepo{
-		db: db,
+		db:     db,
+		logger: l,
 	}
 }
 
@@ -27,5 +28,5 @@ func (r *AuthRepo) CreateUser() {
 }
 
 func (r *AuthRepo) CheckUser() {
-	panic("unimplemented")
+
 }
