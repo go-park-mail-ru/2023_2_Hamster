@@ -6,23 +6,19 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-const (
-	userExist = "smth"
-)
-
-type AuthRep struct {
+type UserRep struct {
 	db     *sqlx.DB
 	logger logger.CustomLogger
 }
 
-func NewRepository(db *sqlx.DB, l logger.CustomLogger) *AuthRep {
-	return &AuthRep{
+func NewRepository(db *sqlx.DB, l logger.CustomLogger) *UserRep {
+	return &UserRep{
 		db:     db,
 		logger: l,
 	}
 }
 
-func (r *AuthRepo) CreateUser() {
+func (r *UserRep) CreateUser() {
 	userID := uuid.New()
 
 	_, err := r.db.ExecContext(ctx)

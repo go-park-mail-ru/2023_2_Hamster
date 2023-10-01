@@ -30,7 +30,7 @@ type Handler struct {
 	log logger.CustomLogger
 }
 
-func NewHandler(log logger.CustomLogger, au auth.Usecase) *Handler {
+func NewHandler(au auth.Usecase, log logger.CustomLogger) *Handler {
 	return &Handler{
 		au:  au,
 		log: log,
