@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS Users
+CREATE TABLE Users
 (
     id            SERIAL       PRIMARY KEY,
     username      VARCHAR(20)  UNIQUE      NOT NULL,
@@ -8,9 +8,19 @@ CREATE TABLE IF NOT EXISTS Users
     avatar_url    TEXT
 );
 
-CREATE TABLE IF NOT EXISTS Accounts (
+CREATE TABLE Accounts (
     id UUID PRIMARY KEY,
     user_id INT,
-    balance NUMERIC,
+    balance money,
     mean_payment TEXT
 );
+
+
+INSERT INTO "users"(username, password_hash, first_name, last_name, avatar_url)
+VALUES ('kosmatoff', 'hash', 'Дмитрий', 'Комаров', 'image/img1.png');
+
+INSERT INTO "accounts"(UserID, Balance, MeanPayment)
+VALUES (1, 'Карта', 25000);
+
+INSERT INTO "accounts"(UserID, Balance, MeanPayment)
+VALUES (1, 'Наличные', 450);
