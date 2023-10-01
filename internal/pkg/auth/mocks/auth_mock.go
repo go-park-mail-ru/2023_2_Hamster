@@ -5,7 +5,7 @@
 package mock_auth
 
 import (
-	models "Hamster/internal/models"
+	models "github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	context "context"
 	reflect "reflect"
 

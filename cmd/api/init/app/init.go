@@ -13,18 +13,18 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func Init(db *sqlx.DB, log logger.CustomLogger) *mux.Router {
-	authRep := authRep.NewRepository(db, log)
-	userRep := userRer.NewRepository(db, log)
+func Init(db *sqlx.DB, log *logger.CustomLogger) *mux.Router {
+	authRep := authRep.NewRepository(db, *log)
+	userRep := userRer.NewRepository(db, *log)
 
-	authUsecase := authUsecase.NewUsecase(authRep, userRep, log)
-	userUsecase := userUsecase.NewUsecase(userRep, log)
+	authUsecase := authUsecase.NewUsecase(authRep, userRep, *log)
+	userUsecase := userUsecase.NewUsecase(userRep, *log)
 
-	authHandler := authDelivery.NewHandler(authUsecase, log)
-	userHandler := userDelivery.NewHandler(userUsecase, log)
+	authHandler := authDelivery.NewHandler(authUsecase, *log)
+	userHandler := userDelivery.NewHandler(userUsecase, *log)
 
 	return router.InitRouter(
 		authHandler,
-	)
+		userHandler)
 
 }

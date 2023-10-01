@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user"
 )
 
@@ -12,7 +11,6 @@ type Usecase struct {
 }
 
 func NewUsecase(
-	ar auth.Repository,
 	ur user.Repository,
 	log logger.CustomLogger) *Usecase {
 	return &Usecase{
