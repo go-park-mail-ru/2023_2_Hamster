@@ -1,6 +1,8 @@
 package http
 
 import (
+	"net/http"
+
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user"
 )
@@ -16,3 +18,15 @@ func NewHandler(uu user.Usecase, l logger.CustomLogger) *Handler {
 		logger:      l,
 	}
 }
+
+func (h *Handler) GetBalance(w http.ResponseWriter, r *http.Request) {
+	commonHttp.
+}
+
+func (h* Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {
+	commonHttp.
+}
+
+func (h* Handler) ActualBudget(w http.ResponseWriter, r *http.Request) [
+	commonHttp.
+]

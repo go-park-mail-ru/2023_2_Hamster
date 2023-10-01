@@ -18,10 +18,10 @@ func InitRouter(auth *auth.Handler, user *user.Handler) *mux.Router {
 	authRouter.Methods("POST").Path("/sighup").HandlerFunc(auth.SignUp)
 	authRouter.Methods("GET").Path("/logout").HandlerFunc(auth.LogOut)
 
-	userRouter := apiRouter.PathPrefix("/user").Methods()
-	userRouter.Path("/getUsername").Methods("GET")
-	userRouter.Path("/{userID}").Methods("GET").HandlerFunc()
-	userRouter.Path("/{}")
+	userRouter := apiRouter.PathPrefix("/user").Subrouter()
+	userRouter.Methods("GET").Path("/{userID}/balance").HandlerFunc(user.GetBalance)
+	userRouter.Methods("GET").Path("/{userID}/plannedBudget").HandlerFunc(user.GetPlannedBudget)
+	userRouter.Methods("GET").Path("/{userID}/actualBudget").HandlerFunc(user.ActualBudget)
 
 	return r
 }

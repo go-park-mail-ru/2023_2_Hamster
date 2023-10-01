@@ -11,6 +11,7 @@ import (
 type Usecase interface {
 	GetByID(userID uuid.UUID) (*models.User, error)
 	ChangeInfo(user *models.User) error
+	GetBalance(user *models.User) (float32, error)
 }
 
 type Repository interface {
