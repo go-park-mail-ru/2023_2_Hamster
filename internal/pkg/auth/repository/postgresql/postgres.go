@@ -2,6 +2,12 @@ package postgresql
 
 import (
 	"database/sql"
+
+	"github.com/google/uuid"
+)
+
+const (
+	userExist = "smth"
 )
 
 type AuthRepo struct {
@@ -15,6 +21,9 @@ func NewAuthRepo(db *sql.DB) *AuthRepo {
 }
 
 func (r *AuthRepo) CreateUser() {
+	userID := uuid.New()
+
+	_, err := r.db.ExecContext(ctx)
 }
 
 func (r *AuthRepo) CheckUser() {

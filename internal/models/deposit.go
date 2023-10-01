@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type deposit struct {
+type Deposit struct {
 	ID           uuid.UUID `json:"id" valid:"-"`
 	AccountID    uint      `json:"account_id" valid:"-"`
 	Total        float64   `json:"total" valid:"required,greaterzero"`
@@ -17,7 +17,7 @@ type deposit struct {
 	Bank         string    `json:"bank"`
 }
 
-func (g *Goal) GoalValidate() error {
-	_, err := valid.ValidateStruct(g)
+func (d *Deposit) DepositValidate() error {
+	_, err := valid.ValidateStruct(d)
 	return err
 }

@@ -10,6 +10,11 @@ func main() {
 
 	db, err := postgresql.InitPostgresDB()
 	if err != nil {
-		log.Errorf("error when trying connect database")
+		log.Errorf("Error Initializing PostgreSQL database: %v", err)
 	}
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Errorf("Error Closing database connection: %v", err)
+		}
+	}()
 }
