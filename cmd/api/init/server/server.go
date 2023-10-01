@@ -48,6 +48,7 @@ func (s *Server) Run(handler http.Handler) error {
 		Addr:    cfgSer.ServerHost + ":" + cfgSer.ServerPort,
 		Handler: handler,
 	}
+
 	if s.httpServer.ListenAndServe(); err != nil {
 		return err
 	}

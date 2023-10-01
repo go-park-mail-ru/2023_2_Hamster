@@ -1,6 +1,6 @@
 CREATE TABLE Users
 (
-    id            SERIAL       PRIMARY KEY,
+    id            UUID       PRIMARY KEY,
     username      VARCHAR(20)  UNIQUE      NOT NULL,
     password_hash VARCHAR(256)             NOT NULL,
     first_name    VARCHAR(20),

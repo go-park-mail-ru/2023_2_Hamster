@@ -4,19 +4,20 @@ import (
 	"context"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
+	"github.com/google/uuid"
 )
 
 // Bussiness logic methods to work with user
 type Usecase interface {
-	GetByID(userID uint32) (*models.User, error)
+	GetByID(userID uuid.UUID) (*models.User, error)
 	ChangeInfo(user *models.User) error
 }
 
 type Repository interface {
-	GetByID(userID uint32) (*models.User, error)
-	CreateUser(user models.User) (uint32, error)
+	GetByID(userID uuid.UUID) (*models.User, error)
+	CreateUser(user models.User) (uuid.UUID, error)
 
-	IncreaseUserVersion(ctx context.Context, userID uint32) error
-	GetUserByUsername(ctx context.Context, username string) (*models.User, error)
-	GetUserByIDAndVersion(ctx context.Context, userID, userVersion uint32) (*models.User, error)
+	IncreaseUserVersion(ctx context.Context, userID uuid.UUID) error
+	GetUserByUsername(username string) (*models.User, error)
+	GetUserByIDAndVersion(ctx context.Context, userID, userVersion uuid.UUID) (*models.User, error)
 }

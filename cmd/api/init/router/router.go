@@ -18,5 +18,10 @@ func InitRouter(auth *auth.Handler, user *user.Handler) *mux.Router {
 	authRouter.Methods("POST").Path("/sighup").HandlerFunc(auth.SignUp)
 	authRouter.Methods("GET").Path("/logout").HandlerFunc(auth.LogOut)
 
+	userRouter := apiRouter.PathPrefix("/user").Methods()
+	userRouter.Path("/getUsername").Methods("GET")
+	userRouter.Path("/{userID}").Methods("GET").HandlerFunc()
+	userRouter.Path("/{}")
+
 	return r
 }
