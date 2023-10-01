@@ -2,8 +2,6 @@ package postgresql
 
 import (
 	"database/sql"
-
-	"github.com/google/uuid"
 )
 
 const (
@@ -20,12 +18,18 @@ func NewAuthRepo(db *sql.DB) *AuthRepo {
 	}
 }
 
-func (r *AuthRepo) CreateUser() {
+/*func (r *AuthRepo) CreateUser() {
 	userID := uuid.New()
 
 	_, err := r.db.ExecContext(ctx)
-}
+}*/
 
-func (r *AuthRepo) CheckUser() {
-	panic("unimplemented")
+func (r *AuthRepo) CheckUser(username string) (bool, error) {
+	var exists bool
+	query := `SELECT exists(SELECT 1 FROM users WHERE username=\$1)`
+	err := r.db.QueryRow(query, username).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
 }

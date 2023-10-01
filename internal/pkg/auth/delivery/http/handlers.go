@@ -113,6 +113,6 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 	commonHttp.SuccessResponse(w, loginResponse, h.log)
 }
 
-func (h *Handler) LogOut(w http.ResponseWriter, r *http.Request) {
-
-}
+/*func (h *Handler) LogOut(w http.ResponseWriter, r *http.Request) {
+	user, err := r.Context().Value(models.User)
+}*/
