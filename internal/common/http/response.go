@@ -3,7 +3,6 @@ package http
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 )
@@ -51,6 +50,6 @@ func JSON(w http.ResponseWriter, status int, response any) {
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.Header().Set("Content-Length", strconv.Itoa(len(response)))
+	// w.Header().Set("Content-Length", )
 	w.WriteHeader(status)
 }
