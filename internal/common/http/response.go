@@ -3,9 +3,15 @@ package http
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 )
+
+type Response struct {
+	Status string      `json:"status"`
+	Body   interface{} `json:"body,omitempty"`
+}
 
 type Error struct {
 	Message string `json:"message"`
@@ -35,4 +41,16 @@ func SuccessResponse(w http.ResponseWriter, response any, log logger.CustomLogge
 		log.Errorf("Error failed to marshal response: %s", err.Error())
 		ErrorResponse(w, "can't encode response into json", http.StatusInternalServerError, log)
 	}
+}
+
+func JSON(w http.ResponseWriter, status int, response any) {
+	encoder := json.NewEncoder(w)
+	if err := encoder.Encode(response); err != nil {
+		w.WriteHeader(status)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("Content-Length", strconv.Itoa(len(response)))
+	w.WriteHeader(status)
 }

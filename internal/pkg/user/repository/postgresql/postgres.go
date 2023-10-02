@@ -112,16 +112,16 @@ func (r *UserRep) GetPlannedBudget(userID uuid.UUID) (float64, error) {
 func (r *UserRep) GetCurrentBudget(userID uuid.UUID) (float64, error) {
 	var currentBudget float64
 	err := r.db.QueryRow(`SELECT 
-								CASE 
-									WHEN is_income = true THEN SUM(total)
-									WHEN is_income = false THEN -SUM(total)
-								END AS calculated_total
-							FROM 
-								Transaction
-							WHERE 
-							user_id = $1
-							AND date >= DATE_TRUNC('month', CURRENT_DATE)
-							AND date < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month'`, userID).Scan(&currentBudget)
+							CASE 
+								WHEN is_income = true THEN SUM(total)
+								WHEN is_income = false THEN -SUM(total)
+							END AS calculated_total
+						FROM 
+							Transaction
+						WHERE 
+						user_id = $1
+						AND date >= DATE_TRUNC('month', CURRENT_DATE)
+						AND date < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month'`, userID).Scan(&currentBudget)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		return 0, fmt.Errorf("(repository) nothing found for this request %w", err)
