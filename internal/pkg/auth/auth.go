@@ -17,7 +17,7 @@ const CtxUserKey = "user"
 
 type Usecase interface {
 	// SignUpUser creates new User and returns it's id
-	SignUpUser(ctx context.Context, user models.User) (uuid.UUID, error)
+	SignUpUser(user models.User) (uuid.UUID, error)
 
 	SignInUser(username, plainPassword string) (string, error)
 

@@ -39,33 +39,25 @@ func NewHandler(au auth.Usecase, log logger.CustomLogger) *Handler {
 }
 
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
-	body, err := io.ReadAll(r.Body)
-	if errors.Is(err, io.EOF) {
+	var user models.User
+
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&user); err != nil {
 		h.log.Error(err.Error())
-		commonHttp.ErrorResponse(w, "Error request body is empty", http.StatusBadRequest, h.log)
-		return
-	}
-	if err != nil {
-		h.log.Errorf("Error decode in request body failed: %v", err.Error())
-		commonHttp.ErrorResponse(w, "Error decode in request body failed", http.StatusBadRequest, h.log)
-	}
-
-	h.log.Debug("request body successfully decoded", r)
-
-	user := &models.User{}
-	if err = json.Unmarshal(body, user); err != nil {
-		h.log.Errorf("Error failed to unmarshal request body: %v", err.Error())
-		commonHttp.ErrorResponse(w, "failed to unmarshal request body", http.StatusBadRequest, h.log)
+		commonHttp.ErrorResponse(w, "incorrect input body", http.StatusBadRequest, h.log)
 		return
 	}
 
-	id, err := h.au.SignUpUser(r.Context(), *(user))
-	var errUserAlreadyExist *models.UserAlreadyExistsError
-	if errors.As(err, errUserAlreadyExist) {
+	h.log.Debug("request body successfully decoded\n", r)
+
+	id, err := h.au.SignUpUser(user)
+	//var errUserAlreadyExist *models.UserAlreadyExistsError
+
+	/*if errors.As(err, errUserAlreadyExist) {
 		h.log.Error(err.Error())
 		commonHttp.ErrorResponse(w, "user already exist", http.StatusBadRequest, h.log)
 		return
-	} else if err != nil {
+	} else*/if err != nil {
 		h.log.Error(err.Error())
 		commonHttp.ErrorResponse(w, "server error", http.StatusBadRequest, h.log)
 		return

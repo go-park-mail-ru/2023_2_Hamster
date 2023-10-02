@@ -44,7 +44,7 @@ func NewUsecase(
 }
 
 // SignUpUser creates new User and returns it's id
-func (u *Usecase) SignUpUser(ctx context.Context, user models.User) (uuid.UUID, error) {
+func (u *Usecase) SignUpUser(user models.User) (uuid.UUID, error) {
 	salt := make([]byte, 8)
 	rand.Read(salt)
 

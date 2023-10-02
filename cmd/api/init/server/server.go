@@ -31,8 +31,8 @@ func initServerConfigFromEnv() (cfgServer, error) {
 	}
 
 	cfg = cfgServer{
-		ServerPort: host,
-		ServerHost: port,
+		ServerHost: host,
+		ServerPort: port,
 	}
 
 	return cfg, nil

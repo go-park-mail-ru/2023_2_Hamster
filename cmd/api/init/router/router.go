@@ -33,6 +33,7 @@ func InitRouter(auth *auth.Handler /*, user *user.Handler*/) *mux.Router {
 
 	r := mux.NewRouter()
 
+	http.Handle("/", r)
 	r.Path("/ping").HandlerFunc(HelloHandler)
 
 	apiRouter := r.PathPrefix("/api").Subrouter()
