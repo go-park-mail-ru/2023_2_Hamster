@@ -16,7 +16,7 @@ func InitRouter(auth *auth.Handler, user *user.Handler) *mux.Router {
 	authRouter := apiRouter.PathPrefix("/auth").Subrouter()
 	authRouter.Methods("POST").Path("/singin").HandlerFunc(auth.SignIn)
 	authRouter.Methods("POST").Path("/sighup").HandlerFunc(auth.SignUp)
-	authRouter.Methods("GET").Path("/logout").HandlerFunc(auth.LogOut)
+	//authRouter.Methods("GET").Path("/logout").HandlerFunc(auth.LogOut)
 
 	userRouter := apiRouter.PathPrefix("/user").Subrouter()
 	userRouter.Methods("GET").Path("/{userID}/balance").HandlerFunc(user.GetBalance)

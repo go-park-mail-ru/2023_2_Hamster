@@ -14,6 +14,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 var secret = os.Getenv("SECRET")
@@ -42,7 +43,7 @@ func NewUsecase(
 }
 
 // SignUpUser creates new User and returns it's id
-func (u *Usecase) SignUpUser(ctx context.Context, user models.User) (uint32, error) {
+func (u *Usecase) SignUpUser(ctx context.Context, user models.User) (uuid.UUID, error) {
 	salt := make([]byte, 8)
 	rand.Read(salt)
 
@@ -51,31 +52,27 @@ func (u *Usecase) SignUpUser(ctx context.Context, user models.User) (uint32, err
 
 	userId, err := u.userRepo.CreateUser(user)
 	if err != nil {
-		return 0, fmt.Errorf("[usecase] cannot create user: %w", err)
+		return uuid.Nil, fmt.Errorf("[usecase] cannot create user: %w", err)
 	}
 	return userId, nil
 }
 
 // GetUserByCreds returns User if such exist in repository
 func (u *Usecase) GetUserByCreds(ctx context.Context, username, plainPassword string) (*models.User, error) {
-	user, err := u.userRepo.GetUserByUsername(ctx, username)
+	user, err := u.userRepo.GetUserByUsername(username)
 	if err != nil {
 		return nil, fmt.Errorf("[usecase] can't find user: %w", err)
-	}
-
-	if !checkPasswordHash(plainPassword, user.Password) {
-		return nil, errors.New("invalid password")
 	}
 
 	return user, nil
 }
 
-func (u *Usecase) LoginUser(username, plainPassword string) (string, error) {
+//func (u *Usecase) LoginUser(username, plainPassword string) (string, error) {
 
-}
+//}
 
 // GetUserByAuthData returns User if such exist in repository
-func (u *Usecase) GetUserByAuthData(ctx context.Context, userID, userVersion uint32) (*models.User, error) {
+func (u *Usecase) GetUserByAuthData(ctx context.Context, userID, userVersion uuid.UUID) (*models.User, error) {
 	return u.userRepo.GetUserByIDAndVersion(ctx, userID, userVersion)
 }
 
@@ -98,7 +95,7 @@ func (u *Usecase) ValidateAccessToken(accessToken string) (uint32, uint32, error
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("[usecase] invalig signing method")
 		}
-		return []byte("your_secret_key"), nil
+		return []byte(secret), nil
 	})
 	if err != nil {
 		return 0, 0, fmt.Errorf("[usecase] invalid token: %w", err)
@@ -114,7 +111,7 @@ func (u *Usecase) ValidateAccessToken(accessToken string) (uint32, uint32, error
 }
 
 // IncraseUserVersion inc User access token version
-func (u *Usecase) IncreaseUserVersion(ctx context.Context, userID uint32) error {
+func (u *Usecase) IncreaseUserVersion(ctx context.Context, userID uuid.UUID) error {
 	if err := u.userRepo.IncreaseUserVersion(ctx, userID); err != nil {
 		return fmt.Errorf("[usecase] error failed to update version: %w", err)
 	}

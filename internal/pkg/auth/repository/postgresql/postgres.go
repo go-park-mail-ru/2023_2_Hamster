@@ -1,11 +1,7 @@
 package postgresql
 
 import (
-
-	"database/sql"
-
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -31,7 +27,7 @@ func NewRepository(db *sqlx.DB, l logger.CustomLogger) *AuthRep {
 	_, err := r.db.ExecContext(ctx)
 }*/
 
-func (r *AuthRepo) CheckUser(username string) (bool, error) {
+func (r *AuthRep) CheckUser(username string) (bool, error) {
 	var exists bool
 	query := `SELECT exists(SELECT 1 FROM users WHERE username=\$1)`
 	err := r.db.QueryRow(query, username).Scan(&exists)
@@ -39,4 +35,4 @@ func (r *AuthRepo) CheckUser(username string) (bool, error) {
 		return false, err
 	}
 	return exists, nil
-
+}
