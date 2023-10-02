@@ -58,7 +58,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := h.au.SignUpUser(r.Context(), user)
+	id, err := h.au.SignUpUser(r.Context(), *(user))
 	var errUserAlreadyExist *models.UserAlreadyExistsError
 	if errors.As(err, errUserAlreadyExist) {
 		h.log.Error(err.Error())
