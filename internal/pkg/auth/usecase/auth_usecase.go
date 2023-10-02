@@ -49,6 +49,7 @@ func (u *Usecase) SignUpUser(user models.User) (uuid.UUID, error) {
 	rand.Read(salt)
 
 	user.Salt = fmt.Sprintf("%x", salt)
+	fmt.Println([]byte(user.Salt))
 	user.Password = hashPassword(user.Password, salt)
 
 	userId, err := u.userRepo.CreateUser(user)
@@ -64,7 +65,12 @@ func (u *Usecase) SignInUser(username, plainPassword string) (string, error) {
 		return "", fmt.Errorf("[usecase] can't find user: %w", err)
 	}
 
-	hashedPassword := hashPassword(plainPassword, []byte(user.Salt))
+	salt, err := hex.DecodeString(user.Salt)
+	if err != nil {
+		return "", fmt.Errorf("[usecase] salt from db decode error: %w", err)
+	}
+
+	hashedPassword := hashPassword(plainPassword, salt)
 	if hashedPassword != user.Password {
 		return "", fmt.Errorf("[usecase] incorrect password")
 	}

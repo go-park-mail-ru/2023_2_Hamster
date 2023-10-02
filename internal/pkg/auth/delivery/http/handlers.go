@@ -2,8 +2,6 @@ package http
 
 import (
 	"encoding/json"
-	"errors"
-	"io"
 	"net/http"
 
 	commonHttp "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
@@ -51,13 +49,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	h.log.Debug("request body successfully decoded\n", r)
 
 	id, err := h.au.SignUpUser(user)
-	//var errUserAlreadyExist *models.UserAlreadyExistsError
-
-	/*if errors.As(err, errUserAlreadyExist) {
-		h.log.Error(err.Error())
-		commonHttp.ErrorResponse(w, "user already exist", http.StatusBadRequest, h.log)
-		return
-	} else*/if err != nil {
+	if err != nil {
 		h.log.Error(err.Error())
 		commonHttp.ErrorResponse(w, "server error", http.StatusBadRequest, h.log)
 		return
@@ -71,26 +63,16 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
-	body, err := io.ReadAll(r.Body)
-	if errors.Is(err, io.EOF) {
+	var userInput signInput
+
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&userInput); err != nil {
 		h.log.Error(err.Error())
-		commonHttp.ErrorResponse(w, "Error request body is empty", http.StatusBadRequest, h.log)
+		commonHttp.ErrorResponse(w, "incorrect input body", http.StatusBadRequest, h.log)
 		return
-	}
-	if err != nil {
-		h.log.Errorf("Error decode in request body failed: %v", err.Error())
-		commonHttp.ErrorResponse(w, "Error decode in request body failed", http.StatusBadRequest, h.log)
 	}
 
 	h.log.Debug("request body successfully decoded", r)
-
-	var userInput signInput
-
-	if err := json.Unmarshal(body, userInput); err != nil {
-		h.log.Errorf("Error failed to unmarshal request body: %v", err.Error())
-		commonHttp.ErrorResponse(w, "failed to unmarshal request body", http.StatusBadRequest, h.log)
-		return
-	}
 
 	token, err := h.au.SignInUser(userInput.Username, userInput.Password)
 	if err != nil {

@@ -44,14 +44,13 @@ func (r *AuthRep) CheckUser(username string) (bool, error) {
 
 func (r *AuthRep) GetUserByAuthData(ctx context.Context, userID uuid.UUID) (*models.User, error) {
 	query := fmt.Sprintf(
-		`SELECT id, version, username, email, password_hash, salt, 
-			first_name, last_name, sex, birth_date 
+		`SELECT id, username, password_hash, salt 
 		FROM %s
 		WHERE id = $1`)
 
 	var user models.User
 	err := r.db.QueryRow(query, userID).Scan(&user.ID, &user.Username,
-		&user.FirstName, &user.LastName, &user.PlannedBudget, &user.Password,
+		&user.PlannedBudget, &user.Password,
 		&user.AvatarURL, &user.Salt)
 	if err != nil {
 		return nil, fmt.Errorf("[repository] Error: %v", err)

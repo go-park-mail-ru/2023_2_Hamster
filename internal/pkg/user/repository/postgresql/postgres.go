@@ -26,10 +26,10 @@ func NewRepository(db *sqlx.DB, l logger.CustomLogger) *UserRep {
 func (r *UserRep) CreateUser(u models.User) (uuid.UUID, error) {
 
 	query := `INSERT INTO users
-			 (username, password_hash)
-		VALUES ($1, $2) RETURNING id;`
+			 (username, password_hash, salt)
+		VALUES ($1, $2, $3) RETURNING id;`
 
-	row := r.db.QueryRow(query, u.Username, u.Password)
+	row := r.db.QueryRow(query, u.Username, u.Password, u.Salt)
 	var id uuid.UUID
 
 	err := row.Scan(&id)
@@ -63,14 +63,16 @@ func (r *UserRep) GetByID(userID uuid.UUID) (*models.User, error) {
 }
 
 func (r *UserRep) GetUserByUsername(username string) (*models.User, error) {
-	query := `SELECT username,
+	query := `SELECT id,
+				username,
 				password_hash,
 				planned_budget,
-				avatar_url
-			 From users WHERE (username=&1)`
+				avatar_url,
+				salt
+			 From users WHERE (username=$1)`
 	row := r.db.QueryRow(query, username)
 	var u models.User
-	err := row.Scan(&u.ID, &u.Username, &u.Password, &u.PlannedBudget, &u.AvatarURL)
+	err := row.Scan(&u.ID, &u.Username, &u.Password, &u.PlannedBudget, &u.AvatarURL, &u.Salt)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, fmt.Errorf("(repository) nothing found for this request %w", err)
