@@ -1,8 +1,6 @@
 package user
 
 import (
-	"context"
-
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
 )
@@ -17,8 +15,7 @@ type Usecase interface {
 type Repository interface {
 	GetByID(userID uuid.UUID) (*models.User, error)
 	CreateUser(user models.User) (uuid.UUID, error)
-
-	IncreaseUserVersion(ctx context.Context, userID uuid.UUID) error
 	GetUserByUsername(username string) (*models.User, error)
-	GetUserByIDAndVersion(ctx context.Context, userID, userVersion uuid.UUID) (*models.User, error)
+
+	//IncreaseUserVersion(ctx context.Context, userID uuid.UUID) error
 }

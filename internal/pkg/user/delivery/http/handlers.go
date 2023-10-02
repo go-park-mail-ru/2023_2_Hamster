@@ -3,6 +3,7 @@ package http
 import (
 	"net/http"
 
+	commonHttp "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user"
 )
@@ -20,7 +21,7 @@ func NewHandler(uu user.Usecase, l logger.CustomLogger) *Handler {
 }
 
 func (h *Handler) GetBalance(w http.ResponseWriter, r *http.Request) {
-	commonHttp.
+	commonHttp.SuccessResponse(w, response, log)
 }
 
 func (h* Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {

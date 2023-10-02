@@ -20,23 +20,23 @@ type PostgresConfig struct {
 
 func initPostgresConfigFromEnv() (PostgresConfig, error) {
 	var cfg = PostgresConfig{}
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Load(".env"); err != nil {
 		return cfg, err
 	}
 
 	host, existHost := os.LookupEnv("DB_HOST")
-	port, existPort := os.LookupEnv("DB_PORT")
 	user, existUser := os.LookupEnv("DB_USER")
-	pass, existPass := os.LookupEnv("DB_PASS")
+	pass, existPass := os.LookupEnv("DB_PASSWORD")
 	dbname, existName := os.LookupEnv("DB_NAME")
 	dbsslmode, existSSL := os.LookupEnv("DB_SSLMODE")
 
-	if !existHost || !existPort || !existUser || !existPass || !existName || existSSL {
+	fmt.Println("lol --> ", host, user, pass, dbname, dbsslmode)
+
+	if !existHost || !existUser || !existPass || !existName || existSSL {
 		return cfg, errors.New("existHost or existPort or existUser or existPass or existName is Empty")
 	}
 	cfg = PostgresConfig{
 		DBHost:     host,
-		DBPort:     port,
 		DBUser:     user,
 		DBName:     dbname,
 		DBPassword: pass,
@@ -48,7 +48,7 @@ func initPostgresConfigFromEnv() (PostgresConfig, error) {
 func InitPostgresDB() (*sqlx.DB, error) {
 	cfg, err := initPostgresConfigFromEnv()
 	if err != nil {
-		return nil, fmt.Errorf("can't read data in env")
+		return nil, fmt.Errorf(err.Error())
 	}
 	dbInfo := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBName, cfg.DBPassword, cfg.DBSSLMode)
