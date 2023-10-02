@@ -44,10 +44,17 @@ func (r *AuthRep) CheckUser(username string) (bool, error) {
 
 func (r *AuthRep) GetUserByAuthData(ctx context.Context, userID uuid.UUID) (*models.User, error) {
 	query := fmt.Sprintf(
-		`SELECT id, version, username, email, password_hash, salt, 
-			first_name, last_name, sex, birth_date 
-		FROM %s
-		WHERE id = $1`)
+		`SELECT 
+		CASE 
+			WHEN is_income = true THEN SUM(total)
+			WHEN is_income = false THEN -SUM(total)
+		END AS calculated_total
+	FROM 
+		Transaction
+	WHERE 
+		user_id = \$1
+		AND date >= DATE_TRUNC('month', CURRENT_DATE)
+		AND date < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month';`)
 
 	var user models.User
 	err := r.db.QueryRow(query, userID).Scan(&user.ID, &user.Username,
