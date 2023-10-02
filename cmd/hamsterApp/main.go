@@ -33,7 +33,7 @@ func main() {
 			log.Fatalf("can't launch server: %v", err)
 		}
 	}()
-	log.Info("server launcher at %s:%s", os.Getenv("SERVER_HOST"), os.Getenv("SERVER_PORT"))
+	log.Infof("server launcher at %s:%s", os.Getenv("SERVER_HOST"), os.Getenv("SERVER_PORT"))
 
 	// Create a channel to listen for OS signals
 	stop := make(chan os.Signal, 1)

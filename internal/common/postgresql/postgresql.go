@@ -7,6 +7,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 type PostgresConfig struct {
@@ -30,17 +31,15 @@ func initPostgresConfigFromEnv() (PostgresConfig, error) {
 	dbname, existName := os.LookupEnv("DB_NAME")
 	dbsslmode, existSSL := os.LookupEnv("DB_SSLMODE")
 
-<<<<<<< HEAD
-=======
-	fmt.Println("lol --> ", host, user, pass, dbname, dbsslmode)
+	fmt.Println(host, existHost, user, existUser, pass, existPass, dbname, existName, dbsslmode, existSSL)
 
->>>>>>> ed715547191ab03c63a39c95a30bb6af59c5a47d
-	if !existHost || !existUser || !existPass || !existName || existSSL {
+	if !existHost || !existUser || !existPass || !existName || !existSSL {
 		return cfg, errors.New("existHost or existPort or existUser or existPass or existName is Empty")
 	}
 
 	cfg = PostgresConfig{
 		DBHost:     host,
+		DBPort:     "5436",
 		DBUser:     user,
 		DBName:     dbname,
 		DBPassword: pass,
@@ -52,14 +51,13 @@ func initPostgresConfigFromEnv() (PostgresConfig, error) {
 func InitPostgresDB() (*sqlx.DB, error) {
 	cfg, err := initPostgresConfigFromEnv()
 	if err != nil {
-<<<<<<< HEAD
-		return nil, err
-=======
 		return nil, fmt.Errorf(err.Error())
->>>>>>> ed715547191ab03c63a39c95a30bb6af59c5a47d
 	}
+
 	dbInfo := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBName, cfg.DBPassword, cfg.DBSSLMode)
+
+	fmt.Println(dbInfo)
 
 	db, err := sqlx.Open("postgres", dbInfo)
 	if err != nil {

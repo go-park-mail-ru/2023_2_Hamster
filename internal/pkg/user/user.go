@@ -15,14 +15,11 @@ type Usecase interface {
 type Repository interface {
 	GetByID(userID uuid.UUID) (*models.User, error)
 	CreateUser(user models.User) (uuid.UUID, error)
-<<<<<<< HEAD
 	//	IncreaseUserVersion(ctx context.Context, userID uuid.UUID) error
 	GetUserByUsername(username string) (*models.User, error)
 	//	GetUserByIDAndVersion(ctx context.Context, userID, userVersion uuid.UUID) (*models.User, error)
 	GetUserBalanceByID(userID uuid.UUID) (float64, error)
-=======
-	GetUserByUsername(username string) (*models.User, error)
 
 	//IncreaseUserVersion(ctx context.Context, userID uuid.UUID) error
->>>>>>> ed715547191ab03c63a39c95a30bb6af59c5a47d
+
 }
