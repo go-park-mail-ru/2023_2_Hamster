@@ -13,6 +13,10 @@ type Handler struct {
 	logger      logger.CustomLogger
 }
 
+const (
+	userIdUrlParam  = "userID"
+)
+
 func NewHandler(uu user.Usecase, l logger.CustomLogger) *Handler {
 	return &Handler{
 		userService: uu,
@@ -22,6 +26,12 @@ func NewHandler(uu user.Usecase, l logger.CustomLogger) *Handler {
 
 func (h *Handler) GetBalance(w http.ResponseWriter, r *http.Request) {
 	commonHttp.SuccessResponse(w, response, log)
+	commonHttp.GetIDFromRequest(r ,userIdUrlParam)
+	if err != nil {
+		h.logger.infof("invalid id: %v:", err)
+		commonHttp.ErrorResponse(w, "invalid url parameter", http.StatusBadRequest, h.logger)
+		return
+	}
 }
 
 func (h* Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {

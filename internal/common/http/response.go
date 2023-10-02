@@ -1,4 +1,4 @@
-package commonHttp
+package http
 
 import (
 	"encoding/json"
