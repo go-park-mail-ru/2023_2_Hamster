@@ -24,6 +24,7 @@ func NewRepository(db *sqlx.DB, l logger.CustomLogger) *UserRep {
 }
 
 func (r *UserRep) CreateUser(u models.User) (uuid.UUID, error) {
+
 	query := `INSERT INTO users
 			 (username, password_hash, first_name, last_name, planned_budget, avatar_url)
 		VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;`
@@ -76,10 +77,22 @@ func (r *UserRep) GetUserByUsername(username string) (*models.User, error) {
 	err := row.Scan(&u.ID, &u.Username, &u.Password, &u.FirstName, &u.LastName, &u.PlannedBudget, &u.AvatarURL)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		return nil, fmt.Errorf("nothing found for this request %w", err)
+		return nil, fmt.Errorf("(repository) nothing found for this request %w", err)
 	} else if err != nil {
 		return &models.User{},
-			fmt.Errorf("failed request db %s, %w", query, err)
+			fmt.Errorf("(repository) failed request db %w", err)
 	}
 	return &u, nil
+}
+
+func (r *UserRep) GetUserBalanceByID(userID uuid.UUID) (float64, error) {
+	var totalbalance float64
+	err := r.db.QueryRow("SELECT SUM(balance) FROM accounts WHERE user_id = $1", userID).Scan(&totalbalance)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, fmt.Errorf("(repository) nothing found for this request %w", err)
+	} else if err != nil {
+		return 0, fmt.Errorf("(repository) failed request db %w", err)
+	}
+	return totalbalance, err
 }
