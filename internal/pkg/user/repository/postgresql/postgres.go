@@ -98,7 +98,7 @@ func (r *UserRep) GetUserBalance(userID uuid.UUID) (float64, error) {
 
 func (r *UserRep) GetPlannedBudget(userID uuid.UUID) (float64, error) {
 	var plannedBudget float64
-	err := r.db.QueryRow("SELECT planned_budget FROM users WHERE user_id = $1", userID).Scan(&plannedBudget)
+	err := r.db.QueryRow("SELECT planned_budget FROM users WHERE id = $1", userID).Scan(&plannedBudget)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		return 0, fmt.Errorf("(repository) nothing found for this request %w", err)
@@ -107,4 +107,27 @@ func (r *UserRep) GetPlannedBudget(userID uuid.UUID) (float64, error) {
 	}
 
 	return plannedBudget, nil
+}
+
+func (r *UserRep) GetCurrentBudget(userID uuid.UUID) (float64, error) {
+	var currentBudget float64
+	err := r.db.QueryRow(`SELECT 
+								CASE 
+									WHEN is_income = true THEN SUM(total)
+									WHEN is_income = false THEN -SUM(total)
+								END AS calculated_total
+							FROM 
+								Transaction
+							WHERE 
+							user_id = $1
+							AND date >= DATE_TRUNC('month', CURRENT_DATE)
+							AND date < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month'`, userID).Scan(&currentBudget)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, fmt.Errorf("(repository) nothing found for this request %w", err)
+	} else if err != nil {
+		return 0, fmt.Errorf("(repository) failed request db %w", err)
+	}
+
+	return currentBudget, nil
 }

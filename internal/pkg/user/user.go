@@ -11,6 +11,7 @@ type Usecase interface {
 	//	ChangeInfo(user *models.User) error
 	GetUserBalance(userID uuid.UUID) (float64, error)
 	GetPlannedBudget(userID uuid.UUID) (float64, error)
+	GetCurrentBudget(userID uuid.UUID) (float64, error)
 }
 
 type Repository interface {
@@ -21,7 +22,7 @@ type Repository interface {
 	//	GetUserByIDAndVersion(ctx context.Context, userID, userVersion uuid.UUID) (*models.User, error)
 	GetUserBalance(userID uuid.UUID) (float64, error)
 	GetPlannedBudget(userID uuid.UUID) (float64, error)
-
+	GetCurrentBudget(userID uuid.UUID) (float64, error)
 	//IncreaseUserVersion(ctx context.Context, userID uuid.UUID) error
 
 }
