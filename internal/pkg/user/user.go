@@ -7,9 +7,10 @@ import (
 
 // Bussiness logic methods to work with user
 type Usecase interface {
-	GetByID(userID uuid.UUID) (*models.User, error)
+	//GetByID(userID uuid.UUID) (*models.User, error)
 	//	ChangeInfo(user *models.User) error
-	GetBalance(userID uuid.UUID) (float64, error)
+	GetUserBalance(userID uuid.UUID) (float64, error)
+	GetPlannedBudget(userID uuid.UUID) (float64, error)
 }
 
 type Repository interface {
@@ -18,7 +19,8 @@ type Repository interface {
 	//	IncreaseUserVersion(ctx context.Context, userID uuid.UUID) error
 	GetUserByUsername(username string) (*models.User, error)
 	//	GetUserByIDAndVersion(ctx context.Context, userID, userVersion uuid.UUID) (*models.User, error)
-	GetUserBalanceByID(userID uuid.UUID) (float64, error)
+	GetUserBalance(userID uuid.UUID) (float64, error)
+	GetPlannedBudget(userID uuid.UUID) (float64, error)
 
 	//IncreaseUserVersion(ctx context.Context, userID uuid.UUID) error
 

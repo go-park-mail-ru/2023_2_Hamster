@@ -31,8 +31,8 @@ func initServerConfigFromEnv() (cfgServer, error) {
 	}
 
 	cfg = cfgServer{
-		ServerPort: host,
-		ServerHost: port,
+		ServerPort: port,
+		ServerHost: host,
 	}
 
 	return cfg, nil
@@ -44,8 +44,9 @@ func (s *Server) Run(handler http.Handler) error {
 		return err
 	}
 
+	addr := cfgSer.ServerHost + ":" + cfgSer.ServerPort
 	s.httpServer = &http.Server{
-		Addr:    cfgSer.ServerHost + ":" + cfgSer.ServerPort,
+		Addr:    addr,
 		Handler: handler,
 	}
 

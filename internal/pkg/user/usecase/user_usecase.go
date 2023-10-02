@@ -22,8 +22,17 @@ func NewUsecase(
 	}
 }
 
-func (u *Usecase) GetBalance(userID uuid.UUID) (float64, error) {
-	balance, err := u.userRepo.GetUserBalanceByID(userID)
+func (u *Usecase) GetUserBalance(userID uuid.UUID) (float64, error) {
+	balance, err := u.userRepo.GetUserBalance(userID)
+	if err != nil {
+		return 0, fmt.Errorf("(usecase) cant't get balance from repository %w", err)
+	}
+
+	return balance, nil
+}
+
+func (u *Usecase) GetPlannedBudget(userID uuid.UUID) (float64, error) {
+	balance, err := u.userRepo.GetPlannedBudget(userID)
 	if err != nil {
 		return 0, fmt.Errorf("(usecase) cant't get balance from repository %w", err)
 	}
