@@ -43,9 +43,8 @@ ALTER COLUMN planned_budget SET DEFAULT 0.0;
 
 --=============================================================================
 
-INSERT INTO "users"(username, password_hash, planned_budget, avatar_url)
-VALUES ('kosmatoff', 'hash', 10000, 'image/img1.png');
-
+INSERT INTO "users"(username, password_hash, salt, planned_budget, avatar_url)
+VALUES ('kosmatoff', 'hash', 'fdsf', 10000, 'image/img1.png');
 
 INSERT INTO "accounts"(user_id, balance, mean_payment)
 VALUES ((SELECT id FROM Users limit 1), 533, 'Кошелек');
@@ -66,4 +65,10 @@ INSERT INTO "transaction"(user_id, category_id, account_id, total, is_income, da
 VALUES ((SELECT id FROM Users limit 1), (SELECT id FROM Category limit 1), (SELECT id FROM Accounts limit 1), 12450.50, false, '2023-10-02',  'МОСЖКХ', 'Оплата недвижки');
 
 INSERT INTO "transaction"(user_id, category_id, account_id, total, is_income, date, payer, description)
+VALUES ((SELECT id FROM Users limit 1), (SELECT id FROM Category limit 1), (SELECT id FROM Accounts limit 1), 12450.50, false, '2023-10-02',  'МОСЖКХ', 'Оплата недвижки');
+
+INSERT INTO "transaction"(user_id, category_id, account_id, total, is_income, date, payer, description)
 VALUES ((SELECT id FROM Users limit 1), (SELECT id FROM Category limit 1), (SELECT id FROM Accounts limit 1), 40000, true, '2023-10-02', 'VK', 'Зарплата');
+
+INSERT INTO "transaction"(user_id, category_id, account_id, total, is_income, date, payer, description)
+VALUES ((SELECT id FROM Users limit 1), (SELECT id FROM Category limit 1), (SELECT id FROM Accounts limit 1), 40000, true, '2023-09-02', 'VK', 'Зарплата');
