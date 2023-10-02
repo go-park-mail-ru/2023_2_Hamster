@@ -30,6 +30,7 @@ func NewHandler(uu user.Usecase, l logger.CustomLogger) *Handler {
 
 func (h *Handler) GetBalance(w http.ResponseWriter, r *http.Request) {
 	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
+
 	if err != nil {
 		h.logger.Infof("invalid id: %v:", err)
 		commonHttp.ErrorResponse(w, "invalid url parameter", http.StatusBadRequest, h.logger)
@@ -42,6 +43,7 @@ func (h *Handler) GetBalance(w http.ResponseWriter, r *http.Request) {
 	}
 	balanceResponse := &balanceResponse{Balance: balance}
 	commonHttp.SuccessResponse(w, balanceResponse, h.logger)
+
 }
 
 // func (h* Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {

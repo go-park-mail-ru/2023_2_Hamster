@@ -10,10 +10,11 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth"
+	"github.com/google/uuid"
 )
 
 type signUpResponse struct {
-	ID uint32 `json:"id"`
+	ID uuid.UUID `json:"id"`
 }
 
 type signInput struct {
@@ -99,7 +100,7 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := h.au.LoginUser(userInput.Username, userInput.Password)
+	token, err := h.au.SignInUser(userInput.Username, userInput.Password)
 	if err != nil {
 		h.log.Error(err.Error())
 		commonHttp.ErrorResponse(w, "Error can't login user", http.StatusBadRequest, h.log)

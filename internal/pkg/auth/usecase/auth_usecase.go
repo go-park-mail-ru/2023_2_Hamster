@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
@@ -57,6 +58,25 @@ func (u *Usecase) SignUpUser(ctx context.Context, user models.User) (uuid.UUID, 
 	return userId, nil
 }
 
+func (u *Usecase) SignInUser(username, plainPassword string) (string, error) {
+	user, err := u.userRepo.GetUserByUsername(username)
+	if err != nil {
+		return "", fmt.Errorf("[usecase] can't find user: %w", err)
+	}
+
+	hashedPassword := hashPassword(plainPassword, []byte(user.Salt))
+	if hashedPassword != user.Password {
+		return "", fmt.Errorf("[usecase] incorrect password")
+	}
+
+	token, err := u.GenerateAccessToken(context.Background(), *user)
+	if err != nil {
+		return "", fmt.Errorf("[usecase] failed to generate access token: %w", err)
+	}
+
+	return token, nil
+}
+
 // GetUserByCreds returns User if such exist in repository
 func (u *Usecase) GetUserByCreds(ctx context.Context, username, plainPassword string) (*models.User, error) {
 	user, err := u.userRepo.GetUserByUsername(username)
@@ -67,22 +87,18 @@ func (u *Usecase) GetUserByCreds(ctx context.Context, username, plainPassword st
 	return user, nil
 }
 
-//func (u *Usecase) LoginUser(username, plainPassword string) (string, error) {
-
-//}
-
 // GetUserByAuthData returns User if such exist in repository
-func (u *Usecase) GetUserByAuthData(ctx context.Context, userID, userVersion uuid.UUID) (*models.User, error) {
-	return u.userRepo.GetUserByIDAndVersion(ctx, userID, userVersion)
+func (u *Usecase) GetUserByAuthData(ctx context.Context, userID uuid.UUID) (*models.User, error) {
+	return u.userRepo.GetByID(userID)
 }
 
-func (u *Usecase) GenerateAccessToken(ctx context.Context, userID, userVersion uint32) (string, error) {
+func (u *Usecase) GenerateAccessToken(ctx context.Context, user models.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":      userID,
-		"version": userVersion,
+		"id":  user.ID,
+		"exp": time.Now().Add(time.Hour * 12).Unix(),
 	})
 
-	tokenString, err := token.SignedString([]byte("your_secret_key"))
+	tokenString, err := token.SignedString([]byte(secret))
 	if err != nil {
 		return "", err
 	}
@@ -103,20 +119,20 @@ func (u *Usecase) ValidateAccessToken(accessToken string) (uint32, uint32, error
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		userID := claims["id"].(uint32)
-		userVersion := claims["version"].(uint32)
-		return userID, userVersion, nil
+		username := claims["username"].(uint32)
+		return userID, username, nil
 	} else {
 		return 0, 0, err
 	}
 }
 
 // IncraseUserVersion inc User access token version
-func (u *Usecase) IncreaseUserVersion(ctx context.Context, userID uuid.UUID) error {
-	if err := u.userRepo.IncreaseUserVersion(ctx, userID); err != nil {
-		return fmt.Errorf("[usecase] error failed to update version: %w", err)
-	}
-	return nil
-}
+// func (u *Usecase) IncreaseUserVersion(ctx context.Context, userID uuid.UUID) error {
+// 	if err := u.userRepo.IncreaseUserVersion(ctx, userID); err != nil {
+// 		return fmt.Errorf("[usecase] error failed to update version: %w", err)
+// 	}
+// 	return nil
+// }
 
 // ChangePassword(ctx context.Context, userID uint32, password string) error
 

@@ -26,10 +26,15 @@ func initPostgresConfigFromEnv() (PostgresConfig, error) {
 
 	host, existHost := os.LookupEnv("DB_HOST")
 	user, existUser := os.LookupEnv("DB_USER")
-	pass, existPass := os.LookupEnv("DB_PASS")
+	pass, existPass := os.LookupEnv("DB_PASSWORD")
 	dbname, existName := os.LookupEnv("DB_NAME")
 	dbsslmode, existSSL := os.LookupEnv("DB_SSLMODE")
 
+<<<<<<< HEAD
+=======
+	fmt.Println("lol --> ", host, user, pass, dbname, dbsslmode)
+
+>>>>>>> ed715547191ab03c63a39c95a30bb6af59c5a47d
 	if !existHost || !existUser || !existPass || !existName || existSSL {
 		return cfg, errors.New("existHost or existPort or existUser or existPass or existName is Empty")
 	}
@@ -47,7 +52,11 @@ func initPostgresConfigFromEnv() (PostgresConfig, error) {
 func InitPostgresDB() (*sqlx.DB, error) {
 	cfg, err := initPostgresConfigFromEnv()
 	if err != nil {
+<<<<<<< HEAD
 		return nil, err
+=======
+		return nil, fmt.Errorf(err.Error())
+>>>>>>> ed715547191ab03c63a39c95a30bb6af59c5a47d
 	}
 	dbInfo := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBName, cfg.DBPassword, cfg.DBSSLMode)
