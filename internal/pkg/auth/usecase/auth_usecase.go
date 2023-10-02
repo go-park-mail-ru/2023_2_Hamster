@@ -47,18 +47,19 @@ func (u *Usecase) SignUpUser(ctx context.Context, user models.User) (uuid.UUID, 
 	salt := make([]byte, 8)
 	rand.Read(salt)
 
+	user.Salt = fmt.Sprintf("%x", salt)
 	user.Password = hashPassword(user.Password, salt)
 
 	userId, err := u.userRepo.CreateUser(user)
 	if err != nil {
-		return 0, fmt.Errorf("[usecase] cannot create user: %w", err)
+		return uuid.Nil, fmt.Errorf("[usecase] cannot create user: %w", err)
 	}
 	return userId, nil
 }
 
 // GetUserByCreds returns User if such exist in repository
 func (u *Usecase) GetUserByCreds(ctx context.Context, username, plainPassword string) (*models.User, error) {
-	user, err := u.userRepo.GetUserByUsername(ctx, username)
+	user, err := u.userRepo.GetUserByUsername(username)
 	if err != nil {
 		return nil, fmt.Errorf("[usecase] can't find user: %w", err)
 	}
@@ -66,9 +67,9 @@ func (u *Usecase) GetUserByCreds(ctx context.Context, username, plainPassword st
 	return user, nil
 }
 
-func (u *Usecase) LoginUser(username, plainPassword string) (string, error) {
+//func (u *Usecase) LoginUser(username, plainPassword string) (string, error) {
 
-}
+//}
 
 // GetUserByAuthData returns User if such exist in repository
 func (u *Usecase) GetUserByAuthData(ctx context.Context, userID, userVersion uuid.UUID) (*models.User, error) {
