@@ -20,7 +20,7 @@ type cfgServer struct {
 
 func initServerConfigFromEnv() (cfgServer, error) {
 	var cfg = cfgServer{}
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Load(".env"); err != nil {
 		return cfg, err
 	}
 

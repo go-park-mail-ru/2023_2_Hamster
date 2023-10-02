@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	user "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/delivery/http"
+
 	"github.com/gorilla/mux"
 )
 
@@ -33,6 +34,8 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 func InitRouter( /*auth *auth.Handler */ user *user.Handler) *mux.Router {
 
 	r := mux.NewRouter()
+
+	r.Path("/ping").HandlerFunc(HelloHandler)
 
 	apiRouter := r.PathPrefix("/api").Subrouter()
 
