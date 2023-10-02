@@ -44,8 +44,9 @@ func (s *Server) Run(handler http.Handler) error {
 		return err
 	}
 
+	addr := cfgSer.ServerHost + ":" + cfgSer.ServerPort
 	s.httpServer = &http.Server{
-		Addr:    cfgSer.ServerHost + ":" + cfgSer.ServerPort,
+		Addr:    addr,
 		Handler: handler,
 	}
 

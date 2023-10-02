@@ -21,7 +21,7 @@ type PostgresConfig struct {
 
 func initPostgresConfigFromEnv() (PostgresConfig, error) {
 	var cfg = PostgresConfig{}
-	if err := godotenv.Load(".env"); err != nil {
+	if err := godotenv.Load(); err != nil {
 		return cfg, err
 	}
 
@@ -30,8 +30,6 @@ func initPostgresConfigFromEnv() (PostgresConfig, error) {
 	pass, existPass := os.LookupEnv("DB_PASSWORD")
 	dbname, existName := os.LookupEnv("DB_NAME")
 	dbsslmode, existSSL := os.LookupEnv("DB_SSLMODE")
-
-	fmt.Println(host, existHost, user, existUser, pass, existPass, dbname, existName, dbsslmode, existSSL)
 
 	if !existHost || !existUser || !existPass || !existName || !existSSL {
 		return cfg, errors.New("existHost or existPort or existUser or existPass or existName is Empty")
@@ -56,8 +54,6 @@ func InitPostgresDB() (*sqlx.DB, error) {
 
 	dbInfo := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBName, cfg.DBPassword, cfg.DBSSLMode)
-
-	fmt.Println(dbInfo)
 
 	db, err := sqlx.Open("postgres", dbInfo)
 	if err != nil {

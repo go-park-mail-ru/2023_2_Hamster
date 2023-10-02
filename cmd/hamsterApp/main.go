@@ -24,7 +24,9 @@ func main() {
 		if err := db.Close(); err != nil {
 			log.Errorf("Error Closing database connection: %v", err)
 		}
+		log.Info("Db closed without errors")
 	}()
+	log.Info("Db connection successfully")
 
 	router := app.Init(db, log)
 	var srv server.Server
@@ -52,8 +54,4 @@ func main() {
 	}
 
 	log.Info("Server exiting")
-
-	if err := db.Close(); err != nil {
-		log.Errorf("error db closing %v", err)
-	}
 }
