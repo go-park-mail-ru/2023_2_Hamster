@@ -2,13 +2,13 @@
 FROM golang:latest
 
 # Установите рабочую директорию внутри контейнера
-WORKDIR /app
+WORKDIR /2023_2_Hamster
 
 # Скопируйте файлы вашего Golang приложения в контейнер
 COPY . .
 
 # Соберите ваше приложение (замените на имя вашего исполняемого файла, если не "main")
-RUN go build -o cmd/api/main.go
+RUN go build -o app cmd/api/main.go
 
 # Укажите команду для запуска вашего приложения при старте контейнера
-CMD ["./main"]
+CMD ["./app"]
