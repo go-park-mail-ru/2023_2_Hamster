@@ -33,6 +33,7 @@ func main() {
 	db, err := postgresql.InitPostgresDB()
 	if err != nil {
 		log.Errorf("Error Initializing PostgreSQL database: %v", err)
+		return
 	}
 	defer func() {
 		if err := db.Close(); err != nil {

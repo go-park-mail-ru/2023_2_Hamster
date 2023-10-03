@@ -11,7 +11,7 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - 5436:5432
+      - "5435:5432" # Исправил порт для PostgreSQL
     volumes:
       - ./internal/common/postgresql/schema/:/docker-entrypoint-initdb.d/
   
@@ -22,4 +22,12 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "8004:8004"
+    environment:
+      SOME_ENV_VARIABLE: some_value
+    networks:
+      - mynetwork # Указываем сеть, чтобы оба контейнера были в одной сети
+
+networks:
+  mynetwork: # Создаем сеть
+    driver: bridge
