@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/app"
+	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/postgresql"
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/server"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/postgresql"
 )
 
 func main() {

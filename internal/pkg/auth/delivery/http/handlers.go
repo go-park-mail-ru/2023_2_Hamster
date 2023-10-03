@@ -88,6 +88,24 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 	commonHttp.SuccessResponse(w, loginResponse, h.log)
 }
 
+//func (h *Handler) AccessVerification(w http.ResponseWriter, r *http.Request) {
+//	tokenCookie, err := r.Cookie(authentication)
+//	if errors.Is(err, http.ErrNoCookie) {
+//		h.log.Errorf("Error cookie token not found: %v", err)
+//		commonHttp.JSON(w, http.StatusBadRequest, commonHttp.NIL())
+//		return
+//	} else if err != nil {
+//		h.log.Errorf("Error fail to get cookie token: %v", err)
+//		commonHttp.JSON(w, http.StatusUnauthorized, commonHttp.NIL())
+//		return
+//	}
+//
+//	id, err := h.au.ValidateAccessToken(tokenCookie.Value)
+//	if err != nil {
+//		h.log.Errorf("Error ")
+//	}
+//}
+
 /*func (h *Handler) LogOut(w http.ResponseWriter, r *http.Request) {
 	user, err := r.Context().Value(models.User)
 }*/
