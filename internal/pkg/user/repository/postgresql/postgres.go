@@ -88,7 +88,7 @@ func (r *UserRep) GetUserBalance(userID uuid.UUID) (float64, error) {
 	err := r.db.QueryRow("SELECT SUM(balance) FROM accounts WHERE user_id = $1", userID).Scan(&totalBalance)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		return 0, fmt.Errorf("[repository] nothing found for this request %w", err)
+		return 0, fmt.Errorf("(repo) %w: %v", &models.NoSuchUserIdBalanceError{UserID: userID}, err)
 	} else if err != nil {
 		return 0, fmt.Errorf("[repository] failed request db %w", err)
 	}
@@ -132,14 +132,12 @@ func (r *UserRep) GetAccounts(user_id uuid.UUID) ([]models.Accounts, error) {
 
 	var accounts []models.Accounts
 
-	// Выполняем запрос к базе данных
 	rows, err := r.db.Query(`SELECT * FROM accounts WHERE user_id = $1`, user_id)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	// Перебираем строки результата и сканируем данные в структуры Account
 	for rows.Next() {
 		var account models.Accounts
 		if err := rows.Scan(
