@@ -62,7 +62,13 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	id, token, err := h.au.SignUpUser(user)
 	if err != nil {
 		h.log.Error(err.Error())
-		commonHttp.ErrorResponse(w, "server error", http.StatusBadRequest, h.log)
+		// commonHttp.ErrorResponse(w, "server error", http.StatusBadRequest, h.log)
+		commonHttp.JSON(w, http.StatusBadRequest, commonHttp.Response{
+			Status: "400",
+			Body: commonHttp.Error{
+				ErrMsg: err.Error(),
+			},
+		})
 		return
 	}
 
@@ -77,7 +83,11 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		Path:     "",
 		HttpOnly: true,
 	})
-	commonHttp.JSON(w, http.StatusOK, suResp)
+	// commonHttp.JSON(w, http.StatusOK, suResp)
+	commonHttp.JSON(w, http.StatusBadRequest, commonHttp.Response{
+		Status: "200",
+		Body:   suResp,
+	})
 }
 
 // @Summary		Sign In
@@ -133,7 +143,11 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 
-	commonHttp.SuccessResponse(w, loginResponse, h.log)
+	// commonHttp.SuccessResponse(w, loginResponse, h.log)
+	commonHttp.JSON(w, http.StatusOK, commonHttp.Response{
+		Status: "200",
+		Body:   loginResponse,
+	})
 }
 
 // @Summary		Validate Auth
