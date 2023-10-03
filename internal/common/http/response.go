@@ -59,3 +59,15 @@ func JSON(w http.ResponseWriter, status int, response any) {
 	// w.Header().Set("Content-Length", )
 	w.WriteHeader(status)
 }
+
+func errJSON(w http.ResponseWriter, status int, response any) {
+	encoder := json.NewEncoder(w)
+	if err := encoder.Encode(response); err != nil {
+		w.WriteHeader(status)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	// w.Header().Set("Content-Length", )
+	w.WriteHeader(status)
+}

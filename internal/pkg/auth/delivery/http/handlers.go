@@ -37,6 +37,16 @@ func NewHandler(au auth.Usecase, log logger.CustomLogger) *Handler {
 	}
 }
 
+// @Summary		Sign Up
+// @Tags			Auth
+// @Description	Create Account
+// @Accept 		json
+// @Produce		json
+// @Param			user		body		models.User		true		"user info"
+// @Success		200		{object}	signUpResponse				"User Created"
+// @Failure		400		{object}	http.Error				"Incorrect Input"
+// @Failure		500		{object}	http.Error				"Server error"
+// @Router		/api/auth/signup	[post]
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 
@@ -70,6 +80,16 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	commonHttp.JSON(w, http.StatusOK, suResp)
 }
 
+// @Summary		Sign In
+// @Tags			Auth
+// @Description	Login account
+// @Accept 		json
+// @Produce		json
+// @Param			userInput		body		signInput		true			"username && password"
+// @Success		200			{object}	loginResponse				"User logedin"
+// @Failure		400			{object}	http.Error				"Incorrect Input"
+// @Failure		500			{object}	http.Error				"Server error"
+// @Router		/api/auth/signin	[post]
 func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 	var userInput signInput
 
@@ -104,27 +124,49 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 	commonHttp.SuccessResponse(w, loginResponse, h.log)
 }
 
+// @Summary		Validate Auth
+// @Tags			Auth
+// @Description	Validate auth
+// @Accept 		json
+// @Produce		json
+// @Param			user		body		models.User		true		"user info"
+// @Success		200		{object}	http.Response			"User status"
+// @Failure		400		{object}	http.Error				"Invalid cookie"
+// @Failure		500		{object}	http.Error				"Server error: cookie read fail"
+// @Router		/api/auth/validateAuth	[post]
 func (h *Handler) AccessVerification(w http.ResponseWriter, r *http.Request) {
 	tokenCookie, err := r.Cookie("Authentication")
 	if errors.Is(err, http.ErrNoCookie) {
 		h.log.Errorf("Error cookie token not found: %v", err)
-		commonHttp.JSON(w, http.StatusBadRequest, commonHttp.NIL())
+		commonHttp.JSON(w, http.StatusBadRequest, commonHttp.Response{
+			Status: "500",
+			Body:   "No cookie found",
+		})
 		return
 	} else if err != nil {
 		h.log.Errorf("Error fail to get cookie token: %v", err)
-		commonHttp.JSON(w, http.StatusUnauthorized, commonHttp.NIL())
+		commonHttp.JSON(w, http.StatusUnauthorized, commonHttp.Response{
+			Status: "500",
+			Body:   "Cookie read fail",
+		})
 		return
 	}
 
 	id, err := h.au.ValidateAccessToken(tokenCookie.Value)
 	if err != nil {
 		h.log.Errorf("Error invalid jwt token: %v", err)
-		commonHttp.JSON(w, http.StatusUnauthorized, commonHttp.NIL())
+		commonHttp.JSON(w, http.StatusUnauthorized, commonHttp.Response{
+			Status: "400",
+			Body:   "Invalid cookie abort auth",
+		})
 		return
 	}
 
 	h.log.Info("User id: ", id)
-	commonHttp.JSON(w, http.StatusOK, commonHttp.NIL())
+	commonHttp.JSON(w, http.StatusOK, commonHttp.Response{
+		Status: "200",
+		Body:   "User logedin",
+	})
 }
 
 /*func (h *Handler) LogOut(w http.ResponseWriter, r *http.Request) {
