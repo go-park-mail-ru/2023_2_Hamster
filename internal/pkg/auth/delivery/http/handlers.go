@@ -96,7 +96,7 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&userInput); err != nil {
 		h.log.Error(err.Error())
-		commonHttp.ErrorResponse(w, "incorrect input body", http.StatusBadRequest, h.log)
+		// commonHttp.ErrorResponse(w, "incorrect input body", http.StatusBadRequest, h.log)
 		commonHttp.JSON(w, http.StatusBadRequest, commonHttp.Response{
 			Status: "400",
 			Body: commonHttp.Error{
@@ -111,7 +111,13 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 	token, err := h.au.SignInUser(userInput.Username, userInput.Password)
 	if err != nil {
 		h.log.Error(err.Error())
-		commonHttp.ErrorResponse(w, "Error can't login user", http.StatusBadRequest, h.log)
+		// commonHttp.ErrorResponse(w, "Error can't login user", http.StatusBadRequest, h.log)
+		commonHttp.JSON(w, http.StatusBadRequest, commonHttp.Response{
+			Status: "400",
+			Body: commonHttp.Error{
+				ErrMsg: "incorrect input body",
+			},
+		})
 		return
 	}
 

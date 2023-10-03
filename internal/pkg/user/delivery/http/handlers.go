@@ -46,7 +46,7 @@ func NewHandler(uu user.Usecase, l logger.CustomLogger) *Handler {
 // @Tags		User
 // @Description	Get User balance
 // @Produce		json
-// @Success		200		{object}	http.Response "Show balance"
+// @Success		200		{object}	http.Response  "Show balance"
 // @Failure		400		{object}	http.Error	"Client error"
 // @Failure		500		{object}	http.Error	"Server error"
 // @Router		/api/user/{userID}/balance [get]
