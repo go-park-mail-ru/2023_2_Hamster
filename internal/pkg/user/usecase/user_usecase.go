@@ -57,8 +57,8 @@ func (u *Usecase) GetCurrentBudget(userID uuid.UUID) (float64, error) {
 	return currentBudget, nil
 }
 
-func (u *Usecase) GetAccount(userID uuid.UUID) (*models.Accounts, error) {
-	account, err := u.userRepo.GetAccount(userID)
+func (u *Usecase) GetAccounts(userID uuid.UUID) ([]models.Accounts, error) { // TO DO ISSUES NULL return
+	account, err := u.userRepo.GetAccounts(userID)
 	if err != nil {
 		return account, fmt.Errorf("[usecase] cant't get account from repository %w", err)
 	}

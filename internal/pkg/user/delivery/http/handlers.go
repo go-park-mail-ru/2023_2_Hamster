@@ -5,6 +5,7 @@ import (
 
 	commonHttp "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user"
 )
 
@@ -26,8 +27,7 @@ type budgetActualResponse struct {
 }
 
 type account struct {
-	Balance     float64 `json:"balance"`
-	MeanPayment string  `json:"mean_payment"`
+	Account []models.Accounts
 }
 
 const (
@@ -117,7 +117,7 @@ func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
 	commonHttp.SuccessResponse(w, budgetResponse, h.logger)
 }
 
-func (h *Handler) GetAccount(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetAccounts(w http.ResponseWriter, r *http.Request) { // TO DO ISSUES
 	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
 
 	if err != nil {
@@ -126,11 +126,11 @@ func (h *Handler) GetAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accountInfo, err := h.userService.GetAccount(userID)
+	accountInfo, err := h.userService.GetAccounts(userID)
 	if err != nil {
 		h.logger.Error(err.Error())
 		commonHttp.ErrorResponse(w, "error get current budget", http.StatusBadRequest, h.logger)
 	}
-	budgetResponse := &account{Balance: accountInfo.Balance, MeanPayment: accountInfo.MeanPayment}
+	budgetResponse := &account{Account: accountInfo}
 	commonHttp.SuccessResponse(w, budgetResponse, h.logger)
 }
