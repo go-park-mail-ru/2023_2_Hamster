@@ -32,6 +32,14 @@ func NewHandler(uu user.Usecase, l logger.CustomLogger) *Handler {
 	}
 }
 
+// @Summary		Get Balance
+// @Tags		User
+// @Description	Get User balance
+// @Produce		json
+// @Success		200		{object}	albumCreateResponse	        "Album created"
+// @Failure		400		{object}	http.Error	"Client error"
+// @Failure		500		{object}	http.Error	"Server error"
+// @Router		/api/albums/ [post]
 func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
 

@@ -54,5 +54,6 @@ func InitRouter(auth *auth.Handler, user *user.Handler) *mux.Router {
 		userRouter.Methods("GET").Path("/plannedBudget").HandlerFunc(user.GetPlannedBudget)
 		userRouter.Methods("GET").Path("/actualBudget").HandlerFunc(user.GetCurrentBudget)
 	}
+
 	return r
 }
