@@ -13,6 +13,20 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 )
 
+// @title		Fluire API
+// @version		1.0.1
+// @description	Server API for Fluire Streaming Service Application
+
+// @contact.name   Fluire API Support
+// @contact.email  dimka.komarov@bk.ru
+
+// @host		localhost:8090
+// @BasePath	/user/{userID}/account/feed
+
+// @securityDefinitions	AuthKey
+// @in					header
+// @name				Authorization
+
 func main() {
 	log := logger.CreateCustomLogger()
 
