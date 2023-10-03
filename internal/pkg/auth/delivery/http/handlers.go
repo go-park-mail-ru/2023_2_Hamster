@@ -97,6 +97,12 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 	if err := decoder.Decode(&userInput); err != nil {
 		h.log.Error(err.Error())
 		commonHttp.ErrorResponse(w, "incorrect input body", http.StatusBadRequest, h.log)
+		commonHttp.JSON(w, http.StatusBadRequest, commonHttp.Response{
+			Status: "400",
+			Body: commonHttp.Error{
+				errMsg: "incorrect input body",
+			},
+		})
 		return
 	}
 
