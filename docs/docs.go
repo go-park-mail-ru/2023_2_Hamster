@@ -138,13 +138,13 @@ const docTemplate = `{
                     "200": {
                         "description": "User status",
                         "schema": {
-                            "$ref": "#/definitions/http.Response"
+                            "$ref": "#/definitions/http.Error"
                         }
                     },
                     "400": {
                         "description": "Invalid cookie",
                         "schema": {
-                            "$ref": "#/definitions/http.Response"
+                            "$ref": "#/definitions/http.Error"
                         }
                     },
                     "500": {
@@ -289,7 +289,7 @@ const docTemplate = `{
         "http.Error": {
             "type": "object",
             "properties": {
-                "errmsg": {
+                "message": {
                     "type": "string"
                 }
             }
@@ -297,10 +297,7 @@ const docTemplate = `{
         "http.Response": {
             "type": "object",
             "properties": {
-                "body": {},
-                "status": {
-                    "type": "string"
-                }
+                "body": {}
             }
         },
         "http.budgetActualResponse": {
