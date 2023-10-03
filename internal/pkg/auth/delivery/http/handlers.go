@@ -85,7 +85,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Description	Login account
 // @Accept 		json
 // @Produce		json
-// @Param			userInput		body		loginInput		true		"username && password"
+// @Param			userInput		body		signInput		true			"username && password"
 // @Success		200			{object}	loginResponse				"User logedin"
 // @Failure		400			{object}	http.Error				"Incorrect Input"
 // @Failure		500			{object}	http.Error				"Server error"
@@ -130,7 +130,7 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 // @Accept 		json
 // @Produce		json
 // @Param			user		body		models.User		true		"user info"
-// @Success		200		{object}	response					"User status"
+// @Success		200		{object}	http.Response			"User status"
 // @Failure		400		{object}	http.Error				"Invalid cookie"
 // @Failure		500		{object}	http.Error				"Server error: cookie read fail"
 // @Router		/api/auth/validateAuth	[post]

@@ -2,6 +2,12 @@ basePath: /user/{userID}/account/feed
 definitions:
   http.Error:
     type: object
+  http.Response:
+    properties:
+      body: {}
+      status:
+        type: string
+    type: object
   http.balanceResponse:
     properties:
       balance:
@@ -17,6 +23,38 @@ definitions:
       planned_balance:
         type: number
     type: object
+  http.loginResponse:
+    properties:
+      jwt:
+        type: string
+    type: object
+  http.signInput:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  http.signUpResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  models.User:
+    properties:
+      avatar_url:
+        type: string
+      id:
+        type: string
+      password:
+        type: string
+      planned_budget:
+        type: number
+      salt:
+        type: string
+      username:
+        type: string
+    type: object
 host: localhost:8090
 info:
   contact:
@@ -26,6 +64,96 @@ info:
   title: Hamster API
   version: 1.0.1
 paths:
+  /api/auth/signin:
+    post:
+      consumes:
+      - application/json
+      description: Login account
+      parameters:
+      - description: username && password
+        in: body
+        name: userInput
+        required: true
+        schema:
+          $ref: '#/definitions/http.signInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User logedin
+          schema:
+            $ref: '#/definitions/http.loginResponse'
+        "400":
+          description: Incorrect Input
+          schema:
+            $ref: '#/definitions/http.Error'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.Error'
+      summary: Sign In
+      tags:
+      - Auth
+  /api/auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Create Account
+      parameters:
+      - description: user info
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User Created
+          schema:
+            $ref: '#/definitions/http.signUpResponse'
+        "400":
+          description: Incorrect Input
+          schema:
+            $ref: '#/definitions/http.Error'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.Error'
+      summary: Sign Up
+      tags:
+      - Auth
+  /api/auth/validateAuth:
+    post:
+      consumes:
+      - application/json
+      description: Validate auth
+      parameters:
+      - description: user info
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User status
+          schema:
+            $ref: '#/definitions/http.Response'
+        "400":
+          description: Invalid cookie
+          schema:
+            $ref: '#/definitions/http.Error'
+        "500":
+          description: 'Server error: cookie read fail'
+          schema:
+            $ref: '#/definitions/http.Error'
+      summary: Validate Auth
+      tags:
+      - Auth
   /api/user/{userID}/actualBudget:
     get:
       description: Get User actual budget
