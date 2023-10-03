@@ -144,7 +144,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid cookie",
                         "schema": {
-                            "$ref": "#/definitions/http.Error"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "500": {

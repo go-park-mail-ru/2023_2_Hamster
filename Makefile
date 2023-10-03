@@ -1,3 +1,5 @@
+include .env
+
 .PHONY: dc run test lint down
 
 dc:

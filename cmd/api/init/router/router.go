@@ -7,20 +7,19 @@ import (
 
 	_ "github.com/go-park-mail-ru/2023_2_Hamster/docs"
 	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth/delivery/http"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth/delivery/http/middleware"
 	user "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/delivery/http"
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
-type Response struct {
-	Status string `json:"status"`
-	Msg    string `json:"message"`
-}
-
 func HelloHandler(w http.ResponseWriter, r *http.Request) {
-	response := Response{
-		Status: "200 OK",
-		Msg:    "Pong",
+	response := struct {
+		Status string
+		Body   interface{}
+	}{
+		Status: "200",
+		Body:   "Pong",
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -33,8 +32,7 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Initialize router and describes all app's endpoints
-func InitRouter(auth *auth.Handler, user *user.Handler) *mux.Router {
-
+func InitRouter(auth *auth.Handler, user *user.Handler, mid *middleware.Middleware) *mux.Router {
 	r := mux.NewRouter()
 
 	http.Handle("/", r)
@@ -52,10 +50,12 @@ func InitRouter(auth *auth.Handler, user *user.Handler) *mux.Router {
 	{
 		authRouter.Methods("POST").Path("/signin").HandlerFunc(auth.SignIn)
 		authRouter.Methods("POST").Path("/signup").HandlerFunc(auth.SignUp)
+
 	}
 	// authRouter.Methods("GET").Path("/logout").HandlerFunc(auth.LogOut)
 
 	userRouter := apiRouter.PathPrefix("/user/{userID}").Subrouter()
+	userRouter.Use(mid.Authentication)
 	{
 		userRouter.Methods("GET").Path("/balance").HandlerFunc(user.GetUserBalance)
 		userRouter.Methods("GET").Path("/plannedBudget").HandlerFunc(user.GetPlannedBudget)

@@ -99,9 +99,6 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 		commonHttp.ErrorResponse(w, "incorrect input body", http.StatusBadRequest, h.log)
 		commonHttp.JSON(w, http.StatusBadRequest, commonHttp.Response{
 			Status: "400",
-			Body: commonHttp.Error{
-				errMsg: "incorrect input body",
-			},
 		})
 		return
 	}
@@ -136,8 +133,8 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 // @Accept 		json
 // @Produce		json
 // @Param			user		body		models.User		true		"user info"
-// @Success		200		{object}	http.Response			"User status"
-// @Failure		400		{object}	http.Error				"Invalid cookie"
+// @Success		200		{object}	http.Response				"User status"
+// @Failure		400		{object}	http.Response				"Invalid cookie"
 // @Failure		500		{object}	http.Error				"Server error: cookie read fail"
 // @Router		/api/auth/validateAuth	[post]
 func (h *Handler) AccessVerification(w http.ResponseWriter, r *http.Request) {

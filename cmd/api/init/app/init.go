@@ -5,6 +5,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 
 	authDelivery "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth/delivery/http"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth/delivery/http/middleware"
 	authRep "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth/repository/postgresql"
 	authUsecase "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth/usecase"
 	userDelivery "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/delivery/http"
@@ -21,9 +22,11 @@ func Init(db *sqlx.DB, log *logger.CustomLogger) *mux.Router {
 	authUsecase := authUsecase.NewUsecase(authRep, userRep, *log)
 	userUsecase := userUsecase.NewUsecase(userRep, *log)
 
+	middlewear := middleware.NewMiddleware(authUsecase, *log)
+
 	authHandler := authDelivery.NewHandler(authUsecase, *log)
 	userHandler := userDelivery.NewHandler(userUsecase, *log)
 
-	return router.InitRouter(authHandler, userHandler)
+	return router.InitRouter(authHandler, userHandler, middlewear)
 
 }

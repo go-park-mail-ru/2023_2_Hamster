@@ -146,7 +146,7 @@ paths:
         "400":
           description: Invalid cookie
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.Response'
         "500":
           description: 'Server error: cookie read fail'
           schema:
