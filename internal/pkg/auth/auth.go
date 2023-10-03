@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
@@ -13,13 +14,16 @@ var (
 	ErrInvalidAccessToken = errors.New("Error invalid access token")
 )
 
-const CtxUserKey = "user"
+type CookieToken struct {
+	Value   string
+	Expires time.Time
+}
 
 type Usecase interface {
 	// SignUpUser creates new User and returns it's id
-	SignUpUser(user models.User) (uuid.UUID, error)
+	SignUpUser(user models.User) (uuid.UUID, CookieToken, error)
 
-	SignInUser(username, plainPassword string) (string, error)
+	SignInUser(username, plainPassword string) (CookieToken, error)
 
 	// GetUserByCreds returns User if such exist in repository
 	GetUserByCreds(ctx context.Context, username, plainPassword string) (*models.User, error)
@@ -27,9 +31,9 @@ type Usecase interface {
 	// GetUserByAuthData returns User if such exist in repository
 	GetUserByAuthData(ctx context.Context, userID uuid.UUID) (*models.User, error)
 
-	GenerateAccessToken(ctx context.Context, user models.User) (string, error)
+	GenerateAccessToken(ctx context.Context, user models.User) (CookieToken, error)
 
-	ValidateAccessToken(accessToken string) (uint32, error)
+	ValidateAccessToken(accessToken string) (uuid.UUID, error)
 
 	// ChangePassword(ctx context.Context, userID uint32, password string) error
 }

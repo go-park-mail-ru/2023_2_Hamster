@@ -27,8 +27,7 @@ type Usecase struct {
 }
 
 type authClaims struct {
-	UserID      uint32 `json:"id"`
-	UserVersion uint32 `json:"user_version"`
+	UserID uuid.UUID `json:"id"`
 	jwt.RegisteredClaims
 }
 
@@ -44,7 +43,7 @@ func NewUsecase(
 }
 
 // SignUpUser creates new User and returns it's id
-func (u *Usecase) SignUpUser(user models.User) (uuid.UUID, error) {
+func (u *Usecase) SignUpUser(user models.User) (uuid.UUID, auth.CookieToken, error) {
 	salt := make([]byte, 8)
 	rand.Read(salt)
 
@@ -54,30 +53,45 @@ func (u *Usecase) SignUpUser(user models.User) (uuid.UUID, error) {
 
 	userId, err := u.userRepo.CreateUser(user)
 	if err != nil {
-		return uuid.Nil, fmt.Errorf("[usecase] cannot create user: %w", err)
+		return uuid.Nil, auth.CookieToken{}, fmt.Errorf("[usecase] cannot create user: %w", err)
 	}
-	return userId, nil
+
+	token, err := u.GenerateAccessToken(context.Background(), user)
+
+	return userId, token, nil
 }
 
-func (u *Usecase) SignInUser(username, plainPassword string) (string, error) {
+func (u *Usecase) SignInUser(username, plainPassword string) (auth.CookieToken, error) {
 	user, err := u.userRepo.GetUserByUsername(username)
 	if err != nil {
-		return "", fmt.Errorf("[usecase] can't find user: %w", err)
+		return auth.CookieToken{
+			Value:   "",
+			Expires: time.Now(),
+		}, fmt.Errorf("[usecase] can't find user: %w", err)
 	}
 
 	salt, err := hex.DecodeString(user.Salt)
 	if err != nil {
-		return "", fmt.Errorf("[usecase] salt from db decode error: %w", err)
+		return auth.CookieToken{
+			Value:   "",
+			Expires: time.Now(),
+		}, fmt.Errorf("[usecase] salt from db decode error: %w", err)
 	}
 
 	hashedPassword := hashPassword(plainPassword, salt)
 	if hashedPassword != user.Password {
-		return "", fmt.Errorf("[usecase] incorrect password")
+		return auth.CookieToken{
+			Value:   "",
+			Expires: time.Now(),
+		}, fmt.Errorf("[usecase] incorrect password")
 	}
 
 	token, err := u.GenerateAccessToken(context.Background(), *user)
 	if err != nil {
-		return "", fmt.Errorf("[usecase] failed to generate access token: %w", err)
+		return auth.CookieToken{
+			Value:   "",
+			Expires: time.Now(),
+		}, fmt.Errorf("[usecase] failed to generate access token: %w", err)
 	}
 
 	return token, nil
@@ -98,36 +112,47 @@ func (u *Usecase) GetUserByAuthData(ctx context.Context, userID uuid.UUID) (*mod
 	return u.userRepo.GetByID(userID)
 }
 
-func (u *Usecase) GenerateAccessToken(ctx context.Context, user models.User) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":  user.ID,
-		"exp": time.Now().Add(time.Hour * 12).Unix(),
+func (u *Usecase) GenerateAccessToken(ctx context.Context, user models.User) (auth.CookieToken, error) {
+	expTime := time.Now().UTC().Add(time.Hour * 24)
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &authClaims{
+		user.ID,
+		jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expTime),
+			Issuer:    "HammyWallet",
+		},
 	})
 
 	tokenString, err := token.SignedString([]byte(secret))
 	if err != nil {
-		return "", err
+		return auth.CookieToken{
+			Value:   "",
+			Expires: time.Now(),
+		}, err
 	}
 
-	return tokenString, nil
+	return auth.CookieToken{
+		Value:   tokenString,
+		Expires: expTime,
+	}, nil
 }
 
-func (u *Usecase) ValidateAccessToken(accessToken string) (uint32, error) {
+func (u *Usecase) ValidateAccessToken(accessToken string) (uuid.UUID, error) {
 	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("[usecase] invalig signing method")
+			return uuid.Nil, errors.New("[usecase] invalig signing method")
 		}
 		return []byte(secret), nil
 	})
 	if err != nil {
-		return 0, fmt.Errorf("[usecase] invalid token: %w", err)
+		return uuid.Nil, fmt.Errorf("[usecase] invalid token: %w", err)
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		userID := claims["id"].(uint32)
+		userID := claims["id"].(uuid.UUID)
 		return userID, nil
 	} else {
-		return 0, err
+		return uuid.Nil, err
 	}
 }
 

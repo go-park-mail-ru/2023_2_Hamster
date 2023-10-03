@@ -16,6 +16,12 @@ type Error struct {
 	errMsg string `json:"error"`
 }
 
+type NilBody struct{}
+
+func NIL() NilBody {
+	return NilBody{}
+}
+
 func ErrorResponse(w http.ResponseWriter, message string, code int, log logger.CustomLogger) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(code)

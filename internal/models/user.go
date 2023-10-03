@@ -14,6 +14,8 @@ type User struct {
 	Salt          string    `json:"salt"`
 }
 
+type ContextKeyUserType struct{}
+
 func (u *User) UserValidate() error {
 	_, err := valid.ValidateStruct(u)
 	return err

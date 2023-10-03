@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	commonHttp "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
@@ -48,7 +49,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	h.log.Debug("request body successfully decoded\n", r)
 
-	id, err := h.au.SignUpUser(user)
+	id, token, err := h.au.SignUpUser(user)
 	if err != nil {
 		h.log.Error(err.Error())
 		commonHttp.ErrorResponse(w, "server error", http.StatusBadRequest, h.log)
@@ -59,7 +60,14 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	suResp := signUpResponse{ID: id}
 
-	commonHttp.SuccessResponse(w, suResp, h.log)
+	http.SetCookie(w, &http.Cookie{
+		Name:     "Authentication",
+		Value:    token.Value,
+		Expires:  token.Expires,
+		Path:     "",
+		HttpOnly: true,
+	})
+	commonHttp.JSON(w, http.StatusOK, suResp)
 }
 
 func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
@@ -83,28 +91,41 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 
 	h.log.Infof("User login with token: %s", token)
 
-	loginResponse := &loginResponse{JWT: token}
+	loginResponse := &loginResponse{JWT: token.Value}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "Authentication",
+		Value:    token.Value,
+		Expires:  token.Expires,
+		Path:     "",
+		HttpOnly: true,
+	})
 
 	commonHttp.SuccessResponse(w, loginResponse, h.log)
 }
 
-//func (h *Handler) AccessVerification(w http.ResponseWriter, r *http.Request) {
-//	tokenCookie, err := r.Cookie(authentication)
-//	if errors.Is(err, http.ErrNoCookie) {
-//		h.log.Errorf("Error cookie token not found: %v", err)
-//		commonHttp.JSON(w, http.StatusBadRequest, commonHttp.NIL())
-//		return
-//	} else if err != nil {
-//		h.log.Errorf("Error fail to get cookie token: %v", err)
-//		commonHttp.JSON(w, http.StatusUnauthorized, commonHttp.NIL())
-//		return
-//	}
-//
-//	id, err := h.au.ValidateAccessToken(tokenCookie.Value)
-//	if err != nil {
-//		h.log.Errorf("Error ")
-//	}
-//}
+func (h *Handler) AccessVerification(w http.ResponseWriter, r *http.Request) {
+	tokenCookie, err := r.Cookie("Authentication")
+	if errors.Is(err, http.ErrNoCookie) {
+		h.log.Errorf("Error cookie token not found: %v", err)
+		commonHttp.JSON(w, http.StatusBadRequest, commonHttp.NIL())
+		return
+	} else if err != nil {
+		h.log.Errorf("Error fail to get cookie token: %v", err)
+		commonHttp.JSON(w, http.StatusUnauthorized, commonHttp.NIL())
+		return
+	}
+
+	id, err := h.au.ValidateAccessToken(tokenCookie.Value)
+	if err != nil {
+		h.log.Errorf("Error invalid jwt token: %v", err)
+		commonHttp.JSON(w, http.StatusUnauthorized, commonHttp.NIL())
+		return
+	}
+
+	h.log.Info("User id: ", id)
+	commonHttp.JSON(w, http.StatusOK, commonHttp.NIL())
+}
 
 /*func (h *Handler) LogOut(w http.ResponseWriter, r *http.Request) {
 	user, err := r.Context().Value(models.User)
