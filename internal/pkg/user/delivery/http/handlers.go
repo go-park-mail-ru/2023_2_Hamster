@@ -46,7 +46,7 @@ func NewHandler(uu user.Usecase, l logger.CustomLogger) *Handler {
 // @Tags		User
 // @Description	Get User balance
 // @Produce		json
-// @Success		200		{object}	http.Response "Show balance"
+// @Success		200		{object}	balanceResponse "Show balance"
 // @Failure		400		{object}	http.Error	"Client error"
 // @Failure		500		{object}	http.Error	"Server error"
 // @Router		/api/user/{userID}/balance [get]
@@ -92,7 +92,7 @@ func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 // @Tags		User
 // @Description	Get User planned budget
 // @Produce		json
-// @Success		200		{object}	budgetPlannedResponse	        "Show planned budget"
+// @Success		200		{object}	budgetActualResponse	        "Show planned budget"
 // @Failure		400		{object}	http.Error	"Client error"
 // @Failure		500		{object}	http.Error	"Server error"
 // @Router		/api/user/{userID}/plannedBudget [get]
@@ -140,7 +140,7 @@ func (h *Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {
 // @Tags		User
 // @Description	Get User actual budget
 // @Produce		json
-// @Success		200		{object}	budgetActualResponse	        "Show actual budget"
+// @Success		200		{object}	budgetPlannedResponse	        "Show actual budget"
 // @Failure		400		{object}	http.Error	"Client error"
 // @Failure		500		{object}	http.Error	"Server error"
 // @Router		/api/user/{userID}/actualBudget [get]
@@ -187,7 +187,7 @@ func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
 // @Tags		User
 // @Description	Get User accounts
 // @Produce		json
-// @Success		200		{object}	http.Response	        "Show actual accounts"
+// @Success		200		{object}	account	        "Show actual accounts"
 // @Failure		400		{object}	http.Error	"Client error"
 // @Failure		500		{object}	http.Error	"Server error"
 // @Router		/api/user/{userID}/accounts/all [get]

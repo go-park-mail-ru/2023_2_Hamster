@@ -88,7 +88,7 @@ func (r *UserRep) GetUserBalance(userID uuid.UUID) (float64, error) {
 	err := r.db.QueryRow("SELECT SUM(balance) FROM accounts WHERE user_id = $1", userID).Scan(&totalBalance)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		return 0, fmt.Errorf("(repo) %w: %v", &models.NoSuchUserIdBalanceError{UserID: userID}, err)
+		return 0, fmt.Errorf("[repo] %w: %v", &models.NoSuchUserIdBalanceError{UserID: userID}, err)
 	} else if err != nil {
 		return 0, fmt.Errorf("[repository] failed request db %w", err)
 	}
@@ -101,7 +101,7 @@ func (r *UserRep) GetPlannedBudget(userID uuid.UUID) (float64, error) {
 	err := r.db.QueryRow("SELECT planned_budget FROM users WHERE id = $1", userID).Scan(&plannedBudget)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		return 0, fmt.Errorf("[repository] nothing found for this request %w", err)
+		return 0, fmt.Errorf("[repo] %w: %v", &models.NoSuchPlannedBudgetError{UserID: userID}, err)
 	} else if err != nil {
 		return 0, fmt.Errorf("[repository] failed request db %w", err)
 	}
@@ -120,7 +120,7 @@ func (r *UserRep) GetCurrentBudget(userID uuid.UUID) (float64, error) {
 					  AND user_id = $1;`, userID).Scan(&currentBudget)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		return 0, fmt.Errorf("[repository] nothing found for this request %w", err)
+		return 0, fmt.Errorf("[repo] %w: %v", &models.NoSuchCurrentBudget{UserID: userID}, err)
 	} else if err != nil {
 		return 0, fmt.Errorf("[repository] failed request db %w", err)
 	}
