@@ -3,7 +3,6 @@ package middleware
 import (
 	"context"
 	"net/http"
-	"time"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
@@ -32,7 +31,7 @@ func (m *Middleware) Authentication(next http.Handler) http.Handler {
 
 		m.log.Info("auth token : " + reqToken)
 
-		if cookie.Value == "" || cookie.Expires < time.Now() {
+		if cookie.Value == "" {
 			m.log.Info("[middleware] missing token")
 			next.ServeHTTP(w, r) // missing token
 			return
