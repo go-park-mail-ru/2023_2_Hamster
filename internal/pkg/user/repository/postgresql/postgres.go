@@ -127,3 +127,22 @@ func (r *UserRep) GetCurrentBudget(userID uuid.UUID) (float64, error) {
 
 	return currentBudget, nil
 }
+
+func (r *UserRep) GetAccount(userID uuid.UUID) (*models.Accounts, error) {
+	query := `SELECT *
+			 FROM account
+			 WHERE id = $1;`
+
+	row := r.db.QueryRow(query, userID)
+	var account models.Accounts
+
+	err := row.Scan(&account.ID, &account.UserID, &account.Balance, &account.MeanPayment)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, fmt.Errorf("nothing found for this request %w", err)
+	} else if err != nil {
+		return &models.Accounts{},
+			fmt.Errorf("failed request db %s, %w", query, err)
+
+	}
+	return &account, nil
+}
