@@ -8,12 +8,11 @@ import (
 )
 
 type Response struct {
-	Body   interface{} `json:"body,omitempty"`
-	Status string      `json:"status"`
+	Data interface{} `json:"body,omitempty"`
 }
 
 type Error struct {
-	ErrMsg string `json:"errmsg"`
+	Message string `json:"message"`
 }
 
 type NilBody struct{}
@@ -22,13 +21,14 @@ func NIL() NilBody {
 	return NilBody{}
 }
 
-func ErrorResponse(w http.ResponseWriter, message string, code int, log logger.CustomLogger) {
+func ErrorResponse(w http.ResponseWriter, code int, message string, log logger.CustomLogger) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(code)
 
 	errorMsg := Error{
-		ErrMsg: message,
+		Message: message,
 	}
+
 	encoder := json.NewEncoder(w)
 	if err := encoder.Encode(errorMsg); err != nil {
 		log.Errorf("Error failed to marshal error message: %s", err.Error())
@@ -37,30 +37,7 @@ func ErrorResponse(w http.ResponseWriter, message string, code int, log logger.C
 	}
 }
 
-func SuccessResponse(w http.ResponseWriter, response any, log logger.CustomLogger) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-
-	encoder := json.NewEncoder(w)
-	if err := encoder.Encode(response); err != nil {
-		log.Errorf("Error failed to marshal response: %s", err.Error())
-		ErrorResponse(w, "can't encode response into json", http.StatusInternalServerError, log)
-	}
-}
-
 func JSON(w http.ResponseWriter, status int, response any) {
-	encoder := json.NewEncoder(w)
-	if err := encoder.Encode(response); err != nil {
-		w.WriteHeader(status)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	// w.Header().Set("Content-Length", )
-	w.WriteHeader(status)
-}
-
-func errJSON(w http.ResponseWriter, status int, response any) {
 	encoder := json.NewEncoder(w)
 	if err := encoder.Encode(response); err != nil {
 		w.WriteHeader(status)

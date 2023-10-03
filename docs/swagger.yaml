@@ -2,14 +2,12 @@ basePath: /user/{userID}/account/feed
 definitions:
   http.Error:
     properties:
-      errmsg:
+      message:
         type: string
     type: object
   http.Response:
     properties:
       body: {}
-      status:
-        type: string
     type: object
   http.budgetActualResponse:
     properties:
@@ -140,11 +138,11 @@ paths:
         "200":
           description: User status
           schema:
-            $ref: '#/definitions/http.Response'
+            $ref: '#/definitions/http.Error'
         "400":
           description: Invalid cookie
           schema:
-            $ref: '#/definitions/http.Response'
+            $ref: '#/definitions/http.Error'
         "500":
           description: 'Server error: cookie read fail'
           schema:

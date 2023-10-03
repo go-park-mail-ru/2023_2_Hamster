@@ -53,7 +53,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&user); err != nil {
 		h.log.Error(err.Error())
-		commonHttp.ErrorResponse(w, "incorrect input body", http.StatusBadRequest, h.log)
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err.Error(), h.log)
 		return
 	}
 
@@ -62,13 +62,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	id, token, err := h.au.SignUpUser(user)
 	if err != nil {
 		h.log.Error(err.Error())
-		// commonHttp.ErrorResponse(w, "server error", http.StatusBadRequest, h.log)
-		commonHttp.JSON(w, http.StatusBadRequest, commonHttp.Response{
-			Status: "400",
-			Body: commonHttp.Error{
-				ErrMsg: err.Error(),
-			},
-		})
+		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err.Error(), h.log)
 		return
 	}
 
@@ -80,14 +74,10 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		Name:     "Authentication",
 		Value:    token.Value,
 		Expires:  token.Expires,
-		Path:     "",
+		Path:     "/",
 		HttpOnly: true,
 	})
-	// commonHttp.JSON(w, http.StatusOK, suResp)
-	commonHttp.JSON(w, http.StatusBadRequest, commonHttp.Response{
-		Status: "200",
-		Body:   suResp,
-	})
+	commonHttp.JSON(w, http.StatusOK, suResp)
 }
 
 // @Summary		Sign In
@@ -95,10 +85,10 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Description	Login account
 // @Accept 		json
 // @Produce		json
-// @Param			userInput		body		signInput		true			"username && password"
-// @Success		200			{object}	loginResponse				"User logedin"
-// @Failure		400			{object}	http.Error				"Incorrect Input"
-// @Failure		500			{object}	http.Error				"Server error"
+// @Param			userInput		body		signInput		true		"username && password"
+// @Success		200			{object}	loginResponse			"User logedin"
+// @Failure		400			{object}	http.Error			"Incorrect Input"
+// @Failure		500			{object}	http.Error			"Server error"
 // @Router		/api/auth/signin	[post]
 func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 	var userInput signInput
@@ -106,13 +96,7 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&userInput); err != nil {
 		h.log.Error(err.Error())
-		// commonHttp.ErrorResponse(w, "incorrect input body", http.StatusBadRequest, h.log)
-		commonHttp.JSON(w, http.StatusBadRequest, commonHttp.Response{
-			Status: "400",
-			Body: commonHttp.Error{
-				ErrMsg: "incorrect input body",
-			},
-		})
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err.Error(), h.log)
 		return
 	}
 
@@ -121,13 +105,7 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 	token, err := h.au.SignInUser(userInput.Username, userInput.Password)
 	if err != nil {
 		h.log.Error(err.Error())
-		// commonHttp.ErrorResponse(w, "Error can't login user", http.StatusBadRequest, h.log)
-		commonHttp.JSON(w, http.StatusBadRequest, commonHttp.Response{
-			Status: "400",
-			Body: commonHttp.Error{
-				ErrMsg: "incorrect input body",
-			},
-		})
+		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err.Error(), h.log)
 		return
 	}
 
@@ -143,11 +121,7 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 
-	// commonHttp.SuccessResponse(w, loginResponse, h.log)
-	commonHttp.JSON(w, http.StatusOK, commonHttp.Response{
-		Status: "200",
-		Body:   loginResponse,
-	})
+	commonHttp.JSON(w, http.StatusOK, loginResponse)
 }
 
 // @Summary		Validate Auth
@@ -156,43 +130,31 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 // @Accept 		json
 // @Produce		json
 // @Param			user		body		models.User		true		"user info"
-// @Success		200		{object}	http.Response				"User status"
-// @Failure		400		{object}	http.Response				"Invalid cookie"
+// @Success		200		{object}	http.Error				"User status"
+// @Failure		400		{object}	http.Error				"Invalid cookie"
 // @Failure		500		{object}	http.Error				"Server error: cookie read fail"
 // @Router		/api/auth/validateAuth	[post]
 func (h *Handler) AccessVerification(w http.ResponseWriter, r *http.Request) {
 	tokenCookie, err := r.Cookie("Authentication")
 	if errors.Is(err, http.ErrNoCookie) {
 		h.log.Errorf("Error cookie token not found: %v", err)
-		commonHttp.JSON(w, http.StatusBadRequest, commonHttp.Response{
-			Status: "500",
-			Body:   "No cookie found",
-		})
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err.Error(), h.log)
 		return
 	} else if err != nil {
 		h.log.Errorf("Error fail to get cookie token: %v", err)
-		commonHttp.JSON(w, http.StatusUnauthorized, commonHttp.Response{
-			Status: "500",
-			Body:   "Cookie read fail",
-		})
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err.Error(), h.log)
 		return
 	}
 
 	id, err := h.au.ValidateAccessToken(tokenCookie.Value)
 	if err != nil {
 		h.log.Errorf("Error invalid jwt token: %v", err)
-		commonHttp.JSON(w, http.StatusUnauthorized, commonHttp.Response{
-			Status: "400",
-			Body:   "Invalid cookie abort auth",
-		})
+		commonHttp.ErrorResponse(w, http.StatusUnauthorized, err.Error(), h.log)
 		return
 	}
 
 	h.log.Info("User id: ", id)
-	commonHttp.JSON(w, http.StatusOK, commonHttp.Response{
-		Status: "200",
-		Body:   "User logedin",
-	})
+	commonHttp.JSON(w, http.StatusOK, "login success")
 }
 
 /*func (h *Handler) LogOut(w http.ResponseWriter, r *http.Request) {

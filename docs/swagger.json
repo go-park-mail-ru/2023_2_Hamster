@@ -132,13 +132,13 @@
                     "200": {
                         "description": "User status",
                         "schema": {
-                            "$ref": "#/definitions/http.Response"
+                            "$ref": "#/definitions/http.Error"
                         }
                     },
                     "400": {
                         "description": "Invalid cookie",
                         "schema": {
-                            "$ref": "#/definitions/http.Response"
+                            "$ref": "#/definitions/http.Error"
                         }
                     },
                     "500": {
@@ -283,7 +283,7 @@
         "http.Error": {
             "type": "object",
             "properties": {
-                "errmsg": {
+                "message": {
                     "type": "string"
                 }
             }
@@ -291,10 +291,7 @@
         "http.Response": {
             "type": "object",
             "properties": {
-                "body": {},
-                "status": {
-                    "type": "string"
-                }
+                "body": {}
             }
         },
         "http.budgetActualResponse": {
