@@ -12,6 +12,7 @@ type Usecase interface {
 	GetUserBalance(userID uuid.UUID) (float64, error)
 	GetPlannedBudget(userID uuid.UUID) (float64, error)
 	GetCurrentBudget(userID uuid.UUID) (float64, error)
+	GetAccount(userID uuid.UUID) (*models.Accounts, error)
 }
 
 type Repository interface {
@@ -20,9 +21,10 @@ type Repository interface {
 	//	IncreaseUserVersion(ctx context.Context, userID uuid.UUID) error
 	GetUserByUsername(username string) (*models.User, error)
 	//	GetUserByIDAndVersion(ctx context.Context, userID, userVersion uuid.UUID) (*models.User, error)
-	GetUserBalance(userID uuid.UUID) (float64, error)
+	GetUserBalance(userID uuid.UUID) (float64, error) // transfer account repostiory
 	GetPlannedBudget(userID uuid.UUID) (float64, error)
 	GetCurrentBudget(userID uuid.UUID) (float64, error)
+	GetAccount(userID uuid.UUID) (*models.Accounts, error) // transfer account repository
 	//IncreaseUserVersion(ctx context.Context, userID uuid.UUID) error
 
 }

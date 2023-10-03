@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user"
 	"github.com/google/uuid"
 )
@@ -54,4 +55,13 @@ func (u *Usecase) GetCurrentBudget(userID uuid.UUID) (float64, error) {
 
 	currentBudget := plannedBudget - transactionExpenses
 	return currentBudget, nil
+}
+
+func (u *Usecase) GetAccount(userID uuid.UUID) (*models.Accounts, error) {
+	account, err := u.userRepo.GetAccount(userID)
+	if err != nil {
+		return account, fmt.Errorf("[usecase] cant't get account from repository %w", err)
+	}
+
+	return account, nil
 }

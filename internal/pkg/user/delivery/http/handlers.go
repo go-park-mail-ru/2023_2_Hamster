@@ -25,6 +25,11 @@ type budgetActualResponse struct {
 	BudgetActual float64 `json:"actual_balance"`
 }
 
+type account struct {
+	Balance     float64 `json:"balance"`
+	MeanPayment string  `json:"mean_payment"`
+}
+
 const (
 	userIdUrlParam = "userID"
 )
@@ -112,10 +117,20 @@ func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
 	commonHttp.SuccessResponse(w, budgetResponse, h.logger)
 }
 
-// func (h* Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {
-// 	commonHttp.
-// }
+func (h *Handler) GetAccount(w http.ResponseWriter, r *http.Request) {
+	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
 
-// func (h* Handler) ActualBudget(w http.ResponseWriter, r *http.Request) [
-// 	commonHttp.
-// ]
+	if err != nil {
+		h.logger.Infof("invalid id: %v:", err)
+		commonHttp.ErrorResponse(w, "invalid url parameter", http.StatusBadRequest, h.logger)
+		return
+	}
+
+	accountInfo, err := h.userService.GetAccount(userID)
+	if err != nil {
+		h.logger.Error(err.Error())
+		commonHttp.ErrorResponse(w, "error get current budget", http.StatusBadRequest, h.logger)
+	}
+	budgetResponse := &account{Balance: accountInfo.Balance, MeanPayment: accountInfo.MeanPayment}
+	commonHttp.SuccessResponse(w, budgetResponse, h.logger)
+}
