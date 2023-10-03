@@ -10,7 +10,7 @@ const docTemplate = `{
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
         "contact": {
-            "name": "Fluire API Support",
+            "name": "Hamster API Support",
             "email": "dimka.komarov@bk.ru"
         },
         "version": "{{.Version}}"
@@ -130,7 +130,7 @@ const docTemplate = `{
         "http.budgetActualResponse": {
             "type": "object",
             "properties": {
-                "planned_balance": {
+                "actual_balance": {
                     "type": "number"
                 }
             }
@@ -152,8 +152,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8090",
 	BasePath:         "/user/{userID}/account/feed",
 	Schemes:          []string{},
-	Title:            "Fluire API",
-	Description:      "Server API for Fluire Streaming Service Application",
+	Title:            "Hamster API",
+	Description:      "Server API for Hamster Money Service Application",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

@@ -1,10 +1,10 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Server API for Fluire Streaming Service Application",
-        "title": "Fluire API",
+        "description": "Server API for Hamster Money Service Application",
+        "title": "Hamster API",
         "contact": {
-            "name": "Fluire API Support",
+            "name": "Hamster API Support",
             "email": "dimka.komarov@bk.ru"
         },
         "version": "1.0.1"
@@ -124,7 +124,7 @@
         "http.budgetActualResponse": {
             "type": "object",
             "properties": {
-                "planned_balance": {
+                "actual_balance": {
                     "type": "number"
                 }
             }

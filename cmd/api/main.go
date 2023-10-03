@@ -13,11 +13,11 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/postgresql"
 )
 
-// @title		Fluire API
+// @title		Hamster API
 // @version		1.0.1
-// @description	Server API for Fluire Streaming Service Application
+// @description	Server API for Hamster Money Service Application
 
-// @contact.name   Fluire API Support
+// @contact.name   Hamster API Support
 // @contact.email  dimka.komarov@bk.ru
 
 // @host		localhost:8090

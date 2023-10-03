@@ -22,7 +22,7 @@ type budgetPlannedResponse struct {
 }
 
 type budgetActualResponse struct {
-	BudgetActual float64 `json:"planned_balance"`
+	BudgetActual float64 `json:"actual_balance"`
 }
 
 const (

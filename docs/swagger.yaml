@@ -9,7 +9,7 @@ definitions:
     type: object
   http.budgetActualResponse:
     properties:
-      planned_balance:
+      actual_balance:
         type: number
     type: object
   http.budgetPlannedResponse:
@@ -21,9 +21,9 @@ host: localhost:8090
 info:
   contact:
     email: dimka.komarov@bk.ru
-    name: Fluire API Support
-  description: Server API for Fluire Streaming Service Application
-  title: Fluire API
+    name: Hamster API Support
+  description: Server API for Hamster Money Service Application
+  title: Hamster API
   version: 1.0.1
 paths:
   /api/user/{userID}/actualBudget:
