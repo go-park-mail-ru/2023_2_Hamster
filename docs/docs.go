@@ -165,10 +165,10 @@ const docTemplate = `{
                 "tags": [
                     "User"
                 ],
-                "summary": "Get Accounts Budget",
+                "summary": "Get User Accounts",
                 "responses": {
                     "200": {
-                        "description": "Show actual budget",
+                        "description": "Show actual accounts",
                         "schema": {
                             "$ref": "#/definitions/http.Response"
                         }
