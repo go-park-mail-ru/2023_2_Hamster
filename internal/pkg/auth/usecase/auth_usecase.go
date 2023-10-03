@@ -112,7 +112,7 @@ func (u *Usecase) GenerateAccessToken(ctx context.Context, user models.User) (st
 	return tokenString, nil
 }
 
-func (u *Usecase) ValidateAccessToken(accessToken string) (uint32, uint32, error) {
+func (u *Usecase) ValidateAccessToken(accessToken string) (uint32, error) {
 	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("[usecase] invalig signing method")
@@ -120,15 +120,14 @@ func (u *Usecase) ValidateAccessToken(accessToken string) (uint32, uint32, error
 		return []byte(secret), nil
 	})
 	if err != nil {
-		return 0, 0, fmt.Errorf("[usecase] invalid token: %w", err)
+		return 0, fmt.Errorf("[usecase] invalid token: %w", err)
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		userID := claims["id"].(uint32)
-		username := claims["username"].(uint32)
-		return userID, username, nil
+		return userID, nil
 	} else {
-		return 0, 0, err
+		return 0, err
 	}
 }
 

@@ -75,10 +75,10 @@ func (r *UserRep) GetUserByUsername(username string) (*models.User, error) {
 	err := row.Scan(&u.ID, &u.Username, &u.Password, &u.PlannedBudget, &u.AvatarURL, &u.Salt)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		return nil, fmt.Errorf("(repository) nothing found for this request %w", err)
+		return nil, fmt.Errorf("[repository] nothing found for this request %w", err)
 	} else if err != nil {
 		return &models.User{},
-			fmt.Errorf("(repository) failed request db %w", err)
+			fmt.Errorf("[repository] failed request db %w", err)
 	}
 	return &u, nil
 }
@@ -88,9 +88,9 @@ func (r *UserRep) GetUserBalance(userID uuid.UUID) (float64, error) {
 	err := r.db.QueryRow("SELECT SUM(balance) FROM accounts WHERE user_id = $1", userID).Scan(&totalBalance)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		return 0, fmt.Errorf("(repository) nothing found for this request %w", err)
+		return 0, fmt.Errorf("[repository] nothing found for this request %w", err)
 	} else if err != nil {
-		return 0, fmt.Errorf("(repository) failed request db %w", err)
+		return 0, fmt.Errorf("[repository] failed request db %w", err)
 	}
 
 	return totalBalance, nil
@@ -101,9 +101,9 @@ func (r *UserRep) GetPlannedBudget(userID uuid.UUID) (float64, error) {
 	err := r.db.QueryRow("SELECT planned_budget FROM users WHERE id = $1", userID).Scan(&plannedBudget)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		return 0, fmt.Errorf("(repository) nothing found for this request %w", err)
+		return 0, fmt.Errorf("[repository] nothing found for this request %w", err)
 	} else if err != nil {
-		return 0, fmt.Errorf("(repository) failed request db %w", err)
+		return 0, fmt.Errorf("[repository] failed request db %w", err)
 	}
 
 	return plannedBudget, nil
@@ -112,18 +112,17 @@ func (r *UserRep) GetPlannedBudget(userID uuid.UUID) (float64, error) {
 func (r *UserRep) GetCurrentBudget(userID uuid.UUID) (float64, error) {
 	var currentBudget float64
 
-	err := r.db.QueryRow(`
-						SELECT SUM(total) AS total_sum
-						FROM Transaction
-						WHERE date_part('month', date) = date_part('month', CURRENT_DATE)
-  						AND date_part('year', date) = date_part('year', CURRENT_DATE)
-						AND is_income = false
-						AND user_id = $1;`, userID).Scan(&currentBudget)
+	err := r.db.QueryRow(`SELECT SUM(total) AS total_sum
+					  FROM Transaction
+					  WHERE date_part('month', date) = date_part('month', CURRENT_DATE)
+  					  AND date_part('year', date) = date_part('year', CURRENT_DATE)
+					  AND is_income = false
+					  AND user_id = $1;`, userID).Scan(&currentBudget)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		return 0, fmt.Errorf("(repository) nothing found for this request %w", err)
+		return 0, fmt.Errorf("[repository] nothing found for this request %w", err)
 	} else if err != nil {
-		return 0, fmt.Errorf("(repository) failed request db %w", err)
+		return 0, fmt.Errorf("[repository] failed request db %w", err)
 	}
 
 	return currentBudget, nil
