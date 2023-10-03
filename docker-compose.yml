@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-
   db:
     image: postgres:latest
     restart: always
@@ -15,3 +14,12 @@ services:
       - 5436:5432
     volumes:
       - ./internal/common/postgresql/schema/:/docker-entrypoint-initdb.d/
+  
+  main:
+    depends_on:
+      - postgres
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
