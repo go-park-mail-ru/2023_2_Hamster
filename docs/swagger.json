@@ -1,0 +1,141 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Server API for Fluire Streaming Service Application",
+        "title": "Fluire API",
+        "contact": {
+            "name": "Fluire API Support",
+            "email": "dimka.komarov@bk.ru"
+        },
+        "version": "1.0.1"
+    },
+    "host": "localhost:8090",
+    "basePath": "/user/{userID}/account/feed",
+    "paths": {
+        "/api/user/{userID}/actualBudget": {
+            "get": {
+                "description": "Get User actual budget",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get Actual Budget",
+                "responses": {
+                    "200": {
+                        "description": "Show actual budget",
+                        "schema": {
+                            "$ref": "#/definitions/http.budgetActualResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/{userID}/balance": {
+            "get": {
+                "description": "Get User balance",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get Balance",
+                "responses": {
+                    "200": {
+                        "description": "Show balance",
+                        "schema": {
+                            "$ref": "#/definitions/http.balanceResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/{userID}/plannedBudget": {
+            "get": {
+                "description": "Get User planned budget",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get Planned Budget",
+                "responses": {
+                    "200": {
+                        "description": "Show planned budget",
+                        "schema": {
+                            "$ref": "#/definitions/http.budgetPlannedResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "http.Error": {
+            "type": "object"
+        },
+        "http.balanceResponse": {
+            "type": "object",
+            "properties": {
+                "balance": {
+                    "type": "number"
+                }
+            }
+        },
+        "http.budgetActualResponse": {
+            "type": "object",
+            "properties": {
+                "planned_balance": {
+                    "type": "number"
+                }
+            }
+        },
+        "http.budgetPlannedResponse": {
+            "type": "object",
+            "properties": {
+                "planned_balance": {
+                    "type": "number"
+                }
+            }
+        }
+    }
+}

@@ -21,6 +21,10 @@ type budgetPlannedResponse struct {
 	BudgetPlanned float64 `json:"planned_balance"`
 }
 
+type budgetActualResponse struct {
+	BudgetActual float64 `json:"planned_balance"`
+}
+
 const (
 	userIdUrlParam = "userID"
 )
@@ -36,10 +40,10 @@ func NewHandler(uu user.Usecase, l logger.CustomLogger) *Handler {
 // @Tags		User
 // @Description	Get User balance
 // @Produce		json
-// @Success		200		{object}	albumCreateResponse	        "Album created"
+// @Success		200		{object}	balanceResponse	        "Show balance"
 // @Failure		400		{object}	http.Error	"Client error"
 // @Failure		500		{object}	http.Error	"Server error"
-// @Router		/api/albums/ [post]
+// @Router		/api/user/{userID}/balance [get]
 func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
 
@@ -58,6 +62,14 @@ func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// @Summary		Get Planned Budget
+// @Tags		User
+// @Description	Get User planned budget
+// @Produce		json
+// @Success		200		{object}	budgetPlannedResponse	        "Show planned budget"
+// @Failure		400		{object}	http.Error	"Client error"
+// @Failure		500		{object}	http.Error	"Server error"
+// @Router		/api/user/{userID}/plannedBudget [get]
 func (h *Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {
 	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
 
@@ -75,6 +87,14 @@ func (h *Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {
 	commonHttp.SuccessResponse(w, budgetResponse, h.logger)
 }
 
+// @Summary		Get Actual Budget
+// @Tags		User
+// @Description	Get User actual budget
+// @Produce		json
+// @Success		200		{object}	budgetActualResponse	        "Show actual budget"
+// @Failure		400		{object}	http.Error	"Client error"
+// @Failure		500		{object}	http.Error	"Server error"
+// @Router		/api/user/{userID}/actualBudget [get]
 func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
 	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
 
@@ -88,7 +108,7 @@ func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
 		h.logger.Error(err.Error())
 		commonHttp.ErrorResponse(w, "error get current budget", http.StatusBadRequest, h.logger)
 	}
-	budgetResponse := &budgetPlannedResponse{BudgetPlanned: budget}
+	budgetResponse := &budgetActualResponse{BudgetActual: budget}
 	commonHttp.SuccessResponse(w, budgetResponse, h.logger)
 }
 

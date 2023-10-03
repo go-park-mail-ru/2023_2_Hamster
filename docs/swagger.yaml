@@ -1,0 +1,92 @@
+basePath: /user/{userID}/account/feed
+definitions:
+  http.Error:
+    type: object
+  http.balanceResponse:
+    properties:
+      balance:
+        type: number
+    type: object
+  http.budgetActualResponse:
+    properties:
+      planned_balance:
+        type: number
+    type: object
+  http.budgetPlannedResponse:
+    properties:
+      planned_balance:
+        type: number
+    type: object
+host: localhost:8090
+info:
+  contact:
+    email: dimka.komarov@bk.ru
+    name: Fluire API Support
+  description: Server API for Fluire Streaming Service Application
+  title: Fluire API
+  version: 1.0.1
+paths:
+  /api/user/{userID}/actualBudget:
+    get:
+      description: Get User actual budget
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Show actual budget
+          schema:
+            $ref: '#/definitions/http.budgetActualResponse'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.Error'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.Error'
+      summary: Get Actual Budget
+      tags:
+      - User
+  /api/user/{userID}/balance:
+    get:
+      description: Get User balance
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Show balance
+          schema:
+            $ref: '#/definitions/http.balanceResponse'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.Error'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.Error'
+      summary: Get Balance
+      tags:
+      - User
+  /api/user/{userID}/plannedBudget:
+    get:
+      description: Get User planned budget
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Show planned budget
+          schema:
+            $ref: '#/definitions/http.budgetPlannedResponse'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.Error'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.Error'
+      summary: Get Planned Budget
+      tags:
+      - User
+swagger: "2.0"
