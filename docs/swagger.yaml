@@ -159,7 +159,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: Show actual budget
+          description: Show actual accounts
           schema:
             $ref: '#/definitions/http.Response'
         "400":
@@ -170,7 +170,7 @@ paths:
           description: Server error
           schema:
             $ref: '#/definitions/http.Error'
-      summary: Get Accounts Budget
+      summary: Get User Accounts
       tags:
       - User
   /api/user/{userID}/actualBudget:

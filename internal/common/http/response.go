@@ -8,8 +8,8 @@ import (
 )
 
 type Response struct {
-	Status string      `json:"status"`
 	Body   interface{} `json:"body,omitempty"`
+	Status string      `json:"status"`
 }
 
 type Error struct {
