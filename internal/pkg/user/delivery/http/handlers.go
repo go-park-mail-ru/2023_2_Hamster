@@ -1,10 +1,12 @@
 package http
 
 import (
+	"errors"
 	"net/http"
 
 	commonHttp "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user"
 )
 
@@ -26,8 +28,7 @@ type budgetActualResponse struct {
 }
 
 type account struct {
-	Balance     float64 `json:"balance"`
-	MeanPayment string  `json:"mean_payment"`
+	Account []models.Accounts
 }
 
 const (
@@ -45,7 +46,7 @@ func NewHandler(uu user.Usecase, l logger.CustomLogger) *Handler {
 // @Tags		User
 // @Description	Get User balance
 // @Produce		json
-// @Success		200		{object}	balanceResponse	        "Show balance"
+// @Success		200		{object}	http.Response "Show balance"
 // @Failure		400		{object}	http.Error	"Client error"
 // @Failure		500		{object}	http.Error	"Server error"
 // @Router		/api/user/{userID}/balance [get]
@@ -54,17 +55,37 @@ func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		h.logger.Infof("invalid id: %v:", err)
-		commonHttp.ErrorResponse(w, "invalid url parameter", http.StatusBadRequest, h.logger)
+
+		commonHttp.JSON(w, http.StatusBadRequest, commonHttp.Response{
+			Status: "400",
+			Body:   commonHttp.Error{ErrMsg: "invalid id"},
+		})
 		return
 	}
 	balance, err := h.userService.GetUserBalance(userID)
-	if err != nil {
-		h.logger.Error(err.Error())
-		commonHttp.ErrorResponse(w, "error get balance", http.StatusBadRequest, h.logger)
-	}
-	balanceResponse := &balanceResponse{Balance: balance}
-	commonHttp.SuccessResponse(w, balanceResponse, h.logger)
 
+	var errNoSuchUserIdBalanceError *models.NoSuchUserIdBalanceError
+	if errors.As(err, &errNoSuchUserIdBalanceError) {
+		h.logger.Error(err.Error())
+		commonHttp.JSON(w, http.StatusBadRequest, commonHttp.Response{
+			Status: "400",
+			Body:   commonHttp.Error{ErrMsg: "failed to get balance"},
+		})
+		return
+	}
+
+	if err != nil {
+		commonHttp.JSON(w, http.StatusInternalServerError, commonHttp.Response{
+			Status: "500",
+			Body:   commonHttp.Error{ErrMsg: "failed to get balance"},
+		})
+		return
+	}
+
+	commonHttp.JSON(w, http.StatusOK, commonHttp.Response{
+		Status: "200",
+		Body:   balanceResponse{Balance: balance},
+	})
 }
 
 // @Summary		Get Planned Budget
@@ -80,16 +101,39 @@ func (h *Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		h.logger.Infof("invalid id: %v:", err)
-		commonHttp.ErrorResponse(w, "invalid url parameter", http.StatusBadRequest, h.logger)
+
+		commonHttp.JSON(w, http.StatusBadRequest, commonHttp.Response{
+			Status: "400",
+			Body:   commonHttp.Error{ErrMsg: "invalid id"},
+		})
 		return
 	}
+
 	budget, err := h.userService.GetPlannedBudget(userID)
-	if err != nil {
+
+	var errNoSuchPlannedBudgetError *models.NoSuchPlannedBudgetError
+	if errors.As(err, &errNoSuchPlannedBudgetError) {
 		h.logger.Error(err.Error())
-		commonHttp.ErrorResponse(w, "error get planned budget", http.StatusBadRequest, h.logger)
+		commonHttp.JSON(w, http.StatusBadRequest, commonHttp.Response{
+			Status: "400",
+			Body:   commonHttp.Error{ErrMsg: "failed to get planned budget"},
+		})
+		return
 	}
-	budgetResponse := &budgetPlannedResponse{BudgetPlanned: budget}
-	commonHttp.SuccessResponse(w, budgetResponse, h.logger)
+
+	if err != nil {
+		commonHttp.JSON(w, http.StatusInternalServerError, commonHttp.Response{
+			Status: "500",
+			Body:   commonHttp.Error{ErrMsg: "failed to get planned budget"},
+		})
+		return
+	}
+
+	commonHttp.JSON(w, http.StatusOK, commonHttp.Response{
+		Status: "200",
+		Body:   budgetPlannedResponse{BudgetPlanned: budget},
+	})
+
 }
 
 // @Summary		Get Actual Budget
@@ -105,32 +149,84 @@ func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		h.logger.Infof("invalid id: %v:", err)
-		commonHttp.ErrorResponse(w, "invalid url parameter", http.StatusBadRequest, h.logger)
+
+		commonHttp.JSON(w, http.StatusBadRequest, commonHttp.Response{
+			Status: "400",
+			Body:   commonHttp.Error{ErrMsg: "invalid id"},
+		})
 		return
 	}
+
 	budget, err := h.userService.GetCurrentBudget(userID)
-	if err != nil {
+
+	var errNoSuchCurrentBudget *models.NoSuchCurrentBudget
+	if errors.As(err, &errNoSuchCurrentBudget) {
 		h.logger.Error(err.Error())
-		commonHttp.ErrorResponse(w, "error get current budget", http.StatusBadRequest, h.logger)
+		commonHttp.JSON(w, http.StatusBadRequest, commonHttp.Response{
+			Status: "400",
+			Body:   commonHttp.Error{ErrMsg: "failed to get current budget"},
+		})
+		return
 	}
-	budgetResponse := &budgetActualResponse{BudgetActual: budget}
-	commonHttp.SuccessResponse(w, budgetResponse, h.logger)
+
+	if err != nil {
+		commonHttp.JSON(w, http.StatusInternalServerError, commonHttp.Response{
+			Status: "500",
+			Body:   commonHttp.Error{ErrMsg: "failed to get current budget"},
+		})
+		return
+	}
+
+	commonHttp.JSON(w, http.StatusOK, commonHttp.Response{
+		Status: "200",
+		Body:   budgetActualResponse{BudgetActual: budget},
+	})
 }
 
-func (h *Handler) GetAccount(w http.ResponseWriter, r *http.Request) {
+// @Summary		Get User Accounts
+// @Tags		User
+// @Description	Get User accounts
+// @Produce		json
+// @Success		200		{object}	http.Response	        "Show actual accounts"
+// @Failure		400		{object}	http.Error	"Client error"
+// @Failure		500		{object}	http.Error	"Server error"
+// @Router		/api/user/{userID}/accounts/all [get]
+func (h *Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
 
 	if err != nil {
 		h.logger.Infof("invalid id: %v:", err)
-		commonHttp.ErrorResponse(w, "invalid url parameter", http.StatusBadRequest, h.logger)
+
+		commonHttp.JSON(w, http.StatusBadRequest, commonHttp.Response{
+			Status: "400",
+			Body:   commonHttp.Error{ErrMsg: "invalid id"},
+		})
 		return
 	}
 
-	accountInfo, err := h.userService.GetAccount(userID)
-	if err != nil {
+	accountInfo, err := h.userService.GetAccounts(userID)
+
+	var errNoSuchAccounts *models.NoSuchAccounts
+	if errors.As(err, &errNoSuchAccounts) {
 		h.logger.Error(err.Error())
-		commonHttp.ErrorResponse(w, "error get current budget", http.StatusBadRequest, h.logger)
+		commonHttp.JSON(w, http.StatusBadRequest, commonHttp.Response{
+			Status: "400",
+			Body:   commonHttp.Error{ErrMsg: "failed to get account"},
+		})
+		return
 	}
-	budgetResponse := &account{Balance: accountInfo.Balance, MeanPayment: accountInfo.MeanPayment}
-	commonHttp.SuccessResponse(w, budgetResponse, h.logger)
+
+	if err != nil {
+		commonHttp.JSON(w, http.StatusInternalServerError, commonHttp.Response{
+			Status: "500",
+			Body:   commonHttp.Error{ErrMsg: "failed to get account"},
+		})
+		return
+	}
+
+	budgetResponse := &account{Account: accountInfo}
+	commonHttp.JSON(w, http.StatusOK, commonHttp.Response{
+		Status: "200",
+		Body:   budgetResponse,
+	})
 }

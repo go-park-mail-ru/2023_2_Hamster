@@ -40,7 +40,7 @@ func (r *UserRep) CreateUser(u models.User) (uuid.UUID, error) {
 }
 
 func (r *UserRep) GetByID(userID uuid.UUID) (*models.User, error) {
-	query := `SELECT id, 
+	query := `SELECT id,
 				username,
 				password_hash,
 				planned_budget,
@@ -88,7 +88,7 @@ func (r *UserRep) GetUserBalance(userID uuid.UUID) (float64, error) {
 	err := r.db.QueryRow("SELECT SUM(balance) FROM accounts WHERE user_id = $1", userID).Scan(&totalBalance)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		return 0, fmt.Errorf("[repository] nothing found for this request %w", err)
+		return 0, fmt.Errorf("(repo) %w: %v", &models.NoSuchUserIdBalanceError{UserID: userID}, err)
 	} else if err != nil {
 		return 0, fmt.Errorf("[repository] failed request db %w", err)
 	}
@@ -128,21 +128,32 @@ func (r *UserRep) GetCurrentBudget(userID uuid.UUID) (float64, error) {
 	return currentBudget, nil
 }
 
-func (r *UserRep) GetAccount(userID uuid.UUID) (*models.Accounts, error) {
-	query := `SELECT *
-			 FROM account
-			 WHERE id = $1;`
+func (r *UserRep) GetAccounts(user_id uuid.UUID) ([]models.Accounts, error) {
 
-	row := r.db.QueryRow(query, userID)
-	var account models.Accounts
+	var accounts []models.Accounts
 
-	err := row.Scan(&account.ID, &account.UserID, &account.Balance, &account.MeanPayment)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, fmt.Errorf("nothing found for this request %w", err)
-	} else if err != nil {
-		return &models.Accounts{},
-			fmt.Errorf("failed request db %s, %w", query, err)
-
+	rows, err := r.db.Query(`SELECT * FROM accounts WHERE user_id = $1`, user_id)
+	if err != nil {
+		return nil, err
 	}
-	return &account, nil
+	defer rows.Close()
+
+	for rows.Next() {
+		var account models.Accounts
+		if err := rows.Scan(
+			&account.ID,
+			&account.UserID,
+			&account.Balance,
+			&account.MeanPayment,
+		); err != nil {
+			return nil, err
+		}
+		accounts = append(accounts, account)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return accounts, nil
 }

@@ -13,7 +13,7 @@ type Response struct {
 }
 
 type Error struct {
-	errMsg string `json:"error"`
+	ErrMsg string `json:"errmsg"`
 }
 
 type NilBody struct{}
@@ -27,7 +27,7 @@ func ErrorResponse(w http.ResponseWriter, message string, code int, log logger.C
 	w.WriteHeader(code)
 
 	errorMsg := Error{
-		errMsg: message,
+		ErrMsg: message,
 	}
 	encoder := json.NewEncoder(w)
 	if err := encoder.Encode(errorMsg); err != nil {

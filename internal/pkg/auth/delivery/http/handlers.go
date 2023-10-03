@@ -99,6 +99,9 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 		commonHttp.ErrorResponse(w, "incorrect input body", http.StatusBadRequest, h.log)
 		commonHttp.JSON(w, http.StatusBadRequest, commonHttp.Response{
 			Status: "400",
+			Body: commonHttp.Error{
+				ErrMsg: "incorrect input body",
+			},
 		})
 		return
 	}

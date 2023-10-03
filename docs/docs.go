@@ -156,6 +156,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/user/{userID}/accounts/all": {
+            "get": {
+                "description": "Get User accounts",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get Accounts Budget",
+                "responses": {
+                    "200": {
+                        "description": "Show actual budget",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/api/user/{userID}/actualBudget": {
             "get": {
                 "description": "Get User actual budget",
@@ -202,7 +234,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Show balance",
                         "schema": {
-                            "$ref": "#/definitions/http.balanceResponse"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -255,7 +287,12 @@ const docTemplate = `{
     },
     "definitions": {
         "http.Error": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "errmsg": {
+                    "type": "string"
+                }
+            }
         },
         "http.Response": {
             "type": "object",
@@ -263,14 +300,6 @@ const docTemplate = `{
                 "body": {},
                 "status": {
                     "type": "string"
-                }
-            }
-        },
-        "http.balanceResponse": {
-            "type": "object",
-            "properties": {
-                "balance": {
-                    "type": "number"
                 }
             }
         },
