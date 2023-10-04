@@ -167,6 +167,9 @@ paths:
       - Auth
   /api/user/{userID}/accounts/all:
     get:
+      description: Get User accounts
+      produces:
+      - application/json
       responses:
         "200":
           description: Show actual accounts
@@ -180,8 +183,14 @@ paths:
           description: Server error
           schema:
             $ref: '#/definitions/http.Error'
+      summary: Get User Accounts
+      tags:
+      - User
   /api/user/{userID}/actualBudget:
     get:
+      description: Get User actual budget
+      produces:
+      - application/json
       responses:
         "200":
           description: Show actual budget
@@ -195,6 +204,9 @@ paths:
           description: Server error
           schema:
             $ref: '#/definitions/http.Error'
+      summary: Get Actual Budget
+      tags:
+      - User
   /api/user/{userID}/balance:
     get:
       description: Get User balance
@@ -218,6 +230,9 @@ paths:
       - User
   /api/user/{userID}/plannedBudget:
     get:
+      description: Get User planned budget
+      produces:
+      - application/json
       responses:
         "200":
           description: Show planned budget
@@ -231,4 +246,7 @@ paths:
           description: Server error
           schema:
             $ref: '#/definitions/http.Error'
+      summary: Get Planned Budget
+      tags:
+      - User
 swagger: "2.0"

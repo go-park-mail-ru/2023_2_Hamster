@@ -158,6 +158,14 @@ const docTemplate = `{
         },
         "/api/user/{userID}/accounts/all": {
             "get": {
+                "description": "Get User accounts",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get User Accounts",
                 "responses": {
                     "200": {
                         "description": "Show actual accounts",
@@ -182,6 +190,14 @@ const docTemplate = `{
         },
         "/api/user/{userID}/actualBudget": {
             "get": {
+                "description": "Get User actual budget",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get Actual Budget",
                 "responses": {
                     "200": {
                         "description": "Show actual budget",
@@ -238,6 +254,14 @@ const docTemplate = `{
         },
         "/api/user/{userID}/plannedBudget": {
             "get": {
+                "description": "Get User planned budget",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get Planned Budget",
                 "responses": {
                     "200": {
                         "description": "Show planned budget",
