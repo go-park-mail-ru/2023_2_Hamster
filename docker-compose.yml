@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+
   db:
     image: postgres:latest
     restart: always
@@ -11,23 +12,7 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "5435:5432" # Исправил порт для PostgreSQL
+      - 5436:5432
     volumes:
-      - ./internal/common/postgresql/schema/:/docker-entrypoint-initdb.d/
+    - ./internal/common/postgresql/schema/:/docker-entrypoint-initdb.d/
   
-  main:
-    depends_on:
-      - db
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8004:8004"
-    environment:
-      SOME_ENV_VARIABLE: some_value
-    networks:
-      - mynetwork # Указываем сеть, чтобы оба контейнера были в одной сети
-
-networks:
-  mynetwork: # Создаем сеть
-    driver: bridge

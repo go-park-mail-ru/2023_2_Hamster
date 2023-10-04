@@ -37,7 +37,7 @@ func initPostgresConfigFromEnv() (PostgresConfig, error) {
 
 	cfg = PostgresConfig{
 		DBHost:     host,
-		DBPort:     "5432",
+		DBPort:     "5436",
 		DBUser:     user,
 		DBName:     dbname,
 		DBPassword: pass,

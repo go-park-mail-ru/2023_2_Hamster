@@ -101,7 +101,7 @@ func (r *UserRep) GetUserBalance(userID uuid.UUID) (float64, error) {
 }
 
 func (r *UserRep) GetPlannedBudget(userID uuid.UUID) (float64, error) {
-	var plannedBudget float64
+	var plannedBudget sql.NullFloat64
 	err := r.db.QueryRow("SELECT planned_budget FROM users WHERE id = $1", userID).Scan(&plannedBudget)
 
 	if errors.Is(err, sql.ErrNoRows) {
@@ -110,11 +110,14 @@ func (r *UserRep) GetPlannedBudget(userID uuid.UUID) (float64, error) {
 		return 0, fmt.Errorf("[repository] failed request db %w", err)
 	}
 
-	return plannedBudget, nil
+	if plannedBudget.Valid {
+		return plannedBudget.Float64, nil
+	}
+	return 0, nil
 }
 
 func (r *UserRep) GetCurrentBudget(userID uuid.UUID) (float64, error) {
-	var currentBudget float64
+	var currentBudget sql.NullFloat64
 
 	err := r.db.QueryRow(`SELECT SUM(total) AS total_sum
 					  FROM Transaction
@@ -129,7 +132,10 @@ func (r *UserRep) GetCurrentBudget(userID uuid.UUID) (float64, error) {
 		return 0, fmt.Errorf("[repository] failed request db %w", err)
 	}
 
-	return currentBudget, nil
+	if currentBudget.Valid {
+		return currentBudget.Float64, nil
+	}
+	return 0, nil
 }
 
 func (r *UserRep) GetAccounts(user_id uuid.UUID) ([]models.Accounts, error) {
