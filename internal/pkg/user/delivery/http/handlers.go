@@ -43,7 +43,7 @@ func NewHandler(uu user.Usecase, l logger.CustomLogger) *Handler {
 }
 
 // @Summary		Get Balance
-// @Tags		User
+// @Tags			User
 // @Description	Get User balance
 // @Produce		json
 // @Success		200		{object}	http.Response  "Show balance"
@@ -77,7 +77,7 @@ func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary		Get Planned Budget
-// @Tags		User
+// @Tags			User
 // @Description	Get User planned budget
 // @Produce		json
 
@@ -114,7 +114,7 @@ func (h *Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary		Get Actual Budget
-// @Tags		User
+// @Tags			User
 // @Description	Get User actual budget
 // @Produce		json
 
@@ -149,11 +149,11 @@ func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary		Get User Accounts
-// @Tags		User
+// @Tags			User
 // @Description	Get User accounts
 // @Produce		json
 
-// @Success		200		{object}	account	     "Show actual accounts"
+// @Success		200		{object}	account	     	"Show actual accounts"
 // @Failure		400		{object}	http.Error		"Client error"
 // @Failure		500		{object}	http.Error		"Server error"
 // @Router		/api/user/{userID}/accounts/all [get]

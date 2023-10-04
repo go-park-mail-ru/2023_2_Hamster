@@ -14,7 +14,7 @@ import (
 
 type signUpResponse struct {
 	ID       uuid.UUID `json:"id"`
-	username string    `json:"username"`
+	Username string    `json:"username"`
 }
 
 type signInput struct {
@@ -69,7 +69,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	h.log.Infof("User created with id: %d", id)
 
-	suResp := signUpResponse{ID: id, username: user.Username}
+	suResp := signUpResponse{ID: id, Username: user.Username}
 
 	http.SetCookie(w, &http.Cookie{
 		Name:     "Authentication",
@@ -114,7 +114,7 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 
 	// loginResponse := &loginResponse{JWT: token.Value}
 
-	siResp := signUpResponse{ID: id, username: userInput.Username}
+	siResp := signUpResponse{ID: id, Username: userInput.Username}
 
 	http.SetCookie(w, &http.Cookie{
 		Name:     "Authentication",

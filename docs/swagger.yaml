@@ -37,6 +37,8 @@ definitions:
     properties:
       id:
         type: string
+      username:
+        type: string
     type: object
   models.Accounts:
     properties:

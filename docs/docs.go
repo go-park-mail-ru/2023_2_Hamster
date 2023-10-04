@@ -319,6 +319,9 @@ const docTemplate = `{
             "properties": {
                 "id": {
                     "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },
