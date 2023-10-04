@@ -167,9 +167,10 @@ func (h *Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 	accountInfo, err := h.userService.GetAccounts(userID)
 
 	var errNoSuchAccounts *models.NoSuchAccounts
+
 	if errors.As(err, &errNoSuchAccounts) {
 		h.logger.Error(err.Error())
-		commonHttp.ErrorResponse(w, http.StatusBadRequest, err.Error(), h.logger)
+		commonHttp.JSON(w, http.StatusOK, "")
 		return
 	}
 
