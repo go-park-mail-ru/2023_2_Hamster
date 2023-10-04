@@ -87,7 +87,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Accept 		json
 // @Produce		json
 // @Param			userInput		body		signInput		true		"username && password"
-// @Success		200			{object}	loginResponse			"User logedin"
+// @Success		200			{object}	signUpResponse			"User logedin"
 // @Failure		400			{object}	http.Error			"Incorrect Input"
 // @Failure		500			{object}	http.Error			"Server error"
 // @Router		/api/auth/signin	[post]

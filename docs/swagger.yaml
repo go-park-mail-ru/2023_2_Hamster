@@ -9,6 +9,13 @@ definitions:
     properties:
       body: {}
     type: object
+  http.account:
+    properties:
+      account:
+        items:
+          $ref: '#/definitions/models.Accounts'
+        type: array
+    type: object
   http.budgetActualResponse:
     properties:
       actual_balance:
@@ -18,11 +25,6 @@ definitions:
     properties:
       planned_balance:
         type: number
-    type: object
-  http.loginResponse:
-    properties:
-      jwt:
-        type: string
     type: object
   http.signInput:
     properties:
@@ -34,6 +36,17 @@ definitions:
   http.signUpResponse:
     properties:
       id:
+        type: string
+    type: object
+  models.Accounts:
+    properties:
+      balance:
+        type: number
+      id:
+        type: string
+      mean_payment:
+        type: string
+      user_id:
         type: string
     type: object
   models.User:
@@ -78,7 +91,7 @@ paths:
         "200":
           description: User logedin
           schema:
-            $ref: '#/definitions/http.loginResponse'
+            $ref: '#/definitions/http.signUpResponse'
         "400":
           description: Incorrect Input
           schema:
@@ -152,14 +165,11 @@ paths:
       - Auth
   /api/user/{userID}/accounts/all:
     get:
-      description: Get User accounts
-      produces:
-      - application/json
       responses:
         "200":
           description: Show actual accounts
           schema:
-            $ref: '#/definitions/http.Response'
+            $ref: '#/definitions/http.account'
         "400":
           description: Client error
           schema:
@@ -168,14 +178,8 @@ paths:
           description: Server error
           schema:
             $ref: '#/definitions/http.Error'
-      summary: Get User Accounts
-      tags:
-      - User
   /api/user/{userID}/actualBudget:
     get:
-      description: Get User actual budget
-      produces:
-      - application/json
       responses:
         "200":
           description: Show actual budget
@@ -189,9 +193,6 @@ paths:
           description: Server error
           schema:
             $ref: '#/definitions/http.Error'
-      summary: Get Actual Budget
-      tags:
-      - User
   /api/user/{userID}/balance:
     get:
       description: Get User balance
@@ -215,9 +216,6 @@ paths:
       - User
   /api/user/{userID}/plannedBudget:
     get:
-      description: Get User planned budget
-      produces:
-      - application/json
       responses:
         "200":
           description: Show planned budget
@@ -231,7 +229,4 @@ paths:
           description: Server error
           schema:
             $ref: '#/definitions/http.Error'
-      summary: Get Planned Budget
-      tags:
-      - User
 swagger: "2.0"

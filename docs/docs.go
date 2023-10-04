@@ -46,7 +46,7 @@ const docTemplate = `{
                     "200": {
                         "description": "User logedin",
                         "schema": {
-                            "$ref": "#/definitions/http.loginResponse"
+                            "$ref": "#/definitions/http.signUpResponse"
                         }
                     },
                     "400": {
@@ -158,19 +158,11 @@ const docTemplate = `{
         },
         "/api/user/{userID}/accounts/all": {
             "get": {
-                "description": "Get User accounts",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "summary": "Get User Accounts",
                 "responses": {
                     "200": {
                         "description": "Show actual accounts",
                         "schema": {
-                            "$ref": "#/definitions/http.Response"
+                            "$ref": "#/definitions/http.account"
                         }
                     },
                     "400": {
@@ -190,14 +182,6 @@ const docTemplate = `{
         },
         "/api/user/{userID}/actualBudget": {
             "get": {
-                "description": "Get User actual budget",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "summary": "Get Actual Budget",
                 "responses": {
                     "200": {
                         "description": "Show actual budget",
@@ -254,14 +238,6 @@ const docTemplate = `{
         },
         "/api/user/{userID}/plannedBudget": {
             "get": {
-                "description": "Get User planned budget",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "summary": "Get Planned Budget",
                 "responses": {
                     "200": {
                         "description": "Show planned budget",
@@ -300,6 +276,17 @@ const docTemplate = `{
                 "body": {}
             }
         },
+        "http.account": {
+            "type": "object",
+            "properties": {
+                "account": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Accounts"
+                    }
+                }
+            }
+        },
         "http.budgetActualResponse": {
             "type": "object",
             "properties": {
@@ -313,14 +300,6 @@ const docTemplate = `{
             "properties": {
                 "planned_balance": {
                     "type": "number"
-                }
-            }
-        },
-        "http.loginResponse": {
-            "type": "object",
-            "properties": {
-                "jwt": {
-                    "type": "string"
                 }
             }
         },
@@ -339,6 +318,23 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Accounts": {
+            "type": "object",
+            "properties": {
+                "balance": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "mean_payment": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "string"
                 }
             }
