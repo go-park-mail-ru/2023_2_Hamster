@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
@@ -26,13 +25,12 @@ func (m *Middleware) Authentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("Authentication")
 		if err != nil {
-			// handle error
+			m.log.Info("[middleware] missing token")
+			next.ServeHTTP(w, r)
 		}
-		fmt.Println("-------------------------------------------------")
-		fmt.Println(">>>>>>>>>>>", cookie, "<<<<<<<<<<<<<")
-		reqToken := &cookie.Raw
+		reqToken := cookie.Value
 
-		m.log.Info("auth token : " + *reqToken)
+		m.log.Info("auth token : " + reqToken)
 
 		if cookie.Value == "" {
 			m.log.Info("[middleware] missing token")
@@ -40,7 +38,7 @@ func (m *Middleware) Authentication(next http.Handler) http.Handler {
 			return
 		}
 
-		userId, err := m.au.ValidateAccessToken(*reqToken)
+		userId, err := m.au.ValidateAccessToken(reqToken)
 		if err != nil {
 			m.log.Infof("[middleware] %s", err.Error())
 			next.ServeHTTP(w, r) // token check failed
