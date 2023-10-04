@@ -84,7 +84,7 @@ func (r *UserRep) GetUserByUsername(username string) (*models.User, error) {
 }
 
 func (r *UserRep) GetUserBalance(userID uuid.UUID) (float64, error) {
-	var totalBalance float64
+	var totalBalance sql.NullFloat64
 	err := r.db.QueryRow("SELECT SUM(balance) FROM accounts WHERE user_id = $1", userID).Scan(&totalBalance)
 
 	if errors.Is(err, sql.ErrNoRows) {
@@ -93,7 +93,11 @@ func (r *UserRep) GetUserBalance(userID uuid.UUID) (float64, error) {
 		return 0, fmt.Errorf("[repository] failed request db %w", err)
 	}
 
-	return totalBalance, nil
+	if totalBalance.Valid {
+		return totalBalance.Float64, nil
+	}
+
+	return 0, nil
 }
 
 func (r *UserRep) GetPlannedBudget(userID uuid.UUID) (float64, error) {
