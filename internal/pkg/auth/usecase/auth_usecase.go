@@ -61,10 +61,10 @@ func (u *Usecase) SignUpUser(user models.User) (uuid.UUID, auth.CookieToken, err
 	return userId, token, nil
 }
 
-func (u *Usecase) SignInUser(username, plainPassword string) (auth.CookieToken, error) {
+func (u *Usecase) SignInUser(username, plainPassword string) (uuid.UUID, auth.CookieToken, error) {
 	user, err := u.userRepo.GetUserByUsername(username)
 	if err != nil {
-		return auth.CookieToken{
+		return uuid.Nil, auth.CookieToken{
 			Value:   "",
 			Expires: time.Now(),
 		}, fmt.Errorf("[usecase] can't find user: %w", err)
@@ -72,7 +72,7 @@ func (u *Usecase) SignInUser(username, plainPassword string) (auth.CookieToken, 
 
 	salt, err := hex.DecodeString(user.Salt)
 	if err != nil {
-		return auth.CookieToken{
+		return uuid.Nil, auth.CookieToken{
 			Value:   "",
 			Expires: time.Now(),
 		}, fmt.Errorf("[usecase] salt from db decode error: %w", err)
@@ -80,7 +80,7 @@ func (u *Usecase) SignInUser(username, plainPassword string) (auth.CookieToken, 
 
 	hashedPassword := hashPassword(plainPassword, salt)
 	if hashedPassword != user.Password {
-		return auth.CookieToken{
+		return uuid.Nil, auth.CookieToken{
 			Value:   "",
 			Expires: time.Now(),
 		}, fmt.Errorf("[usecase] incorrect password")
@@ -88,13 +88,13 @@ func (u *Usecase) SignInUser(username, plainPassword string) (auth.CookieToken, 
 
 	token, err := u.GenerateAccessToken(context.Background(), *user)
 	if err != nil {
-		return auth.CookieToken{
+		return uuid.Nil, auth.CookieToken{
 			Value:   "",
 			Expires: time.Now(),
 		}, fmt.Errorf("[usecase] failed to generate access token: %w", err)
 	}
 
-	return token, nil
+	return user.ID, token, nil
 }
 
 // GetUserByCreds returns User if such exist in repository

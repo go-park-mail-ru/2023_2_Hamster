@@ -23,7 +23,7 @@ type Usecase interface {
 	// SignUpUser creates new User and returns it's id
 	SignUpUser(user models.User) (uuid.UUID, CookieToken, error)
 
-	SignInUser(username, plainPassword string) (CookieToken, error)
+	SignInUser(username, plainPassword string) (uuid.UUID, CookieToken, error)
 
 	// GetUserByCreds returns User if such exist in repository
 	GetUserByCreds(ctx context.Context, username, plainPassword string) (*models.User, error)

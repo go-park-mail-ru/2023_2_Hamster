@@ -102,7 +102,7 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 
 	h.log.Debug("request body successfully decoded", r)
 
-	token, err := h.au.SignInUser(userInput.Username, userInput.Password)
+	id, token, err := h.au.SignInUser(userInput.Username, userInput.Password)
 	if err != nil {
 		h.log.Error(err.Error())
 		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err.Error(), h.log)
@@ -111,7 +111,9 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 
 	h.log.Infof("User login with token: %s", token)
 
-	loginResponse := &loginResponse{JWT: token.Value}
+	// loginResponse := &loginResponse{JWT: token.Value}
+
+	siResp := signUpResponse{ID: id}
 
 	http.SetCookie(w, &http.Cookie{
 		Name:     "Authentication",
@@ -121,7 +123,7 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 
-	commonHttp.JSON(w, http.StatusOK, loginResponse)
+	commonHttp.JSON(w, http.StatusOK, siResp)
 }
 
 // @Summary		Validate Auth
