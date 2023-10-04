@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-
   db:
     image: postgres:latest
     restart: always
@@ -12,7 +11,6 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - 5436:5432
+      - "5436:5432"
     volumes:
-    - ./internal/common/postgresql/schema/:/docker-entrypoint-initdb.d/
-  
+      - ./internal/common/postgresql/schema/:/docker-entrypoint-initdb.d/

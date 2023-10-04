@@ -115,7 +115,7 @@ func (u *Usecase) GetUserByAuthData(ctx context.Context, userID uuid.UUID) (*mod
 func (u *Usecase) GenerateAccessToken(ctx context.Context, user models.User) (auth.CookieToken, error) {
 	expTime := time.Now().UTC().Add(time.Hour * 24)
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &authClaims{
+	tokenHeaderPayload := jwt.NewWithClaims(jwt.SigningMethodHS256, &authClaims{
 		user.ID,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expTime),
@@ -123,7 +123,7 @@ func (u *Usecase) GenerateAccessToken(ctx context.Context, user models.User) (au
 		},
 	})
 
-	tokenString, err := token.SignedString([]byte(secret))
+	tokenString, err := tokenHeaderPayload.SignedString([]byte(secret))
 	if err != nil {
 		return auth.CookieToken{
 			Value:   "",
@@ -149,8 +149,12 @@ func (u *Usecase) ValidateAccessToken(accessToken string) (uuid.UUID, error) {
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		userID := claims["id"].(uuid.UUID)
-		return userID, nil
+		userID := claims["id"].(string)
+		resID, err := uuid.Parse(userID)
+		if err != nil {
+			return uuid.Nil, fmt.Errorf("[usecase] invalid token: %w", err)
+		}
+		return resID, nil
 	} else {
 		return uuid.Nil, err
 	}
