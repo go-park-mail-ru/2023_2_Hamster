@@ -55,7 +55,7 @@ func InitRouter(auth *auth.Handler, user *user.Handler, mid *middleware.Middlewa
 	// authRouter.Methods("GET").Path("/logout").HandlerFunc(auth.LogOut)
 
 	userRouter := apiRouter.PathPrefix("/user/{userID}").Subrouter()
-	// userRouter.Use(mid.Authentication)
+	userRouter.Use(mid.Authentication)
 	{
 		userRouter.Methods("GET").Path("/balance").HandlerFunc(user.GetUserBalance)
 		userRouter.Methods("GET").Path("/plannedBudget").HandlerFunc(user.GetPlannedBudget)
