@@ -24,7 +24,7 @@ C^
 - <a href="https://github.com/frontend-park-mail-ru/2023_2_Hamster" target="_blank">Фронт</a>
 
 
-#Список команды
+# Список команды
 Владимир Захаров
 Дмитрий Комаров
 Григорий Коваленко
