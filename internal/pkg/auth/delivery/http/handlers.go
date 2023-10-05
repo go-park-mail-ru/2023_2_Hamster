@@ -168,9 +168,10 @@ func (h *Handler) AccessVerification(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) LogOut(w http.ResponseWriter, r *http.Request) {
+	c, _ := r.Cookie("Authentication")
 	http.SetCookie(w, &http.Cookie{
 		Name:    "Authentication",
-		Value:   "",
+		Value:   c.Value,
 		Expires: time.Now().UTC().AddDate(0, 0, -99999999),
 		MaxAge:  -1,
 	})
