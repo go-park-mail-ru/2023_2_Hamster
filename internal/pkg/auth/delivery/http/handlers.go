@@ -150,13 +150,6 @@ func (h *Handler) AccessVerification(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tim := tokenCookie.Expires
-
-	if tim.Compare(time.Now()) <= 0 {
-		commonHttp.ErrorResponse(w, http.StatusUnauthorized, err.Error(), h.log)
-		return
-	}
-
 	id, username, err := h.au.ValidateAccessToken(tokenCookie.Value)
 	if err != nil {
 		h.log.Errorf("Error invalid jwt token: %v", err)
