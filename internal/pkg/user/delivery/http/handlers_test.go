@@ -18,17 +18,14 @@ func TestHandler_GetUserBalance(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	// Создаем моки для usecase и logger
 	mockUsecase := mocks.NewMockUsecase(ctrl)
 	//mockLogger := &logger.CustomLoggerMock{}
 
-	// Создаем обработчик
 	handler := &Handler{
 		userService: mockUsecase,
 		logger:      *logger.CreateCustomLogger(),
 	}
 
-	// Создаем UUID для тестов
 	userID := uuid.New()
 
 	// Сценарий 1: успешный вызов GetUserBalance
