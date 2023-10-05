@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"time"
 
 	commonHttp "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
@@ -161,6 +162,12 @@ func (h *Handler) AccessVerification(w http.ResponseWriter, r *http.Request) {
 	commonHttp.JSON(w, http.StatusOK, "login success")
 }
 
-/*func (h *Handler) LogOut(w http.ResponseWriter, r *http.Request) {
-	user, err := r.Context().Value(models.User)
-}*/
+func (h *Handler) LogOut(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:    "Authentication",
+		Value:   "",
+		Expires: time.Now().UTC().AddDate(0, 0, -5),
+	})
+	h.log.Info("logout")
+	commonHttp.JSON(w, http.StatusOK, "user loged out")
+}

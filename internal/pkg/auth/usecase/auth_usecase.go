@@ -55,6 +55,7 @@ func (u *Usecase) SignUpUser(user models.User) (uuid.UUID, auth.CookieToken, err
 	if err != nil {
 		return uuid.Nil, auth.CookieToken{}, fmt.Errorf("[usecase] cannot create user: %w", err)
 	}
+	user.ID = userId
 
 	token, err := u.GenerateAccessToken(context.Background(), user)
 
@@ -115,6 +116,8 @@ func (u *Usecase) GetUserByAuthData(ctx context.Context, userID uuid.UUID) (*mod
 func (u *Usecase) GenerateAccessToken(ctx context.Context, user models.User) (auth.CookieToken, error) {
 	expTime := time.Now().UTC().Add(time.Hour * 24)
 
+	fmt.Println(">>>>>>>>>>>>>>>>> ", user.ID)
+
 	tokenHeaderPayload := jwt.NewWithClaims(jwt.SigningMethodHS256, &authClaims{
 		user.ID,
 		jwt.RegisteredClaims{
@@ -149,8 +152,9 @@ func (u *Usecase) ValidateAccessToken(accessToken string) (uuid.UUID, error) {
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		userID := claims["id"].(string)
-		resultID, err := uuid.Parse(userID)
+		userID := claims["id"]
+		fmt.Println(">>>>>>>>>> ", userID)
+		resultID, err := uuid.Parse(userID.(string))
 		if err != nil {
 			return uuid.Nil, fmt.Errorf("[usecase] invalid id token claims")
 		}

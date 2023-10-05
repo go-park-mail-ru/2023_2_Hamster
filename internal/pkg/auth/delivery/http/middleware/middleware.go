@@ -26,22 +26,23 @@ func (m *Middleware) Authentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("Authentication")
 		if err != nil {
-			m.log.Info("[middleware] missing token")
+			m.log.Errorf("[middleware] missing token")
 			next.ServeHTTP(w, r)
+			return
 		}
 		reqToken := cookie.Value
 
 		m.log.Info("auth token : " + reqToken)
 
 		if cookie.Value == "" {
-			m.log.Info("[middleware] missing token")
+			m.log.Errorf("[middleware] missing token")
 			next.ServeHTTP(w, r) // missing token
 			return
 		}
 
 		userId, err := m.au.ValidateAccessToken(reqToken)
 		if err != nil {
-			m.log.Infof("[middleware] %s", err.Error())
+			m.log.Errorf("[middleware] validation error: %s", err.Error())
 			next.ServeHTTP(w, r) // token check failed
 			return
 		}
@@ -49,7 +50,7 @@ func (m *Middleware) Authentication(next http.Handler) http.Handler {
 		fmt.Println(userId)
 		user, err := m.au.GetUserByAuthData(r.Context(), userId)
 		if err != nil {
-			m.log.Infof("[middleware] %s", err.Error())
+			m.log.Infof("[middleware] get user error: %s", err.Error())
 			next.ServeHTTP(w, r) // UserAuth data check failed
 			return
 		}
