@@ -54,7 +54,7 @@ func InitRouter(auth *auth.Handler, user *user.Handler, mid *middleware.Middlewa
 		authRouter.Methods("POST").Path("/signin").HandlerFunc(auth.SignIn)
 		authRouter.Methods("POST").Path("/signup").HandlerFunc(auth.SignUp)
 		authRouter.Methods("POST").Path("/checkAuth").HandlerFunc(auth.AccessVerification)
-		authRouter.Methods("GET").Path("/logout").HandlerFunc(auth.LogOut)
+		authRouter.Methods("POST").Path("/logout").HandlerFunc(auth.LogOut)
 	}
 
 	userRouter := apiRouter.PathPrefix("/user/{userID}").Subrouter()
