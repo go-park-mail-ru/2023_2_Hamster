@@ -2,6 +2,7 @@ package corsmiddleware
 
 import (
 	"net/http"
+	"os"
 	"strconv"
 )
 
@@ -18,10 +19,10 @@ const (
 )
 
 func CorsMiddleware(next http.Handler) http.Handler {
-	// origin := os.Getenv("FRONTEND_IP") + ":" + os.Getenv("FRONTEND_PORT") + ", " + "127.0.0.1:8000"
+	origin := "http://" + os.Getenv("FRONTEND_IP") + ":" + os.Getenv("FRONTEND_PORT") + ", " + "http://127.0.0.1:8000"
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set(Origin /*origin*/, "*")
+		w.Header().Set(Origin, origin /*, "*"*/)
 		w.Header().Set(Methods, AllowedMethods)
 		w.Header().Set(Headers, AllowedHeaders)
 		w.Header().Set(Credentials, "true")
