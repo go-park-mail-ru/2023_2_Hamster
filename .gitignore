@@ -17,6 +17,10 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
+# IDE dirictories
+
+.vscode
+
 # Go workspace file
 go.work
 
@@ -26,9 +30,6 @@ app
 *.idea
 *.bin
 *.tmp
-
-# Environment
-# .env
 
 # Logs
 *.log
