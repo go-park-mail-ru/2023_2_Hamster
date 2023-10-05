@@ -171,7 +171,8 @@ func (h *Handler) LogOut(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:    "Authentication",
 		Value:   "",
-		Expires: time.Now().UTC().AddDate(0, 0, -5),
+		Expires: time.Now().UTC().AddDate(0, 0, -99999999),
+		MaxAge:  -1,
 	})
 	h.log.Info("logout")
 	commonHttp.JSON(w, http.StatusOK, "user loged out")
