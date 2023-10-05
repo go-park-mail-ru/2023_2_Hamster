@@ -75,6 +75,36 @@ info:
   title: Hamster API
   version: 1.0.1
 paths:
+  /api/auth/checkAuth:
+    post:
+      consumes:
+      - application/json
+      description: Validate auth
+      parameters:
+      - description: user info
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User status
+          schema:
+            $ref: '#/definitions/http.Error'
+        "400":
+          description: Invalid cookie
+          schema:
+            $ref: '#/definitions/http.Error'
+        "500":
+          description: 'Server error: cookie read fail'
+          schema:
+            $ref: '#/definitions/http.Error'
+      summary: Validate Auth
+      tags:
+      - Auth
   /api/auth/signin:
     post:
       consumes:
@@ -133,36 +163,6 @@ paths:
           schema:
             $ref: '#/definitions/http.Error'
       summary: Sign Up
-      tags:
-      - Auth
-  /api/auth/validateAuth:
-    post:
-      consumes:
-      - application/json
-      description: Validate auth
-      parameters:
-      - description: user info
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/models.User'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User status
-          schema:
-            $ref: '#/definitions/http.Error'
-        "400":
-          description: Invalid cookie
-          schema:
-            $ref: '#/definitions/http.Error'
-        "500":
-          description: 'Server error: cookie read fail'
-          schema:
-            $ref: '#/definitions/http.Error'
-      summary: Validate Auth
       tags:
       - Auth
   /api/user/{userID}/accounts/all:

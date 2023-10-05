@@ -136,7 +136,7 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 // @Success		200		{object}	http.Error				"User status"
 // @Failure		400		{object}	http.Error				"Invalid cookie"
 // @Failure		500		{object}	http.Error				"Server error: cookie read fail"
-// @Router		/api/auth/validateAuth	[post]
+// @Router		/api/auth/checkAuth	[post]
 func (h *Handler) AccessVerification(w http.ResponseWriter, r *http.Request) {
 	tokenCookie, err := r.Cookie("Authentication")
 	if errors.Is(err, http.ErrNoCookie) {
@@ -157,6 +157,7 @@ func (h *Handler) AccessVerification(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.log.Info("User id: ", id)
+
 	commonHttp.JSON(w, http.StatusOK, "login success")
 }
 

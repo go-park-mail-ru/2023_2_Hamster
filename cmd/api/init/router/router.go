@@ -10,6 +10,8 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth/delivery/http/middleware"
 	user "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/delivery/http"
 	"github.com/gorilla/mux"
+
+	corsmiddleware "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/middleware/CORS_Middleware"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
@@ -45,17 +47,18 @@ func InitRouter(auth *auth.Handler, user *user.Handler, mid *middleware.Middlewa
 	)).Methods(http.MethodGet)
 
 	apiRouter := r.PathPrefix("/api").Subrouter()
+	apiRouter.Use(corsmiddleware.CorsMiddleware)
 
 	authRouter := apiRouter.PathPrefix("/auth").Subrouter()
 	{
 		authRouter.Methods("POST").Path("/signin").HandlerFunc(auth.SignIn)
 		authRouter.Methods("POST").Path("/signup").HandlerFunc(auth.SignUp)
-
+		authRouter.Methods("GET").Path("/checkAuth").HandlerFunc(auth.AccessVerification)
 	}
 	// authRouter.Methods("GET").Path("/logout").HandlerFunc(auth.LogOut)
 
 	userRouter := apiRouter.PathPrefix("/user/{userID}").Subrouter()
-	// userRouter.Use(mid.Authentication)
+	userRouter.Use(mid.Authentication)
 	{
 		userRouter.Methods("GET").Path("/balance").HandlerFunc(user.GetUserBalance)
 		userRouter.Methods("GET").Path("/plannedBudget").HandlerFunc(user.GetPlannedBudget)

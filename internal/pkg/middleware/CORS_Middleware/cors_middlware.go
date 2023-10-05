@@ -1,4 +1,4 @@
-package corsmiddlware
+package corsmiddleware
 
 import (
 	"net/http"
@@ -18,7 +18,7 @@ const (
 	MaxAgeValue    = 24 * 60 * 60
 )
 
-func corsMiddlware(next http.Handler) http.Handler {
+func CorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set(Origin, os.Getenv("FRONTEND_IP")+os.Getenv("FRONTEND_PORT"))
 		w.Header().Set(Methods, AllowedMethods)

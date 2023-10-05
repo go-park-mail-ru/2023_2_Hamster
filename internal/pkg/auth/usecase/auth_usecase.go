@@ -150,11 +150,11 @@ func (u *Usecase) ValidateAccessToken(accessToken string) (uuid.UUID, error) {
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		userID := claims["id"].(string)
-		resID, err := uuid.Parse(userID)
+		resultID, err := uuid.Parse(userID)
 		if err != nil {
-			return uuid.Nil, fmt.Errorf("[usecase] invalid token: %w", err)
+			return uuid.Nil, fmt.Errorf("[usecase] invalid id token claims")
 		}
-		return resID, nil
+		return resultID, nil
 	} else {
 		return uuid.Nil, err
 	}
