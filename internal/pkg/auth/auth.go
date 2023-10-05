@@ -33,7 +33,7 @@ type Usecase interface {
 
 	GenerateAccessToken(ctx context.Context, user models.User) (CookieToken, error)
 
-	ValidateAccessToken(accessToken string) (uuid.UUID, error)
+	ValidateAccessToken(accessToken string) (uuid.UUID, string, error)
 
 	// ChangePassword(ctx context.Context, userID uint32, password string) error
 }

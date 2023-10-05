@@ -40,7 +40,7 @@ func (m *Middleware) Authentication(next http.Handler) http.Handler {
 			return
 		}
 
-		userId, err := m.au.ValidateAccessToken(reqToken)
+		userId, _, err := m.au.ValidateAccessToken(reqToken)
 		if err != nil {
 			m.log.Errorf("[middleware] validation error: %s", err.Error())
 			next.ServeHTTP(w, r) // token check failed

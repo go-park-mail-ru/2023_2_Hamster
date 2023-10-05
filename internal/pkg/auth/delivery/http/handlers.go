@@ -150,7 +150,7 @@ func (h *Handler) AccessVerification(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := h.au.ValidateAccessToken(tokenCookie.Value)
+	id, username, err := h.au.ValidateAccessToken(tokenCookie.Value)
 	if err != nil {
 		h.log.Errorf("Error invalid jwt token: %v", err)
 		commonHttp.ErrorResponse(w, http.StatusUnauthorized, err.Error(), h.log)
@@ -159,7 +159,12 @@ func (h *Handler) AccessVerification(w http.ResponseWriter, r *http.Request) {
 
 	h.log.Info("User id: ", id)
 
-	commonHttp.JSON(w, http.StatusOK, "login success")
+	response := signUpResponse{
+		Username: username,
+		ID:       id,
+	}
+
+	commonHttp.JSON(w, http.StatusOK, response)
 }
 
 func (h *Handler) LogOut(w http.ResponseWriter, r *http.Request) {

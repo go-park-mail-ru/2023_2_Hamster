@@ -27,7 +27,8 @@ type Usecase struct {
 }
 
 type authClaims struct {
-	UserID uuid.UUID `json:"id"`
+	UserID   uuid.UUID `json:"id"`
+	Username string    `json:"username"`
 	jwt.RegisteredClaims
 }
 
@@ -120,6 +121,7 @@ func (u *Usecase) GenerateAccessToken(ctx context.Context, user models.User) (au
 
 	tokenHeaderPayload := jwt.NewWithClaims(jwt.SigningMethodHS256, &authClaims{
 		user.ID,
+		user.Username,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expTime),
 			Issuer:    "HammyWallet",
@@ -140,7 +142,7 @@ func (u *Usecase) GenerateAccessToken(ctx context.Context, user models.User) (au
 	}, nil
 }
 
-func (u *Usecase) ValidateAccessToken(accessToken string) (uuid.UUID, error) {
+func (u *Usecase) ValidateAccessToken(accessToken string) (uuid.UUID, string, error) {
 	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return uuid.Nil, errors.New("[usecase] invalig signing method")
@@ -148,31 +150,21 @@ func (u *Usecase) ValidateAccessToken(accessToken string) (uuid.UUID, error) {
 		return []byte(secret), nil
 	})
 	if err != nil {
-		return uuid.Nil, fmt.Errorf("[usecase] invalid token: %w", err)
+		return uuid.Nil, "", fmt.Errorf("[usecase] invalid token: %w", err)
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		userID := claims["id"]
-		fmt.Println(">>>>>>>>>> ", userID)
+		username := claims["username"].(string)
 		resultID, err := uuid.Parse(userID.(string))
 		if err != nil {
-			return uuid.Nil, fmt.Errorf("[usecase] invalid id token claims")
+			return uuid.Nil, "", fmt.Errorf("[usecase] invalid id token claims")
 		}
-		return resultID, nil
+		return resultID, username, nil
 	} else {
-		return uuid.Nil, err
+		return uuid.Nil, "", err
 	}
 }
-
-// IncraseUserVersion inc User access token version
-// func (u *Usecase) IncreaseUserVersion(ctx context.Context, userID uuid.UUID) error {
-// 	if err := u.userRepo.IncreaseUserVersion(ctx, userID); err != nil {
-// 		return fmt.Errorf("[usecase] error failed to update version: %w", err)
-// 	}
-// 	return nil
-// }
-
-// ChangePassword(ctx context.Context, userID uint32, password string) error
 
 func hashPassword(pwd string, salt []byte) string {
 	hash := sha256.New()
