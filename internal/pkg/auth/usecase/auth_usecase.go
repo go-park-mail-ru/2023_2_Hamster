@@ -136,6 +136,8 @@ func (u *Usecase) GenerateAccessToken(ctx context.Context, user models.User) (au
 		}, err
 	}
 
+	fmt.Println("Cookie >>>> ", tokenString, "\n", "Exptime >>>>> ", expTime)
+
 	return auth.CookieToken{
 		Value:   tokenString,
 		Expires: expTime,

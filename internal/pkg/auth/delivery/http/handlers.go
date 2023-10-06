@@ -3,6 +3,7 @@ package http
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -72,6 +73,8 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	suResp := signUpResponse{ID: id, Username: user.Username}
 
+	fmt.Println("signup exp time >>>>>", token.Expires)
+
 	http.SetCookie(w, &http.Cookie{
 		Name:     "Authentication",
 		Value:    token.Value,
@@ -121,7 +124,7 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 		Name:     "Authentication",
 		Value:    token.Value,
 		Expires:  token.Expires,
-		Path:     "",
+		Path:     "/",
 		HttpOnly: true,
 	})
 
@@ -150,6 +153,16 @@ func (h *Handler) AccessVerification(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	expirationTime := tokenCookie.Expires
+	fmt.Println("AccessVerification >>>>>> ", tokenCookie.Expires)
+	if expirationTime.IsZero() {
+		h.log.Info("Cookie does not have an expiration time.")
+	} else if expirationTime.UTC().Before(time.Now()) {
+		h.log.Errorf("Cookie has expired")
+		commonHttp.ErrorResponse(w, http.StatusUnauthorized, "Cookie has expired", h.log)
+		return
+	}
+
 	id, username, err := h.au.ValidateAccessToken(tokenCookie.Value)
 	if err != nil {
 		h.log.Errorf("Error invalid jwt token: %v", err)
@@ -168,12 +181,10 @@ func (h *Handler) AccessVerification(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) LogOut(w http.ResponseWriter, r *http.Request) {
-	c, _ := r.Cookie("Authentication")
 	http.SetCookie(w, &http.Cookie{
-		Name:    "Authentication",
-		Value:   c.Value,
-		Expires: time.Now().UTC().AddDate(0, 0, -99999999),
-		MaxAge:  -1,
+		Name:  "Authentication",
+		Value: "",
+		Path:  "/",
 	})
 	h.log.Info("logout")
 	commonHttp.JSON(w, http.StatusOK, "user loged out")
