@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/mocks"
 	mock "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/mocks"
 	"github.com/golang/mock/gomock"
@@ -54,6 +55,106 @@ func TestUsecase_GetUserBalance(t *testing.T) {
 			balance, err := mockUsecase.GetUserBalance(userID)
 
 			assert.Equal(t, tc.expectedBalance, balance)
+			if !reflect.DeepEqual(tc.expectedErr, err) {
+				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
+			}
+		})
+	}
+}
+
+func TestUsecase_GetPlannedBudget(t *testing.T) {
+	testCases := []struct {
+		name           string
+		expectedBudget float64
+		expectedErr    error
+		mockRepoFn     func(*mock.MockRepository)
+	}{
+		{
+			name:           "Successful budget retrieval",
+			expectedBudget: 200.0,
+			expectedErr:    nil,
+			mockRepoFn: func(mockRepository *mock.MockRepository) {
+				mockRepository.EXPECT().GetPlannedBudget(gomock.Any()).Return(200.0, nil)
+			},
+		},
+		{
+			name:           "Error in budget retrieval",
+			expectedBudget: 0,
+			expectedErr:    fmt.Errorf("[usecase] can't get planned budget from repository some error"),
+			mockRepoFn: func(mockRepository *mock.MockRepository) {
+				mockRepository.EXPECT().GetPlannedBudget(gomock.Any()).Return(0.0, errors.New("some error"))
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockRepo := mock.NewMockRepository(ctrl)
+			tc.mockRepoFn(mockRepo)
+
+			mockUsecase := NewUsecase(mockRepo, *logger.CreateCustomLogger())
+
+			userID := uuid.New()
+
+			budget, err := mockUsecase.GetPlannedBudget(userID)
+
+			assert.Equal(t, tc.expectedBudget, budget)
+			if !reflect.DeepEqual(tc.expectedErr, err) {
+				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
+			}
+		})
+	}
+}
+
+func TestUsecase_GetAccounts(t *testing.T) {
+	uuidTest := uuid.New()
+	testCases := []struct {
+		name             string
+		expectedAccounts []models.Accounts
+		expectedErr      error
+		mockRepoFn       func(*mock.MockRepository)
+	}{
+		{
+			name: "Successful accounts retrieval",
+			expectedAccounts: []models.Accounts{
+				{ID: uuidTest, UserID: uuidTest, Balance: 100.0, MeanPayment: "Account1"},
+				{ID: uuidTest, UserID: uuidTest, Balance: 200.0, MeanPayment: "Account2"},
+			},
+			expectedErr: nil,
+			mockRepoFn: func(mockRepository *mock.MockRepository) {
+				mockRepository.EXPECT().GetAccounts(gomock.Any()).Return([]models.Accounts{
+					{ID: uuidTest, UserID: uuidTest, Balance: 100.0, MeanPayment: "Account1"},
+					{ID: uuidTest, UserID: uuidTest, Balance: 200.0, MeanPayment: "Account2"}}, nil)
+			},
+		},
+		{
+			name:             "Error in accounts retrieval",
+			expectedAccounts: nil,
+			expectedErr:      fmt.Errorf("[usecase] can't get accounts from repository some error"),
+			mockRepoFn: func(mockRepository *mock.MockRepository) {
+				mockRepository.EXPECT().GetAccounts(gomock.Any()).Return(nil, errors.New("some error"))
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockRepo := mock.NewMockRepository(ctrl)
+			tc.mockRepoFn(mockRepo)
+
+			mockUsecase := NewUsecase(mockRepo, *logger.CreateCustomLogger())
+
+			userID := uuid.New()
+
+			accounts, err := mockUsecase.GetAccounts(userID)
+
+			assert.Equal(t, tc.expectedAccounts, accounts)
 			if !reflect.DeepEqual(tc.expectedErr, err) {
 				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
 			}
