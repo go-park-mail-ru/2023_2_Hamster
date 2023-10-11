@@ -26,10 +26,11 @@ go.work
 
 app
 
-# *.env
+*.env
 *.idea
 *.bin
 *.tmp
+.env
 
 # Logs
 *.log
