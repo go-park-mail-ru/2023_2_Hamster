@@ -23,17 +23,17 @@ type NoSuchAccounts struct {
 }
 
 func (e *NoSuchUserIdBalanceError) Error() string {
-	return fmt.Sprintf("balance from user: #%d doesn't exist", e.UserID)
+	return fmt.Sprintf("balance from user: %s doesn't exist", e.UserID.String())
 }
 
 func (e *NoSuchPlannedBudgetError) Error() string {
-	return fmt.Sprintf("planned budget from user: #%d doesn't exist", e.UserID)
+	return fmt.Sprintf("planned budget from user: %s doesn't exist", e.UserID.String())
 }
 
 func (e *NoSuchCurrentBudget) Error() string {
-	return fmt.Sprintf("actual budget from user: #%d doesn't exist", e.UserID)
+	return fmt.Sprintf("actual budget from user: %s doesn't exist", e.UserID.String())
 }
 
 func (e *NoSuchAccounts) Error() string {
-	return fmt.Sprintf("No Such Accounts from user: #%d doesn't exist", e.UserID)
+	return fmt.Sprintf("No Such Accounts from user: %s doesn't exist", e.UserID.String())
 }
