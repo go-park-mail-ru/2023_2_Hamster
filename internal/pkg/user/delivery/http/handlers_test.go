@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/mocks"
+	mocks "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/mocks"
 	"github.com/gorilla/mux"
 
 	"github.com/golang/mock/gomock"

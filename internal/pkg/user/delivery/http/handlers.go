@@ -182,3 +182,23 @@ func (h *Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 	budgetResponse := &account{Account: accountInfo}
 	commonHttp.JSON(w, http.StatusOK, budgetResponse)
 }
+
+func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
+	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
+
+	if err != nil {
+		h.logger.Infof("invalid id: %v:", err)
+
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err.Error(), h.logger)
+		return
+	}
+
+	dateFeed, err := h.userService.GetFeed(userID)
+
+	if err != nil {
+		h.logger.Error(err.Error())
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err.Error(), h.logger)
+	}
+	commonHttp.JSON(w, http.StatusOK, dateFeed)
+
+}

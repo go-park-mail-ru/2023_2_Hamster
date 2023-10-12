@@ -13,6 +13,7 @@ type Usecase interface {
 	GetPlannedBudget(userID uuid.UUID) (float64, error)
 	GetCurrentBudget(userID uuid.UUID) (float64, error)
 	GetAccounts(userID uuid.UUID) ([]models.Accounts, error)
+	GetFeed(userID uuid.UUID) (models.UserFeed, error)
 }
 
 type Repository interface {

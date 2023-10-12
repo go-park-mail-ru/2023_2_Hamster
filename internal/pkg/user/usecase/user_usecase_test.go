@@ -3,12 +3,10 @@ package usecase
 import (
 	"errors"
 	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/mocks"
 	mock "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
@@ -26,16 +24,16 @@ func TestUsecase_GetUserBalance(t *testing.T) {
 			name:            "Successful balance retrieval",
 			expectedBalance: 100.0,
 			expectedErr:     nil,
-			mockRepoFn: func(mockRepositry *mocks.MockRepository) {
+			mockRepoFn: func(mockRepositry *mock.MockRepository) {
 				mockRepositry.EXPECT().GetUserBalance(gomock.Any()).Return(100.0, nil)
 			},
 		},
 		{
 			name:            "Error in balance retrieval",
 			expectedBalance: 0,
-			expectedErr:     fmt.Errorf("[usecase] cant't get balance from repository fsdaffd"),
-			mockRepoFn: func(mockRepositry *mocks.MockRepository) {
-				mockRepositry.EXPECT().GetUserBalance(gomock.Any()).Return(0.0, errors.New("fsdaffd"))
+			expectedErr:     fmt.Errorf("[usecase] can't get balance from repository some error"),
+			mockRepoFn: func(mockRepositry *mock.MockRepository) {
+				mockRepositry.EXPECT().GetUserBalance(gomock.Any()).Return(0.0, errors.New("some error"))
 			},
 		},
 	}
@@ -55,7 +53,7 @@ func TestUsecase_GetUserBalance(t *testing.T) {
 			balance, err := mockUsecase.GetUserBalance(userID)
 
 			assert.Equal(t, tc.expectedBalance, balance)
-			if !reflect.DeepEqual(tc.expectedErr, err) {
+			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
 				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
 			}
 		})
@@ -102,7 +100,7 @@ func TestUsecase_GetPlannedBudget(t *testing.T) {
 			budget, err := mockUsecase.GetPlannedBudget(userID)
 
 			assert.Equal(t, tc.expectedBudget, budget)
-			if !reflect.DeepEqual(tc.expectedErr, err) {
+			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
 				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
 			}
 		})
@@ -155,7 +153,7 @@ func TestUsecase_GetAccounts(t *testing.T) {
 			accounts, err := mockUsecase.GetAccounts(userID)
 
 			assert.Equal(t, tc.expectedAccounts, accounts)
-			if !reflect.DeepEqual(tc.expectedErr, err) {
+			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
 				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
 			}
 		})

@@ -64,6 +64,7 @@ func InitRouter(auth *auth.Handler, user *user.Handler, mid *middleware.Middlewa
 		userRouter.Methods("GET").Path("/plannedBudget").HandlerFunc(user.GetPlannedBudget)
 		userRouter.Methods("GET").Path("/actualBudget").HandlerFunc(user.GetCurrentBudget)
 		userRouter.Methods("GET").Path("/account/all").HandlerFunc(user.GetAccounts)
+		userRouter.Methods("GET").Path("/feed").HandlerFunc(user.GetFeed)
 	}
 
 	return r
