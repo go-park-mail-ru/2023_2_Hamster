@@ -8,27 +8,12 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/delivery/http/transfer_models"
 )
 
 type Handler struct {
 	userService user.Usecase
 	logger      logger.CustomLogger
-}
-
-type balanceResponse struct {
-	Balance float64 `json:"balance"`
-}
-
-type budgetPlannedResponse struct {
-	BudgetPlanned float64 `json:"planned_balance"`
-}
-
-type budgetActualResponse struct {
-	BudgetActual float64 `json:"actual_balance"`
-}
-
-type account struct {
-	Account []models.Accounts
 }
 
 const (
@@ -46,13 +31,12 @@ func NewHandler(uu user.Usecase, l logger.CustomLogger) *Handler {
 // @Tags			User
 // @Description	Get User balance
 // @Produce		json
-// @Success		200		{object}	http.Response  "Show balance"
+// @Success		200		{object}	Response[transfer_models.BalanceResponse] "Show balance"
 // @Failure		400		{object}	http.Error	"Client error"
 // @Failure		500		{object}	http.Error	"Server error"
 // @Router		/api/user/{userID}/balance [get]
 func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
-
 	if err != nil {
 		h.logger.Infof("invalid id: %v:", err)
 
@@ -73,14 +57,15 @@ func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	commonHttp.JSON(w, http.StatusOK, balanceResponse{Balance: balance})
+	response := transfer_models.BalanceResponse{Balance: balance}
+	commonHttp.JSON[transfer_models.BalanceResponse](w, http.StatusOK, response)
 }
 
 // @Summary		Get Planned Budget
 // @Tags			User
 // @Description	Get User planned budget
 // @Produce		json
-// @Success		200		{object}	budgetPlannedResponse	"Show planned budget"
+// @Success		200		{object} 	Response[transfer_models.BudgetPlannedResponse]	"Show planned budget"
 // @Failure		400		{object}	http.Error			"Client error"
 // @Failure		500		{object}	http.Error			"Server error"
 // @Router		/api/user/{userID}/plannedBudget [get]
@@ -108,15 +93,15 @@ func (h *Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	commonHttp.JSON(w, http.StatusOK, budgetPlannedResponse{BudgetPlanned: budget})
-
+	response := transfer_models.BudgetPlannedResponse{BudgetPlanned: budget}
+	commonHttp.JSON[transfer_models.BudgetPlannedResponse](w, http.StatusOK, response)
 }
 
 // @Summary		Get Actual Budget
 // @Tags			User
 // @Description	Get User actual budget
 // @Produce		json
-// @Success		200		{object}	budgetActualResponse	"Show actual budget"
+// @Success		200		{object}	Response[transfer_models.BudgetActualResponse]	"Show actual budget"
 // @Failure		400		{object}	http.Error			"Client error"
 // @Failure		500		{object}	http.Error			"Server error"
 // @Router		/api/user/{userID}/actualBudget [get]
@@ -143,14 +128,15 @@ func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	commonHttp.JSON(w, http.StatusOK, budgetActualResponse{BudgetActual: budget})
+	response := transfer_models.BudgetActualResponse{BudgetActual: budget}
+	commonHttp.JSON[transfer_models.BudgetActualResponse](w, http.StatusOK, response)
 }
 
 // @Summary		Get User Accounts
 // @Tags			User
 // @Description	Get User accounts
 // @Produce		json
-// @Success		200		{object}	account	     	"Show actual accounts"
+// @Success		200		{object}	Response[transfer_models.Account]	     	"Show actual accounts"
 // @Failure		400		{object}	http.Error		"Client error"
 // @Failure		500		{object}	http.Error		"Server error"
 // @Router		/api/user/{userID}/accounts/all [get]
@@ -179,11 +165,20 @@ func (h *Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	budgetResponse := &account{Account: accountInfo}
-	commonHttp.JSON(w, http.StatusOK, budgetResponse)
+	response := transfer_models.Account{Account: accountInfo}
+	commonHttp.JSON[transfer_models.Account](w, http.StatusOK, response)
 }
 
-func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
+// @Summary		Get User Accounts
+// @Tags			User
+// @Description	Get User accounts
+// @Produce		json
+// @Success		200		{object}	Response[transfer_models.UserFeed]	     	"Show actual accounts"
+// @Failure		400		{object}	http.Error		"Client error"
+// @Failure		500		{object}	http.Error		"Server error"
+// @Router		/api/user/{userID}/feed [get]
+func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) { // need test
+	status := http.StatusOK
 	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
 
 	if err != nil {
@@ -193,12 +188,11 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dateFeed, err := h.userService.GetFeed(userID)
-
-	if err != nil {
-		h.logger.Error(err.Error())
-		commonHttp.ErrorResponse(w, http.StatusBadRequest, err.Error(), h.logger)
+	dataFeed, multierr := h.userService.GetFeed(userID)
+	if multierr.ErrorOrNil() != nil {
+		h.logger.Error(multierr)
+		status = http.StatusInternalServerError
 	}
-	commonHttp.JSON(w, http.StatusOK, dateFeed)
 
+	commonHttp.JSON(w, status, dataFeed)
 }

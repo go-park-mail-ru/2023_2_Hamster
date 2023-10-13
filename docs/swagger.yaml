@@ -5,26 +5,40 @@ definitions:
       message:
         type: string
     type: object
-  http.Response:
+  http.Response-transfer_models_Account:
     properties:
-      body: {}
+      body:
+        $ref: '#/definitions/transfer_models.Account'
+      status:
+        type: integer
     type: object
-  http.account:
+  http.Response-transfer_models_BalanceResponse:
     properties:
-      account:
-        items:
-          $ref: '#/definitions/models.Accounts'
-        type: array
+      body:
+        $ref: '#/definitions/transfer_models.BalanceResponse'
+      status:
+        type: integer
     type: object
-  http.budgetActualResponse:
+  http.Response-transfer_models_BudgetActualResponse:
     properties:
-      actual_balance:
-        type: number
+      body:
+        $ref: '#/definitions/transfer_models.BudgetActualResponse'
+      status:
+        type: integer
     type: object
-  http.budgetPlannedResponse:
+  http.Response-transfer_models_BudgetPlannedResponse:
     properties:
-      planned_balance:
-        type: number
+      body:
+        $ref: '#/definitions/transfer_models.BudgetPlannedResponse'
+      status:
+        type: integer
+    type: object
+  http.Response-transfer_models_UserFeed:
+    properties:
+      body:
+        $ref: '#/definitions/transfer_models.UserFeed'
+      status:
+        type: integer
     type: object
   http.signInput:
     properties:
@@ -65,6 +79,43 @@ definitions:
         type: string
       username:
         type: string
+    type: object
+  transfer_models.Account:
+    properties:
+      account:
+        items:
+          $ref: '#/definitions/models.Accounts'
+        type: array
+    type: object
+  transfer_models.BalanceResponse:
+    properties:
+      balance:
+        type: number
+    type: object
+  transfer_models.BudgetActualResponse:
+    properties:
+      actual_balance:
+        type: number
+    type: object
+  transfer_models.BudgetPlannedResponse:
+    properties:
+      planned_balance:
+        type: number
+    type: object
+  transfer_models.UserFeed:
+    properties:
+      account:
+        items:
+          $ref: '#/definitions/models.Accounts'
+        type: array
+      actual_balance:
+        type: number
+      balance:
+        type: number
+      err_message:
+        type: string
+      planned_balance:
+        type: number
     type: object
 host: localhost:8090
 info:
@@ -174,7 +225,7 @@ paths:
         "200":
           description: Show actual accounts
           schema:
-            $ref: '#/definitions/http.account'
+            $ref: '#/definitions/http.Response-transfer_models_Account'
         "400":
           description: Client error
           schema:
@@ -195,7 +246,7 @@ paths:
         "200":
           description: Show actual budget
           schema:
-            $ref: '#/definitions/http.budgetActualResponse'
+            $ref: '#/definitions/http.Response-transfer_models_BudgetActualResponse'
         "400":
           description: Client error
           schema:
@@ -216,7 +267,7 @@ paths:
         "200":
           description: Show balance
           schema:
-            $ref: '#/definitions/http.Response'
+            $ref: '#/definitions/http.Response-transfer_models_BalanceResponse'
         "400":
           description: Client error
           schema:
@@ -228,6 +279,27 @@ paths:
       summary: Get Balance
       tags:
       - User
+  /api/user/{userID}/feed:
+    get:
+      description: Get User accounts
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Show actual accounts
+          schema:
+            $ref: '#/definitions/http.Response-transfer_models_UserFeed'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.Error'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.Error'
+      summary: Get User Accounts
+      tags:
+      - User
   /api/user/{userID}/plannedBudget:
     get:
       description: Get User planned budget
@@ -237,7 +309,7 @@ paths:
         "200":
           description: Show planned budget
           schema:
-            $ref: '#/definitions/http.budgetPlannedResponse'
+            $ref: '#/definitions/http.Response-transfer_models_BudgetPlannedResponse'
         "400":
           description: Client error
           schema:

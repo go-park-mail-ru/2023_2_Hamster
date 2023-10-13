@@ -10,3 +10,6 @@ run:
 
 down:
 	sudo docker-compose down
+
+doc:
+	swag init -g cmd/api/main.go

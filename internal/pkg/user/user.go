@@ -2,7 +2,9 @@ package user
 
 import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
+	json "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/delivery/http/transfer_models"
 	"github.com/google/uuid"
+	"github.com/hashicorp/go-multierror"
 )
 
 // Bussiness logic methods to work with user
@@ -13,7 +15,7 @@ type Usecase interface {
 	GetPlannedBudget(userID uuid.UUID) (float64, error)
 	GetCurrentBudget(userID uuid.UUID) (float64, error)
 	GetAccounts(userID uuid.UUID) ([]models.Accounts, error)
-	GetFeed(userID uuid.UUID) (models.UserFeed, error)
+	GetFeed(userID uuid.UUID) (json.UserFeed, *multierror.Error)
 }
 
 type Repository interface {

@@ -1,11 +1,15 @@
 package usecase
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user"
+	tranfer_models "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/delivery/http/transfer_models"
+	"github.com/hashicorp/go-multierror"
+
 	"github.com/google/uuid"
 )
 
@@ -66,25 +70,37 @@ func (u *Usecase) GetAccounts(userID uuid.UUID) ([]models.Accounts, error) {
 	return account, nil
 }
 
-func (u *Usecase) GetFeed(userID uuid.UUID) (models.UserFeed, error) {
-	var feed models.UserFeed
+func (u *Usecase) GetFeed(userID uuid.UUID) (tranfer_models.UserFeed, *multierror.Error) {
+	var dataTranfer tranfer_models.UserFeed
 	var err error
-	feed.Balance, err = u.GetUserBalance(userID)
+	var multiErr *multierror.Error
 
+	errMsg := "errors: "
+	dataTranfer.Balance, err = u.GetUserBalance(userID)
 	if err != nil {
-		return feed, err
-	}
-	feed.CurrentBudget, err = u.GetCurrentBudget(userID)
+		multiErr = multierror.Append(multiErr, errors.New("balance: "+err.Error()))
 
+		errMsg += "(balance) "
+	}
+
+	dataTranfer.BudgetActual, err = u.GetCurrentBudget(userID)
 	if err != nil {
-		return feed, err
+		multiErr = multierror.Append(multiErr, errors.New("current: "+err.Error()))
+		errMsg += "(budgetActual) "
 	}
-	feed.PlannedBudget, err = u.GetPlannedBudget(userID)
 
+	dataTranfer.BudgetPlanned, err = u.GetPlannedBudget(userID)
 	if err != nil {
-		return feed, err
+		multiErr = multierror.Append(multiErr, errors.New("planned: "+err.Error()))
+		errMsg += "(budgetPlanned)"
 	}
-	feed.MassAccount, err = u.GetAccounts(userID)
 
-	return feed, err
+	dataTranfer.Account.Account, err = u.GetAccounts(userID)
+	if err != nil {
+		multiErr = multierror.Append(multiErr, errors.New("accounts: "+err.Error()))
+		errMsg += "(account)"
+	}
+
+	dataTranfer.ErrMes = errMsg
+	return dataTranfer, multiErr
 }

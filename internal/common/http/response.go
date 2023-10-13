@@ -7,15 +7,16 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 )
 
-type Response struct {
-	Data interface{} `json:"body,omitempty"`
-}
-
 type Error struct {
-	Message string `json:"message"`
+	ErrMes string `json:"message"`
 }
 
 type NilBody struct{}
+
+type Response[T any] struct {
+	Status int `json:"status"`
+	Body   T   `json:"body"`
+}
 
 func NIL() NilBody {
 	return NilBody{}
@@ -26,7 +27,7 @@ func ErrorResponse(w http.ResponseWriter, code int, message string, log logger.C
 	w.WriteHeader(code)
 
 	errorMsg := Error{
-		Message: message,
+		ErrMes: message,
 	}
 
 	encoder := json.NewEncoder(w)
@@ -37,9 +38,10 @@ func ErrorResponse(w http.ResponseWriter, code int, message string, log logger.C
 	}
 }
 
-func JSON(w http.ResponseWriter, status int, response any) {
+func JSON[T any](w http.ResponseWriter, status int, response T) {
+	date := Response[T]{Status: status, Body: response}
 	encoder := json.NewEncoder(w)
-	if err := encoder.Encode(response); err != nil {
+	if err := encoder.Encode(date); err != nil {
 		w.WriteHeader(status)
 		return
 	}
