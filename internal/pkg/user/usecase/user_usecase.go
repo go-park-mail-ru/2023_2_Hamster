@@ -45,7 +45,7 @@ func (u *Usecase) GetPlannedBudget(userID uuid.UUID) (float64, error) {
 	return balance, nil
 }
 
-func (u *Usecase) GetCurrentBudget(userID uuid.UUID) (float64, error) {
+func (u *Usecase) GetCurrentBudget(userID uuid.UUID) (float64, error) { // need test
 	transactionExpenses, err := u.userRepo.GetCurrentBudget(userID)
 
 	if err != nil {
@@ -64,13 +64,14 @@ func (u *Usecase) GetCurrentBudget(userID uuid.UUID) (float64, error) {
 func (u *Usecase) GetAccounts(userID uuid.UUID) ([]models.Accounts, error) {
 	account, err := u.userRepo.GetAccounts(userID)
 	if err != nil {
+
 		return account, fmt.Errorf("[usecase] can't get accounts from repository %w", err)
 	}
 
 	return account, nil
 }
 
-func (u *Usecase) GetFeed(userID uuid.UUID) (tranfer_models.UserFeed, *multierror.Error) {
+func (u *Usecase) GetFeed(userID uuid.UUID) (tranfer_models.UserFeed, *multierror.Error) { // need test!
 	var dataTranfer tranfer_models.UserFeed
 	var err error
 	var multiErr *multierror.Error

@@ -30,17 +30,15 @@ func NewHandler(uu user.Usecase, l logger.CustomLogger) *Handler {
 // @Summary		Get Balance
 // @Tags			User
 // @Description	Get User balance
-// @Produce		json
+// @Produce		SuccessResponse
 // @Success		200		{object}	Response[transfer_models.BalanceResponse] "Show balance"
-// @Failure		400		{object}	http.Error	"Client error"
-// @Failure		500		{object}	http.Error	"Server error"
+// @Failure		400		{object}	Error	"Client error"
+// @Failure		500		{object}	Error	"Server error"
 // @Router		/api/user/{userID}/balance [get]
 func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
 	if err != nil {
-		h.logger.Infof("invalid id: %v:", err)
-
-		commonHttp.ErrorResponse(w, http.StatusBadRequest, err.Error(), h.logger)
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
 		return
 	}
 	balance, err := h.userService.GetUserBalance(userID)
@@ -48,23 +46,23 @@ func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 	var errNoSuchUserIdBalanceError *models.NoSuchUserIdBalanceError
 	if errors.As(err, &errNoSuchUserIdBalanceError) {
 		h.logger.Error(err.Error())
-		commonHttp.ErrorResponse(w, http.StatusBadRequest, err.Error(), h.logger)
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.BalanceNotFound, h.logger)
 		return
 	}
 
 	if err != nil {
-		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err.Error(), h.logger)
+		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, transfer_models.BalanceGetServerError, h.logger)
 		return
 	}
 
 	response := transfer_models.BalanceResponse{Balance: balance}
-	commonHttp.JSON[transfer_models.BalanceResponse](w, http.StatusOK, response)
+	commonHttp.SuccessResponse[transfer_models.BalanceResponse](w, http.StatusOK, response)
 }
 
 // @Summary		Get Planned Budget
 // @Tags			User
 // @Description	Get User planned budget
-// @Produce		json
+// @Produce		SuccessResponse
 // @Success		200		{object} 	Response[transfer_models.BudgetPlannedResponse]	"Show planned budget"
 // @Failure		400		{object}	http.Error			"Client error"
 // @Failure		500		{object}	http.Error			"Server error"
@@ -94,13 +92,13 @@ func (h *Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := transfer_models.BudgetPlannedResponse{BudgetPlanned: budget}
-	commonHttp.JSON[transfer_models.BudgetPlannedResponse](w, http.StatusOK, response)
+	commonHttp.SuccessResponse[transfer_models.BudgetPlannedResponse](w, http.StatusOK, response)
 }
 
 // @Summary		Get Actual Budget
 // @Tags			User
 // @Description	Get User actual budget
-// @Produce		json
+// @Produce		SuccessResponse
 // @Success		200		{object}	Response[transfer_models.BudgetActualResponse]	"Show actual budget"
 // @Failure		400		{object}	http.Error			"Client error"
 // @Failure		500		{object}	http.Error			"Server error"
@@ -129,13 +127,13 @@ func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := transfer_models.BudgetActualResponse{BudgetActual: budget}
-	commonHttp.JSON[transfer_models.BudgetActualResponse](w, http.StatusOK, response)
+	commonHttp.SuccessResponse[transfer_models.BudgetActualResponse](w, http.StatusOK, response)
 }
 
 // @Summary		Get User Accounts
 // @Tags			User
 // @Description	Get User accounts
-// @Produce		json
+// @Produce		SuccessResponse
 // @Success		200		{object}	Response[transfer_models.Account]	     	"Show actual accounts"
 // @Failure		400		{object}	http.Error		"Client error"
 // @Failure		500		{object}	http.Error		"Server error"
@@ -156,7 +154,7 @@ func (h *Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 
 	if errors.As(err, &errNoSuchAccounts) {
 		h.logger.Error(err.Error())
-		commonHttp.JSON(w, http.StatusOK, "")
+		commonHttp.SuccessResponse(w, http.StatusOK, "")
 		return
 	}
 
@@ -166,13 +164,13 @@ func (h *Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := transfer_models.Account{Account: accountInfo}
-	commonHttp.JSON[transfer_models.Account](w, http.StatusOK, response)
+	commonHttp.SuccessResponse[transfer_models.Account](w, http.StatusOK, response)
 }
 
 // @Summary		Get User Accounts
 // @Tags			User
 // @Description	Get User accounts
-// @Produce		json
+// @Produce		SuccessResponse
 // @Success		200		{object}	Response[transfer_models.UserFeed]	     	"Show actual accounts"
 // @Failure		400		{object}	http.Error		"Client error"
 // @Failure		500		{object}	http.Error		"Server error"
@@ -194,5 +192,5 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) { // need test
 		status = http.StatusInternalServerError
 	}
 
-	commonHttp.JSON(w, status, dataFeed)
+	commonHttp.SuccessResponse(w, status, dataFeed)
 }

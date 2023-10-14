@@ -4,6 +4,12 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 )
 
+// Response error message
+const (
+	BalanceNotFound       = "no such balance"
+	BalanceGetServerError = "can't get balance"
+)
+
 type BalanceResponse struct {
 	Balance float64 `json:"balance"`
 }
