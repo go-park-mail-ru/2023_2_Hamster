@@ -2,14 +2,11 @@ include .env
 
 .PHONY: dc run test lint down
 
-dc:
-	sudo docker-compose up -d
-
 run:
-	go build -o app ./cmd/api/main.go && ./app
+	docker-compose up -d
 
 down:
-	sudo docker-compose down
+	docker-compose down
 
 doc:
 	swag init -g cmd/api/main.go
