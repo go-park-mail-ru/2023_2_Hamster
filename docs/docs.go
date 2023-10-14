@@ -323,6 +323,9 @@ const docTemplate = `{
             "properties": {
                 "message": {
                     "type": "string"
+                },
+                "status": {
+                    "type": "integer"
                 }
             }
         },

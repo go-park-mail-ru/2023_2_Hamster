@@ -7,7 +7,14 @@ import (
 // Response error message
 const (
 	BalanceNotFound       = "no such balance"
-	BalanceGetServerError = "can't get balance"
+	PlannedBudgetNotFound = "no such planned budget"
+	CurrentBudgetNotFound = "no such current budget"
+	AccountNotFound       = "no such account"
+
+	BalanceGetServerError       = "can't get balance"
+	PlannedBudgetGetServerError = "can't get planned budget"
+	CurrentBudgetGetServerError = "can't get current budget"
+	AccountServerError          = "can't get account"
 )
 
 type BalanceResponse struct {

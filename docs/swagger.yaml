@@ -4,6 +4,8 @@ definitions:
     properties:
       message:
         type: string
+      status:
+        type: integer
     type: object
   http.Response-transfer_models_Account:
     properties:
