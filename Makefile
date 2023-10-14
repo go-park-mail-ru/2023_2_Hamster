@@ -5,6 +5,8 @@ include .env
 run:
 	docker-compose up -d
 
+сondb:
+	docker exec -it 2023_2_hamster-db-1 psql -U kosmatoff -d Hamster
 down:
 	docker-compose down
 
