@@ -47,7 +47,7 @@ func (r *UserRep) GetByID(userID uuid.UUID) (*models.User, error) { // need test
 	row := r.db.QueryRow(query, userID)
 	var u models.User
 
-	err := row.Scan(&u.ID, &u.Username, &u.Password, &u.PlannedBudget, &u.AvatarURL)
+	err := row.Scan(&u.ID, &u.Username, &u.Password, &u.Salt, &u.PlannedBudget, &u.AvatarURL)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, fmt.Errorf("[repo] %w: %v", &models.NoSuchUserError{UserID: userID}, err)
 	} else if err != nil {

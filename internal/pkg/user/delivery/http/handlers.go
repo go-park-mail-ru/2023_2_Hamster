@@ -47,9 +47,12 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) { // need test
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserNotFound, h.logger)
 		return
 	}
+
 	if err != nil {
 		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, transfer_models.UserServerError, h.logger)
+		return
 	}
+
 	usrTranfer := models.InitUserTransfer(*usr)
 
 	commonHttp.SuccessResponse(w, http.StatusOK, usrTranfer)
