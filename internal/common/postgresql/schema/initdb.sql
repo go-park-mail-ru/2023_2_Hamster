@@ -60,16 +60,16 @@ INSERT INTO "category"(user_id, name)
 VALUES ((SELECT id FROM Users limit 1), 'Стипендия');
 
 INSERT INTO "transaction" (user_id, category_id, account_id, total, is_income, date, payer, description)
-VALUES ((SELECT id FROM Users  where username="frontender"), (SELECT id FROM Category limit 1), (SELECT id FROM Accounts limit 1), 12400.50, false, '2023-10-01', 'МОСЖКХ', 'Оплата недвижки');
+VALUES ((SELECT id FROM Users limit 1), (SELECT id FROM Category limit 1), (SELECT id FROM Accounts limit 1), 12400.50, false, '2023-10-01', 'МОСЖКХ', 'Оплата недвижки');
 
 INSERT INTO "transaction"(user_id, category_id, account_id, total, is_income, date, payer, description)
-VALUES ((SELECT id FROM Users  where username="frontender"), (SELECT id FROM Category limit 1), (SELECT id FROM Accounts limit 1), 12450.50, false, '2023-10-02',  'МОСЖКХ', 'Оплата недвижки');
+VALUES ((SELECT id FROM Users limit 1), (SELECT id FROM Category limit 1), (SELECT id FROM Accounts limit 1), 12450.50, false, '2023-10-02',  'МОСЖКХ', 'Оплата недвижки');
 
 INSERT INTO "transaction"(user_id, category_id, account_id, total, is_income, date, payer, description)
-VALUES ((SELECT id FROM Users  where username="frontender"), (SELECT id FROM Category limit 1), (SELECT id FROM Accounts limit 1), 12450.50, false, '2023-10-02',  'МОСЖКХ', 'Оплата недвижки');
+VALUES ((SELECT id FROM Users limit 1), (SELECT id FROM Category limit 1), (SELECT id FROM Accounts limit 1), 12450.50, false, '2023-10-02',  'МОСЖКХ', 'Оплата недвижки');
 
 INSERT INTO "transaction"(user_id, category_id, account_id, total, is_income, date, payer, description)
-VALUES ((SELECT id FROM Users  where username="frontender"), (SELECT id FROM Category limit 1), (SELECT id FROM Accounts limit 1), 40000, true, '2023-10-02', 'VK', 'Зарплата');
+VALUES ((SELECT id FROM Users limit 1), (SELECT id FROM Category limit 1), (SELECT id FROM Accounts limit 1), 40000, true, '2023-10-02', 'VK', 'Зарплата');
 
 INSERT INTO "transaction"(user_id, category_id, account_id, total, is_income, date, payer, description)
-VALUES ((SELECT id FROM Users  where username="frontender"), (SELECT id FROM Category limit 1), (SELECT id FROM Accounts limit 1), 40000, true, '2023-09-02', 'VK', 'Зарплата');
+VALUES ((SELECT id FROM Users limit 1), (SELECT id FROM Category limit 1), (SELECT id FROM Accounts limit 1), 40000, true, '2023-09-02', 'VK', 'Зарплата');

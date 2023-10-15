@@ -27,6 +27,34 @@ func NewHandler(uu user.Usecase, l logger.CustomLogger) *Handler {
 	}
 }
 
+// @Summary		Get User
+// @Tags		User
+// @Description	Get user with chosen ID
+// @Produce		json
+// @Success		200		{object}	Response[models.usrTranfer] "Show balance"
+// @Failure		400		{object}	http.Error	"Client error"
+// @Failure		500		{object}	http.Error	"Server error"
+func (h *Handler) Get(w http.ResponseWriter, r *http.Request) { // need test
+	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
+		return
+	}
+
+	var errNoSuchUser *models.NoSuchUserError
+	usr, err := h.userService.GetUser(userID)
+	if errors.As(err, &errNoSuchUser) {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserNotFound, h.logger)
+		return
+	}
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, transfer_models.UserServerError, h.logger)
+	}
+	usrTranfer := models.InitUserTransfer(*usr)
+
+	commonHttp.SuccessResponse(w, http.StatusOK, usrTranfer)
+}
+
 // @Summary		Get Balance
 // @Tags			User
 // @Description	Get User balance
@@ -109,11 +137,11 @@ func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
 
 	budget, err := h.userService.GetCurrentBudget(userID)
 
-	var errNoSuchCurrentBudget *models.NoSuchCurrentBudget
-	if errors.As(err, &errNoSuchCurrentBudget) {
-		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.CurrentBudgetNotFound, h.logger)
-		return
-	}
+	// var errNoSuchCurrentBudget *models.NoSuchCurrentBudget
+	// if errors.As(err, &errNoSuchCurrentBudget) {
+	// 	commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.CurrentBudgetNotFound, h.logger)
+	// 	return
+	// }
 
 	if err != nil {
 		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, transfer_models.CurrentBudgetGetServerError, h.logger)
@@ -155,7 +183,7 @@ func (h *Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := transfer_models.Account{Account: accountInfo}
+	response := transfer_models.Account{AccountMas: accountInfo}
 	commonHttp.SuccessResponse[transfer_models.Account](w, http.StatusOK, response)
 }
 
@@ -178,10 +206,24 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) { // need test
 		return
 	}
 
-	dataFeed, multierr := h.userService.GetFeed(userID)
-	if multierr.ErrorOrNil() != nil {
-		h.logger.Error(multierr)
-		status = http.StatusInternalServerError
+	dataFeed, err := h.userService.GetFeed(userID)
+
+	var errNoSuchPlannedBudgetError *models.NoSuchPlannedBudgetError
+	var errNoSuchUserIdBalanceError *models.NoSuchUserIdBalanceError
+	var errNoSuchAccounts *models.NoSuchAccounts
+
+	if errors.As(err, &errNoSuchAccounts) {
+		h.logger.Info(err.Error())
+	}
+
+	if errors.As(err, &errNoSuchPlannedBudgetError) {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.PlannedBudgetNotFound, h.logger)
+		return
+	}
+
+	if errors.As(err, &errNoSuchUserIdBalanceError) {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.BalanceNotFound, h.logger)
+		return
 	}
 
 	commonHttp.SuccessResponse(w, status, dataFeed)

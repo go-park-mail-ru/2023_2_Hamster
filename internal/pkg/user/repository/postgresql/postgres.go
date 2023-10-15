@@ -23,7 +23,7 @@ func NewRepository(db *sqlx.DB, l logger.CustomLogger) *UserRep {
 	}
 }
 
-func (r *UserRep) CreateUser(u models.User) (uuid.UUID, error) {
+func (r *UserRep) CreateUser(u models.User) (uuid.UUID, error) { // need test
 
 	query := `INSERT INTO users
 			 (username, password_hash, salt)
@@ -39,12 +39,8 @@ func (r *UserRep) CreateUser(u models.User) (uuid.UUID, error) {
 	return id, nil
 }
 
-func (r *UserRep) GetByID(userID uuid.UUID) (*models.User, error) {
-	query := `SELECT id,
-				username,
-				password_hash,
-				planned_budget,
-				avatar_url
+func (r *UserRep) GetByID(userID uuid.UUID) (*models.User, error) { // need test
+	query := `SELECT *
 			 FROM users
 			 WHERE id = $1;`
 
@@ -53,7 +49,7 @@ func (r *UserRep) GetByID(userID uuid.UUID) (*models.User, error) {
 
 	err := row.Scan(&u.ID, &u.Username, &u.Password, &u.PlannedBudget, &u.AvatarURL)
 	if errors.Is(err, sql.ErrNoRows) {
-		return nil, fmt.Errorf("nothing found for this request %w", err)
+		return nil, fmt.Errorf("[repo] %w: %v", &models.NoSuchUserError{UserID: userID}, err)
 	} else if err != nil {
 		return &models.User{},
 			fmt.Errorf("failed request db %s, %w", query, err)
@@ -62,7 +58,7 @@ func (r *UserRep) GetByID(userID uuid.UUID) (*models.User, error) {
 	return &u, nil
 }
 
-func (r *UserRep) GetUserByUsername(username string) (*models.User, error) {
+func (r *UserRep) GetUserByUsername(username string) (*models.User, error) { // need test
 	query := `SELECT id,
 				username,
 				password_hash,
@@ -83,7 +79,7 @@ func (r *UserRep) GetUserByUsername(username string) (*models.User, error) {
 	return &u, nil
 }
 
-func (r *UserRep) GetUserBalance(userID uuid.UUID) (float64, error) {
+func (r *UserRep) GetUserBalance(userID uuid.UUID) (float64, error) { // need test
 	var totalBalance sql.NullFloat64
 	err := r.db.QueryRow("SELECT SUM(balance) FROM accounts WHERE user_id = $1", userID).Scan(&totalBalance)
 
@@ -100,7 +96,7 @@ func (r *UserRep) GetUserBalance(userID uuid.UUID) (float64, error) {
 	return 0, nil
 }
 
-func (r *UserRep) GetPlannedBudget(userID uuid.UUID) (float64, error) {
+func (r *UserRep) GetPlannedBudget(userID uuid.UUID) (float64, error) { // need test
 	var plannedBudget sql.NullFloat64
 	err := r.db.QueryRow("SELECT planned_budget FROM users WHERE id = $1", userID).Scan(&plannedBudget)
 
@@ -116,7 +112,7 @@ func (r *UserRep) GetPlannedBudget(userID uuid.UUID) (float64, error) {
 	return 0, nil
 }
 
-func (r *UserRep) GetCurrentBudget(userID uuid.UUID) (float64, error) {
+func (r *UserRep) GetCurrentBudget(userID uuid.UUID) (float64, error) { // need test
 	var currentBudget sql.NullFloat64
 
 	err := r.db.QueryRow(`SELECT SUM(total) AS total_sum
@@ -126,9 +122,7 @@ func (r *UserRep) GetCurrentBudget(userID uuid.UUID) (float64, error) {
 					  AND is_income = false
 					  AND user_id = $1;`, userID).Scan(&currentBudget)
 
-	if errors.Is(err, sql.ErrNoRows) {
-		return 0, fmt.Errorf("[repo] %w: %v", &models.NoSuchCurrentBudget{UserID: userID}, err)
-	} else if err != nil {
+	if err != nil {
 		return 0, fmt.Errorf("[repository] failed request db %w", err)
 	}
 
@@ -138,7 +132,7 @@ func (r *UserRep) GetCurrentBudget(userID uuid.UUID) (float64, error) {
 	return 0, nil
 }
 
-func (r *UserRep) GetAccounts(user_id uuid.UUID) ([]models.Accounts, error) {
+func (r *UserRep) GetAccounts(user_id uuid.UUID) ([]models.Accounts, error) { // need test
 
 	var accounts []models.Accounts
 

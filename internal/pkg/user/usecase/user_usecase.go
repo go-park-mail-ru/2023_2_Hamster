@@ -1,14 +1,12 @@
 package usecase
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user"
 	tranfer_models "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/delivery/http/transfer_models"
-	"github.com/hashicorp/go-multierror"
 
 	"github.com/google/uuid"
 )
@@ -25,6 +23,15 @@ func NewUsecase(
 		userRepo: ur,
 		logger:   log,
 	}
+}
+
+func (u *Usecase) GetUser(userID uuid.UUID) (*models.User, error) { // need test
+	user, err := u.userRepo.GetByID(userID)
+	if err != nil {
+		return user, fmt.Errorf("[usecase] can't get user from repository %w", err)
+	}
+
+	return user, nil
 }
 
 func (u *Usecase) GetUserBalance(userID uuid.UUID) (float64, error) {
@@ -71,37 +78,30 @@ func (u *Usecase) GetAccounts(userID uuid.UUID) ([]models.Accounts, error) {
 	return account, nil
 }
 
-func (u *Usecase) GetFeed(userID uuid.UUID) (tranfer_models.UserFeed, *multierror.Error) { // need test!
+func (u *Usecase) GetFeed(userID uuid.UUID) (tranfer_models.UserFeed, error) { // need test!
 	var dataTranfer tranfer_models.UserFeed
 	var err error
-	var multiErr *multierror.Error
 
-	errMsg := "errors: "
 	dataTranfer.Balance, err = u.GetUserBalance(userID)
 	if err != nil {
-		multiErr = multierror.Append(multiErr, errors.New("balance: "+err.Error()))
 
-		errMsg += "(balance) "
+		return dataTranfer, err
 	}
 
 	dataTranfer.BudgetActual, err = u.GetCurrentBudget(userID)
 	if err != nil {
-		multiErr = multierror.Append(multiErr, errors.New("current: "+err.Error()))
-		errMsg += "(budgetActual) "
+		return dataTranfer, err
 	}
 
 	dataTranfer.BudgetPlanned, err = u.GetPlannedBudget(userID)
 	if err != nil {
-		multiErr = multierror.Append(multiErr, errors.New("planned: "+err.Error()))
-		errMsg += "(budgetPlanned)"
+		return dataTranfer, err
 	}
 
-	dataTranfer.Account.Account, err = u.GetAccounts(userID)
+	dataTranfer.AccountMas, err = u.GetAccounts(userID)
 	if err != nil {
-		multiErr = multierror.Append(multiErr, errors.New("accounts: "+err.Error()))
-		errMsg += "(account)"
+		return dataTranfer, err
 	}
 
-	dataTranfer.ErrMes = errMsg
-	return dataTranfer, multiErr
+	return dataTranfer, nil
 }

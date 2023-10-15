@@ -10,11 +10,13 @@ const (
 	PlannedBudgetNotFound = "no such planned budget"
 	CurrentBudgetNotFound = "no such current budget"
 	AccountNotFound       = "no such account"
+	UserNotFound          = "no such user"
 
 	BalanceGetServerError       = "can't get balance"
 	PlannedBudgetGetServerError = "can't get planned budget"
 	CurrentBudgetGetServerError = "can't get current budget"
 	AccountServerError          = "can't get account"
+	UserServerError             = "can't get user"
 )
 
 type BalanceResponse struct {
@@ -30,7 +32,7 @@ type BudgetActualResponse struct {
 }
 
 type Account struct {
-	Account []models.Accounts `json:"account"`
+	AccountMas []models.Accounts `json:"account"`
 }
 
 type UserFeed struct {

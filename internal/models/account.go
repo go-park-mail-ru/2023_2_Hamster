@@ -8,3 +8,9 @@ type Accounts struct {
 	Balance     float64   `json:"balance"`
 	MeanPayment string    `json:"mean_payment"`
 }
+
+type AccounstTransfer struct {
+	ID            uuid.UUID `json:"id"`
+	Username      string    `json:"username"`
+	PlannedBudget float64   `json:"planned_budget"`
+}

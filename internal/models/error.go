@@ -6,6 +6,10 @@ import (
 	"github.com/google/uuid"
 )
 
+type NoSuchUserError struct {
+	UserID uuid.UUID
+}
+
 type NoSuchUserIdBalanceError struct {
 	UserID uuid.UUID
 }
@@ -36,4 +40,8 @@ func (e *NoSuchCurrentBudget) Error() string {
 
 func (e *NoSuchAccounts) Error() string {
 	return fmt.Sprintf("No Such Accounts from user: %s doesn't exist", e.UserID.String())
+}
+
+func (e *NoSuchUserError) Error() string {
+	return fmt.Sprintf("No Such user: %s doesn't exist", e.UserID.String())
 }
