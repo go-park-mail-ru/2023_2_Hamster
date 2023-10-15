@@ -34,7 +34,7 @@ func NewHandler(uu user.Usecase, l logger.CustomLogger) *Handler {
 // @Success		200		{object}	Response[models.usrTranfer] "Show balance"
 // @Failure		400		{object}	http.Error	"Client error"
 // @Failure		500		{object}	http.Error	"Server error"
-func (h *Handler) Get(w http.ResponseWriter, r *http.Request) { // need test
+func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
 	if err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
@@ -198,13 +198,11 @@ func (h *Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 // @Failure		400		{object}	http.Error		"Client error"
 // @Failure		500		{object}	http.Error		"Server error"
 // @Router		/api/user/{userID}/feed [get]
-func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) { // need test
+func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 	status := http.StatusOK
 	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
 
 	if err != nil {
-		h.logger.Infof("invalid id: %v:", err)
-
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
 		return
 	}
@@ -215,17 +213,16 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) { // need test
 	var errNoSuchUserIdBalanceError *models.NoSuchUserIdBalanceError
 	var errNoSuchAccounts *models.NoSuchAccounts
 
-	if errors.As(err, &errNoSuchAccounts) {
-		h.logger.Info(err.Error())
-	}
+	if errors.As(err, &errNoSuchAccounts) ||
+		errors.As(err, &errNoSuchPlannedBudgetError) ||
+		errors.As(err, &errNoSuchUserIdBalanceError) {
 
-	if errors.As(err, &errNoSuchPlannedBudgetError) {
-		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.PlannedBudgetNotFound, h.logger)
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserFeedNotFound, h.logger)
 		return
 	}
 
-	if errors.As(err, &errNoSuchUserIdBalanceError) {
-		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.BalanceNotFound, h.logger)
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, transfer_models.UserFeedServerError, h.logger)
 		return
 	}
 

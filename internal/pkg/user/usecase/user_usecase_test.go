@@ -159,3 +159,60 @@ func TestUsecase_GetAccounts(t *testing.T) {
 		})
 	}
 }
+
+func TestUsecase_GetCurrentBudget(t *testing.T) {
+	testCases := []struct {
+		name                  string
+		expectedCurrentBudget float64
+		expectedErr           error
+		mockRepoFn            func(*mock.MockRepository)
+	}{
+		{
+			name:                  "Successful current budget",
+			expectedCurrentBudget: 0.0,
+			expectedErr:           nil,
+			mockRepoFn: func(mockRepository *mock.MockRepository) {
+				mockRepository.EXPECT().GetPlannedBudget(gomock.Any()).Return(1700.0, nil)
+				mockRepository.EXPECT().GetCurrentBudget(gomock.Any()).Return(1700.0, nil)
+			},
+		},
+		{
+			name:                  "Error in planned issue",
+			expectedCurrentBudget: 0.0,
+			expectedErr:           fmt.Errorf("[usecase] can't get planned budget from repository some error"),
+			mockRepoFn: func(mockRepository *mock.MockRepository) {
+				mockRepository.EXPECT().GetPlannedBudget(gomock.Any()).Return(0.0, errors.New("some error"))
+				mockRepository.EXPECT().GetCurrentBudget(gomock.Any()).Return(0.0, nil)
+			},
+		},
+		{
+			name:                  "Error in planned issue",
+			expectedCurrentBudget: 0.0,
+			expectedErr:           fmt.Errorf("[usecase] can't get current budget from repository some error"),
+			mockRepoFn: func(mockRepository *mock.MockRepository) {
+				mockRepository.EXPECT().GetCurrentBudget(gomock.Any()).Return(0.0, errors.New("some error"))
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockRepo := mock.NewMockRepository(ctrl)
+			tc.mockRepoFn(mockRepo)
+
+			mockUsecase := NewUsecase(mockRepo, *logger.CreateCustomLogger())
+
+			userID := uuid.New()
+
+			currentBudget, err := mockUsecase.GetCurrentBudget(userID)
+
+			assert.Equal(t, tc.expectedCurrentBudget, currentBudget)
+			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
+				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
+			}
+		})
+	}
+}

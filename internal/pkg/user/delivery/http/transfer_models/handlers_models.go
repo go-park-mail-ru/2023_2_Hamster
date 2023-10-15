@@ -11,12 +11,14 @@ const (
 	CurrentBudgetNotFound = "no such current budget"
 	AccountNotFound       = "no such account"
 	UserNotFound          = "no such user"
+	UserFeedNotFound      = "no such feed info"
 
 	BalanceGetServerError       = "can't get balance"
 	PlannedBudgetGetServerError = "can't get planned budget"
 	CurrentBudgetGetServerError = "can't get current budget"
 	AccountServerError          = "can't get account"
 	UserServerError             = "can't get user"
+	UserFeedServerError         = "can't get feed info"
 )
 
 type BalanceResponse struct {

@@ -52,7 +52,7 @@ func (u *Usecase) GetPlannedBudget(userID uuid.UUID) (float64, error) {
 	return balance, nil
 }
 
-func (u *Usecase) GetCurrentBudget(userID uuid.UUID) (float64, error) { // need test
+func (u *Usecase) GetCurrentBudget(userID uuid.UUID) (float64, error) {
 	transactionExpenses, err := u.userRepo.GetCurrentBudget(userID)
 
 	if err != nil {
@@ -84,7 +84,6 @@ func (u *Usecase) GetFeed(userID uuid.UUID) (tranfer_models.UserFeed, error) { /
 
 	dataTranfer.Balance, err = u.GetUserBalance(userID)
 	if err != nil {
-
 		return dataTranfer, err
 	}
 

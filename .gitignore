@@ -26,6 +26,9 @@ go.work
 
 app
 
+*.out.tmp
+*.html
+
 *.env
 *.idea
 *.bin

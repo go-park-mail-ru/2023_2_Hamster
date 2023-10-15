@@ -8,6 +8,7 @@ import (
 	reflect "reflect"
 
 	models "github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
+	transfer_models "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/delivery/http/transfer_models"
 	gomock "github.com/golang/mock/gomock"
 	uuid "github.com/google/uuid"
 )
@@ -66,10 +67,10 @@ func (mr *MockUsecaseMockRecorder) GetCurrentBudget(userID interface{}) *gomock.
 }
 
 // GetFeed mocks base method.
-func (m *MockUsecase) GetFeed(userID uuid.UUID) (models.UserFeed, error) {
+func (m *MockUsecase) GetFeed(userID uuid.UUID) (transfer_models.UserFeed, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetFeed", userID)
-	ret0, _ := ret[0].(models.UserFeed)
+	ret0, _ := ret[0].(transfer_models.UserFeed)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -93,6 +94,21 @@ func (m *MockUsecase) GetPlannedBudget(userID uuid.UUID) (float64, error) {
 func (mr *MockUsecaseMockRecorder) GetPlannedBudget(userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPlannedBudget", reflect.TypeOf((*MockUsecase)(nil).GetPlannedBudget), userID)
+}
+
+// GetUser mocks base method.
+func (m *MockUsecase) GetUser(userID uuid.UUID) (*models.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUser", userID)
+	ret0, _ := ret[0].(*models.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUser indicates an expected call of GetUser.
+func (mr *MockUsecaseMockRecorder) GetUser(userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockUsecase)(nil).GetUser), userID)
 }
 
 // GetUserBalance mocks base method.
