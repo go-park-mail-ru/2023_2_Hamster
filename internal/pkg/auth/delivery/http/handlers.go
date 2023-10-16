@@ -3,7 +3,6 @@ package http
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -11,22 +10,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth"
-	"github.com/google/uuid"
 )
-
-type signUpResponse struct {
-	ID       uuid.UUID `json:"id"`
-	Username string    `json:"username"`
-}
-
-type signInput struct {
-	Username string `json:"username" valid:"required"`
-	Password string `json:"password" valid:"required"`
-}
-
-type loginResponse struct {
-	JWT string `json:"jwt"`
-}
 
 type Handler struct {
 	au  auth.Usecase
@@ -73,15 +57,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	suResp := signUpResponse{ID: id, Username: user.Username}
 
-	fmt.Println("signup exp time >>>>>", token.Expires)
-
-	http.SetCookie(w, &http.Cookie{
-		Name:     "Authentication",
-		Value:    token.Value,
-		Expires:  token.Expires,
-		Path:     "/",
-		HttpOnly: true,
-	})
+	http.SetCookie(w, InitCookie(AuthCookie, token.Value, token.Expires))
 	commonHttp.JSON(w, http.StatusOK, suResp)
 }
 
@@ -96,7 +72,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Failure		500			{object}	http.Error			"Server error"
 // @Router		/api/auth/signin	[post]
 func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
-	var userInput signInput
+	userInput := &signInput{}
 
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&userInput); err != nil {
@@ -120,13 +96,7 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 
 	siResp := signUpResponse{ID: id, Username: userInput.Username}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     "Authentication",
-		Value:    token.Value,
-		Expires:  token.Expires,
-		Path:     "/",
-		HttpOnly: true,
-	})
+	http.SetCookie(w, InitCookie(AuthCookie, token.Value, token.Expires))
 
 	commonHttp.JSON(w, http.StatusOK, siResp)
 }
@@ -142,7 +112,7 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 // @Failure		500		{object}	http.Error				"Server error: cookie read fail"
 // @Router		/api/auth/checkAuth	[post]
 func (h *Handler) AccessVerification(w http.ResponseWriter, r *http.Request) {
-	tokenCookie, err := r.Cookie("Authentication")
+	tokenCookie, err := r.Cookie(AuthCookie)
 	if errors.Is(err, http.ErrNoCookie) {
 		h.log.Errorf("Error cookie token not found: %v", err)
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err.Error(), h.log)
@@ -154,7 +124,6 @@ func (h *Handler) AccessVerification(w http.ResponseWriter, r *http.Request) {
 	}
 
 	expirationTime := tokenCookie.Expires
-	fmt.Println("AccessVerification >>>>>> ", tokenCookie.Expires)
 	if expirationTime.IsZero() {
 		h.log.Info("Cookie does not have an expiration time.")
 	} else if expirationTime.UTC().Before(time.Now()) {
@@ -172,17 +141,14 @@ func (h *Handler) AccessVerification(w http.ResponseWriter, r *http.Request) {
 
 	h.log.Info("User id: ", id)
 
-	response := signUpResponse{
-		Username: username,
-		ID:       id,
-	}
+	response := signUpResponse{Username: username, ID: id}
 
 	commonHttp.JSON(w, http.StatusOK, response)
 }
 
 func (h *Handler) LogOut(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
-		Name:  "Authentication",
+		Name:  AuthCookie,
 		Value: "",
 		Path:  "/",
 	})

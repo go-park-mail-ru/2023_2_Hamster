@@ -9,6 +9,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth"
+	cookiePkg "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth/delivery/http"
 )
 
 type Middleware struct {
@@ -25,7 +26,7 @@ func NewMiddleware(au auth.Usecase, log logger.CustomLogger) *Middleware {
 
 func (m *Middleware) Authentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie("Authentication")
+		cookie, err := r.Cookie(cookiePkg.AuthCookie)
 		if err != nil {
 			m.log.Errorf("[middleware] no cookie Authentication")
 			commonHttp.ErrorResponse(w, http.StatusUnauthorized, "missing token unauthorized", m.log)
