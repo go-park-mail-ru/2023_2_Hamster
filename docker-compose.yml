@@ -1,16 +1,31 @@
 version: '3.8'
 
+networks:
+  app-network:
+
 services:
+  server:
+    build:
+      context: .
+      dockerfile: ./build/Dockerfile
+    restart: on-failure
+    networks:
+      app-network:
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
   db:
     image: postgres:latest
-    restart: always
+    restart: on-failure
+    networks:
+      app-network:
     env_file:
       - .env
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "5436:5432"
     volumes:
       - ./internal/common/postgresql/schema/:/docker-entrypoint-initdb.d/

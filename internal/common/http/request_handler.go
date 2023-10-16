@@ -13,7 +13,7 @@ func GetIDFromRequest(id string, r *http.Request) (uuid.UUID, error) {
 	parsedUUID, err := uuid.Parse(uuidString)
 
 	if err != nil {
-		return parsedUUID, errors.New("invalid uuid parametr")
+		return parsedUUID, errors.New("invalid uuid parameter")
 	}
 	return parsedUUID, nil
 }

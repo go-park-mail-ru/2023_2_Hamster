@@ -170,7 +170,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Show actual accounts",
                         "schema": {
-                            "$ref": "#/definitions/http.account"
+                            "$ref": "#/definitions/http.Response-transfer_models_Account"
                         }
                     },
                     "400": {
@@ -202,7 +202,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Show actual budget",
                         "schema": {
-                            "$ref": "#/definitions/http.budgetActualResponse"
+                            "$ref": "#/definitions/http.Response-transfer_models_BudgetActualResponse"
                         }
                     },
                     "400": {
@@ -234,7 +234,39 @@ const docTemplate = `{
                     "200": {
                         "description": "Show balance",
                         "schema": {
-                            "$ref": "#/definitions/http.Response"
+                            "$ref": "#/definitions/http.Response-transfer_models_BalanceResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/{userID}/feed": {
+            "get": {
+                "description": "Get User accounts",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get User Accounts",
+                "responses": {
+                    "200": {
+                        "description": "Show actual accounts",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-transfer_models_UserFeed"
                         }
                     },
                     "400": {
@@ -266,7 +298,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Show planned budget",
                         "schema": {
-                            "$ref": "#/definitions/http.budgetPlannedResponse"
+                            "$ref": "#/definitions/http.Response-transfer_models_BudgetPlannedResponse"
                         }
                     },
                     "400": {
@@ -291,39 +323,64 @@ const docTemplate = `{
             "properties": {
                 "message": {
                     "type": "string"
+                },
+                "status": {
+                    "type": "integer"
                 }
             }
         },
-        "http.Response": {
+        "http.Response-transfer_models_Account": {
             "type": "object",
             "properties": {
-                "body": {}
-            }
-        },
-        "http.account": {
-            "type": "object",
-            "properties": {
-                "account": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.Accounts"
-                    }
+                "body": {
+                    "$ref": "#/definitions/transfer_models.Account"
+                },
+                "status": {
+                    "type": "integer"
                 }
             }
         },
-        "http.budgetActualResponse": {
+        "http.Response-transfer_models_BalanceResponse": {
             "type": "object",
             "properties": {
-                "actual_balance": {
-                    "type": "number"
+                "body": {
+                    "$ref": "#/definitions/transfer_models.BalanceResponse"
+                },
+                "status": {
+                    "type": "integer"
                 }
             }
         },
-        "http.budgetPlannedResponse": {
+        "http.Response-transfer_models_BudgetActualResponse": {
             "type": "object",
             "properties": {
-                "planned_balance": {
-                    "type": "number"
+                "body": {
+                    "$ref": "#/definitions/transfer_models.BudgetActualResponse"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "http.Response-transfer_models_BudgetPlannedResponse": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/transfer_models.BudgetPlannedResponse"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "http.Response-transfer_models_UserFeed": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/transfer_models.UserFeed"
+                },
+                "status": {
+                    "type": "integer"
                 }
             }
         },
@@ -386,6 +443,64 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "transfer_models.Account": {
+            "type": "object",
+            "properties": {
+                "account": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Accounts"
+                    }
+                }
+            }
+        },
+        "transfer_models.BalanceResponse": {
+            "type": "object",
+            "properties": {
+                "balance": {
+                    "type": "number"
+                }
+            }
+        },
+        "transfer_models.BudgetActualResponse": {
+            "type": "object",
+            "properties": {
+                "actual_balance": {
+                    "type": "number"
+                }
+            }
+        },
+        "transfer_models.BudgetPlannedResponse": {
+            "type": "object",
+            "properties": {
+                "planned_balance": {
+                    "type": "number"
+                }
+            }
+        },
+        "transfer_models.UserFeed": {
+            "type": "object",
+            "properties": {
+                "account": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Accounts"
+                    }
+                },
+                "actual_balance": {
+                    "type": "number"
+                },
+                "balance": {
+                    "type": "number"
+                },
+                "err_message": {
+                    "type": "string"
+                },
+                "planned_balance": {
+                    "type": "number"
                 }
             }
         }
