@@ -11,17 +11,17 @@ const (
 	InvalidURLParameter = "invalid url parameter"
 )
 
+type Response[T any] struct {
+	Status int `json:"status"`
+	Body   T   `json:"body"`
+}
+
 type Error struct {
 	Status int    `json:"status"`
 	ErrMes string `json:"message"`
 }
 
 type NilBody struct{}
-
-type Response[T any] struct {
-	Status int `json:"status"`
-	Body   T   `json:"body"`
-}
 
 func NIL() NilBody {
 	return NilBody{}
