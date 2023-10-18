@@ -42,5 +42,4 @@ type UserFeed struct {
 	BalanceResponse
 	BudgetPlannedResponse
 	BudgetActualResponse
-	ErrMes string `json:"err_message"`
 }

@@ -78,8 +78,8 @@ func (u *Usecase) GetAccounts(userID uuid.UUID) ([]models.Accounts, error) {
 	return account, nil
 }
 
-func (u *Usecase) GetFeed(userID uuid.UUID) (tranfer_models.UserFeed, error) { // need test!
-	var dataTranfer tranfer_models.UserFeed
+func (u *Usecase) GetFeed(userID uuid.UUID) (*tranfer_models.UserFeed, error) { // need test!
+	dataTranfer := &tranfer_models.UserFeed{}
 	var err error
 
 	dataTranfer.Balance, err = u.GetUserBalance(userID)

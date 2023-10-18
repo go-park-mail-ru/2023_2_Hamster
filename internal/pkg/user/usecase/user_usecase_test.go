@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/delivery/http/transfer_models"
 	mock "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
@@ -210,6 +211,146 @@ func TestUsecase_GetCurrentBudget(t *testing.T) {
 			currentBudget, err := mockUsecase.GetCurrentBudget(userID)
 
 			assert.Equal(t, tc.expectedCurrentBudget, currentBudget)
+			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
+				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
+			}
+		})
+	}
+}
+
+func TestUsecase_GetUser(t *testing.T) {
+	testUserID := uuid.New()
+	testCases := []struct {
+		name         string
+		expectedUser *models.User
+		expectedErr  error
+		mockRepoFn   func(*mock.MockRepository)
+	}{
+		{
+			name: "Success GetUser",
+			expectedUser: &models.User{ID: testUserID,
+				Username:      "kossmatoff",
+				PlannedBudget: 100.0,
+				Password:      "hash",
+				AvatarURL:     "img/image.png",
+				Salt:          "a"},
+
+			expectedErr: fmt.Errorf("[usecase] can't get user from repository some error"),
+			mockRepoFn: func(mockRepository *mock.MockRepository) {
+				mockRepository.EXPECT().GetByID(gomock.Any()).Return(&models.User{ID: testUserID,
+					Username:      "kossmatoff",
+					PlannedBudget: 100.0,
+					Password:      "hash",
+					AvatarURL:     "img/image.png",
+					Salt:          "a"}, errors.New("some error"))
+			},
+		},
+		{
+			name:         "Error in UserGet issue",
+			expectedUser: &models.User{},
+			expectedErr:  nil,
+			mockRepoFn: func(mockRepository *mock.MockRepository) {
+				user := &models.User{}
+				mockRepository.EXPECT().GetByID(gomock.Any()).Return(user, nil)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockRepo := mock.NewMockRepository(ctrl)
+			tc.mockRepoFn(mockRepo)
+
+			mockUsecase := NewUsecase(mockRepo, *logger.CreateCustomLogger())
+
+			userID := uuid.New()
+
+			userActual, err := mockUsecase.GetUser(userID)
+
+			assert.Equal(t, tc.expectedUser, userActual)
+			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
+				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
+			}
+		})
+	}
+}
+
+func TestUsecase_GetFeed(t *testing.T) {
+	testUserID := uuid.New()
+	testCases := []struct {
+		name         string
+		expectedFeed *transfer_models.UserFeed
+		expectedErr  error
+		mockRepoFn   func(*mock.MockRepository)
+	}{
+		{
+			name:         "Error getUser balance retrieval",
+			expectedFeed: &transfer_models.UserFeed{},
+			expectedErr:  fmt.Errorf("[usecase] can't get balance from repository some erros"),
+			mockRepoFn: func(mockRepository *mock.MockRepository) {
+				mockRepository.EXPECT().GetUserBalance(gomock.Any()).Return(0.0, errors.New("some erros"))
+			},
+		},
+		{
+			name:         "Error getUser current budget retrieval",
+			expectedFeed: &transfer_models.UserFeed{},
+			expectedErr:  fmt.Errorf("[usecase] can't get current budget from repository some error"),
+			mockRepoFn: func(mockRepository *mock.MockRepository) {
+				mockRepository.EXPECT().GetUserBalance(gomock.Any()).Return(0.0, nil)
+				mockRepository.EXPECT().GetCurrentBudget(gomock.Any()).Return(0.0, errors.New("some error"))
+			},
+		},
+		{
+			name:         "Error in getUser planned budget retrieval",
+			expectedFeed: &transfer_models.UserFeed{},
+			expectedErr:  fmt.Errorf("[usecase] can't get planned budget from repository some error"),
+			mockRepoFn: func(mockRepository *mock.MockRepository) {
+				mockRepository.EXPECT().GetUserBalance(gomock.Any()).Return(0.0, nil)
+				mockRepository.EXPECT().GetCurrentBudget(gomock.Any()).Return(0.0, nil)
+				mockRepository.EXPECT().GetPlannedBudget(gomock.Any()).Return(0.0, errors.New("some error"))
+			},
+		},
+		// {
+		// 	name:         "Error in getUser accounts retrieval",
+		// 	expectedFeed: &transfer_models.UserFeed{},
+		// 	expectedErr:  fmt.Errorf("[usecase] can't get accounts from repository some error"),
+		// 	mockRepoFn: func(mockRepository *mock.MockRepository) {
+		// 		mockRepository.EXPECT().GetUserBalance(testUserID).Return(0.0, nil)
+		// 		mockRepository.EXPECT().GetCurrentBudget(testUserID).Return(0.0, nil)
+		// 		mockRepository.EXPECT().GetPlannedBudget(testUserID).Return(0.0, nil)
+		// 		mockRepository.EXPECT().GetAccounts(testUserID).Return([]models.Accounts{}, errors.New("some error"))
+		// 	},
+		// },
+		// {
+		// 	name:         "Success in getUser",
+		// 	expectedFeed: &transfer_models.UserFeed{},
+
+		// 	expectedErr: nil,
+		// 	mockRepoFn: func(mockRepository *mock.MockRepository) {
+		// 		mockRepository.EXPECT().GetUserBalance(gomock.Any()).Return(100.0, nil)
+		// 		mockRepository.EXPECT().GetCurrentBudget(gomock.Any()).Return(100.0, nil)
+		// 		mockRepository.EXPECT().GetPlannedBudget(gomock.Any()).Return(0.0, nil)
+		// 		mockRepository.EXPECT().GetAccounts(gomock.Any()).Return([]models.Accounts{}, nil)
+		// 	},
+		// },
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockRepo := mock.NewMockRepository(ctrl)
+			tc.mockRepoFn(mockRepo)
+
+			mockUsecase := NewUsecase(mockRepo, *logger.CreateCustomLogger())
+
+			feedActual, err := mockUsecase.GetFeed(testUserID)
+
+			assert.Equal(t, tc.expectedFeed, feedActual)
 			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
 				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
 			}
