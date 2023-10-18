@@ -31,9 +31,10 @@ func NewHandler(uu user.Usecase, l logger.CustomLogger) *Handler {
 // @Tags		User
 // @Description	Get user with chosen ID
 // @Produce		json
-// @Success		200		{object}	Response[models.usrTranfer] "Show balance"
-// @Failure		400		{object}	http.Error	"Client error"
-// @Failure		500		{object}	http.Error	"Server error"
+// @Success		200		{object}	Response[models.UserTransfer] "Show balance"
+// @Failure		400		{object}	ResponseError	"Client error"
+// @Failure		500		{object}	ResponseError	"Server error"
+// @Router		/api/user/{userID}/ [get]
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
 	if err != nil {
@@ -63,8 +64,8 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 // @Description	Get User balance
 // @Produce		json
 // @Success		200		{object}	Response[transfer_models.BalanceResponse] "Show balance"
-// @Failure		400		{object}	http.Error	"Client error"
-// @Failure		500		{object}	http.Error	"Server error"
+// @Failure		400		{object}	ResponseError	"Client error"
+// @Failure		500		{object}	ResponseError	"Server error"
 // @Router		/api/user/{userID}/balance [get]
 func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
@@ -94,8 +95,8 @@ func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 // @Description	Get User planned budget
 // @Produce		json
 // @Success		200		{object} 	Response[transfer_models.BudgetPlannedResponse]	"Show planned budget"
-// @Failure		400		{object}	http.Error			"Client error"
-// @Failure		500		{object}	http.Error			"Server error"
+// @Failure		400		{object}	ResponseError			"Client error"
+// @Failure		500		{object}	ResponseError			"Server error"
 // @Router		/api/user/{userID}/plannedBudget [get]
 func (h *Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {
 	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
@@ -127,8 +128,8 @@ func (h *Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {
 // @Description	Get User actual budget
 // @Produce		json
 // @Success		200		{object}	Response[transfer_models.BudgetActualResponse]	"Show actual budget"
-// @Failure		400		{object}	http.Error			"Client error"
-// @Failure		500		{object}	http.Error			"Server error"
+// @Failure		400		{object}	ResponseError			"Client error"
+// @Failure		500		{object}	ResponseError			"Server error"
 // @Router		/api/user/{userID}/actualBudget [get]
 func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
 	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
@@ -160,8 +161,8 @@ func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
 // @Description	Get User accounts
 // @Produce		json
 // @Success		200		{object}	Response[transfer_models.Account]	     	"Show actual accounts"
-// @Failure		400		{object}	http.Error		"Client error"
-// @Failure		500		{object}	http.Error		"Server error"
+// @Failure		400		{object}	ResponseError		"Client error"
+// @Failure		500		{object}	ResponseError		"Server error"
 // @Router		/api/user/{userID}/accounts/all [get]
 func (h *Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
@@ -195,8 +196,8 @@ func (h *Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 // @Description	Get User accounts
 // @Produce		json
 // @Success		200		{object}	Response[transfer_models.UserFeed]	     	"Show actual accounts"
-// @Failure		400		{object}	http.Error		"Client error"
-// @Failure		500		{object}	http.Error		"Server error"
+// @Failure		400		{object}	ResponseError		"Client error"
+// @Failure		500		{object}	ResponseError		"Server error"
 // @Router		/api/user/{userID}/feed [get]
 func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 	status := http.StatusOK

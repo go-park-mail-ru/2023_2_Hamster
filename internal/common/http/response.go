@@ -11,7 +11,7 @@ const (
 	InvalidURLParameter = "invalid url parameter"
 )
 
-type Error struct {
+type ResponseError struct {
 	Status int    `json:"status"`
 	ErrMes string `json:"message"`
 }
@@ -33,7 +33,7 @@ func ErrorResponse(w http.ResponseWriter, code int, err error, message string, l
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(code)
 
-	errorMsg := Error{
+	errorMsg := ResponseError{
 		Status: code,
 		ErrMes: message,
 	}
