@@ -58,6 +58,7 @@ func InitRouter( /*auth *auth.Handler,*/ user *user.Handler /*mid *middleware.Mi
 	//userRouter.Use(mid.Authentication)
 	{
 		userRouter.Methods("GET").Path("/").HandlerFunc(user.Get)
+		userRouter.Methods("PUT").Path("/update").HandlerFunc(user.Update)
 		userRouter.Methods("GET").Path("/balance").HandlerFunc(user.GetUserBalance)
 		userRouter.Methods("GET").Path("/plannedBudget").HandlerFunc(user.GetPlannedBudget)
 		userRouter.Methods("GET").Path("/actualBudget").HandlerFunc(user.GetCurrentBudget)

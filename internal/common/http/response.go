@@ -9,6 +9,7 @@ import (
 
 const (
 	InvalidURLParameter = "invalid url parameter"
+	InvalidBodyRequest  = "invalid input body"
 )
 
 type ResponseError struct {

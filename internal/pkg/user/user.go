@@ -16,6 +16,7 @@ type Usecase interface {
 	GetAccounts(userID uuid.UUID) ([]models.Accounts, error)
 	GetFeed(userID uuid.UUID) (*transfer_models.UserFeed, error)
 	GetUser(userID uuid.UUID) (*models.User, error)
+	UpdateUser(user *models.User) error
 }
 
 type Repository interface {
@@ -29,4 +30,6 @@ type Repository interface {
 	GetCurrentBudget(userID uuid.UUID) (float64, error)
 	GetAccounts(userID uuid.UUID) ([]models.Accounts, error) // transfer account repository
 	//IncreaseUserVersion(ctx context.Context, userID uuid.UUID) error
+	UpdateUser(user *models.User) error
+	CheckUser(userID uuid.UUID) error
 }

@@ -104,3 +104,14 @@ func (u *Usecase) GetFeed(userID uuid.UUID) (*tranfer_models.UserFeed, error) { 
 
 	return dataTranfer, nil
 }
+
+func (u *Usecase) UpdateUser(user *models.User) error { // need test
+	if err := u.userRepo.CheckUser(user.ID); err != nil {
+		return fmt.Errorf("[usecase] can't get check user from repository %w", err)
+	}
+
+	if err := u.userRepo.UpdateUser(user); err != nil {
+		return fmt.Errorf("[usecase] can't update user %w", err)
+	}
+	return nil
+}

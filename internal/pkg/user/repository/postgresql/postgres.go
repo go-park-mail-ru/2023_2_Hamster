@@ -161,3 +161,33 @@ func (r *UserRep) GetAccounts(user_id uuid.UUID) ([]models.Accounts, error) { //
 
 	return accounts, nil
 }
+
+func (r *UserRep) CheckUser(userID uuid.UUID) error {
+	var exists bool
+	err := r.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM users WHERE id = $1);`, userID).Scan(&exists)
+
+	if err != nil {
+		return fmt.Errorf("[repository] failed request checkUser %w", err)
+	}
+
+	if !exists {
+		return fmt.Errorf("[repo] %w: %v", &models.NoSuchUserError{UserID: userID}, err)
+	}
+
+	return nil
+}
+
+func (r *UserRep) UpdateUser(user *models.User) error { // need test
+	query := `UPDATE users
+				   SET username = $2,
+				       planned_budget = $3,
+					   avatar_url = $4
+				   WHERE id = $1;`
+
+	_, err := r.db.Exec(query, user.ID, user.Username, user.PlannedBudget, user.AvatarURL)
+	if err != nil {
+		return fmt.Errorf("[repo] failed update user %w", err)
+	}
+
+	return nil
+}

@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	commonHttp "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
@@ -49,7 +48,7 @@ func (m *Middleware) Authentication(next http.Handler) http.Handler {
 			return
 		}
 
-		fmt.Println(userId)
+		//fmt.Println(userId)
 		user, err := m.au.GetUserByAuthData(r.Context(), userId)
 		if err != nil {
 			m.log.Infof("[middleware] get user error: %s", err.Error())
