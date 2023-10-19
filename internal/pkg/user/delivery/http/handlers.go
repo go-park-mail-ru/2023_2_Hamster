@@ -44,7 +44,7 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var errNoSuchUser *models.NoSuchUserError
-	usr, err := h.userService.GetUser(userID)
+	usr, err := h.userService.GetUser(r.Context(), userID)
 	if errors.As(err, &errNoSuchUser) {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserNotFound, h.logger)
 		return
@@ -74,7 +74,7 @@ func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
 		return
 	}
-	balance, err := h.userService.GetUserBalance(userID)
+	balance, err := h.userService.GetUserBalance(r.Context(), userID)
 
 	var errNoSuchUserIdBalanceError *models.NoSuchUserIdBalanceError
 	if errors.As(err, &errNoSuchUserIdBalanceError) {
@@ -107,7 +107,7 @@ func (h *Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	budget, err := h.userService.GetPlannedBudget(userID)
+	budget, err := h.userService.GetPlannedBudget(r.Context(), userID)
 
 	var errNoSuchPlannedBudgetError *models.NoSuchPlannedBudgetError
 	if errors.As(err, &errNoSuchPlannedBudgetError) {
@@ -140,7 +140,7 @@ func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	budget, err := h.userService.GetCurrentBudget(userID)
+	budget, err := h.userService.GetCurrentBudget(r.Context(), userID)
 
 	// var errNoSuchCurrentBudget *models.NoSuchCurrentBudget
 	// if errors.As(err, &errNoSuchCurrentBudget) {
@@ -174,7 +174,7 @@ func (h *Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accountInfo, err := h.userService.GetAccounts(userID)
+	accountInfo, err := h.userService.GetAccounts(r.Context(), userID)
 
 	var errNoSuchAccounts *models.NoSuchAccounts
 
@@ -209,7 +209,7 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dataFeed, err := h.userService.GetFeed(userID)
+	dataFeed, err := h.userService.GetFeed(r.Context(), userID)
 
 	var errNoSuchPlannedBudgetError *models.NoSuchPlannedBudgetError
 	var errNoSuchUserIdBalanceError *models.NoSuchUserIdBalanceError
@@ -258,7 +258,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) { // need test
 		return
 	}
 
-	if err := h.userService.UpdateUser(updProfile.ToUser(user)); err != nil {
+	if err := h.userService.UpdateUser(r.Context(), updProfile.ToUser(user)); err != nil {
 		var errNoSuchUser *models.NoSuchUserError
 		if errors.As(err, &errNoSuchUser) {
 			commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserNotFound, h.logger)

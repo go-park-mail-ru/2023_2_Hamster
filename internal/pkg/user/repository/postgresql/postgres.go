@@ -1,6 +1,7 @@
 package postgresql
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -23,13 +24,13 @@ func NewRepository(db *sqlx.DB, l logger.CustomLogger) *UserRep {
 	}
 }
 
-func (r *UserRep) CreateUser(u models.User) (uuid.UUID, error) { // need test
+func (r *UserRep) CreateUser(ctx context.Context, u models.User) (uuid.UUID, error) { // need test
 
 	query := `INSERT INTO users
 			 (username, password_hash, salt)
 		VALUES ($1, $2, $3) RETURNING id;`
 
-	row := r.db.QueryRow(query, u.Username, u.Password, u.Salt)
+	row := r.db.QueryRowContext(ctx, query, u.Username, u.Password, u.Salt)
 	var id uuid.UUID
 
 	err := row.Scan(&id)
@@ -39,12 +40,12 @@ func (r *UserRep) CreateUser(u models.User) (uuid.UUID, error) { // need test
 	return id, nil
 }
 
-func (r *UserRep) GetByID(userID uuid.UUID) (*models.User, error) { // need test
+func (r *UserRep) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) { // need test
 	query := `SELECT *
 			 FROM users
 			 WHERE id = $1;`
 
-	row := r.db.QueryRow(query, userID)
+	row := r.db.QueryRowContext(ctx, query, userID)
 	var u models.User
 
 	err := row.Scan(&u.ID, &u.Username, &u.Password, &u.Salt, &u.PlannedBudget, &u.AvatarURL)
@@ -58,7 +59,7 @@ func (r *UserRep) GetByID(userID uuid.UUID) (*models.User, error) { // need test
 	return &u, nil
 }
 
-func (r *UserRep) GetUserByUsername(username string) (*models.User, error) { // need test
+func (r *UserRep) GetUserByUsername(ctx context.Context, username string) (*models.User, error) { // need test
 	query := `SELECT id,
 				username,
 				password_hash,
@@ -66,7 +67,7 @@ func (r *UserRep) GetUserByUsername(username string) (*models.User, error) { // 
 				avatar_url,
 				salt
 			 From users WHERE (username=$1)`
-	row := r.db.QueryRow(query, username)
+	row := r.db.QueryRowContext(ctx, query, username)
 	var u models.User
 	err := row.Scan(&u.ID, &u.Username, &u.Password, &u.PlannedBudget, &u.AvatarURL, &u.Salt)
 
@@ -79,9 +80,9 @@ func (r *UserRep) GetUserByUsername(username string) (*models.User, error) { // 
 	return &u, nil
 }
 
-func (r *UserRep) GetUserBalance(userID uuid.UUID) (float64, error) { // need test
+func (r *UserRep) GetUserBalance(ctx context.Context, userID uuid.UUID) (float64, error) { // need test
 	var totalBalance sql.NullFloat64
-	err := r.db.QueryRow("SELECT SUM(balance) FROM accounts WHERE user_id = $1", userID).Scan(&totalBalance)
+	err := r.db.QueryRowContext(ctx, "SELECT SUM(balance) FROM accounts WHERE user_id = $1", userID).Scan(&totalBalance)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		return 0, fmt.Errorf("[repo] %w: %v", &models.NoSuchUserIdBalanceError{UserID: userID}, err)
@@ -96,9 +97,9 @@ func (r *UserRep) GetUserBalance(userID uuid.UUID) (float64, error) { // need te
 	return 0, nil
 }
 
-func (r *UserRep) GetPlannedBudget(userID uuid.UUID) (float64, error) { // need test
+func (r *UserRep) GetPlannedBudget(ctx context.Context, userID uuid.UUID) (float64, error) { // need test
 	var plannedBudget sql.NullFloat64
-	err := r.db.QueryRow("SELECT planned_budget FROM users WHERE id = $1", userID).Scan(&plannedBudget)
+	err := r.db.QueryRowContext(ctx, "SELECT planned_budget FROM users WHERE id = $1", userID).Scan(&plannedBudget)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		return 0, fmt.Errorf("[repo] %w: %v", &models.NoSuchPlannedBudgetError{UserID: userID}, err)
@@ -112,10 +113,10 @@ func (r *UserRep) GetPlannedBudget(userID uuid.UUID) (float64, error) { // need 
 	return 0, nil
 }
 
-func (r *UserRep) GetCurrentBudget(userID uuid.UUID) (float64, error) { // need test
+func (r *UserRep) GetCurrentBudget(ctx context.Context, userID uuid.UUID) (float64, error) { // need test
 	var currentBudget sql.NullFloat64
 
-	err := r.db.QueryRow(`SELECT SUM(total) AS total_sum
+	err := r.db.QueryRowContext(ctx, `SELECT SUM(total) AS total_sum
 					  FROM Transaction
 					  WHERE date_part('month', date) = date_part('month', CURRENT_DATE)
   					  AND date_part('year', date) = date_part('year', CURRENT_DATE)
@@ -132,11 +133,11 @@ func (r *UserRep) GetCurrentBudget(userID uuid.UUID) (float64, error) { // need 
 	return 0, nil
 }
 
-func (r *UserRep) GetAccounts(user_id uuid.UUID) ([]models.Accounts, error) { // need test
+func (r *UserRep) GetAccounts(ctx context.Context, user_id uuid.UUID) ([]models.Accounts, error) { // need test
 
 	var accounts []models.Accounts
 
-	rows, err := r.db.Query(`SELECT * FROM accounts WHERE user_id = $1`, user_id)
+	rows, err := r.db.QueryContext(ctx, `SELECT * FROM accounts WHERE user_id = $1`, user_id)
 	if err != nil {
 		return nil, err
 	}
@@ -162,9 +163,9 @@ func (r *UserRep) GetAccounts(user_id uuid.UUID) ([]models.Accounts, error) { //
 	return accounts, nil
 }
 
-func (r *UserRep) CheckUser(userID uuid.UUID) error {
+func (r *UserRep) CheckUser(ctx context.Context, userID uuid.UUID) error {
 	var exists bool
-	err := r.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM users WHERE id = $1);`, userID).Scan(&exists)
+	err := r.db.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM users WHERE id = $1);`, userID).Scan(&exists)
 
 	if err != nil {
 		return fmt.Errorf("[repository] failed request checkUser %w", err)
@@ -177,14 +178,14 @@ func (r *UserRep) CheckUser(userID uuid.UUID) error {
 	return nil
 }
 
-func (r *UserRep) UpdateUser(user *models.User) error { // need test
+func (r *UserRep) UpdateUser(ctx context.Context, user *models.User) error { // need test
 	query := `UPDATE users
 				   SET username = $2,
 				       planned_budget = $3,
 					   avatar_url = $4
 				   WHERE id = $1;`
 
-	_, err := r.db.Exec(query, user.ID, user.Username, user.PlannedBudget, user.AvatarURL)
+	_, err := r.db.ExecContext(ctx, query, user.ID, user.Username, user.PlannedBudget, user.AvatarURL)
 	if err != nil {
 		return fmt.Errorf("[repo] failed update user %w", err)
 	}
