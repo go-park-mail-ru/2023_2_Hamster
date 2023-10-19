@@ -23,7 +23,7 @@ type Usecase interface {
 
 type Repository interface {
 	GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error)
-	CreateUser(user models.User) (uuid.UUID, error)
+	CreateUser(ctx context.Context, user models.User) (uuid.UUID, error)
 	//	IncreaseUserVersion(ctx context.Context, ctx context.Context, userID uuid.UUID) error
 	GetUserByUsername(username string) (*models.User, error)
 	//	GetUserByIDAndVersion(ctx context.Context, ctx context.Context, userID, userVersion uuid.UUID) (*models.User, error)
