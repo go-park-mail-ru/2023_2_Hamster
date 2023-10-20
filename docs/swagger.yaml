@@ -1,12 +1,5 @@
 basePath: /user/{userID}/account/feed
 definitions:
-  http.Response-models_UserTransfer:
-    properties:
-      body:
-        $ref: '#/definitions/models.UserTransfer'
-      status:
-        type: integer
-    type: object
   http.Response-transfer_models_Account:
     properties:
       body:
@@ -39,6 +32,13 @@ definitions:
     properties:
       body:
         $ref: '#/definitions/transfer_models.UserFeed'
+      status:
+        type: integer
+    type: object
+  http.Response-transfer_models_UserTransfer:
+    properties:
+      body:
+        $ref: '#/definitions/transfer_models.UserTransfer'
       status:
         type: integer
     type: object
@@ -89,17 +89,6 @@ definitions:
       username:
         type: string
     type: object
-  models.UserTransfer:
-    properties:
-      avatar_url:
-        type: string
-      id:
-        type: string
-      planned_budget:
-        type: number
-      username:
-        type: string
-    type: object
   transfer_models.Account:
     properties:
       account:
@@ -134,6 +123,17 @@ definitions:
         type: number
       planned_balance:
         type: number
+    type: object
+  transfer_models.UserTransfer:
+    properties:
+      avatar_url:
+        type: string
+      id:
+        type: string
+      planned_budget:
+        type: number
+      username:
+        type: string
     type: object
 host: localhost:8090
 info:
@@ -243,7 +243,7 @@ paths:
         "200":
           description: Show balance
           schema:
-            $ref: '#/definitions/http.Response-models_UserTransfer'
+            $ref: '#/definitions/http.Response-transfer_models_UserTransfer'
         "400":
           description: Client error
           schema:
@@ -320,7 +320,7 @@ paths:
       - User
   /api/user/{userID}/feed:
     get:
-      description: Get User accounts
+      description: Get Feed user info
       produces:
       - application/json
       responses:
@@ -336,7 +336,7 @@ paths:
           description: Server error
           schema:
             $ref: '#/definitions/http.ResponseError'
-      summary: Get User Accounts
+      summary: Get Feed
       tags:
       - User
   /api/user/{userID}/plannedBudget:
@@ -358,6 +358,36 @@ paths:
           schema:
             $ref: '#/definitions/http.ResponseError'
       summary: Get Planned Budget
+      tags:
+      - User
+  /api/user/{userID}/update:
+    put:
+      consumes:
+      - application/json
+      description: Update user info
+      parameters:
+      - description: user info update
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/transfer_models.UserTransfer'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Update user info
+          schema:
+            $ref: '#/definitions/http.Response-transfer_models_UserTransfer'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: PUT Update
       tags:
       - User
 swagger: "2.0"

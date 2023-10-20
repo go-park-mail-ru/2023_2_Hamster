@@ -162,7 +162,6 @@ func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
 // @Description	Get User accounts
 // @Produce		json
 // @Success		200		{object}	Response[transfer_models.Account]	     	"Show actual accounts"
-// @Success		204		{object}	Response[""]	     	"Show actual accounts"
 // @Failure		400		{object}	ResponseError		"Client error"
 // @Failure		500		{object}	ResponseError		"Server error"
 // @Router		/api/user/{userID}/accounts/all [get]
@@ -234,12 +233,14 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 // @Summary		PUT Update
 // @Tags			User
 // @Description	Update user info
+// @Accept      json
 // @Produce		json
+// @Param			user		body		transfer_models.UserTransfer		true		"user info update"
 // @Success		200		{object}	Response[transfer_models.UserTransfer]	     	"Update user info"
 // @Failure		400		{object}	ResponseError		"Client error"
 // @Failure		500		{object}	ResponseError		"Server error"
 // @Router		/api/user/{userID}/update [put]
-func (h *Handler) Update(w http.ResponseWriter, r *http.Request) { // need test
+func (h *Handler) Update(w http.ResponseWriter, r *http.Request) { // need test, TO DO ADD UserUdate struct
 	user, err := commonHttp.GetUserFromRequest(r)
 	if err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
