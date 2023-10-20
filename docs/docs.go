@@ -46,19 +46,19 @@ const docTemplate = `{
                     "200": {
                         "description": "User status",
                         "schema": {
-                            "$ref": "#/definitions/http.Error"
+                            "$ref": "#/definitions/http.ResponseError"
                         }
                     },
                     "400": {
                         "description": "Invalid cookie",
                         "schema": {
-                            "$ref": "#/definitions/http.Error"
+                            "$ref": "#/definitions/http.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Server error: cookie read fail",
                         "schema": {
-                            "$ref": "#/definitions/http.Error"
+                            "$ref": "#/definitions/http.ResponseError"
                         }
                     }
                 }
@@ -98,13 +98,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Incorrect Input",
                         "schema": {
-                            "$ref": "#/definitions/http.Error"
+                            "$ref": "#/definitions/http.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Server error",
                         "schema": {
-                            "$ref": "#/definitions/http.Error"
+                            "$ref": "#/definitions/http.ResponseError"
                         }
                     }
                 }
@@ -144,13 +144,45 @@ const docTemplate = `{
                     "400": {
                         "description": "Incorrect Input",
                         "schema": {
-                            "$ref": "#/definitions/http.Error"
+                            "$ref": "#/definitions/http.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Server error",
                         "schema": {
-                            "$ref": "#/definitions/http.Error"
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/{userID}/": {
+            "get": {
+                "description": "Get user with chosen ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get User",
+                "responses": {
+                    "200": {
+                        "description": "Show balance",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-models_UserTransfer"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
                         }
                     }
                 }
@@ -176,13 +208,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Client error",
                         "schema": {
-                            "$ref": "#/definitions/http.Error"
+                            "$ref": "#/definitions/http.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Server error",
                         "schema": {
-                            "$ref": "#/definitions/http.Error"
+                            "$ref": "#/definitions/http.ResponseError"
                         }
                     }
                 }
@@ -208,13 +240,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Client error",
                         "schema": {
-                            "$ref": "#/definitions/http.Error"
+                            "$ref": "#/definitions/http.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Server error",
                         "schema": {
-                            "$ref": "#/definitions/http.Error"
+                            "$ref": "#/definitions/http.ResponseError"
                         }
                     }
                 }
@@ -240,13 +272,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Client error",
                         "schema": {
-                            "$ref": "#/definitions/http.Error"
+                            "$ref": "#/definitions/http.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Server error",
                         "schema": {
-                            "$ref": "#/definitions/http.Error"
+                            "$ref": "#/definitions/http.ResponseError"
                         }
                     }
                 }
@@ -272,13 +304,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Client error",
                         "schema": {
-                            "$ref": "#/definitions/http.Error"
+                            "$ref": "#/definitions/http.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Server error",
                         "schema": {
-                            "$ref": "#/definitions/http.Error"
+                            "$ref": "#/definitions/http.ResponseError"
                         }
                     }
                 }
@@ -304,13 +336,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Client error",
                         "schema": {
-                            "$ref": "#/definitions/http.Error"
+                            "$ref": "#/definitions/http.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Server error",
                         "schema": {
-                            "$ref": "#/definitions/http.Error"
+                            "$ref": "#/definitions/http.ResponseError"
                         }
                     }
                 }
@@ -318,11 +350,11 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "http.Error": {
+        "http.Response-models_UserTransfer": {
             "type": "object",
             "properties": {
-                "message": {
-                    "type": "string"
+                "body": {
+                    "$ref": "#/definitions/models.UserTransfer"
                 },
                 "status": {
                     "type": "integer"
@@ -378,6 +410,17 @@ const docTemplate = `{
             "properties": {
                 "body": {
                     "$ref": "#/definitions/transfer_models.UserFeed"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "http.ResponseError": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
                 },
                 "status": {
                     "type": "integer"
@@ -446,6 +489,23 @@ const docTemplate = `{
                 }
             }
         },
+        "models.UserTransfer": {
+            "type": "object",
+            "properties": {
+                "avatar_url": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "planned_budget": {
+                    "type": "number"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "transfer_models.Account": {
             "type": "object",
             "properties": {
@@ -495,9 +555,6 @@ const docTemplate = `{
                 },
                 "balance": {
                     "type": "number"
-                },
-                "err_message": {
-                    "type": "string"
                 },
                 "planned_balance": {
                     "type": "number"

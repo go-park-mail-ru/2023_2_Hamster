@@ -31,8 +31,8 @@ func NewHandler(au auth.Usecase, log logger.CustomLogger) *Handler {
 // @Produce		json
 // @Param			user		body		models.User		true		"user info"
 // @Success		200		{object}	signUpResponse				"User Created"
-// @Failure		400		{object}	http.Error				"Incorrect Input"
-// @Failure		500		{object}	http.Error				"Server error"
+// @Failure		400		{object}	ResponseError				"Incorrect Input"
+// @Failure		500		{object}	ResponseError				"Server error"
 // @Router		/api/auth/signup	[post]
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	var user models.User
@@ -68,8 +68,8 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Produce		json
 // @Param			userInput		body		signInput		true		"username && password"
 // @Success		200			{object}	signUpResponse			"User logedin"
-// @Failure		400			{object}	http.Error			"Incorrect Input"
-// @Failure		500			{object}	http.Error			"Server error"
+// @Failure		400			{object}	ResponseError			"Incorrect Input"
+// @Failure		500			{object}	ResponseError			"Server error"
 // @Router		/api/auth/signin	[post]
 func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 	userInput := &models.SignInput{}
@@ -107,9 +107,9 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 // @Accept 		json
 // @Produce		json
 // @Param			user		body		models.User		true		"user info"
-// @Success		200		{object}	http.Error				"User status"
-// @Failure		400		{object}	http.Error				"Invalid cookie"
-// @Failure		500		{object}	http.Error				"Server error: cookie read fail"
+// @Success		200		{object}	ResponseError				"User status"
+// @Failure		400		{object}	ResponseError				"Invalid cookie"
+// @Failure		500		{object}	ResponseError				"Server error: cookie read fail"
 // @Router		/api/auth/checkAuth	[post]
 func (h *Handler) AccessVerification(w http.ResponseWriter, r *http.Request) {
 	tokenCookie, err := r.Cookie(AuthCookie)

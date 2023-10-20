@@ -6,6 +6,12 @@ import (
 	"github.com/google/uuid"
 )
 
+type UnathorizedError struct{}
+
+func (e *UnathorizedError) Error() string {
+	return "unathorized"
+}
+
 type NoSuchUserError struct {
 	UserID uuid.UUID
 }

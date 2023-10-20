@@ -1,6 +1,6 @@
 module github.com/go-park-mail-ru/2023_2_Hamster
 
-go 1.18.1
+go 1.20
 
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect

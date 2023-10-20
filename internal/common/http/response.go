@@ -9,6 +9,7 @@ import (
 
 const (
 	InvalidURLParameter = "invalid url parameter"
+	InvalidBodyRequest  = "invalid input body"
 )
 
 type Response[T any] struct {
@@ -16,7 +17,7 @@ type Response[T any] struct {
 	Body   T   `json:"body"`
 }
 
-type Error struct {
+type ResponseError struct {
 	Status int    `json:"status"`
 	ErrMes string `json:"message"`
 }
@@ -33,7 +34,7 @@ func ErrorResponse(w http.ResponseWriter, code int, err error, message string, l
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(code)
 
-	errorMsg := Error{
+	errorMsg := ResponseError{
 		Status: code,
 		ErrMes: message,
 	}

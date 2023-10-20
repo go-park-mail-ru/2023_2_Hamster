@@ -1,6 +1,7 @@
 package http
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -31,9 +32,10 @@ func NewHandler(uu user.Usecase, l logger.CustomLogger) *Handler {
 // @Tags		User
 // @Description	Get user with chosen ID
 // @Produce		json
-// @Success		200		{object}	Response[models.usrTranfer] "Show balance"
-// @Failure		400		{object}	http.Error	"Client error"
-// @Failure		500		{object}	http.Error	"Server error"
+// @Success		200		{object}	Response[transfer_models.UserTransfer] "Show balance"
+// @Failure		400		{object}	ResponseError	"Client error"
+// @Failure		500		{object}	ResponseError	"Server error"
+// @Router		/api/user/{userID}/ [get]
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
 	if err != nil {
@@ -42,7 +44,7 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var errNoSuchUser *models.NoSuchUserError
-	usr, err := h.userService.GetUser(userID)
+	usr, err := h.userService.GetUser(r.Context(), userID)
 	if errors.As(err, &errNoSuchUser) {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserNotFound, h.logger)
 		return
@@ -53,7 +55,7 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	usrTranfer := models.InitUserTransfer(*usr)
+	usrTranfer := transfer_models.InitUserTransfer(*usr)
 
 	commonHttp.SuccessResponse(w, http.StatusOK, usrTranfer)
 }
@@ -63,8 +65,8 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 // @Description	Get User balance
 // @Produce		json
 // @Success		200		{object}	Response[transfer_models.BalanceResponse] "Show balance"
-// @Failure		400		{object}	http.Error	"Client error"
-// @Failure		500		{object}	http.Error	"Server error"
+// @Failure		400		{object}	ResponseError	"Client error"
+// @Failure		500		{object}	ResponseError	"Server error"
 // @Router		/api/user/{userID}/balance [get]
 func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
@@ -72,7 +74,7 @@ func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
 		return
 	}
-	balance, err := h.userService.GetUserBalance(userID)
+	balance, err := h.userService.GetUserBalance(r.Context(), userID)
 
 	var errNoSuchUserIdBalanceError *models.NoSuchUserIdBalanceError
 	if errors.As(err, &errNoSuchUserIdBalanceError) {
@@ -94,8 +96,8 @@ func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 // @Description	Get User planned budget
 // @Produce		json
 // @Success		200		{object} 	Response[transfer_models.BudgetPlannedResponse]	"Show planned budget"
-// @Failure		400		{object}	http.Error			"Client error"
-// @Failure		500		{object}	http.Error			"Server error"
+// @Failure		400		{object}	ResponseError			"Client error"
+// @Failure		500		{object}	ResponseError			"Server error"
 // @Router		/api/user/{userID}/plannedBudget [get]
 func (h *Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {
 	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
@@ -105,7 +107,7 @@ func (h *Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	budget, err := h.userService.GetPlannedBudget(userID)
+	budget, err := h.userService.GetPlannedBudget(r.Context(), userID)
 
 	var errNoSuchPlannedBudgetError *models.NoSuchPlannedBudgetError
 	if errors.As(err, &errNoSuchPlannedBudgetError) {
@@ -127,8 +129,8 @@ func (h *Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {
 // @Description	Get User actual budget
 // @Produce		json
 // @Success		200		{object}	Response[transfer_models.BudgetActualResponse]	"Show actual budget"
-// @Failure		400		{object}	http.Error			"Client error"
-// @Failure		500		{object}	http.Error			"Server error"
+// @Failure		400		{object}	ResponseError			"Client error"
+// @Failure		500		{object}	ResponseError			"Server error"
 // @Router		/api/user/{userID}/actualBudget [get]
 func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
 	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
@@ -138,7 +140,7 @@ func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	budget, err := h.userService.GetCurrentBudget(userID)
+	budget, err := h.userService.GetCurrentBudget(r.Context(), userID)
 
 	// var errNoSuchCurrentBudget *models.NoSuchCurrentBudget
 	// if errors.As(err, &errNoSuchCurrentBudget) {
@@ -160,8 +162,9 @@ func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
 // @Description	Get User accounts
 // @Produce		json
 // @Success		200		{object}	Response[transfer_models.Account]	     	"Show actual accounts"
-// @Failure		400		{object}	http.Error		"Client error"
-// @Failure		500		{object}	http.Error		"Server error"
+// @Success		204		{object}	Response[""]	     	"Show actual accounts"
+// @Failure		400		{object}	ResponseError		"Client error"
+// @Failure		500		{object}	ResponseError		"Server error"
 // @Router		/api/user/{userID}/accounts/all [get]
 func (h *Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
@@ -171,13 +174,13 @@ func (h *Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accountInfo, err := h.userService.GetAccounts(userID)
+	accountInfo, err := h.userService.GetAccounts(r.Context(), userID)
 
 	var errNoSuchAccounts *models.NoSuchAccounts
 
 	if errors.As(err, &errNoSuchAccounts) {
 		h.logger.Info(err.Error())
-		commonHttp.SuccessResponse(w, http.StatusOK, "")
+		commonHttp.SuccessResponse(w, http.StatusNoContent, "")
 		return
 	}
 
@@ -190,16 +193,15 @@ func (h *Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 	commonHttp.SuccessResponse[transfer_models.Account](w, http.StatusOK, response)
 }
 
-// @Summary		Get User Accounts
+// @Summary		Get Feed
 // @Tags			User
-// @Description	Get User accounts
+// @Description	Get Feed user info
 // @Produce		json
 // @Success		200		{object}	Response[transfer_models.UserFeed]	     	"Show actual accounts"
-// @Failure		400		{object}	http.Error		"Client error"
-// @Failure		500		{object}	http.Error		"Server error"
+// @Failure		400		{object}	ResponseError		"Client error"
+// @Failure		500		{object}	ResponseError		"Server error"
 // @Router		/api/user/{userID}/feed [get]
 func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
-	status := http.StatusOK
 	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
 
 	if err != nil {
@@ -207,7 +209,7 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dataFeed, err := h.userService.GetFeed(userID)
+	dataFeed, err := h.userService.GetFeed(r.Context(), userID)
 
 	var errNoSuchPlannedBudgetError *models.NoSuchPlannedBudgetError
 	var errNoSuchUserIdBalanceError *models.NoSuchUserIdBalanceError
@@ -226,5 +228,48 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	commonHttp.SuccessResponse(w, status, dataFeed)
+	commonHttp.SuccessResponse(w, http.StatusOK, dataFeed)
+}
+
+// @Summary		PUT Update
+// @Tags			User
+// @Description	Update user info
+// @Produce		json
+// @Success		200		{object}	Response[transfer_models.UserTransfer]	     	"Update user info"
+// @Failure		400		{object}	ResponseError		"Client error"
+// @Failure		500		{object}	ResponseError		"Server error"
+// @Router		/api/user/{userID}/update [put]
+func (h *Handler) Update(w http.ResponseWriter, r *http.Request) { // need test
+	user, err := commonHttp.GetUserFromRequest(r)
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
+		return
+	}
+
+	var updProfile transfer_models.UserTransfer
+
+	if err := json.NewDecoder(r.Body).Decode(&updProfile); err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidBodyRequest, h.logger)
+		return
+	}
+
+	if err := updProfile.CheckValid(); err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidBodyRequest, h.logger)
+		return
+	}
+
+	if err := h.userService.UpdateUser(r.Context(), updProfile.ToUser(user)); err != nil {
+		var errNoSuchUser *models.NoSuchUserError
+		if errors.As(err, &errNoSuchUser) {
+			commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserNotFound, h.logger)
+			return
+		}
+
+		if err != nil {
+			commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, transfer_models.UserServerError, h.logger)
+			return
+		}
+	}
+
+	commonHttp.SuccessResponse(w, http.StatusOK, updProfile)
 }

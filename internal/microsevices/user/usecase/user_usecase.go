@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
@@ -25,8 +26,8 @@ func NewUsecase(
 	}
 }
 
-func (u *Usecase) GetUser(userID uuid.UUID) (*models.User, error) { // need test
-	user, err := u.userRepo.GetByID(userID)
+func (u *Usecase) GetUser(ctx context.Context, userID uuid.UUID) (*models.User, error) { // need test
+	user, err := u.userRepo.GetByID(ctx, userID)
 	if err != nil {
 		return user, fmt.Errorf("[usecase] can't get user from repository %w", err)
 	}
@@ -34,8 +35,8 @@ func (u *Usecase) GetUser(userID uuid.UUID) (*models.User, error) { // need test
 	return user, nil
 }
 
-func (u *Usecase) GetUserBalance(userID uuid.UUID) (float64, error) {
-	balance, err := u.userRepo.GetUserBalance(userID)
+func (u *Usecase) GetUserBalance(ctx context.Context, userID uuid.UUID) (float64, error) {
+	balance, err := u.userRepo.GetUserBalance(ctx, userID)
 	if err != nil {
 		return 0, fmt.Errorf("[usecase] can't get balance from repository %w", err)
 	}
@@ -43,8 +44,8 @@ func (u *Usecase) GetUserBalance(userID uuid.UUID) (float64, error) {
 	return balance, nil
 }
 
-func (u *Usecase) GetPlannedBudget(userID uuid.UUID) (float64, error) {
-	balance, err := u.userRepo.GetPlannedBudget(userID)
+func (u *Usecase) GetPlannedBudget(ctx context.Context, userID uuid.UUID) (float64, error) {
+	balance, err := u.userRepo.GetPlannedBudget(ctx, userID)
 	if err != nil {
 		return 0, fmt.Errorf("[usecase] can't get planned budget from repository %w", err)
 	}
@@ -52,14 +53,14 @@ func (u *Usecase) GetPlannedBudget(userID uuid.UUID) (float64, error) {
 	return balance, nil
 }
 
-func (u *Usecase) GetCurrentBudget(userID uuid.UUID) (float64, error) {
-	transactionExpenses, err := u.userRepo.GetCurrentBudget(userID)
+func (u *Usecase) GetCurrentBudget(ctx context.Context, userID uuid.UUID) (float64, error) {
+	transactionExpenses, err := u.userRepo.GetCurrentBudget(ctx, userID)
 
 	if err != nil {
 		return 0, fmt.Errorf("[usecase] can't get current budget from repository %w", err)
 	}
 
-	plannedBudget, err := u.userRepo.GetPlannedBudget(userID)
+	plannedBudget, err := u.userRepo.GetPlannedBudget(ctx, userID)
 	if err != nil {
 		return 0, fmt.Errorf("[usecase] can't get planned budget from repository %w", err)
 	}
@@ -68,8 +69,8 @@ func (u *Usecase) GetCurrentBudget(userID uuid.UUID) (float64, error) {
 	return currentBudget, nil
 }
 
-func (u *Usecase) GetAccounts(userID uuid.UUID) ([]models.Accounts, error) {
-	account, err := u.userRepo.GetAccounts(userID)
+func (u *Usecase) GetAccounts(ctx context.Context, userID uuid.UUID) ([]models.Accounts, error) {
+	account, err := u.userRepo.GetAccounts(ctx, userID)
 	if err != nil {
 
 		return account, fmt.Errorf("[usecase] can't get accounts from repository %w", err)
@@ -78,29 +79,40 @@ func (u *Usecase) GetAccounts(userID uuid.UUID) ([]models.Accounts, error) {
 	return account, nil
 }
 
-func (u *Usecase) GetFeed(userID uuid.UUID) (tranfer_models.UserFeed, error) { // need test!
-	var dataTranfer tranfer_models.UserFeed
+func (u *Usecase) GetFeed(ctx context.Context, userID uuid.UUID) (*tranfer_models.UserFeed, error) { // need test!
+	dataTranfer := &tranfer_models.UserFeed{}
 	var err error
 
-	dataTranfer.Balance, err = u.GetUserBalance(userID)
+	dataTranfer.Balance, err = u.GetUserBalance(ctx, userID)
 	if err != nil {
 		return dataTranfer, err
 	}
 
-	dataTranfer.BudgetActual, err = u.GetCurrentBudget(userID)
+	dataTranfer.BudgetActual, err = u.GetCurrentBudget(ctx, userID)
 	if err != nil {
 		return dataTranfer, err
 	}
 
-	dataTranfer.BudgetPlanned, err = u.GetPlannedBudget(userID)
+	dataTranfer.BudgetPlanned, err = u.GetPlannedBudget(ctx, userID)
 	if err != nil {
 		return dataTranfer, err
 	}
 
-	dataTranfer.AccountMas, err = u.GetAccounts(userID)
+	dataTranfer.AccountMas, err = u.GetAccounts(ctx, userID)
 	if err != nil {
 		return dataTranfer, err
 	}
 
 	return dataTranfer, nil
+}
+
+func (u *Usecase) UpdateUser(ctx context.Context, user *models.User) error { // need test
+	if err := u.userRepo.CheckUser(ctx, user.ID); err != nil {
+		return fmt.Errorf("[usecase] can't get check user from repository %w", err)
+	}
+
+	if err := u.userRepo.UpdateUser(ctx, user); err != nil {
+		return fmt.Errorf("[usecase] can't update user %w", err)
+	}
+	return nil
 }

@@ -1,9 +1,9 @@
 basePath: /user/{userID}/account/feed
 definitions:
-  http.Error:
+  http.Response-models_UserTransfer:
     properties:
-      message:
-        type: string
+      body:
+        $ref: '#/definitions/models.UserTransfer'
       status:
         type: integer
     type: object
@@ -39,6 +39,13 @@ definitions:
     properties:
       body:
         $ref: '#/definitions/transfer_models.UserFeed'
+      status:
+        type: integer
+    type: object
+  http.ResponseError:
+    properties:
+      message:
+        type: string
       status:
         type: integer
     type: object
@@ -82,6 +89,17 @@ definitions:
       username:
         type: string
     type: object
+  models.UserTransfer:
+    properties:
+      avatar_url:
+        type: string
+      id:
+        type: string
+      planned_budget:
+        type: number
+      username:
+        type: string
+    type: object
   transfer_models.Account:
     properties:
       account:
@@ -114,8 +132,6 @@ definitions:
         type: number
       balance:
         type: number
-      err_message:
-        type: string
       planned_balance:
         type: number
     type: object
@@ -146,15 +162,15 @@ paths:
         "200":
           description: User status
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
         "400":
           description: Invalid cookie
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
         "500":
           description: 'Server error: cookie read fail'
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
       summary: Validate Auth
       tags:
       - Auth
@@ -180,11 +196,11 @@ paths:
         "400":
           description: Incorrect Input
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
         "500":
           description: Server error
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
       summary: Sign In
       tags:
       - Auth
@@ -210,14 +226,35 @@ paths:
         "400":
           description: Incorrect Input
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
         "500":
           description: Server error
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
       summary: Sign Up
       tags:
       - Auth
+  /api/user/{userID}/:
+    get:
+      description: Get user with chosen ID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Show balance
+          schema:
+            $ref: '#/definitions/http.Response-models_UserTransfer'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Get User
+      tags:
+      - User
   /api/user/{userID}/accounts/all:
     get:
       description: Get User accounts
@@ -231,11 +268,11 @@ paths:
         "400":
           description: Client error
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
         "500":
           description: Server error
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
       summary: Get User Accounts
       tags:
       - User
@@ -252,11 +289,11 @@ paths:
         "400":
           description: Client error
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
         "500":
           description: Server error
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
       summary: Get Actual Budget
       tags:
       - User
@@ -273,11 +310,11 @@ paths:
         "400":
           description: Client error
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
         "500":
           description: Server error
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
       summary: Get Balance
       tags:
       - User
@@ -294,11 +331,11 @@ paths:
         "400":
           description: Client error
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
         "500":
           description: Server error
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
       summary: Get User Accounts
       tags:
       - User
@@ -315,11 +352,11 @@ paths:
         "400":
           description: Client error
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
         "500":
           description: Server error
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
       summary: Get Planned Budget
       tags:
       - User

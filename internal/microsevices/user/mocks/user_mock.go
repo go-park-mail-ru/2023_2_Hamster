@@ -67,10 +67,10 @@ func (mr *MockUsecaseMockRecorder) GetCurrentBudget(userID interface{}) *gomock.
 }
 
 // GetFeed mocks base method.
-func (m *MockUsecase) GetFeed(userID uuid.UUID) (transfer_models.UserFeed, error) {
+func (m *MockUsecase) GetFeed(userID uuid.UUID) (*transfer_models.UserFeed, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetFeed", userID)
-	ret0, _ := ret[0].(transfer_models.UserFeed)
+	ret0, _ := ret[0].(*transfer_models.UserFeed)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
