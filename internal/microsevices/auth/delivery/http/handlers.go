@@ -46,7 +46,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	h.log.Debug("request body successfully decoded\n", r)
 
-	id, token, err := h.au.SignUpUser(user)
+	id, err := h.au.SignUp(ctx.TODO(), user)
 	if err != nil {
 		h.log.Error(err.Error())
 		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err.Error(), h.log)
@@ -72,7 +72,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Failure		500			{object}	http.Error			"Server error"
 // @Router		/api/auth/signin	[post]
 func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
-	userInput := &signInput{}
+	userInput := &models.SignInput{}
 
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&userInput); err != nil {

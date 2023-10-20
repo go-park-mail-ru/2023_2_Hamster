@@ -2,6 +2,7 @@ version: '3.8'
 
 networks:
   app-network:
+    driver: bridge
 
 services:
   server:
@@ -10,17 +11,18 @@ services:
       dockerfile: ./build/Dockerfile
     restart: on-failure
     networks:
-      app-network:
+      - app-network
     ports:
       - "8080:8080"
     depends_on:
       - db
+      - redis
 
   db:
     image: postgres:latest
     restart: on-failure
     networks:
-      app-network:
+      - app-network
     env_file:
       - .env
     environment:
@@ -29,3 +31,11 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - ./internal/common/postgresql/schema/:/docker-entrypoint-initdb.d/
+
+  redis:
+    image: redis:latest
+    restart: on-failure
+    networks:
+      - app-network
+    ports:
+      - "6379:6379"

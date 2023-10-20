@@ -14,6 +14,11 @@ type User struct {
 	Salt          string    `json:"salt"`
 }
 
+type SignInput struct {
+	Username string `json:"username" valid:"required"`
+	Password string `json:"password" valid:"required"`
+}
+
 type ContextKeyUserType struct{}
 
 func (u *User) UserValidate() error {

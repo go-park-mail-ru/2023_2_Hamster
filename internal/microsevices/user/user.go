@@ -1,6 +1,8 @@
 package user
 
 import (
+	"context"
+
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/delivery/http/transfer_models"
 	"github.com/google/uuid"
@@ -22,7 +24,7 @@ type Repository interface {
 	GetByID(userID uuid.UUID) (*models.User, error)
 	CreateUser(user models.User) (uuid.UUID, error)
 	//	IncreaseUserVersion(ctx context.Context, userID uuid.UUID) error
-	GetUserByUsername(username string) (*models.User, error)
+	GetUserByUsername(ctx context.Context, username string) (*models.User, error)
 	//	GetUserByIDAndVersion(ctx context.Context, userID, userVersion uuid.UUID) (*models.User, error)
 	GetUserBalance(userID uuid.UUID) (float64, error) // transfer account repostiory
 	GetPlannedBudget(userID uuid.UUID) (float64, error)
