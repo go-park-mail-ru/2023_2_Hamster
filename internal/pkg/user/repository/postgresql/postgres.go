@@ -27,10 +27,10 @@ func NewRepository(db *sqlx.DB, l logger.CustomLogger) *UserRep {
 func (r *UserRep) CreateUser(ctx context.Context, u models.User) (uuid.UUID, error) { // need test
 
 	query := `INSERT INTO users
-			 (username, password_hash, salt)
+			 (login, username, password_hash, salt)
 		VALUES ($1, $2, $3) RETURNING id;`
 
-	row := r.db.QueryRowContext(ctx, query, u.Username, u.Password, u.Salt)
+	row := r.db.QueryRowContext(ctx, query, u.Login, u.Username, u.Password, u.Salt)
 	var id uuid.UUID
 
 	err := row.Scan(&id)
@@ -48,7 +48,7 @@ func (r *UserRep) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, 
 	row := r.db.QueryRowContext(ctx, query, userID)
 	var u models.User
 
-	err := row.Scan(&u.ID, &u.Username, &u.Password, &u.Salt, &u.PlannedBudget, &u.AvatarURL)
+	err := row.Scan(&u.ID, &u.Login, &u.Username, &u.Password, &u.Salt, &u.PlannedBudget, &u.AvatarURL)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, fmt.Errorf("[repo] %w: %v", &models.NoSuchUserError{UserID: userID}, err)
 	} else if err != nil {
@@ -69,7 +69,7 @@ func (r *UserRep) GetUserByUsername(ctx context.Context, username string) (*mode
 			 From users WHERE (username=$1)`
 	row := r.db.QueryRowContext(ctx, query, username)
 	var u models.User
-	err := row.Scan(&u.ID, &u.Username, &u.Password, &u.PlannedBudget, &u.AvatarURL, &u.Salt)
+	err := row.Scan(&u.ID, &u.Login, &u.Username, &u.Password, &u.PlannedBudget, &u.AvatarURL, &u.Salt)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, fmt.Errorf("[repository] nothing found for this request %w", err)
@@ -191,4 +191,15 @@ func (r *UserRep) UpdateUser(ctx context.Context, user *models.User) error { // 
 	}
 
 	return nil
+}
+
+func (r *UserRep) IsLoginUnique(ctx context.Context, login string) (bool, error) {
+	query := "SELECT COUNT(*) FROM users WHERE login = $1"
+	var count int
+	err := r.db.QueryRowContext(ctx, query, login).Scan(&count)
+	if err != nil {
+		return false, fmt.Errorf("[repo] failed login unique check %w", err)
+	}
+
+	return count == 0, nil
 }

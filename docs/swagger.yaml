@@ -1,5 +1,14 @@
 basePath: /user/{userID}/account/feed
 definitions:
+  http.NilBody:
+    type: object
+  http.Response-http_NilBody:
+    properties:
+      body:
+        $ref: '#/definitions/http.NilBody'
+      status:
+        type: integer
+    type: object
   http.Response-transfer_models_Account:
     properties:
       body:
@@ -131,6 +140,13 @@ definitions:
       id:
         type: string
       planned_budget:
+        type: number
+      username:
+        type: string
+    type: object
+  transfer_models.UserUdate:
+    properties:
+      plannedBudget:
         type: number
       username:
         type: string
@@ -371,14 +387,14 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/transfer_models.UserTransfer'
+          $ref: '#/definitions/transfer_models.UserUdate'
       produces:
       - application/json
       responses:
         "200":
           description: Update user info
           schema:
-            $ref: '#/definitions/http.Response-transfer_models_UserTransfer'
+            $ref: '#/definitions/http.Response-http_NilBody'
         "400":
           description: Client error
           schema:

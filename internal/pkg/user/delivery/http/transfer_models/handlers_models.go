@@ -50,19 +50,25 @@ type UserFeed struct {
 
 type UserTransfer struct {
 	ID            uuid.UUID `json:"id" valid:""`
+	Login         string    `json:"login" valid:"required,maxstringlength(20)"`
 	Username      string    `json:"username" valid:"required,maxstringlength(20)"`
 	PlannedBudget float64   `json:"planned_budget" valid:"required,float"`
-	AvatarURL     string    `json:"avatar_url" valid:""`
+	AvatarURL     uuid.UUID `json:"avatar_url" valid:""`
 }
 
-func (ui *UserTransfer) CheckValid() error {
+type UserUdate struct {
+	Username      string
+	PlannedBudget float64
+}
+
+func (ui *UserUdate) CheckValid() error {
 	ui.Username = html.EscapeString(ui.Username)
 	_, err := valid.ValidateStruct(*ui)
 
 	return err
 }
 
-func (ui *UserTransfer) ToUser(user *models.User) *models.User {
+func (ui *UserUdate) ToUser(user *models.User) *models.User {
 	return &models.User{
 		ID:            user.ID,
 		Username:      ui.Username,

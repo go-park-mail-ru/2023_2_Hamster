@@ -116,3 +116,13 @@ func (u *Usecase) UpdateUser(ctx context.Context, user *models.User) error { // 
 	}
 	return nil
 }
+
+func (u *Usecase) IsLoginUnique(ctx context.Context, login string) (bool, error) { // move from auth rep
+	isUnique, err := u.userRepo.IsLoginUnique(ctx, login)
+
+	if err != nil {
+		return false, fmt.Errorf("[usecase] can`t login unique check")
+	}
+
+	return isUnique, nil
+}

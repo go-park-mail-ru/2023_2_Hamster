@@ -368,7 +368,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/transfer_models.UserTransfer"
+                            "$ref": "#/definitions/transfer_models.UserUdate"
                         }
                     }
                 ],
@@ -376,7 +376,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Update user info",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-transfer_models_UserTransfer"
+                            "$ref": "#/definitions/http.Response-http_NilBody"
                         }
                     },
                     "400": {
@@ -396,6 +396,20 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "http.NilBody": {
+            "type": "object"
+        },
+        "http.Response-http_NilBody": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/http.NilBody"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
         "http.Response-transfer_models_Account": {
             "type": "object",
             "properties": {
@@ -600,6 +614,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "planned_budget": {
+                    "type": "number"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "transfer_models.UserUdate": {
+            "type": "object",
+            "properties": {
+                "plannedBudget": {
                     "type": "number"
                 },
                 "username": {

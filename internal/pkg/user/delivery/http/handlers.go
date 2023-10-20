@@ -18,7 +18,8 @@ type Handler struct {
 }
 
 const (
-	userIdUrlParam = "userID"
+	userIdUrlParam    = "userID"
+	userloginUrlParam = "login"
 )
 
 func NewHandler(uu user.Usecase, l logger.CustomLogger) *Handler {
@@ -235,19 +236,19 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 // @Description	Update user info
 // @Accept      json
 // @Produce		json
-// @Param			user		body		transfer_models.UserTransfer		true		"user info update"
-// @Success		200		{object}	Response[transfer_models.UserTransfer]	     	"Update user info"
+// @Param			user		body		transfer_models.UserUdate		true		"user info update"
+// @Success		200		{object}	Response[NilBody]	     	"Update user info"
 // @Failure		400		{object}	ResponseError		"Client error"
 // @Failure		500		{object}	ResponseError		"Server error"
 // @Router		/api/user/{userID}/update [put]
-func (h *Handler) Update(w http.ResponseWriter, r *http.Request) { // need test, TO DO ADD UserUdate struct
+func (h *Handler) Update(w http.ResponseWriter, r *http.Request) { // need test
 	user, err := commonHttp.GetUserFromRequest(r)
 	if err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
 		return
 	}
 
-	var updProfile transfer_models.UserTransfer
+	var updProfile transfer_models.UserUdate
 
 	if err := json.NewDecoder(r.Body).Decode(&updProfile); err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidBodyRequest, h.logger)
@@ -272,5 +273,17 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) { // need test,
 		}
 	}
 
-	commonHttp.SuccessResponse(w, http.StatusOK, updProfile)
+	commonHttp.SuccessResponse(w, http.StatusOK, commonHttp.NilBody{})
+}
+
+func (h *Handler) IsLoginUnique(w http.ResponseWriter, r *http.Request) {
+	userLogin := commonHttp.GetloginFromRequest(userloginUrlParam, r)
+
+	isUnique, err := h.userService.IsLoginUnique(r.Context(), userLogin)
+
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, "can't get unique info login", h.logger)
+		return
+	}
+	commonHttp.SuccessResponse(w, http.StatusOK, isUnique)
 }
