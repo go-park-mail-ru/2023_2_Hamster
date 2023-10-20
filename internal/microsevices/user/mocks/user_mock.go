@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	models "github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
-	transfer_models "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/delivery/http/transfer_models"
+	transfer_models "github.com/go-park-mail-ru/2023_2_Hamster/internal/microsevices/user/delivery/http/transfer_models"
 	gomock "github.com/golang/mock/gomock"
 	uuid "github.com/google/uuid"
 )

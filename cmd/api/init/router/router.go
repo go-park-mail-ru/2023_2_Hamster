@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	_ "github.com/go-park-mail-ru/2023_2_Hamster/docs"
-	user "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/delivery/http"
+	user "github.com/go-park-mail-ru/2023_2_Hamster/internal/microsevices/user/delivery/http"
 	"github.com/gorilla/mux"
 
 	httpSwagger "github.com/swaggo/http-swagger"

@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microsevices/user"
+	tranfer_models "github.com/go-park-mail-ru/2023_2_Hamster/internal/microsevices/user/delivery/http/transfer_models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user"
-	tranfer_models "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/delivery/http/transfer_models"
 
 	"github.com/google/uuid"
 )
