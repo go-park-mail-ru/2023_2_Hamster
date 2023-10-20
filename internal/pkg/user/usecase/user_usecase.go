@@ -69,7 +69,7 @@ func (u *Usecase) GetCurrentBudget(ctx context.Context, userID uuid.UUID) (float
 	return currentBudget, nil
 }
 
-func (u *Usecase) GetAccounts(ctx context.Context, userID uuid.UUID) ([]models.Accounts, error) {
+func (u *Usecase) GetAccounts(ctx context.Context, userID uuid.UUID) ([]models.Accounts, error) { // TO DO MODELS TRANSFER
 	account, err := u.userRepo.GetAccounts(ctx, userID)
 	if err != nil {
 

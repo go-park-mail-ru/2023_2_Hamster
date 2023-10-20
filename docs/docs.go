@@ -170,7 +170,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Show balance",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-models_UserTransfer"
+                            "$ref": "#/definitions/http.Response-transfer_models_UserTransfer"
                         }
                     },
                     "400": {
@@ -286,14 +286,14 @@ const docTemplate = `{
         },
         "/api/user/{userID}/feed": {
             "get": {
-                "description": "Get User accounts",
+                "description": "Get Feed user info",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "User"
                 ],
-                "summary": "Get User Accounts",
+                "summary": "Get Feed",
                 "responses": {
                     "200": {
                         "description": "Show actual accounts",
@@ -347,20 +347,55 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/user/{userID}/update": {
+            "put": {
+                "description": "Update user info",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "PUT Update",
+                "parameters": [
+                    {
+                        "description": "user info update",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/transfer_models.UserTransfer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Update user info",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-transfer_models_UserTransfer"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
-        "http.Response-models_UserTransfer": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/models.UserTransfer"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
         "http.Response-transfer_models_Account": {
             "type": "object",
             "properties": {
@@ -410,6 +445,17 @@ const docTemplate = `{
             "properties": {
                 "body": {
                     "$ref": "#/definitions/transfer_models.UserFeed"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "http.Response-transfer_models_UserTransfer": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/transfer_models.UserTransfer"
                 },
                 "status": {
                     "type": "integer"
@@ -489,23 +535,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.UserTransfer": {
-            "type": "object",
-            "properties": {
-                "avatar_url": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "planned_budget": {
-                    "type": "number"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
         "transfer_models.Account": {
             "type": "object",
             "properties": {
@@ -558,6 +587,23 @@ const docTemplate = `{
                 },
                 "planned_balance": {
                     "type": "number"
+                }
+            }
+        },
+        "transfer_models.UserTransfer": {
+            "type": "object",
+            "properties": {
+                "avatar_url": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "planned_budget": {
+                    "type": "number"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         }
