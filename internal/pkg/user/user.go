@@ -25,7 +25,7 @@ type Repository interface {
 	GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error)
 	CreateUser(ctx context.Context, user models.User) (uuid.UUID, error)
 	//	IncreaseUserVersion(ctx context.Context, ctx context.Context, userID uuid.UUID) error
-	GetUserByUsername(username string) (*models.User, error)
+	GetUserByUsername(ctx context.Context, username string) (*models.User, error)
 	//	GetUserByIDAndVersion(ctx context.Context, ctx context.Context, userID, userVersion uuid.UUID) (*models.User, error)
 	GetUserBalance(ctx context.Context, userID uuid.UUID) (float64, error) // transfer account repostiory
 	GetPlannedBudget(ctx context.Context, userID uuid.UUID) (float64, error)
