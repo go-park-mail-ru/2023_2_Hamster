@@ -19,10 +19,10 @@ func GetIDFromRequest(id string, r *http.Request) (uuid.UUID, error) {
 	return parsedUUID, nil
 }
 
-func GetloginFromRequest(id string, r *http.Request) string {
-	uuidString := mux.Vars(r)[id]
+func GetloginFromRequest(login string, r *http.Request) string {
+	userLogin := mux.Vars(r)[login]
 
-	return uuidString
+	return userLogin
 }
 
 var ErrUnauthorized = &models.UnathorizedError{}

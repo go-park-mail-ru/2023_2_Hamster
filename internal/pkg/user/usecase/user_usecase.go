@@ -126,3 +126,12 @@ func (u *Usecase) IsLoginUnique(ctx context.Context, login string) (bool, error)
 
 	return isUnique, nil
 }
+
+func (u *Usecase) UpdatePhoto(ctx context.Context, userID uuid.UUID) (uuid.UUID, error) {
+	path := uuid.New()
+	err := u.userRepo.UpdatePhoto(ctx, userID, path)
+	if err != nil {
+		return uuid.Nil, err
+	}
+	return path, nil
+}

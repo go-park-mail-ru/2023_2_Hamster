@@ -393,11 +393,80 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/user/{userID}/updatePhoto": {
+            "put": {
+                "description": "Update user photo",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "PUT Update Photo",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "New photo to upload",
+                        "name": "upload",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Path to old photo",
+                        "name": "path",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Photo updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-UUID"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
         "http.NilBody": {
             "type": "object"
+        },
+        "http.Response-UUID": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
         },
         "http.Response-http_NilBody": {
             "type": "object",
@@ -535,6 +604,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "login": {
+                    "type": "string"
+                },
                 "password": {
                     "type": "string"
                 },
@@ -611,6 +683,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
+                    "type": "string"
+                },
+                "login": {
                     "type": "string"
                 },
                 "planned_budget": {

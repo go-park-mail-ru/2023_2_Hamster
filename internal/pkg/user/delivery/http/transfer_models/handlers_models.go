@@ -10,19 +10,31 @@ import (
 
 // Response error message
 const (
-	BalanceNotFound       = "no such balance"
-	PlannedBudgetNotFound = "no such planned budget"
-	CurrentBudgetNotFound = "no such current budget"
-	AccountNotFound       = "no such account"
-	UserNotFound          = "no such user"
-	UserFeedNotFound      = "no such feed info"
+	//======================ERROR================================
+	BalanceNotFound        = "no such balance"
+	PlannedBudgetNotFound  = "no such planned budget"
+	CurrentBudgetNotFound  = "no such current budget"
+	AccountNotFound        = "no such account"
+	UserNotFound           = "no such user"
+	UserFeedNotFound       = "no such feed info"
+	UserFileUnableUpload   = "unable to process the uploaded file"
+	UserFileUnableOpen     = "unable to open the uploaded file"
+	UserFileNotCorrectType = "no correct type file"
+	UserFileNotPath        = "can't get path in form"
+	UserFileNotDelete      = "can't delete old file"
 
-	BalanceGetServerError       = "can't get balance"
-	PlannedBudgetGetServerError = "can't get planned budget"
-	CurrentBudgetGetServerError = "can't get current budget"
-	AccountServerError          = "can't get account"
-	UserServerError             = "can't get user"
-	UserFeedServerError         = "can't get feed info"
+	BalanceGetServerError        = "can't get balance"
+	PlannedBudgetGetServerError  = "can't get planned budget"
+	CurrentBudgetGetServerError  = "can't get current budget"
+	AccountServerError           = "can't get account"
+	UserServerError              = "can't get user"
+	UserFeedServerError          = "can't get feed info"
+	UserFileServerError          = "file is too large."
+	UserFileServerNotUpdateError = "can't update url photo"
+	UserFileServerNotCreate      = "cat't create photo"
+	//======================ERROR================================
+	MaxFileSize = 10 << 20
+	FolderPath  = "/images/"
 )
 
 type BalanceResponse struct {

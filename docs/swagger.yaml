@@ -2,6 +2,13 @@ basePath: /user/{userID}/account/feed
 definitions:
   http.NilBody:
     type: object
+  http.Response-UUID:
+    properties:
+      body:
+        type: string
+      status:
+        type: integer
+    type: object
   http.Response-http_NilBody:
     properties:
       body:
@@ -89,6 +96,8 @@ definitions:
         type: string
       id:
         type: string
+      login:
+        type: string
       password:
         type: string
       planned_budget:
@@ -138,6 +147,8 @@ definitions:
       avatar_url:
         type: string
       id:
+        type: string
+      login:
         type: string
       planned_budget:
         type: number
@@ -404,6 +415,45 @@ paths:
           schema:
             $ref: '#/definitions/http.ResponseError'
       summary: PUT Update
+      tags:
+      - User
+  /api/user/{userID}/updatePhoto:
+    put:
+      consumes:
+      - multipart/form-data
+      description: Update user photo
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: string
+      - description: New photo to upload
+        in: formData
+        name: upload
+        required: true
+        type: file
+      - description: Path to old photo
+        in: formData
+        name: path
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Photo updated successfully
+          schema:
+            $ref: '#/definitions/http.Response-UUID'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: PUT Update Photo
       tags:
       - User
 swagger: "2.0"

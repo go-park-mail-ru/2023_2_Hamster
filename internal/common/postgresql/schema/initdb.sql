@@ -8,7 +8,7 @@ CREATE TABLE Users
     password_hash  VARCHAR(256)             NOT NULL,
     salt           VARCHAR(16)              NOT NULL,
 	planned_budget numeric(10, 2),
-    avatar_url     TEXT DEFAULT '/static/img/img1.png'
+    avatar_url     UUID
 );
 
 CREATE TABLE Accounts (

@@ -3,13 +3,17 @@ package http
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
+	"os"
 
 	commonHttp "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/delivery/http/transfer_models"
+	"github.com/google/uuid"
 )
 
 type Handler struct {
@@ -276,7 +280,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) { // need test
 	commonHttp.SuccessResponse(w, http.StatusOK, commonHttp.NilBody{})
 }
 
-func (h *Handler) IsLoginUnique(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) IsLoginUnique(w http.ResponseWriter, r *http.Request) { /// move auth rep
 	userLogin := commonHttp.GetloginFromRequest(userloginUrlParam, r)
 
 	isUnique, err := h.userService.IsLoginUnique(r.Context(), userLogin)
@@ -286,4 +290,91 @@ func (h *Handler) IsLoginUnique(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	commonHttp.SuccessResponse(w, http.StatusOK, isUnique)
+}
+
+// @Summary     PUT Update Photo
+// @Tags        User
+// @Description Update user photo
+// @Accept      multipart/form-data
+// @Produce     json
+// @Param       userID        path  string  true  "User ID"
+// @Param       upload        formData file    true  "New photo to upload"
+// @Param       path          formData string  true  "Path to old photo"
+// @Success     200           {object} Response[UUID] "Photo updated successfully"
+// @Failure     400           {object} ResponseError   "Client error"
+// @Failure     500           {object} ResponseError   "Server error"
+// @Router      /api/user/{userID}/updatePhoto [put]
+func (h *Handler) UpdatePhoto(w http.ResponseWriter, r *http.Request) { // need test
+	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
+
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserNotFound, h.logger)
+		return
+	}
+
+	err = r.ParseMultipartForm(transfer_models.MaxFileSize)
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, transfer_models.UserFileServerError, h.logger)
+		return
+	}
+
+	file, fileTmp, err := r.FormFile("upload")
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserFileUnableUpload, h.logger)
+		return
+	}
+
+	buf, _ := io.ReadAll(file)
+	file.Close()
+	if file, err = fileTmp.Open(); err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserFileUnableOpen, h.logger)
+		return
+	}
+
+	if http.DetectContentType(buf) != "image/jpeg" && http.DetectContentType(buf) != "image/png" && http.DetectContentType(buf) != "image/jpg" {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserFileNotCorrectType, h.logger)
+		return
+	}
+	defer file.Close()
+
+	var oldName uuid.UUID
+	oldName, err = uuid.Parse(r.PostFormValue("path"))
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserFileNotPath, h.logger)
+		return
+	}
+
+	if oldName != uuid.Nil {
+		err = os.Remove(transfer_models.FolderPath + fmt.Sprintf("%s.jpg", oldName.String()))
+		if err != nil {
+			commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserFileNotDelete, h.logger)
+			return
+		}
+	}
+
+	name, err := h.userService.UpdatePhoto(r.Context(), userID)
+	var errNoSuchUser *models.NoSuchUserError
+	if errors.As(err, &errNoSuchUser) {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserNotFound, h.logger)
+		return
+	}
+
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, transfer_models.UserFileServerNotUpdateError, h.logger)
+		return
+	}
+
+	f, err := os.Create(fmt.Sprintf("%s%s.jpg", transfer_models.FolderPath, name.String()))
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, transfer_models.UserFileServerNotCreate, h.logger)
+		return
+	}
+	defer f.Close()
+
+	if _, err = io.Copy(f, file); err != nil {
+		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, transfer_models.UserFileServerNotCreate, h.logger)
+		return
+	}
+
+	commonHttp.SuccessResponse(w, http.StatusOK, name)
 }

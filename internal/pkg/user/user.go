@@ -20,6 +20,7 @@ type Usecase interface {
 	GetUser(ctx context.Context, userID uuid.UUID) (*models.User, error)
 	UpdateUser(ctx context.Context, user *models.User) error
 	IsLoginUnique(ctx context.Context, login string) (bool, error) // move from auth rep
+	UpdatePhoto(ctx context.Context, usserID uuid.UUID) (uuid.UUID, error)
 }
 
 type Repository interface {
@@ -36,5 +37,5 @@ type Repository interface {
 	UpdateUser(ctx context.Context, user *models.User) error
 	CheckUser(ctx context.Context, userID uuid.UUID) error
 	IsLoginUnique(ctx context.Context, login string) (bool, error) // move from auth rep
-
+	UpdatePhoto(ctx context.Context, userID uuid.UUID, path uuid.UUID) error
 }

@@ -203,3 +203,16 @@ func (r *UserRep) IsLoginUnique(ctx context.Context, login string) (bool, error)
 
 	return count == 0, nil
 }
+
+func (r *UserRep) UpdatePhoto(ctx context.Context, userID uuid.UUID, path uuid.UUID) error {
+	query := `UPDATE users
+				SET avatar_url = $2
+			  WHERE id = $1;`
+	_, err := r.db.ExecContext(ctx, query, userID, path)
+	if errors.Is(err, sql.ErrNoRows) {
+		return fmt.Errorf("[repo] %w: %v", &models.NoSuchUserError{UserID: userID}, err)
+	} else if err != nil {
+		return fmt.Errorf("[repo] failed request db %s, %w", query, err)
+	}
+	return nil
+}
