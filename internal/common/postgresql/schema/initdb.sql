@@ -44,8 +44,8 @@ ALTER COLUMN planned_budget SET DEFAULT 0.0;
 
 --=============================================================================
 
-INSERT INTO "users"(username, password_hash, salt, planned_budget, avatar_url)
-VALUES ('kosmatoff', 'hash', 'fdsf', 10000, 'image/img1.png');
+INSERT INTO "users"(login, username, password_hash, salt, planned_budget)
+VALUES ('kossmatof','komarov', 'hash', 'fdsf', 10000);
 
 
 INSERT INTO "accounts"(user_id, balance, mean_payment)
