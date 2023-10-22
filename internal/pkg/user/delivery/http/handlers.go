@@ -39,6 +39,8 @@ func NewHandler(uu user.Usecase, l logger.CustomLogger) *Handler {
 // @Produce		json
 // @Success		200		{object}	Response[transfer_models.UserTransfer] "Show balance"
 // @Failure		400		{object}	ResponseError	"Client error"
+// @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
+// @Failure     403    	{object}  	ResponseError  		"Forbidden user"
 // @Failure		500		{object}	ResponseError	"Server error"
 // @Router		/api/user/{userID}/ [get]
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
@@ -71,6 +73,8 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 // @Produce		json
 // @Success		200		{object}	Response[transfer_models.BalanceResponse] "Show balance"
 // @Failure		400		{object}	ResponseError	"Client error"
+// @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
+// @Failure     403    	{object}  	ResponseError  		"Forbidden user"
 // @Failure		500		{object}	ResponseError	"Server error"
 // @Router		/api/user/{userID}/balance [get]
 func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
@@ -102,6 +106,8 @@ func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 // @Produce		json
 // @Success		200		{object} 	Response[transfer_models.BudgetPlannedResponse]	"Show planned budget"
 // @Failure		400		{object}	ResponseError			"Client error"
+// @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
+// @Failure     403    	{object}  	ResponseError  		"Forbidden user"
 // @Failure		500		{object}	ResponseError			"Server error"
 // @Router		/api/user/{userID}/plannedBudget [get]
 func (h *Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {
@@ -135,6 +141,8 @@ func (h *Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {
 // @Produce		json
 // @Success		200		{object}	Response[transfer_models.BudgetActualResponse]	"Show actual budget"
 // @Failure		400		{object}	ResponseError			"Client error"
+// @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
+// @Failure     403    	{object}  	ResponseError  		"Forbidden user"
 // @Failure		500		{object}	ResponseError			"Server error"
 // @Router		/api/user/{userID}/actualBudget [get]
 func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
@@ -168,6 +176,8 @@ func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
 // @Produce		json
 // @Success		200		{object}	Response[transfer_models.Account]	     	"Show actual accounts"
 // @Failure		400		{object}	ResponseError		"Client error"
+// @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
+// @Failure     403    	{object}  	ResponseError  		"Forbidden user"
 // @Failure		500		{object}	ResponseError		"Server error"
 // @Router		/api/user/{userID}/accounts/all [get]
 func (h *Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
@@ -203,6 +213,8 @@ func (h *Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 // @Produce		json
 // @Success		200		{object}	Response[transfer_models.UserFeed]	     	"Show actual accounts"
 // @Failure		400		{object}	ResponseError		"Client error"
+// @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
+// @Failure     403    	{object}  	ResponseError  		"Forbidden user"
 // @Failure		500		{object}	ResponseError		"Server error"
 // @Router		/api/user/{userID}/feed [get]
 func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
@@ -243,6 +255,8 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 // @Param			user		body		transfer_models.UserUdate		true		"user info update"
 // @Success		200		{object}	Response[NilBody]	     	"Update user info"
 // @Failure		400		{object}	ResponseError		"Client error"
+// @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
+// @Failure     403    	{object}  	ResponseError  		"Forbidden user"
 // @Failure		500		{object}	ResponseError		"Server error"
 // @Router		/api/user/{userID}/update [put]
 func (h *Handler) Update(w http.ResponseWriter, r *http.Request) { // need test
@@ -302,6 +316,8 @@ func (h *Handler) IsLoginUnique(w http.ResponseWriter, r *http.Request) { /// mo
 // @Param       path          formData string  true  "Path to old photo"
 // @Success     200           {object} Response[transfer_models.PhotoUpdate] "Photo updated successfully"
 // @Failure     400           {object} ResponseError   "Client error"
+// @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
+// @Failure     403    	{object}  	ResponseError  		"Forbidden user"
 // @Failure     500           {object} ResponseError   "Server error"
 // @Router      /api/user/{userID}/updatePhoto [put]
 func (h *Handler) UpdatePhoto(w http.ResponseWriter, r *http.Request) { // need test

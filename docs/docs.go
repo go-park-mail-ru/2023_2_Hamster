@@ -179,6 +179,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/http.ResponseError"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
                     "500": {
                         "description": "Server error",
                         "schema": {
@@ -207,6 +219,18 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
                         }
@@ -243,6 +267,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/http.ResponseError"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
                     "500": {
                         "description": "Server error",
                         "schema": {
@@ -271,6 +307,18 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
                         }
@@ -307,6 +355,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/http.ResponseError"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
                     "500": {
                         "description": "Server error",
                         "schema": {
@@ -335,6 +395,18 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
                         }
@@ -381,6 +453,18 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
                         }
@@ -439,6 +523,18 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
                         }

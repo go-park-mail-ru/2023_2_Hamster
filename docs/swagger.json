@@ -173,6 +173,18 @@
                             "$ref": "#/definitions/http.ResponseError"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
                     "500": {
                         "description": "Server error",
                         "schema": {
@@ -201,6 +213,18 @@
                     },
                     "400": {
                         "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
                         }
@@ -237,6 +261,18 @@
                             "$ref": "#/definitions/http.ResponseError"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
                     "500": {
                         "description": "Server error",
                         "schema": {
@@ -265,6 +301,18 @@
                     },
                     "400": {
                         "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
                         }
@@ -301,6 +349,18 @@
                             "$ref": "#/definitions/http.ResponseError"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
                     "500": {
                         "description": "Server error",
                         "schema": {
@@ -329,6 +389,18 @@
                     },
                     "400": {
                         "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
                         }
@@ -375,6 +447,18 @@
                     },
                     "400": {
                         "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
                         }
@@ -433,6 +517,18 @@
                     },
                     "400": {
                         "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
                         }

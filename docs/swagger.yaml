@@ -280,6 +280,14 @@ paths:
           description: Client error
           schema:
             $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
         "500":
           description: Server error
           schema:
@@ -299,6 +307,14 @@ paths:
             $ref: '#/definitions/http.Response-transfer_models_Account'
         "400":
           description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
           schema:
             $ref: '#/definitions/http.ResponseError'
         "500":
@@ -322,6 +338,14 @@ paths:
           description: Client error
           schema:
             $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
         "500":
           description: Server error
           schema:
@@ -341,6 +365,14 @@ paths:
             $ref: '#/definitions/http.Response-transfer_models_BalanceResponse'
         "400":
           description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
           schema:
             $ref: '#/definitions/http.ResponseError'
         "500":
@@ -364,6 +396,14 @@ paths:
           description: Client error
           schema:
             $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
         "500":
           description: Server error
           schema:
@@ -383,6 +423,14 @@ paths:
             $ref: '#/definitions/http.Response-transfer_models_BudgetPlannedResponse'
         "400":
           description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
           schema:
             $ref: '#/definitions/http.ResponseError'
         "500":
@@ -413,6 +461,14 @@ paths:
             $ref: '#/definitions/http.Response-http_NilBody'
         "400":
           description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
           schema:
             $ref: '#/definitions/http.ResponseError'
         "500":
@@ -452,6 +508,14 @@ paths:
             $ref: '#/definitions/http.Response-transfer_models_PhotoUpdate'
         "400":
           description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
           schema:
             $ref: '#/definitions/http.ResponseError'
         "500":
