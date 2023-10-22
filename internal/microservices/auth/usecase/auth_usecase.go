@@ -11,9 +11,9 @@ import (
 	"time"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
