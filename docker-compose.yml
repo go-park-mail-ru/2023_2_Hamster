@@ -15,6 +15,9 @@ services:
       - "8080:8080"
     depends_on:
       - db
+    # command: [".scripts/wait-for-it.sh", "db:5432", "--", "./app"]
+    env_file:
+      - .env
 
   db:
     image: postgres:latest
@@ -29,3 +32,9 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - ./internal/common/postgresql/schema/:/docker-entrypoint-initdb.d/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s

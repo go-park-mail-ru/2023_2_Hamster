@@ -12,7 +12,7 @@ dock-build:
 	docker-compose build
 
 dock-clean:
-	docker rmi $(docker images -q)
+	docker rmi -f $(docker images -q)
 
 con-db:
 	docker exec -it 2023_2_hamster-db-1 psql -U kosmatoff -d Hamster
