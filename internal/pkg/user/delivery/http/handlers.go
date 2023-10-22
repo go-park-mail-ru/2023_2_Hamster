@@ -175,6 +175,7 @@ func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
 // @Description	Get User accounts
 // @Produce		json
 // @Success		200		{object}	Response[transfer_models.Account]	     	"Show actual accounts"
+// @Success		204		{object}	Response[transfer_models.Account]	     	"Show actual accounts"
 // @Failure		400		{object}	ResponseError		"Client error"
 // @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
 // @Failure     403    	{object}  	ResponseError  		"Forbidden user"
