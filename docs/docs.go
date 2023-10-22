@@ -217,6 +217,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/http.Response-transfer_models_Account"
                         }
                     },
+                    "204": {
+                        "description": "Show actual accounts",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-transfer_models_Account"
+                        }
+                    },
                     "400": {
                         "description": "Client error",
                         "schema": {
