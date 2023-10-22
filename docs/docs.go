@@ -434,7 +434,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Photo updated successfully",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-UUID"
+                            "$ref": "#/definitions/http.Response-transfer_models_PhotoUpdate"
                         }
                     },
                     "400": {
@@ -456,17 +456,6 @@ const docTemplate = `{
     "definitions": {
         "http.NilBody": {
             "type": "object"
-        },
-        "http.Response-UUID": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
         },
         "http.Response-http_NilBody": {
             "type": "object",
@@ -517,6 +506,17 @@ const docTemplate = `{
             "properties": {
                 "body": {
                     "$ref": "#/definitions/transfer_models.BudgetPlannedResponse"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "http.Response-transfer_models_PhotoUpdate": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/transfer_models.PhotoUpdate"
                 },
                 "status": {
                     "type": "integer"
@@ -653,6 +653,14 @@ const docTemplate = `{
             "properties": {
                 "planned_balance": {
                     "type": "number"
+                }
+            }
+        },
+        "transfer_models.PhotoUpdate": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string"
                 }
             }
         },

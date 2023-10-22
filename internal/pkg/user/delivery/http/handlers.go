@@ -300,7 +300,7 @@ func (h *Handler) IsLoginUnique(w http.ResponseWriter, r *http.Request) { /// mo
 // @Param       userID        path  string  true  "User ID"
 // @Param       upload        formData file    true  "New photo to upload"
 // @Param       path          formData string  true  "Path to old photo"
-// @Success     200           {object} Response[UUID] "Photo updated successfully"
+// @Success     200           {object} Response[transfer_models.PhotoUpdate] "Photo updated successfully"
 // @Failure     400           {object} ResponseError   "Client error"
 // @Failure     500           {object} ResponseError   "Server error"
 // @Router      /api/user/{userID}/updatePhoto [put]
@@ -376,5 +376,5 @@ func (h *Handler) UpdatePhoto(w http.ResponseWriter, r *http.Request) { // need 
 		return
 	}
 
-	commonHttp.SuccessResponse(w, http.StatusOK, name)
+	commonHttp.SuccessResponse(w, http.StatusOK, transfer_models.PhotoUpdate{Path: name})
 }

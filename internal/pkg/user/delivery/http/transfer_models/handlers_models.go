@@ -53,6 +53,10 @@ type Account struct {
 	AccountMas []models.Accounts `json:"account"`
 }
 
+type PhotoUpdate struct {
+	Path uuid.UUID `json:"path"`
+}
+
 type UserFeed struct {
 	Account
 	BalanceResponse

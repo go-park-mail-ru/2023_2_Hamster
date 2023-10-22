@@ -2,13 +2,6 @@ basePath: /user/{userID}/account/feed
 definitions:
   http.NilBody:
     type: object
-  http.Response-UUID:
-    properties:
-      body:
-        type: string
-      status:
-        type: integer
-    type: object
   http.Response-http_NilBody:
     properties:
       body:
@@ -41,6 +34,13 @@ definitions:
     properties:
       body:
         $ref: '#/definitions/transfer_models.BudgetPlannedResponse'
+      status:
+        type: integer
+    type: object
+  http.Response-transfer_models_PhotoUpdate:
+    properties:
+      body:
+        $ref: '#/definitions/transfer_models.PhotoUpdate'
       status:
         type: integer
     type: object
@@ -128,6 +128,11 @@ definitions:
     properties:
       planned_balance:
         type: number
+    type: object
+  transfer_models.PhotoUpdate:
+    properties:
+      path:
+        type: string
     type: object
   transfer_models.UserFeed:
     properties:
@@ -444,7 +449,7 @@ paths:
         "200":
           description: Photo updated successfully
           schema:
-            $ref: '#/definitions/http.Response-UUID'
+            $ref: '#/definitions/http.Response-transfer_models_PhotoUpdate'
         "400":
           description: Client error
           schema:
