@@ -1,8 +1,20 @@
+CREATE TABLE "User" (
+    user_id SERIAL PRIMARY KEY,
+    name VARCHAR(255),
+    login VARCHAR(50) UNIQUE
+);
+
 CREATE TABLE Account (
     account_id SERIAL PRIMARY KEY,
     balance MONEY DEFAULT '$0.00',
     description TEXT,
     bank VARCHAR(255) DEFAULT ''
+);
+
+CREATE TABLE UserAccount (
+    user_account_id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES "User"(user_id),
+    account_id INTEGER REFERENCES Account(account_id)
 );
 
 CREATE TABLE Category (
@@ -71,16 +83,4 @@ CREATE TABLE Goal (
     description TEXT DEFAULT '',
     total MONEY DEFAULT '$0.00',
     date DATE
-);
-
-CREATE TABLE "User" (
-    user_id SERIAL PRIMARY KEY,
-    name VARCHAR(255),
-    login VARCHAR(50) UNIQUE
-);
-
-CREATE TABLE UserAccount (
-    user_account_id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES "User"(user_id),
-    account_id INTEGER REFERENCES Account(account_id)
 );
