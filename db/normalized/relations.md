@@ -81,15 +81,15 @@ erDiagram
     Investment {
         uuid id PK
         uuid user_id FK
-        name string
-        total numeric
+        string name
+        numeric total
         date_start date
         price money
         percentage numeric
     }
     Credit {
         uuid id PK
-        account_id FK
+        uuid account_id FK
         money total
         date date_start
         text summary
@@ -99,14 +99,14 @@ erDiagram
     }
     Deposit {
         uuid id PK
-        account_id FK
+        uuid account_id FK
         money total
         date date_start
         date date_end
         numeric interest_rate
     }
-    Account ||--o Deposit : has
-    Account ||--o Credit : has
+    Account ||--o{ Deposit : has
+    Account ||--o{ Credit : has
     User ||--o{ Investment : has
     User ||--o{ UserAccount : has
     Account ||--o{ UserAccount : has
@@ -116,6 +116,4 @@ erDiagram
     Category ||--o{ Transaction : has
     User ||--o{ Goal : has
 
-    
-    
 ```

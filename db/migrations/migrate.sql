@@ -2,6 +2,10 @@ CREATE TABLE "User" (
     user_id SERIAL PRIMARY KEY,
     name VARCHAR(255),
     login VARCHAR(50) UNIQUE
+    password_hash  VARCHAR(256)             NOT NULL,
+    salt           VARCHAR(16)              NOT NULL,
+	planned_budget numeric(10, 2),
+    avatar_url     UUID
 );
 
 CREATE TABLE Account (
