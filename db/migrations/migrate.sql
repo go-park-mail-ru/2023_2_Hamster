@@ -34,10 +34,10 @@ CREATE TABLE IF NOT EXISTS category (
 );
 
 CREATE TABLE IF NOT EXISTS "transaction" (
-    transaction_id          UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    user_id                 UUID REFERENCES "user"(user_id) CONSTRAINT fk_user_transaction             NOT NULL,
+    transaction_id          UUID DEFAULT uuid_generate_v4()         PRIMARY KEY,
+    user_id                 UUID REFERENCES "user"(user_id)         CONSTRAINT fk_user_transaction     NOT NULL,
     category_id             UUID REFERENCES "category"(category_id) CONSTRAINT fk_category_transaction NOT NULL,
-    account_id              UUID REFERENCES "account"(account_id) CONSTRAINT fk_account_transaction    NOT NULL,
+    account_id              UUID REFERENCES "account"(account_id)   CONSTRAINT fk_account_transaction  NOT NULL,
     is_income               BOOLEAN                                                                    NOT NULL,
     total_money             MONEY       DEFAULT 0.00                                                   NOT NULL,
     transaction_date        DATE        DEFAULT CURRENT_DATE                                           NOT NULL,
