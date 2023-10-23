@@ -9,15 +9,15 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
-	"github.com/jmoiron/sqlx"
+	"github.com/jackc/pgx/v5"
 )
 
 type UserRep struct {
-	db     *sqlx.DB
+	db     *pgx.Conn
 	logger logger.CustomLogger
 }
 
-func NewRepository(db *sqlx.DB, l logger.CustomLogger) *UserRep {
+func NewRepository(db *pgx.Conn, l logger.CustomLogger) *UserRep {
 	return &UserRep{
 		db:     db,
 		logger: l,
@@ -30,7 +30,7 @@ func (r *UserRep) CreateUser(ctx context.Context, u models.User) (uuid.UUID, err
 			 (login, username, password_hash, salt)
 		VALUES ($1, $2, $3) RETURNING id;`
 
-	row := r.db.QueryRowContext(ctx, query, u.Login, u.Username, u.Password, u.Salt)
+	row := r.db.QueryRow(ctx, query, u.Login, u.Username, u.Password, u.Salt)
 	var id uuid.UUID
 
 	err := row.Scan(&id)
@@ -45,7 +45,7 @@ func (r *UserRep) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, 
 			 FROM users
 			 WHERE id = $1;`
 
-	row := r.db.QueryRowContext(ctx, query, userID)
+	row := r.db.QueryRow(ctx, query, userID)
 	var u models.User
 
 	err := row.Scan(&u.ID, &u.Login, &u.Username, &u.Password, &u.Salt, &u.PlannedBudget, &u.AvatarURL)
@@ -67,7 +67,7 @@ func (r *UserRep) GetUserByUsername(ctx context.Context, username string) (*mode
 				avatar_url,
 				salt
 			 From users WHERE (username=$1)`
-	row := r.db.QueryRowContext(ctx, query, username)
+	row := r.db.QueryRow(ctx, query, username)
 	var u models.User
 	err := row.Scan(&u.ID, &u.Login, &u.Username, &u.Password, &u.PlannedBudget, &u.AvatarURL, &u.Salt)
 
@@ -82,7 +82,7 @@ func (r *UserRep) GetUserByUsername(ctx context.Context, username string) (*mode
 
 func (r *UserRep) GetUserBalance(ctx context.Context, userID uuid.UUID) (float64, error) { // need test
 	var totalBalance sql.NullFloat64
-	err := r.db.QueryRowContext(ctx, "SELECT SUM(balance) FROM accounts WHERE user_id = $1", userID).Scan(&totalBalance)
+	err := r.db.QueryRow(ctx, "SELECT SUM(balance) FROM accounts WHERE user_id = $1", userID).Scan(&totalBalance)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		return 0, fmt.Errorf("[repo] %w: %v", &models.NoSuchUserIdBalanceError{UserID: userID}, err)
@@ -99,7 +99,7 @@ func (r *UserRep) GetUserBalance(ctx context.Context, userID uuid.UUID) (float64
 
 func (r *UserRep) GetPlannedBudget(ctx context.Context, userID uuid.UUID) (float64, error) { // need test
 	var plannedBudget sql.NullFloat64
-	err := r.db.QueryRowContext(ctx, "SELECT planned_budget FROM users WHERE id = $1", userID).Scan(&plannedBudget)
+	err := r.db.QueryRow(ctx, "SELECT planned_budget FROM users WHERE id = $1", userID).Scan(&plannedBudget)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		return 0, fmt.Errorf("[repo] %w: %v", &models.NoSuchPlannedBudgetError{UserID: userID}, err)
@@ -116,7 +116,7 @@ func (r *UserRep) GetPlannedBudget(ctx context.Context, userID uuid.UUID) (float
 func (r *UserRep) GetCurrentBudget(ctx context.Context, userID uuid.UUID) (float64, error) { // need test
 	var currentBudget sql.NullFloat64
 
-	err := r.db.QueryRowContext(ctx, `SELECT SUM(total) AS total_sum
+	err := r.db.QueryRow(ctx, `SELECT SUM(total) AS total_sum
 					  FROM Transaction
 					  WHERE date_part('month', date) = date_part('month', CURRENT_DATE)
   					  AND date_part('year', date) = date_part('year', CURRENT_DATE)
@@ -137,7 +137,7 @@ func (r *UserRep) GetAccounts(ctx context.Context, user_id uuid.UUID) ([]models.
 
 	var accounts []models.Accounts
 
-	rows, err := r.db.QueryContext(ctx, `SELECT * FROM accounts WHERE user_id = $1`, user_id)
+	rows, err := r.db.Query(ctx, `SELECT * FROM accounts WHERE user_id = $1`, user_id)
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +165,7 @@ func (r *UserRep) GetAccounts(ctx context.Context, user_id uuid.UUID) ([]models.
 
 func (r *UserRep) CheckUser(ctx context.Context, userID uuid.UUID) error {
 	var exists bool
-	err := r.db.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM users WHERE id = $1);`, userID).Scan(&exists)
+	err := r.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM users WHERE id = $1);`, userID).Scan(&exists)
 
 	if err != nil {
 		return fmt.Errorf("[repository] failed request checkUser %w", err)
@@ -185,7 +185,7 @@ func (r *UserRep) UpdateUser(ctx context.Context, user *models.User) error { // 
 					   avatar_url = $4
 				   WHERE id = $1;`
 
-	_, err := r.db.ExecContext(ctx, query, user.ID, user.Username, user.PlannedBudget, user.AvatarURL)
+	_, err := r.db.Exec(ctx, query, user.ID, user.Username, user.PlannedBudget, user.AvatarURL)
 	if err != nil {
 		return fmt.Errorf("[repo] failed update user %w", err)
 	}
@@ -196,7 +196,7 @@ func (r *UserRep) UpdateUser(ctx context.Context, user *models.User) error { // 
 func (r *UserRep) IsLoginUnique(ctx context.Context, login string) (bool, error) {
 	query := "SELECT COUNT(*) FROM users WHERE login = $1"
 	var count int
-	err := r.db.QueryRowContext(ctx, query, login).Scan(&count)
+	err := r.db.QueryRow(ctx, query, login).Scan(&count)
 	if err != nil {
 		return false, fmt.Errorf("[repo] failed login unique check %w", err)
 	}
@@ -208,7 +208,7 @@ func (r *UserRep) UpdatePhoto(ctx context.Context, userID uuid.UUID, path uuid.U
 	query := `UPDATE users
 				SET avatar_url = $2
 			  WHERE id = $1;`
-	_, err := r.db.ExecContext(ctx, query, userID, path)
+	_, err := r.db.Exec(ctx, query, userID, path)
 	if errors.Is(err, sql.ErrNoRows) {
 		return fmt.Errorf("[repo] %w: %v", &models.NoSuchUserError{UserID: userID}, err)
 	} else if err != nil {

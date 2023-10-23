@@ -1,13 +1,13 @@
 package postgresql
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
 
-	"github.com/jmoiron/sqlx"
+	"github.com/jackc/pgx/v5"
 	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
 )
 
 type PostgresConfig struct {
@@ -46,27 +46,27 @@ func initPostgresConfigFromEnv() (PostgresConfig, error) {
 	return cfg, nil
 }
 
-func InitPostgresDB() (*sqlx.DB, error) {
+func InitPostgresDB(ctx context.Context) (*pgx.Conn, error) {
 	cfg, err := initPostgresConfigFromEnv()
 	if err != nil {
 		return nil, fmt.Errorf(err.Error())
 	}
 
-	dbInfo := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
+	connString := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBName, cfg.DBPassword, cfg.DBSSLMode)
 
-	db, err := sqlx.Open("postgres", dbInfo)
+	conn, err := pgx.Connect(ctx, connString)
 	if err != nil {
 		return nil, err
 	}
 
-	err = db.Ping()
+	err = conn.Ping(ctx)
 	if err != nil {
-		errClose := db.Close()
+		errClose := conn.Close(ctx)
 		if errClose != nil {
 			return nil, fmt.Errorf("can't close postgresql (%w) after failed ping: %w", errClose, err)
 		}
-		return db, err
+		return conn, err
 	}
-	return db, nil
+	return conn, nil
 }

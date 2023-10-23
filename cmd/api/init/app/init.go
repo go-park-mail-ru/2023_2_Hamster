@@ -3,15 +3,15 @@ package app
 import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/router"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
+	"github.com/jackc/pgx/v5"
 
 	userDelivery "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/delivery/http"
 	userRep "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/repository/postgresql"
 	userUsecase "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/usecase"
 	"github.com/gorilla/mux"
-	"github.com/jmoiron/sqlx"
 )
 
-func Init(db *sqlx.DB, log *logger.CustomLogger) *mux.Router {
+func Init(db *pgx.Conn, log *logger.CustomLogger) *mux.Router {
 	//authRep := authRep.NewRepository(db, *log)
 	userRep := userRep.NewRepository(db, *log)
 
