@@ -26,8 +26,8 @@
 - Хранит информацию о вкладах
 - {id} -> {account_id, total, date_start, date_end, interest_rate}
 ## Credit
-- Хрнит информаци о вкладах на аккаунте
-- {id} -> {account_id,total, date_start, summary, date_end, credit_calculation, payments}
+- Хрнит информаци о кредитах на аккаунте на аккаунте
+- {id} -> {account_id, amount, date_start, date_end, status, credit_type, monthly_payment}
 ## Debt
 - {id} -> {user_id, total, date, status, description, creditor}
 
