@@ -1,26 +1,27 @@
 # Описание Таблиц
-## Users
+## User
 - Хранит информацию о пользователях.
-- {id} -> username, login, password_hash, salt, planned_budget, avatar_url
-## Accounts
+- {id} -> {username, login, password_hash, salt, planned_budget, avatar_url}
+- {login}->{username, password_hash, salt, planned_budget, avatar_url}
+## Account
 - Хранит информацию о банковских счетах пользователя.
-- {id} -> user_id, balance, mean_payment
-- {user_id} -> id
-## Investments
+- {id} -> {user_id, balance, mean_payment}
+- {user_id} -> {id}
+## Investment
 - Хранит информацию о инвестициях пользователя.
-- id -> name, total, date start, price, percentage
+- id -> {name, total, date start, price, percentage}
 ## Category
 - Хранит информацию о категориях транзакций.
-- {id} -> user_id, name
+- {id} -> {user_id, name}
 ## Transaction
 - Хранит информацию о транзакциях пользователя.
-- {id} -> user_id, category_id, account_id, total, is_income, date, payer, description
+- {id} -> {user_id, category_id, account_id, total, is_income, date, payer, description}
 ## Goal
 - Хранит информацию о финансовых целях пользователя.
-- {id} -> user_id, name, description, total, date
+- {id} -> {user_id, name, description, total, date}
 ## UserAccount
 - Служит для связи таблиц Users и Accounts.
-- {id} -> user_id, account_id
+- {id} -> {user_id, account_id}
 
 
 
@@ -28,7 +29,7 @@
 
 ```mermaid
 erDiagram
-    Users {
+    User {
         uuid id PK
         string username
         string login
@@ -37,7 +38,7 @@ erDiagram
         numeric planned_budget
         uuid avatar_url
     }
-    Accounts {
+    Account {
         uuid id PK
         string user_id FK
         numeric balance
@@ -59,7 +60,7 @@ erDiagram
         string payer
         string description
     }
-    UserAccounts {
+    UserAccount {
         uuid id PK
         uuid user_id FK
         uuid account_id FK
@@ -72,7 +73,7 @@ erDiagram
         numeric total
         date date
     }
-    Investments {
+    Investment {
         uuid id PK
         uuid user_id FK
         name string
