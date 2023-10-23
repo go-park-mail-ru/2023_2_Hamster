@@ -82,14 +82,14 @@ erDiagram
         price numeric
         percentage numeric
     }
-    Users ||--o{ Investments : has
-    Users ||--o{ UserAccounts : has
-    Accounts ||--o{ UserAccounts : has
-    Users ||--o{ Category : has
-    Users ||--o{ Transaction : has
-    Accounts ||--o{ Transaction : has
+    User ||--o{ Investment : has
+    User ||--o{ UserAccount : has
+    Account ||--o{ UserAccount : has
+    User ||--o{ Category : has
+    User ||--o{ Transaction : has
+    Account ||--o{ Transaction : has
     Category ||--o{ Transaction : has
-    Users ||--o{ Goal : has
+    User ||--o{ Goal : has
 
     
     
