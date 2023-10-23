@@ -4,6 +4,9 @@ CREATE TABLE IF NOT EXISTS "user" (
     user_id    UUID   DEFAULT uuid_generate_v4() PRIMARY KEY,
     full_name  VARCHAR(255) NOT NULL,
     username   VARCHAR(50)  UNIQUE NOT NULL
+    password_hash  VARCHAR(256)             NOT NULL,
+	planned_budget MONEY DEFAULT '$0.00',
+    avatar_url     UUID
 );
 
 
@@ -56,6 +59,7 @@ CREATE TABLE IF NOT EXISTS deposit (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+<<<<<<< HEAD
 
 CREATE TABLE IF NOT EXISTS credit (
     credit_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
