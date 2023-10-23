@@ -22,7 +22,12 @@
 ## UserAccount
 - Служит для связи таблиц Users и Accounts.
 - {id} -> {user_id, account_id}
-
+## Deposit
+- {id} -> {account_id, total, date_start, date_end, interest_rate}
+## Credit
+- {id} -> {account_id,total, date_start, summary, date_end, credit_calculation, payments}
+## Debt
+- {id} -> {user_id, total, date, status, description, creditor}
 
 
 
@@ -35,13 +40,13 @@ erDiagram
         string login
         string password_hash
         string salt
-        numeric planned_budget
+        money planned_budget
         uuid avatar_url
     }
     Account {
         uuid id PK
         string user_id FK
-        numeric balance
+        money balance
         string mean_payment
     }
     Category {
@@ -54,7 +59,7 @@ erDiagram
         uuid user_id FK
         uuid category_id FK
         uuid account_id FK
-        numeric total
+        money total
         boolean is_income
         date date
         string payer
@@ -70,7 +75,7 @@ erDiagram
         uuid user_id FK
         string name
         string description
-        numeric total
+        money total
         date date
     }
     Investment {
@@ -79,9 +84,29 @@ erDiagram
         name string
         total numeric
         date_start date
-        price numeric
+        price money
         percentage numeric
     }
+    Credit {
+        uuid id PK
+        account_id FK
+        money total
+        date date_start
+        text summary
+        date date_end
+        string credit_calculation
+        money payments 
+    }
+    Deposit {
+        uuid id PK
+        account_id FK
+        money total
+        date date_start
+        date date_end
+        numeric interest_rate
+    }
+    Account ||--o Deposit : has
+    Account ||--o Credit : has
     User ||--o{ Investment : has
     User ||--o{ UserAccount : has
     Account ||--o{ UserAccount : has
