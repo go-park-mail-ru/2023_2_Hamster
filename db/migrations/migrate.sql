@@ -50,14 +50,14 @@ CREATE TABLE Deposit (
 );
 
 CREATE TABLE Credit (
-    credit_id SERIAL PRIMARY KEY,
-    account_id INTEGER REFERENCES Account(account_id),
-    total MONEY DEFAULT '$0.00',
-    date_start DATE,
-    summary TEXT DEFAULT '',
-    date_end DATE,
-    credit_calculation VARCHAR(255) DEFAULT '',
-    payments MONEY DEFAULT '$0.00'
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    account_id UUID REFERENCES Account(account_id),
+    amount DECIMAL(10, 2) NOT NULL,
+    date_start DATE NOT NULL,
+    date_end DATE NOT NULL,
+    status VARCHAR(20) DEFAULT 'Active',
+    credit_type VARCHAR(20) DEFAULT 'Annuity',
+    monthly_payment DECIMAL(10, 2)
 );
 
 CREATE TABLE Investment (
