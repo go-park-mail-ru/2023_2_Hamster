@@ -92,7 +92,7 @@ erDiagram
     Credit {
         id uuid  PK
         account_id uuid  FK
-        amount money 
+        total_amount money 
         date_start date 
         date_end date 
         status string

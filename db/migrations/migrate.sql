@@ -59,8 +59,6 @@ CREATE TABLE IF NOT EXISTS deposit (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-<<<<<<< HEAD
-
 CREATE TABLE IF NOT EXISTS credit (
     credit_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     account_id UUID REFERENCES account(account_id) NOT NULL,
