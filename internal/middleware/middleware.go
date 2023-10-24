@@ -6,9 +6,9 @@ import (
 
 	commonHttp "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth"
+	cookiePkg "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth"
-	cookiePkg "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth/delivery/http"
 )
 
 type Middleware struct {

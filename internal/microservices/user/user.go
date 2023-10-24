@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microsevices/user/delivery/http/transfer_models"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user/delivery/http/transfer_models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
 )

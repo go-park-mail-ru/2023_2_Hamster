@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"crypto/rand"
-	"crypto/sha256"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -166,10 +165,4 @@ func (u *Usecase) ValidateAccessToken(accessToken string) (uuid.UUID, string, er
 	} else {
 		return uuid.Nil, "", err
 	}
-}
-
-func hashPassword(pwd string, salt []byte) string {
-	hash := sha256.New()
-	hash.Write(append([]byte(pwd), salt...))
-	return hex.EncodeToString(hash.Sum(nil))
 }

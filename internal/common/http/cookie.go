@@ -6,15 +6,15 @@ import (
 )
 
 const (
-	AuthCookie = "Authentication"
+	AuthTag = "Authentication"
 )
 
-func InitCookie(name, value string, expire time.Time) *http.Cookie {
+func InitCookie(name, value string, expire time.Time, path string) *http.Cookie {
 	return &http.Cookie{
 		Name:     name,
 		Value:    value,
 		Expires:  expire,
-		Path:     "/",
+		Path:     path,
 		HttpOnly: true,
 	}
 }

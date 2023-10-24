@@ -1,6 +1,8 @@
 package models
 
+import "github.com/google/uuid"
+
 type Session struct {
-	UserId uint64 `json:"user_id" db:"profile_id"`
-	Cookie string `json:"cookie" db:"cookie"`
+	UserId uuid.UUID `json:"user_id" db:"profile_id"`
+	Cookie string    `json:"cookie" db:"cookie"`
 }

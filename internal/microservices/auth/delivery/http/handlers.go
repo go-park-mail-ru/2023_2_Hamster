@@ -3,21 +3,38 @@ package http
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
-	commonHttp "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
+	response "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microsevices/auth"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions"
+	"github.com/google/uuid"
 )
+
+type RegistredUser struct {
+	ID       uuid.UUID `json:"user_id"`
+	username string    `json:"username"`
+}
 
 type Handler struct {
 	au  auth.Usecase
+	uu  user.Usecase
+	su  sessions.Usecase
 	log logger.CustomLogger
 }
 
-func NewHandler(au auth.Usecase, log logger.CustomLogger) *Handler {
+func NewHandler(
+	au auth.Usecase,
+	uu user.Usecase,
+	su sessions.Usecase,
+	log logger.CustomLogger) *Handler {
 	return &Handler{
 		au:  au,
+		uu:  uu,
+		su:  su,
 		log: log,
 	}
 }
@@ -27,10 +44,10 @@ func NewHandler(au auth.Usecase, log logger.CustomLogger) *Handler {
 // @Description	Create Account
 // @Accept 		json
 // @Produce		json
-// @Param			user		body		models.User		true		"user info"
-// @Success		200		{object}	signUpResponse				"User Created"
-// @Failure		400		{object}	ResponseError				"Incorrect Input"
-// @Failure		500		{object}	ResponseError				"Server error"
+// @Param			user		body		models.User			true		"user info"
+// @Success		200		{object}	Response[RegistredUser]			"User Created"
+// @Failure		400		{object}	ResponseError					"Incorrect Input"
+// @Failure		429		{object}	ResponseError					"Server error"
 // @Router		/api/auth/signup	[post]
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	var user models.User
@@ -38,25 +55,21 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&user); err != nil {
 		h.log.Error(err.Error())
-		commonHttp.ErrorResponse(w, http.StatusBadRequest, err.Error(), h.log)
+		response.ErrorResponse(w, http.StatusBadRequest, err, "Corrupted request body can't unmarshal", h.log)
 		return
 	}
 
-	h.log.Debug("request body successfully decoded\n", r)
-
-	id, err := h.au.SignUp(ctx.TODO(), user)
+	user, err := h.au.SignUp(r.Context(), user)
 	if err != nil {
-		h.log.Error(err.Error())
-		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err.Error(), h.log)
-		return
+		h.log.Errorf("Error in sign up: %v", err)
+		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't Sign Up user", h.log)
 	}
 
-	h.log.Infof("User created with id: %d", id)
+	session, err := h.su.CreateSessionById(r.Context(), user.ID)
+	regUser := RegistredUser{ID: session.UserId, username: user.Username}
 
-	suResp := signUpResponse{ID: id, Username: user.Username}
-
-	http.SetCookie(w, InitCookie(AuthCookie, token.Value, token.Expires))
-	commonHttp.JSON(w, http.StatusOK, suResp)
+	http.SetCookie(w, response.InitCookie(response.AuthTag, session.Cookie, time.Now().Add(7*24*time.Hour), "/api"))
+	response.SuccessResponse[RegistredUser](w, http.StatusAccepted, regUser)
 }
 
 // @Summary		Sign In
@@ -65,38 +78,19 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Accept 		json
 // @Produce		json
 // @Param			userInput		body		signInput		true		"username && password"
-// @Success		200			{object}	signUpResponse			"User logedin"
+// @Success		200			{object}	Response[RegistredUser]			"User logedin"
 // @Failure		400			{object}	ResponseError			"Incorrect Input"
 // @Failure		500			{object}	ResponseError			"Server error"
 // @Router		/api/auth/signin	[post]
 func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
-	userInput := &models.SignInput{}
+	var user models.User
 
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&userInput); err != nil {
+	if err := decoder.Decode(&user); err != nil {
 		h.log.Error(err.Error())
-		commonHttp.ErrorResponse(w, http.StatusBadRequest, err.Error(), h.log)
+		response.ErrorResponse(w, http.StatusBadRequest, err, "Corrupted request body can't unmarshal", h.log)
 		return
 	}
-
-	h.log.Debug("request body successfully decoded", r)
-
-	id, token, err := h.au.SignInUser(userInput.Username, userInput.Password)
-	if err != nil {
-		h.log.Error(err.Error())
-		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err.Error(), h.log)
-		return
-	}
-
-	h.log.Infof("User login with token: %s", token)
-
-	// loginResponse := &loginResponse{JWT: token.Value}
-
-	siResp := signUpResponse{ID: id, Username: userInput.Username}
-
-	http.SetCookie(w, InitCookie(AuthCookie, token.Value, token.Expires))
-
-	commonHttp.JSON(w, http.StatusOK, siResp)
 }
 
 // @Summary		Validate Auth

@@ -12,6 +12,8 @@ const (
 	InvalidBodyRequest  = "invalid input body"
 )
 
+const minErrorToLogCode = 500
+
 type Response[T any] struct {
 	Status int `json:"status"`
 	Body   T   `json:"body"`
@@ -27,8 +29,6 @@ type NilBody struct{}
 func NIL() NilBody {
 	return NilBody{}
 }
-
-const minErrorToLogCode = 500
 
 func ErrorResponse(w http.ResponseWriter, code int, err error, message string, log logger.CustomLogger) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
