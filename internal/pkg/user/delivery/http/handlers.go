@@ -262,8 +262,8 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 // @Router		/api/user/{userID}/update [put]
 func (h *Handler) Update(w http.ResponseWriter, r *http.Request) { // need test
 	user, err := commonHttp.GetUserFromRequest(r)
-	if err != nil {
-		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
+	if err != nil && errors.Is(err, commonHttp.ErrUnauthorized) {
+		commonHttp.ErrorResponse(w, http.StatusUnauthorized, err, commonHttp.ErrUnauthorized.Error(), h.logger)
 		return
 	}
 
@@ -297,7 +297,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) { // need test
 
 func (h *Handler) IsLoginUnique(w http.ResponseWriter, r *http.Request) { /// move auth rep
 	userLogin := commonHttp.GetloginFromRequest(userloginUrlParam, r)
-
+	fmt.Println(userLogin)
 	isUnique, err := h.userService.IsLoginUnique(r.Context(), userLogin)
 
 	if err != nil {
