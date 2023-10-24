@@ -1,5 +1,14 @@
 basePath: /user/{userID}/account/feed
 definitions:
+  http.NilBody:
+    type: object
+  http.Response-http_NilBody:
+    properties:
+      body:
+        $ref: '#/definitions/http.NilBody'
+      status:
+        type: integer
+    type: object
   http.Response-transfer_models_Account:
     properties:
       body:
@@ -25,6 +34,13 @@ definitions:
     properties:
       body:
         $ref: '#/definitions/transfer_models.BudgetPlannedResponse'
+      status:
+        type: integer
+    type: object
+  http.Response-transfer_models_PhotoUpdate:
+    properties:
+      body:
+        $ref: '#/definitions/transfer_models.PhotoUpdate'
       status:
         type: integer
     type: object
@@ -80,6 +96,8 @@ definitions:
         type: string
       id:
         type: string
+      login:
+        type: string
       password:
         type: string
       planned_budget:
@@ -111,6 +129,11 @@ definitions:
       planned_balance:
         type: number
     type: object
+  transfer_models.PhotoUpdate:
+    properties:
+      path:
+        type: string
+    type: object
   transfer_models.UserFeed:
     properties:
       account:
@@ -130,7 +153,16 @@ definitions:
         type: string
       id:
         type: string
+      login:
+        type: string
       planned_budget:
+        type: number
+      username:
+        type: string
+    type: object
+  transfer_models.UserUdate:
+    properties:
+      plannedBudget:
         type: number
       username:
         type: string
@@ -248,6 +280,14 @@ paths:
           description: Client error
           schema:
             $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
         "500":
           description: Server error
           schema:
@@ -265,8 +305,20 @@ paths:
           description: Show actual accounts
           schema:
             $ref: '#/definitions/http.Response-transfer_models_Account'
+        "204":
+          description: Show actual accounts
+          schema:
+            $ref: '#/definitions/http.Response-transfer_models_Account'
         "400":
           description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
           schema:
             $ref: '#/definitions/http.ResponseError'
         "500":
@@ -290,6 +342,14 @@ paths:
           description: Client error
           schema:
             $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
         "500":
           description: Server error
           schema:
@@ -309,6 +369,14 @@ paths:
             $ref: '#/definitions/http.Response-transfer_models_BalanceResponse'
         "400":
           description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
           schema:
             $ref: '#/definitions/http.ResponseError'
         "500":
@@ -332,6 +400,14 @@ paths:
           description: Client error
           schema:
             $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
         "500":
           description: Server error
           schema:
@@ -353,6 +429,14 @@ paths:
           description: Client error
           schema:
             $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
         "500":
           description: Server error
           schema:
@@ -371,16 +455,24 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/transfer_models.UserTransfer'
+          $ref: '#/definitions/transfer_models.UserUdate'
       produces:
       - application/json
       responses:
         "200":
           description: Update user info
           schema:
-            $ref: '#/definitions/http.Response-transfer_models_UserTransfer'
+            $ref: '#/definitions/http.Response-http_NilBody'
         "400":
           description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
           schema:
             $ref: '#/definitions/http.ResponseError'
         "500":
@@ -388,6 +480,53 @@ paths:
           schema:
             $ref: '#/definitions/http.ResponseError'
       summary: PUT Update
+      tags:
+      - User
+  /api/user/{userID}/updatePhoto:
+    put:
+      consumes:
+      - multipart/form-data
+      description: Update user photo
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: string
+      - description: New photo to upload
+        in: formData
+        name: upload
+        required: true
+        type: file
+      - description: Path to old photo
+        in: formData
+        name: path
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Photo updated successfully
+          schema:
+            $ref: '#/definitions/http.Response-transfer_models_PhotoUpdate'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: PUT Update Photo
       tags:
       - User
 swagger: "2.0"

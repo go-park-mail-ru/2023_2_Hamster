@@ -3,13 +3,19 @@ package http
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
+	"os"
 
 	commonHttp "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user/delivery/http/transfer_models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/delivery/http/transfer_models"
+	"github.com/google/uuid"
 )
 
 type Handler struct {
@@ -18,7 +24,8 @@ type Handler struct {
 }
 
 const (
-	userIdUrlParam = "userID"
+	userIdUrlParam    = "userID"
+	userloginUrlParam = "login"
 )
 
 func NewHandler(uu user.Usecase, l logger.CustomLogger) *Handler {
@@ -34,6 +41,8 @@ func NewHandler(uu user.Usecase, l logger.CustomLogger) *Handler {
 // @Produce		json
 // @Success		200		{object}	Response[transfer_models.UserTransfer] "Show balance"
 // @Failure		400		{object}	ResponseError	"Client error"
+// @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
+// @Failure     403    	{object}  	ResponseError  		"Forbidden user"
 // @Failure		500		{object}	ResponseError	"Server error"
 // @Router		/api/user/{userID}/ [get]
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
@@ -66,6 +75,8 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 // @Produce		json
 // @Success		200		{object}	Response[transfer_models.BalanceResponse] "Show balance"
 // @Failure		400		{object}	ResponseError	"Client error"
+// @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
+// @Failure     403    	{object}  	ResponseError  		"Forbidden user"
 // @Failure		500		{object}	ResponseError	"Server error"
 // @Router		/api/user/{userID}/balance [get]
 func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
@@ -97,6 +108,8 @@ func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 // @Produce		json
 // @Success		200		{object} 	Response[transfer_models.BudgetPlannedResponse]	"Show planned budget"
 // @Failure		400		{object}	ResponseError			"Client error"
+// @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
+// @Failure     403    	{object}  	ResponseError  		"Forbidden user"
 // @Failure		500		{object}	ResponseError			"Server error"
 // @Router		/api/user/{userID}/plannedBudget [get]
 func (h *Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {
@@ -130,6 +143,8 @@ func (h *Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {
 // @Produce		json
 // @Success		200		{object}	Response[transfer_models.BudgetActualResponse]	"Show actual budget"
 // @Failure		400		{object}	ResponseError			"Client error"
+// @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
+// @Failure     403    	{object}  	ResponseError  		"Forbidden user"
 // @Failure		500		{object}	ResponseError			"Server error"
 // @Router		/api/user/{userID}/actualBudget [get]
 func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
@@ -162,7 +177,10 @@ func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
 // @Description	Get User accounts
 // @Produce		json
 // @Success		200		{object}	Response[transfer_models.Account]	     	"Show actual accounts"
+// @Success		204		{object}	Response[transfer_models.Account]	     	"Show actual accounts"
 // @Failure		400		{object}	ResponseError		"Client error"
+// @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
+// @Failure     403    	{object}  	ResponseError  		"Forbidden user"
 // @Failure		500		{object}	ResponseError		"Server error"
 // @Router		/api/user/{userID}/accounts/all [get]
 func (h *Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
@@ -198,6 +216,8 @@ func (h *Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 // @Produce		json
 // @Success		200		{object}	Response[transfer_models.UserFeed]	     	"Show actual accounts"
 // @Failure		400		{object}	ResponseError		"Client error"
+// @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
+// @Failure     403    	{object}  	ResponseError  		"Forbidden user"
 // @Failure		500		{object}	ResponseError		"Server error"
 // @Router		/api/user/{userID}/feed [get]
 func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
@@ -235,19 +255,21 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 // @Description	Update user info
 // @Accept      json
 // @Produce		json
-// @Param			user		body		transfer_models.UserTransfer		true		"user info update"
-// @Success		200		{object}	Response[transfer_models.UserTransfer]	     	"Update user info"
+// @Param			user		body		transfer_models.UserUdate		true		"user info update"
+// @Success		200		{object}	Response[NilBody]	     	"Update user info"
 // @Failure		400		{object}	ResponseError		"Client error"
+// @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
+// @Failure     403    	{object}  	ResponseError  		"Forbidden user"
 // @Failure		500		{object}	ResponseError		"Server error"
 // @Router		/api/user/{userID}/update [put]
-func (h *Handler) Update(w http.ResponseWriter, r *http.Request) { // need test, TO DO ADD UserUdate struct
+func (h *Handler) Update(w http.ResponseWriter, r *http.Request) { // need test
 	user, err := commonHttp.GetUserFromRequest(r)
 	if err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
 		return
 	}
 
-	var updProfile transfer_models.UserTransfer
+	var updProfile transfer_models.UserUdate
 
 	if err := json.NewDecoder(r.Body).Decode(&updProfile); err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidBodyRequest, h.logger)
@@ -272,5 +294,106 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) { // need test,
 		}
 	}
 
-	commonHttp.SuccessResponse(w, http.StatusOK, updProfile)
+	commonHttp.SuccessResponse(w, http.StatusOK, commonHttp.NilBody{})
+}
+
+func (h *Handler) IsLoginUnique(w http.ResponseWriter, r *http.Request) { /// move auth rep
+	userLogin := commonHttp.GetloginFromRequest(userloginUrlParam, r)
+
+	isUnique, err := h.userService.IsLoginUnique(r.Context(), userLogin)
+
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, "can't get unique info login", h.logger)
+		return
+	}
+	commonHttp.SuccessResponse(w, http.StatusOK, isUnique)
+}
+
+// @Summary     PUT Update Photo
+// @Tags        User
+// @Description Update user photo
+// @Accept      multipart/form-data
+// @Produce     json
+// @Param       userID        path  string  true  "User ID"
+// @Param       upload        formData file    true  "New photo to upload"
+// @Param       path          formData string  true  "Path to old photo"
+// @Success     200           {object} Response[transfer_models.PhotoUpdate] "Photo updated successfully"
+// @Failure     400           {object} ResponseError   "Client error"
+// @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
+// @Failure     403    	{object}  	ResponseError  		"Forbidden user"
+// @Failure     500           {object} ResponseError   "Server error"
+// @Router      /api/user/{userID}/updatePhoto [put]
+func (h *Handler) UpdatePhoto(w http.ResponseWriter, r *http.Request) { // need test
+	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
+
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserNotFound, h.logger)
+		return
+	}
+
+	err = r.ParseMultipartForm(transfer_models.MaxFileSize)
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, transfer_models.UserFileServerError, h.logger)
+		return
+	}
+
+	file, fileTmp, err := r.FormFile("upload")
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserFileUnableUpload, h.logger)
+		return
+	}
+
+	buf, _ := io.ReadAll(file)
+	file.Close()
+	if file, err = fileTmp.Open(); err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserFileUnableOpen, h.logger)
+		return
+	}
+
+	if http.DetectContentType(buf) != "image/jpeg" && http.DetectContentType(buf) != "image/png" && http.DetectContentType(buf) != "image/jpg" {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserFileNotCorrectType, h.logger)
+		return
+	}
+	defer file.Close()
+
+	var oldName uuid.UUID
+	oldName, err = uuid.Parse(r.PostFormValue("path"))
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserFileNotPath, h.logger)
+		return
+	}
+
+	if oldName != uuid.Nil {
+		err = os.Remove(transfer_models.FolderPath + fmt.Sprintf("%s.jpg", oldName.String()))
+		if err != nil {
+			commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserFileNotDelete, h.logger)
+			return
+		}
+	}
+
+	name, err := h.userService.UpdatePhoto(r.Context(), userID)
+	var errNoSuchUser *models.NoSuchUserError
+	if errors.As(err, &errNoSuchUser) {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserNotFound, h.logger)
+		return
+	}
+
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, transfer_models.UserFileServerNotUpdateError, h.logger)
+		return
+	}
+
+	f, err := os.Create(fmt.Sprintf("%s%s.jpg", transfer_models.FolderPath, name.String()))
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, transfer_models.UserFileServerNotCreate, h.logger)
+		return
+	}
+	defer f.Close()
+
+	if _, err = io.Copy(f, file); err != nil {
+		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, transfer_models.UserFileServerNotCreate, h.logger)
+		return
+	}
+
+	commonHttp.SuccessResponse(w, http.StatusOK, transfer_models.PhotoUpdate{Path: name})
 }

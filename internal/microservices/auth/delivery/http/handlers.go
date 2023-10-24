@@ -14,6 +14,11 @@ import (
 	"github.com/google/uuid"
 )
 
+type SignUser struct {
+	username       string `json:"username"`
+	plaintPassword string `json:"password"`
+}
+
 type RegistredUser struct {
 	ID       uuid.UUID `json:"user_id"`
 	username string    `json:"username"`
@@ -50,10 +55,10 @@ func NewHandler(
 // @Failure		429		{object}	ResponseError					"Server error"
 // @Router		/api/auth/signup	[post]
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
-	var user models.User
+	var signUser SignUser
 
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&user); err != nil {
+	if err := decoder.Decode(&signUser); err != nil {
 		h.log.Error(err.Error())
 		response.ErrorResponse(w, http.StatusBadRequest, err, "Corrupted request body can't unmarshal", h.log)
 		return
@@ -83,14 +88,16 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Failure		500			{object}	ResponseError			"Server error"
 // @Router		/api/auth/signin	[post]
 func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
-	var user models.User
+	var signUser SignUser
 
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&user); err != nil {
+	if err := decoder.Decode(&signUser); err != nil {
 		h.log.Error(err.Error())
 		response.ErrorResponse(w, http.StatusBadRequest, err, "Corrupted request body can't unmarshal", h.log)
 		return
 	}
+
+	user, err := h.au
 }
 
 // @Summary		Validate Auth

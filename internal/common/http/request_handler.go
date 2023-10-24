@@ -19,6 +19,12 @@ func GetIDFromRequest(id string, r *http.Request) (uuid.UUID, error) {
 	return parsedUUID, nil
 }
 
+func GetloginFromRequest(login string, r *http.Request) string {
+	userLogin := mux.Vars(r)[login]
+
+	return userLogin
+}
+
 var ErrUnauthorized = &models.UnathorizedError{}
 
 func GetUserFromRequest(r *http.Request) (*models.User, error) {

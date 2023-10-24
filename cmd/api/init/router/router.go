@@ -58,7 +58,9 @@ func InitRouter( /*auth *auth.Handler,*/ user *user.Handler /*mid *middleware.Mi
 	//userRouter.Use(mid.Authentication)
 	{
 		userRouter.Methods("GET").Path("/").HandlerFunc(user.Get)
+		userRouter.Methods("GET").Path("/check-unique-login/{login}").HandlerFunc(user.IsLoginUnique) // move from auth router
 		userRouter.Methods("PUT").Path("/update").HandlerFunc(user.Update)
+		userRouter.Methods("PUT").Path("/updatePhoto").HandlerFunc(user.UpdatePhoto)
 		userRouter.Methods("GET").Path("/balance").HandlerFunc(user.GetUserBalance)
 		userRouter.Methods("GET").Path("/plannedBudget").HandlerFunc(user.GetPlannedBudget)
 		userRouter.Methods("GET").Path("/actualBudget").HandlerFunc(user.GetCurrentBudget)
@@ -66,5 +68,20 @@ func InitRouter( /*auth *auth.Handler,*/ user *user.Handler /*mid *middleware.Mi
 		userRouter.Methods("GET").Path("/feed").HandlerFunc(user.GetFeed)
 	}
 
+	// transactionRouter := apiRouter.PathPrefix("/transaction").Subrouter()
+	// {
+	// 	transactionRouter.Methods("GET").Path("/all").HandlerFunc(transaction.GetFeed)
+	// 	transactionRouter.Methods("PUT").Path("/{transactionID}/update").HandlerFunc(transaction.Update) // ?
+	// 	transactionRouter.Methods("POST").Path("/create").HandlerFunc(transaction.Create)
+	// 	transactionRouter.Methods("DELETE").Path("/delete").HandlerFunc(transaction.Delete)
+	// }
+
+	// categoryRouter := apiRouter.PathPrefix("/category").Subrouter()
+	// {
+	// 	categoryRouter.Methods("GET").Path("/all").HandlerFunc(category.GetFeed)
+	// 	categoryRouter.Methods("PUT").Path("/{categoryID}/update").HandlerFunc(category.Update)
+	// 	categoryRouter.Methods("POST").Path("/create").HandlerFunc(category.Create)
+	// 	categoryRouter.Methods("DELETE").Path("/delete").HandlerFunc(category.Delete)
+	// }
 	return r
 }

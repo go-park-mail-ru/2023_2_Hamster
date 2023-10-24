@@ -7,7 +7,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
-	"github.com/jmoiron/sqlx"
+	"github.com/jackc/pgx/v5"
 )
 
 const (
@@ -15,11 +15,11 @@ const (
 )
 
 type AuthRep struct {
-	db     *sqlx.DB
+	db     *pgx.Conn
 	logger logger.CustomLogger
 }
 
-func NewRepository(db *sqlx.DB, l logger.CustomLogger) *AuthRep {
+func NewRepository(db *pgx.Conn, l logger.CustomLogger) *AuthRep {
 	return &AuthRep{
 		db:     db,
 		logger: l,

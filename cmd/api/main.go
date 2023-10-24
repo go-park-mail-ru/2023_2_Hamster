@@ -28,15 +28,18 @@ import (
 // @name				Authorization
 
 func main() {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	log := logger.CreateCustomLogger()
 
-	db, err := postgresql.InitPostgresDB()
+	db, err := postgresql.InitPostgresDB(ctx)
 	if err != nil {
 		log.Errorf("Error Initializing PostgreSQL database: %v", err)
 		return
 	}
 	defer func() {
-		if err := db.Close(); err != nil {
+		if err := db.Close(ctx); err != nil {
 			log.Errorf("Error Closing database connection: %v", err)
 		}
 		log.Info("Db closed without errors")
@@ -52,18 +55,11 @@ func main() {
 	}()
 	log.Infof("server launcher at %s:%s", os.Getenv("SERVER_HOST"), os.Getenv("SERVER_PORT"))
 
-	// Create a channel to listen for OS signals
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 
-	// Block until we receive a signal
 	<-stop
 
-	// Create a context with a timeout for server shutdown
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	// Attempt to gracefully shutdown the server
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatalf("Server forced to shutdown: %v", err)
 	}

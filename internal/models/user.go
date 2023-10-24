@@ -6,10 +6,11 @@ import (
 
 type User struct {
 	ID            uuid.UUID `json:"id"`
+	Login         string    `json:"login"`
 	Username      string    `json:"username"`
 	PlannedBudget float64   `json:"planned_budget"`
 	Password      string    `json:"password"`
-	AvatarURL     string    `json:"avatar_url"`
+	AvatarURL     uuid.UUID `json:"avatar_url"`
 	Salt          string    `json:"salt"`
 }
 

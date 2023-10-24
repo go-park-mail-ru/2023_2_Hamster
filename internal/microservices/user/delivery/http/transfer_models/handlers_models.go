@@ -10,19 +10,31 @@ import (
 
 // Response error message
 const (
-	BalanceNotFound       = "no such balance"
-	PlannedBudgetNotFound = "no such planned budget"
-	CurrentBudgetNotFound = "no such current budget"
-	AccountNotFound       = "no such account"
-	UserNotFound          = "no such user"
-	UserFeedNotFound      = "no such feed info"
+	//======================ERROR================================
+	BalanceNotFound        = "no such balance"
+	PlannedBudgetNotFound  = "no such planned budget"
+	CurrentBudgetNotFound  = "no such current budget"
+	AccountNotFound        = "no such account"
+	UserNotFound           = "no such user"
+	UserFeedNotFound       = "no such feed info"
+	UserFileUnableUpload   = "unable to process the uploaded file"
+	UserFileUnableOpen     = "unable to open the uploaded file"
+	UserFileNotCorrectType = "no correct type file"
+	UserFileNotPath        = "can't get path in form"
+	UserFileNotDelete      = "can't delete old file"
 
-	BalanceGetServerError       = "can't get balance"
-	PlannedBudgetGetServerError = "can't get planned budget"
-	CurrentBudgetGetServerError = "can't get current budget"
-	AccountServerError          = "can't get account"
-	UserServerError             = "can't get user"
-	UserFeedServerError         = "can't get feed info"
+	BalanceGetServerError        = "can't get balance"
+	PlannedBudgetGetServerError  = "can't get planned budget"
+	CurrentBudgetGetServerError  = "can't get current budget"
+	AccountServerError           = "can't get account"
+	UserServerError              = "can't get user"
+	UserFeedServerError          = "can't get feed info"
+	UserFileServerError          = "file is too large."
+	UserFileServerNotUpdateError = "can't update url photo"
+	UserFileServerNotCreate      = "cat't create photo"
+	//======================ERROR================================
+	MaxFileSize = 10 << 20
+	FolderPath  = "/images/"
 )
 
 type BalanceResponse struct {
@@ -41,6 +53,10 @@ type Account struct {
 	AccountMas []models.Accounts `json:"account"`
 }
 
+type PhotoUpdate struct {
+	Path uuid.UUID `json:"path"`
+}
+
 type UserFeed struct {
 	Account
 	BalanceResponse
@@ -50,19 +66,25 @@ type UserFeed struct {
 
 type UserTransfer struct {
 	ID            uuid.UUID `json:"id" valid:""`
+	Login         string    `json:"login" valid:"required,maxstringlength(20)"`
 	Username      string    `json:"username" valid:"required,maxstringlength(20)"`
 	PlannedBudget float64   `json:"planned_budget" valid:"required,float"`
-	AvatarURL     string    `json:"avatar_url" valid:""`
+	AvatarURL     uuid.UUID `json:"avatar_url" valid:""`
 }
 
-func (ui *UserTransfer) CheckValid() error {
+type UserUdate struct {
+	Username      string
+	PlannedBudget float64
+}
+
+func (ui *UserUdate) CheckValid() error {
 	ui.Username = html.EscapeString(ui.Username)
 	_, err := valid.ValidateStruct(*ui)
 
 	return err
 }
 
-func (ui *UserTransfer) ToUser(user *models.User) *models.User {
+func (ui *UserUdate) ToUser(user *models.User) *models.User {
 	return &models.User{
 		ID:            user.ID,
 		Username:      ui.Username,

@@ -179,6 +179,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/http.ResponseError"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
                     "500": {
                         "description": "Server error",
                         "schema": {
@@ -205,8 +217,26 @@ const docTemplate = `{
                             "$ref": "#/definitions/http.Response-transfer_models_Account"
                         }
                     },
+                    "204": {
+                        "description": "Show actual accounts",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-transfer_models_Account"
+                        }
+                    },
                     "400": {
                         "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
                         }
@@ -243,6 +273,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/http.ResponseError"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
                     "500": {
                         "description": "Server error",
                         "schema": {
@@ -271,6 +313,18 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
                         }
@@ -307,6 +361,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/http.ResponseError"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
                     "500": {
                         "description": "Server error",
                         "schema": {
@@ -335,6 +401,18 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
                         }
@@ -368,7 +446,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/transfer_models.UserTransfer"
+                            "$ref": "#/definitions/transfer_models.UserUdate"
                         }
                     }
                 ],
@@ -376,11 +454,93 @@ const docTemplate = `{
                     "200": {
                         "description": "Update user info",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-transfer_models_UserTransfer"
+                            "$ref": "#/definitions/http.Response-http_NilBody"
                         }
                     },
                     "400": {
                         "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/{userID}/updatePhoto": {
+            "put": {
+                "description": "Update user photo",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "PUT Update Photo",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "New photo to upload",
+                        "name": "upload",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Path to old photo",
+                        "name": "path",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Photo updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-transfer_models_PhotoUpdate"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
                         }
@@ -396,6 +556,20 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "http.NilBody": {
+            "type": "object"
+        },
+        "http.Response-http_NilBody": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/http.NilBody"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
         "http.Response-transfer_models_Account": {
             "type": "object",
             "properties": {
@@ -434,6 +608,17 @@ const docTemplate = `{
             "properties": {
                 "body": {
                     "$ref": "#/definitions/transfer_models.BudgetPlannedResponse"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "http.Response-transfer_models_PhotoUpdate": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/transfer_models.PhotoUpdate"
                 },
                 "status": {
                     "type": "integer"
@@ -521,6 +706,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "login": {
+                    "type": "string"
+                },
                 "password": {
                     "type": "string"
                 },
@@ -570,6 +758,14 @@ const docTemplate = `{
                 }
             }
         },
+        "transfer_models.PhotoUpdate": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string"
+                }
+            }
+        },
         "transfer_models.UserFeed": {
             "type": "object",
             "properties": {
@@ -599,7 +795,21 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "login": {
+                    "type": "string"
+                },
                 "planned_budget": {
+                    "type": "number"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "transfer_models.UserUdate": {
+            "type": "object",
+            "properties": {
+                "plannedBudget": {
                     "type": "number"
                 },
                 "username": {

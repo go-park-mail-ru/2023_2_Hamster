@@ -3,10 +3,11 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE Users
 (
     id             UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    username       VARCHAR(20)  UNIQUE      NOT NULL,
+    username       VARCHAR(20)              NOT NULL,
+    login          VARCHAR(20)       UNIQUE NOT NULL,
     password_hash  VARCHAR(256)             NOT NULL,
 	planned_budget numeric(10, 2),
-    avatar_url     TEXT DEFAULT '/static/img/img1.png'
+    avatar_url     UUID
 );
 
 CREATE TABLE Accounts (
@@ -42,8 +43,8 @@ ALTER COLUMN planned_budget SET DEFAULT 0.0;
 
 --=============================================================================
 
-INSERT INTO "users"(username, password_hash, salt, planned_budget, avatar_url)
-VALUES ('kosmatoff', 'hash', 'fdsf', 10000, 'image/img1.png');
+INSERT INTO "users"(login, username, password_hash, salt, planned_budget)
+VALUES ('kossmatof','komarov', 'hash', 'fdsf', 10000);
 
 
 INSERT INTO "accounts"(user_id, balance, mean_payment)
