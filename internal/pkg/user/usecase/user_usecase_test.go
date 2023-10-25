@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"testing"
@@ -26,7 +27,7 @@ func TestUsecase_GetUserBalance(t *testing.T) {
 			expectedBalance: 100.0,
 			expectedErr:     nil,
 			mockRepoFn: func(mockRepositry *mock.MockRepository) {
-				mockRepositry.EXPECT().GetUserBalance(gomock.Any()).Return(100.0, nil)
+				mockRepositry.EXPECT().GetUserBalance(gomock.Any(), gomock.Any()).Return(100.0, nil)
 			},
 		},
 		{
@@ -34,7 +35,7 @@ func TestUsecase_GetUserBalance(t *testing.T) {
 			expectedBalance: 0,
 			expectedErr:     fmt.Errorf("[usecase] can't get balance from repository some error"),
 			mockRepoFn: func(mockRepositry *mock.MockRepository) {
-				mockRepositry.EXPECT().GetUserBalance(gomock.Any()).Return(0.0, errors.New("some error"))
+				mockRepositry.EXPECT().GetUserBalance(gomock.Any(), gomock.Any()).Return(0.0, errors.New("some error"))
 			},
 		},
 	}
@@ -51,7 +52,7 @@ func TestUsecase_GetUserBalance(t *testing.T) {
 
 			userID := uuid.New()
 
-			balance, err := mockUsecase.GetUserBalance(userID)
+			balance, err := mockUsecase.GetUserBalance(context.Background(), userID)
 
 			assert.Equal(t, tc.expectedBalance, balance)
 			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
@@ -73,7 +74,7 @@ func TestUsecase_GetPlannedBudget(t *testing.T) {
 			expectedBudget: 200.0,
 			expectedErr:    nil,
 			mockRepoFn: func(mockRepository *mock.MockRepository) {
-				mockRepository.EXPECT().GetPlannedBudget(gomock.Any()).Return(200.0, nil)
+				mockRepository.EXPECT().GetPlannedBudget(gomock.Any(), gomock.Any()).Return(200.0, nil)
 			},
 		},
 		{
@@ -81,7 +82,7 @@ func TestUsecase_GetPlannedBudget(t *testing.T) {
 			expectedBudget: 0,
 			expectedErr:    fmt.Errorf("[usecase] can't get planned budget from repository some error"),
 			mockRepoFn: func(mockRepository *mock.MockRepository) {
-				mockRepository.EXPECT().GetPlannedBudget(gomock.Any()).Return(0.0, errors.New("some error"))
+				mockRepository.EXPECT().GetPlannedBudget(gomock.Any(), gomock.Any()).Return(0.0, errors.New("some error"))
 			},
 		},
 	}
@@ -98,7 +99,7 @@ func TestUsecase_GetPlannedBudget(t *testing.T) {
 
 			userID := uuid.New()
 
-			budget, err := mockUsecase.GetPlannedBudget(userID)
+			budget, err := mockUsecase.GetPlannedBudget(context.Background(), userID)
 
 			assert.Equal(t, tc.expectedBudget, budget)
 			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
@@ -124,7 +125,7 @@ func TestUsecase_GetAccounts(t *testing.T) {
 			},
 			expectedErr: nil,
 			mockRepoFn: func(mockRepository *mock.MockRepository) {
-				mockRepository.EXPECT().GetAccounts(gomock.Any()).Return([]models.Accounts{
+				mockRepository.EXPECT().GetAccounts(gomock.Any(), gomock.Any()).Return([]models.Accounts{
 					{ID: uuidTest, UserID: uuidTest, Balance: 100.0, MeanPayment: "Account1"},
 					{ID: uuidTest, UserID: uuidTest, Balance: 200.0, MeanPayment: "Account2"}}, nil)
 			},
@@ -134,7 +135,7 @@ func TestUsecase_GetAccounts(t *testing.T) {
 			expectedAccounts: nil,
 			expectedErr:      fmt.Errorf("[usecase] can't get accounts from repository some error"),
 			mockRepoFn: func(mockRepository *mock.MockRepository) {
-				mockRepository.EXPECT().GetAccounts(gomock.Any()).Return(nil, errors.New("some error"))
+				mockRepository.EXPECT().GetAccounts(gomock.Any(), gomock.Any()).Return(nil, errors.New("some error"))
 			},
 		},
 	}
@@ -151,7 +152,7 @@ func TestUsecase_GetAccounts(t *testing.T) {
 
 			userID := uuid.New()
 
-			accounts, err := mockUsecase.GetAccounts(userID)
+			accounts, err := mockUsecase.GetAccounts(context.Background(), userID)
 
 			assert.Equal(t, tc.expectedAccounts, accounts)
 			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
@@ -173,8 +174,8 @@ func TestUsecase_GetCurrentBudget(t *testing.T) {
 			expectedCurrentBudget: 0.0,
 			expectedErr:           nil,
 			mockRepoFn: func(mockRepository *mock.MockRepository) {
-				mockRepository.EXPECT().GetPlannedBudget(gomock.Any()).Return(1700.0, nil)
-				mockRepository.EXPECT().GetCurrentBudget(gomock.Any()).Return(1700.0, nil)
+				mockRepository.EXPECT().GetPlannedBudget(gomock.Any(), gomock.Any()).Return(1700.0, nil)
+				mockRepository.EXPECT().GetCurrentBudget(gomock.Any(), gomock.Any()).Return(1700.0, nil)
 			},
 		},
 		{
@@ -182,8 +183,8 @@ func TestUsecase_GetCurrentBudget(t *testing.T) {
 			expectedCurrentBudget: 0.0,
 			expectedErr:           fmt.Errorf("[usecase] can't get planned budget from repository some error"),
 			mockRepoFn: func(mockRepository *mock.MockRepository) {
-				mockRepository.EXPECT().GetPlannedBudget(gomock.Any()).Return(0.0, errors.New("some error"))
-				mockRepository.EXPECT().GetCurrentBudget(gomock.Any()).Return(0.0, nil)
+				mockRepository.EXPECT().GetPlannedBudget(gomock.Any(), gomock.Any()).Return(0.0, errors.New("some error"))
+				mockRepository.EXPECT().GetCurrentBudget(gomock.Any(), gomock.Any()).Return(0.0, nil)
 			},
 		},
 		{
@@ -191,7 +192,7 @@ func TestUsecase_GetCurrentBudget(t *testing.T) {
 			expectedCurrentBudget: 0.0,
 			expectedErr:           fmt.Errorf("[usecase] can't get current budget from repository some error"),
 			mockRepoFn: func(mockRepository *mock.MockRepository) {
-				mockRepository.EXPECT().GetCurrentBudget(gomock.Any()).Return(0.0, errors.New("some error"))
+				mockRepository.EXPECT().GetCurrentBudget(gomock.Any(), gomock.Any()).Return(0.0, errors.New("some error"))
 			},
 		},
 	}
@@ -208,7 +209,7 @@ func TestUsecase_GetCurrentBudget(t *testing.T) {
 
 			userID := uuid.New()
 
-			currentBudget, err := mockUsecase.GetCurrentBudget(userID)
+			currentBudget, err := mockUsecase.GetCurrentBudget(context.Background(), userID)
 
 			assert.Equal(t, tc.expectedCurrentBudget, currentBudget)
 			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
@@ -232,16 +233,16 @@ func TestUsecase_GetUser(t *testing.T) {
 				Username:      "kossmatoff",
 				PlannedBudget: 100.0,
 				Password:      "hash",
-				AvatarURL:     "img/image.png",
+				AvatarURL:     uuid.Nil,
 				Salt:          "a"},
 
 			expectedErr: fmt.Errorf("[usecase] can't get user from repository some error"),
 			mockRepoFn: func(mockRepository *mock.MockRepository) {
-				mockRepository.EXPECT().GetByID(gomock.Any()).Return(&models.User{ID: testUserID,
+				mockRepository.EXPECT().GetByID(gomock.Any(), gomock.Any()).Return(&models.User{ID: testUserID,
 					Username:      "kossmatoff",
 					PlannedBudget: 100.0,
 					Password:      "hash",
-					AvatarURL:     "img/image.png",
+					AvatarURL:     uuid.Nil,
 					Salt:          "a"}, errors.New("some error"))
 			},
 		},
@@ -251,7 +252,7 @@ func TestUsecase_GetUser(t *testing.T) {
 			expectedErr:  nil,
 			mockRepoFn: func(mockRepository *mock.MockRepository) {
 				user := &models.User{}
-				mockRepository.EXPECT().GetByID(gomock.Any()).Return(user, nil)
+				mockRepository.EXPECT().GetByID(gomock.Any(), gomock.Any()).Return(user, nil)
 			},
 		},
 	}
@@ -268,7 +269,7 @@ func TestUsecase_GetUser(t *testing.T) {
 
 			userID := uuid.New()
 
-			userActual, err := mockUsecase.GetUser(userID)
+			userActual, err := mockUsecase.GetUser(context.Background(), userID)
 
 			assert.Equal(t, tc.expectedUser, userActual)
 			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
@@ -291,7 +292,7 @@ func TestUsecase_GetFeed(t *testing.T) {
 			expectedFeed: &transfer_models.UserFeed{},
 			expectedErr:  fmt.Errorf("[usecase] can't get balance from repository some erros"),
 			mockRepoFn: func(mockRepository *mock.MockRepository) {
-				mockRepository.EXPECT().GetUserBalance(gomock.Any()).Return(0.0, errors.New("some erros"))
+				mockRepository.EXPECT().GetUserBalance(gomock.Any(), gomock.Any()).Return(0.0, errors.New("some erros"))
 			},
 		},
 		{
@@ -299,8 +300,8 @@ func TestUsecase_GetFeed(t *testing.T) {
 			expectedFeed: &transfer_models.UserFeed{},
 			expectedErr:  fmt.Errorf("[usecase] can't get current budget from repository some error"),
 			mockRepoFn: func(mockRepository *mock.MockRepository) {
-				mockRepository.EXPECT().GetUserBalance(gomock.Any()).Return(0.0, nil)
-				mockRepository.EXPECT().GetCurrentBudget(gomock.Any()).Return(0.0, errors.New("some error"))
+				mockRepository.EXPECT().GetUserBalance(gomock.Any(), gomock.Any()).Return(0.0, nil)
+				mockRepository.EXPECT().GetCurrentBudget(gomock.Any(), gomock.Any()).Return(0.0, errors.New("some error"))
 			},
 		},
 		{
@@ -308,9 +309,9 @@ func TestUsecase_GetFeed(t *testing.T) {
 			expectedFeed: &transfer_models.UserFeed{},
 			expectedErr:  fmt.Errorf("[usecase] can't get planned budget from repository some error"),
 			mockRepoFn: func(mockRepository *mock.MockRepository) {
-				mockRepository.EXPECT().GetUserBalance(gomock.Any()).Return(0.0, nil)
-				mockRepository.EXPECT().GetCurrentBudget(gomock.Any()).Return(0.0, nil)
-				mockRepository.EXPECT().GetPlannedBudget(gomock.Any()).Return(0.0, errors.New("some error"))
+				mockRepository.EXPECT().GetUserBalance(gomock.Any(), gomock.Any()).Return(0.0, nil)
+				mockRepository.EXPECT().GetCurrentBudget(gomock.Any(), gomock.Any()).Return(0.0, nil)
+				mockRepository.EXPECT().GetPlannedBudget(gomock.Any(), gomock.Any()).Return(0.0, errors.New("some error"))
 			},
 		},
 		// {
@@ -348,7 +349,7 @@ func TestUsecase_GetFeed(t *testing.T) {
 
 			mockUsecase := NewUsecase(mockRepo, *logger.CreateCustomLogger())
 
-			feedActual, err := mockUsecase.GetFeed(testUserID)
+			feedActual, err := mockUsecase.GetFeed(context.Background(), testUserID)
 
 			assert.Equal(t, tc.expectedFeed, feedActual)
 			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {

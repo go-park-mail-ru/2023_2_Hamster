@@ -73,8 +73,8 @@ type UserTransfer struct {
 }
 
 type UserUdate struct {
-	Username      string
-	PlannedBudget float64
+	Username      string  `json:"username" valid:"required,maxstringlength(20)"`
+	PlannedBudget float64 `json:"planned_budget" valid:"required,float"`
 }
 
 func (ui *UserUdate) CheckValid() error {

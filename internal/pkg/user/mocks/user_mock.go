@@ -5,6 +5,7 @@
 package mock_user
 
 import (
+	context "context"
 	reflect "reflect"
 
 	models "github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
@@ -37,93 +38,137 @@ func (m *MockUsecase) EXPECT() *MockUsecaseMockRecorder {
 }
 
 // GetAccounts mocks base method.
-func (m *MockUsecase) GetAccounts(userID uuid.UUID) ([]models.Accounts, error) {
+func (m *MockUsecase) GetAccounts(ctx context.Context, userID uuid.UUID) ([]models.Accounts, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAccounts", userID)
+	ret := m.ctrl.Call(m, "GetAccounts", ctx, userID)
 	ret0, _ := ret[0].([]models.Accounts)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetAccounts indicates an expected call of GetAccounts.
-func (mr *MockUsecaseMockRecorder) GetAccounts(userID interface{}) *gomock.Call {
+func (mr *MockUsecaseMockRecorder) GetAccounts(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccounts", reflect.TypeOf((*MockUsecase)(nil).GetAccounts), userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccounts", reflect.TypeOf((*MockUsecase)(nil).GetAccounts), ctx, userID)
 }
 
 // GetCurrentBudget mocks base method.
-func (m *MockUsecase) GetCurrentBudget(userID uuid.UUID) (float64, error) {
+func (m *MockUsecase) GetCurrentBudget(ctx context.Context, userID uuid.UUID) (float64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetCurrentBudget", userID)
+	ret := m.ctrl.Call(m, "GetCurrentBudget", ctx, userID)
 	ret0, _ := ret[0].(float64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetCurrentBudget indicates an expected call of GetCurrentBudget.
-func (mr *MockUsecaseMockRecorder) GetCurrentBudget(userID interface{}) *gomock.Call {
+func (mr *MockUsecaseMockRecorder) GetCurrentBudget(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentBudget", reflect.TypeOf((*MockUsecase)(nil).GetCurrentBudget), userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentBudget", reflect.TypeOf((*MockUsecase)(nil).GetCurrentBudget), ctx, userID)
 }
 
 // GetFeed mocks base method.
-func (m *MockUsecase) GetFeed(userID uuid.UUID) (*transfer_models.UserFeed, error) {
+func (m *MockUsecase) GetFeed(ctx context.Context, userID uuid.UUID) (*transfer_models.UserFeed, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetFeed", userID)
+	ret := m.ctrl.Call(m, "GetFeed", ctx, userID)
 	ret0, _ := ret[0].(*transfer_models.UserFeed)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetFeed indicates an expected call of GetFeed.
-func (mr *MockUsecaseMockRecorder) GetFeed(userID interface{}) *gomock.Call {
+func (mr *MockUsecaseMockRecorder) GetFeed(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFeed", reflect.TypeOf((*MockUsecase)(nil).GetFeed), userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFeed", reflect.TypeOf((*MockUsecase)(nil).GetFeed), ctx, userID)
 }
 
 // GetPlannedBudget mocks base method.
-func (m *MockUsecase) GetPlannedBudget(userID uuid.UUID) (float64, error) {
+func (m *MockUsecase) GetPlannedBudget(ctx context.Context, userID uuid.UUID) (float64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetPlannedBudget", userID)
+	ret := m.ctrl.Call(m, "GetPlannedBudget", ctx, userID)
 	ret0, _ := ret[0].(float64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetPlannedBudget indicates an expected call of GetPlannedBudget.
-func (mr *MockUsecaseMockRecorder) GetPlannedBudget(userID interface{}) *gomock.Call {
+func (mr *MockUsecaseMockRecorder) GetPlannedBudget(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPlannedBudget", reflect.TypeOf((*MockUsecase)(nil).GetPlannedBudget), userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPlannedBudget", reflect.TypeOf((*MockUsecase)(nil).GetPlannedBudget), ctx, userID)
 }
 
 // GetUser mocks base method.
-func (m *MockUsecase) GetUser(userID uuid.UUID) (*models.User, error) {
+func (m *MockUsecase) GetUser(ctx context.Context, userID uuid.UUID) (*models.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUser", userID)
+	ret := m.ctrl.Call(m, "GetUser", ctx, userID)
 	ret0, _ := ret[0].(*models.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetUser indicates an expected call of GetUser.
-func (mr *MockUsecaseMockRecorder) GetUser(userID interface{}) *gomock.Call {
+func (mr *MockUsecaseMockRecorder) GetUser(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockUsecase)(nil).GetUser), userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockUsecase)(nil).GetUser), ctx, userID)
 }
 
 // GetUserBalance mocks base method.
-func (m *MockUsecase) GetUserBalance(userID uuid.UUID) (float64, error) {
+func (m *MockUsecase) GetUserBalance(ctx context.Context, userID uuid.UUID) (float64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserBalance", userID)
+	ret := m.ctrl.Call(m, "GetUserBalance", ctx, userID)
 	ret0, _ := ret[0].(float64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetUserBalance indicates an expected call of GetUserBalance.
-func (mr *MockUsecaseMockRecorder) GetUserBalance(userID interface{}) *gomock.Call {
+func (mr *MockUsecaseMockRecorder) GetUserBalance(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserBalance", reflect.TypeOf((*MockUsecase)(nil).GetUserBalance), userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserBalance", reflect.TypeOf((*MockUsecase)(nil).GetUserBalance), ctx, userID)
+}
+
+// IsLoginUnique mocks base method.
+func (m *MockUsecase) IsLoginUnique(ctx context.Context, login string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IsLoginUnique", ctx, login)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// IsLoginUnique indicates an expected call of IsLoginUnique.
+func (mr *MockUsecaseMockRecorder) IsLoginUnique(ctx, login interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsLoginUnique", reflect.TypeOf((*MockUsecase)(nil).IsLoginUnique), ctx, login)
+}
+
+// UpdatePhoto mocks base method.
+func (m *MockUsecase) UpdatePhoto(ctx context.Context, usserID uuid.UUID) (uuid.UUID, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdatePhoto", ctx, usserID)
+	ret0, _ := ret[0].(uuid.UUID)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdatePhoto indicates an expected call of UpdatePhoto.
+func (mr *MockUsecaseMockRecorder) UpdatePhoto(ctx, usserID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePhoto", reflect.TypeOf((*MockUsecase)(nil).UpdatePhoto), ctx, usserID)
+}
+
+// UpdateUser mocks base method.
+func (m *MockUsecase) UpdateUser(ctx context.Context, user *models.User) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUser", ctx, user)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateUser indicates an expected call of UpdateUser.
+func (mr *MockUsecaseMockRecorder) UpdateUser(ctx, user interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUser", reflect.TypeOf((*MockUsecase)(nil).UpdateUser), ctx, user)
 }
 
 // MockRepository is a mock of Repository interface.
@@ -149,107 +194,164 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
 }
 
-// CreateUser mocks base method.
-func (m *MockRepository) CreateUser(user models.User) (uuid.UUID, error) {
+// CheckUser mocks base method.
+func (m *MockRepository) CheckUser(ctx context.Context, userID uuid.UUID) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateUser", user)
+	ret := m.ctrl.Call(m, "CheckUser", ctx, userID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CheckUser indicates an expected call of CheckUser.
+func (mr *MockRepositoryMockRecorder) CheckUser(ctx, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckUser", reflect.TypeOf((*MockRepository)(nil).CheckUser), ctx, userID)
+}
+
+// CreateUser mocks base method.
+func (m *MockRepository) CreateUser(ctx context.Context, user models.User) (uuid.UUID, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateUser", ctx, user)
 	ret0, _ := ret[0].(uuid.UUID)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateUser indicates an expected call of CreateUser.
-func (mr *MockRepositoryMockRecorder) CreateUser(user interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) CreateUser(ctx, user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockRepository)(nil).CreateUser), user)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockRepository)(nil).CreateUser), ctx, user)
 }
 
 // GetAccounts mocks base method.
-func (m *MockRepository) GetAccounts(userID uuid.UUID) ([]models.Accounts, error) {
+func (m *MockRepository) GetAccounts(ctx context.Context, userID uuid.UUID) ([]models.Accounts, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAccounts", userID)
+	ret := m.ctrl.Call(m, "GetAccounts", ctx, userID)
 	ret0, _ := ret[0].([]models.Accounts)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetAccounts indicates an expected call of GetAccounts.
-func (mr *MockRepositoryMockRecorder) GetAccounts(userID interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) GetAccounts(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccounts", reflect.TypeOf((*MockRepository)(nil).GetAccounts), userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccounts", reflect.TypeOf((*MockRepository)(nil).GetAccounts), ctx, userID)
 }
 
 // GetByID mocks base method.
-func (m *MockRepository) GetByID(userID uuid.UUID) (*models.User, error) {
+func (m *MockRepository) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByID", userID)
+	ret := m.ctrl.Call(m, "GetByID", ctx, userID)
 	ret0, _ := ret[0].(*models.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetByID indicates an expected call of GetByID.
-func (mr *MockRepositoryMockRecorder) GetByID(userID interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) GetByID(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockRepository)(nil).GetByID), userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockRepository)(nil).GetByID), ctx, userID)
 }
 
 // GetCurrentBudget mocks base method.
-func (m *MockRepository) GetCurrentBudget(userID uuid.UUID) (float64, error) {
+func (m *MockRepository) GetCurrentBudget(ctx context.Context, userID uuid.UUID) (float64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetCurrentBudget", userID)
+	ret := m.ctrl.Call(m, "GetCurrentBudget", ctx, userID)
 	ret0, _ := ret[0].(float64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetCurrentBudget indicates an expected call of GetCurrentBudget.
-func (mr *MockRepositoryMockRecorder) GetCurrentBudget(userID interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) GetCurrentBudget(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentBudget", reflect.TypeOf((*MockRepository)(nil).GetCurrentBudget), userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentBudget", reflect.TypeOf((*MockRepository)(nil).GetCurrentBudget), ctx, userID)
 }
 
 // GetPlannedBudget mocks base method.
-func (m *MockRepository) GetPlannedBudget(userID uuid.UUID) (float64, error) {
+func (m *MockRepository) GetPlannedBudget(ctx context.Context, userID uuid.UUID) (float64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetPlannedBudget", userID)
+	ret := m.ctrl.Call(m, "GetPlannedBudget", ctx, userID)
 	ret0, _ := ret[0].(float64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetPlannedBudget indicates an expected call of GetPlannedBudget.
-func (mr *MockRepositoryMockRecorder) GetPlannedBudget(userID interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) GetPlannedBudget(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPlannedBudget", reflect.TypeOf((*MockRepository)(nil).GetPlannedBudget), userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPlannedBudget", reflect.TypeOf((*MockRepository)(nil).GetPlannedBudget), ctx, userID)
 }
 
 // GetUserBalance mocks base method.
-func (m *MockRepository) GetUserBalance(userID uuid.UUID) (float64, error) {
+func (m *MockRepository) GetUserBalance(ctx context.Context, userID uuid.UUID) (float64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserBalance", userID)
+	ret := m.ctrl.Call(m, "GetUserBalance", ctx, userID)
 	ret0, _ := ret[0].(float64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetUserBalance indicates an expected call of GetUserBalance.
-func (mr *MockRepositoryMockRecorder) GetUserBalance(userID interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) GetUserBalance(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserBalance", reflect.TypeOf((*MockRepository)(nil).GetUserBalance), userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserBalance", reflect.TypeOf((*MockRepository)(nil).GetUserBalance), ctx, userID)
 }
 
 // GetUserByUsername mocks base method.
-func (m *MockRepository) GetUserByUsername(username string) (*models.User, error) {
+func (m *MockRepository) GetUserByUsername(ctx context.Context, username string) (*models.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserByUsername", username)
+	ret := m.ctrl.Call(m, "GetUserByUsername", ctx, username)
 	ret0, _ := ret[0].(*models.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetUserByUsername indicates an expected call of GetUserByUsername.
-func (mr *MockRepositoryMockRecorder) GetUserByUsername(username interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) GetUserByUsername(ctx, username interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByUsername", reflect.TypeOf((*MockRepository)(nil).GetUserByUsername), username)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByUsername", reflect.TypeOf((*MockRepository)(nil).GetUserByUsername), ctx, username)
+}
+
+// IsLoginUnique mocks base method.
+func (m *MockRepository) IsLoginUnique(ctx context.Context, login string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IsLoginUnique", ctx, login)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// IsLoginUnique indicates an expected call of IsLoginUnique.
+func (mr *MockRepositoryMockRecorder) IsLoginUnique(ctx, login interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsLoginUnique", reflect.TypeOf((*MockRepository)(nil).IsLoginUnique), ctx, login)
+}
+
+// UpdatePhoto mocks base method.
+func (m *MockRepository) UpdatePhoto(ctx context.Context, userID, path uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdatePhoto", ctx, userID, path)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdatePhoto indicates an expected call of UpdatePhoto.
+func (mr *MockRepositoryMockRecorder) UpdatePhoto(ctx, userID, path interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePhoto", reflect.TypeOf((*MockRepository)(nil).UpdatePhoto), ctx, userID, path)
+}
+
+// UpdateUser mocks base method.
+func (m *MockRepository) UpdateUser(ctx context.Context, user *models.User) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUser", ctx, user)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateUser indicates an expected call of UpdateUser.
+func (mr *MockRepositoryMockRecorder) UpdateUser(ctx, user interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUser", reflect.TypeOf((*MockRepository)(nil).UpdateUser), ctx, user)
 }
