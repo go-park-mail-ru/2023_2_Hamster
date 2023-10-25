@@ -7,22 +7,10 @@ import (
 
 	response "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions"
-	"github.com/google/uuid"
+	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user"
 )
-
-type SignUser struct {
-	username       string `json:"username"`
-	plaintPassword string `json:"password"`
-}
-
-type RegistredUser struct {
-	ID       uuid.UUID `json:"user_id"`
-	username string    `json:"username"`
-}
 
 type Handler struct {
 	au  auth.Usecase
@@ -55,7 +43,7 @@ func NewHandler(
 // @Failure		429		{object}	ResponseError					"Server error"
 // @Router		/api/auth/signup	[post]
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
-	var signUser SignUser
+	var signUser auth.SignUser
 
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&signUser); err != nil {
@@ -64,17 +52,25 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.au.SignUp(r.Context(), user)
+	user, err := h.au.SignUp(r.Context(), signUser)
 	if err != nil {
-		h.log.Errorf("Error in sign up: %v", err)
+		h.log.Errorf("[usecase] Error in sign up: %v", err)
 		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't Sign Up user", h.log)
 	}
 
 	session, err := h.su.CreateSessionById(r.Context(), user.ID)
-	regUser := RegistredUser{ID: session.UserId, username: user.Username}
+	if err != nil {
+		h.log.Errorf("[usecase] Error in sign up session creation: %v", err)
+		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't Sign Up user", h.log)
+	}
+
+	regUser := auth.SignResponse{
+		ID:       session.UserId,
+		Username: user.Username,
+	}
 
 	http.SetCookie(w, response.InitCookie(response.AuthTag, session.Cookie, time.Now().Add(7*24*time.Hour), "/api"))
-	response.SuccessResponse[RegistredUser](w, http.StatusAccepted, regUser)
+	response.SuccessResponse[auth.SignResponse](w, http.StatusAccepted, regUser)
 }
 
 // @Summary		Sign In
@@ -88,7 +84,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Failure		500			{object}	ResponseError			"Server error"
 // @Router		/api/auth/signin	[post]
 func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
-	var signUser SignUser
+	var signUser auth.SignUser
 
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&signUser); err != nil {
@@ -97,7 +93,25 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.au
+	user, err := h.au.Login(r.Context(), signUser)
+	if err != nil {
+		h.log.Errorf("[usecase] Error in login: %v", err)
+		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't Login user", h.log)
+	}
+
+	session, err := h.su.CreateSessionById(r.Context(), user.ID)
+	if err != nil {
+		h.log.Errorf("[usecase] Error in login: %v", err)
+		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't Login user", h.log)
+	}
+
+	regUser := auth.SignResponse{
+		ID:       session.UserId,
+		Username: user.Username,
+	}
+
+	http.SetCookie(w, response.InitCookie(response.AuthTag, session.Cookie, time.Now().Add(7*24*time.Hour), "/api"))
+	response.SuccessResponse[auth.SignResponse](w, http.StatusAccepted, regUser)
 }
 
 // @Summary		Validate Auth
@@ -110,7 +124,7 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 // @Failure		400		{object}	ResponseError				"Invalid cookie"
 // @Failure		500		{object}	ResponseError				"Server error: cookie read fail"
 // @Router		/api/auth/checkAuth	[post]
-func (h *Handler) AccessVerification(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary		Validate Auth
@@ -124,6 +138,20 @@ func (h *Handler) AccessVerification(w http.ResponseWriter, r *http.Request) {
 // @Failure		500		{object}	ResponseError				"Server error: cookie read fail"
 // @Router		/api/auth/checkAuth	[post]
 func (h *Handler) LogOut(w http.ResponseWriter, r *http.Request) {
+	session, err := r.Cookie("session")
+	if err != nil {
+		h.log.Errorf("[usecase] Log out error: %v", err)
+		response.ErrorResponse(w, http.StatusBadRequest, err, "No cookie provided", h.log)
+	}
+
+	err = h.su.DeleteSessionByCookie(r.Context(), session.Name)
+	if err != nil {
+		h.log.Errorf("[usecase] Error session delete: %v", err)
+		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't delete session", h.log)
+	}
+
+	http.SetCookie(w, response.InitCookie("session", "", time.Now().AddDate(0, 0, -1), "/api"))
+	response.SuccessResponse[response.NilBody](w, http.StatusOK, response.NIL())
 }
 
 // @Summary		Sign Up

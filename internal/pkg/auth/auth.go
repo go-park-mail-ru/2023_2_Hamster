@@ -8,8 +8,8 @@ import (
 
 type Usecase interface {
 	// Auth
-	SignUp(ctx context.Context, input models.User) (models.User, error)
-	Login(ctx context.Context, input models.SignInput) (models.User, error)
+	SignUp(ctx context.Context, input SignUser) (models.User, error)
+	Login(ctx context.Context, input SignUser) (models.User, error)
 }
 
 type Repository interface {

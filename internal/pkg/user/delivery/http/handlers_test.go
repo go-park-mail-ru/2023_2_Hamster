@@ -8,9 +8,9 @@ import (
 	"testing"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microsevices/user/delivery/http/transfer_models"
-	mocks "github.com/go-park-mail-ru/2023_2_Hamster/internal/microsevices/user/mocks"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/delivery/http/transfer_models"
+	mocks "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/mocks"
 	"github.com/gorilla/mux"
 
 	"github.com/golang/mock/gomock"

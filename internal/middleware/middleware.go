@@ -4,11 +4,9 @@ import (
 	"context"
 	"net/http"
 
-	commonHttp "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth"
-	cookiePkg "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth"
 )
 
 type Middleware struct {
@@ -25,7 +23,7 @@ func NewMiddleware(au auth.Usecase, log logger.CustomLogger) *Middleware {
 
 func (m *Middleware) Authentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie(cookiePkg.AuthCookie)
+		/*cookie, err := r.Cookie(cookiePkg.AuthCookie)
 		if err != nil {
 			m.log.Errorf("[middleware] no cookie Authentication")
 			commonHttp.ErrorResponse(w, http.StatusUnauthorized, err, "missing token unauthorized", m.log)
@@ -58,8 +56,8 @@ func (m *Middleware) Authentication(next http.Handler) http.Handler {
 		}
 
 		m.log.Infof("user accepted : %d", user.ID)
-
-		ctx := context.WithValue(r.Context(), models.ContextKeyUserType{}, user)
-		next.ServeHTTP(w, r.WithContext(ctx)) // token check successed
+		*/
+		ctx := context.WithValue(r.Context(), models.ContextKeyUserType{}, models.User{}) // Empty user
+		next.ServeHTTP(w, r.WithContext(ctx))                                             // token check successed
 	})
 }
