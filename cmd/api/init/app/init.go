@@ -3,7 +3,7 @@ package app
 import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/router"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgtype/pgxtype"
 
 	userDelivery "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/delivery/http"
 	userRep "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/repository/postgresql"
@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func Init(db *pgx.Conn, log *logger.CustomLogger) *mux.Router {
+func Init(db pgxtype.Querier, log *logger.CustomLogger) *mux.Router {
 	//authRep := authRep.NewRepository(db, *log)
 	userRep := userRep.NewRepository(db, *log)
 

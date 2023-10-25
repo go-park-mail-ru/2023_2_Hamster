@@ -9,11 +9,11 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgtype/pgxtype"
 )
 
 const (
-	UserCreate           = `INSERT INTO users (login, username, password_hash, salt) VALUES ($1, $2, $3) RETURNING id;`
+	UserCreate           = `INSERT INTO users (login, username, password_hash, salt) VALUES ($1, $2, $3, $4) RETURNING id;`
 	UserIDGetByID        = `SELECT * FROM users WHERE id = $1;`
 	UserGetByUserName    = `SELECT id, username, password_hash, planned_budget, avatar_url, salt From users WHERE (username=$1)`
 	UserGetPlannedBudget = "SELECT planned_budget FROM users WHERE id = $1"
@@ -26,11 +26,11 @@ const (
 )
 
 type UserRep struct {
-	db     *pgx.Conn
+	db     pgxtype.Querier
 	logger logger.CustomLogger
 }
 
-func NewRepository(db *pgx.Conn, l logger.CustomLogger) *UserRep {
+func NewRepository(db pgxtype.Querier, l logger.CustomLogger) *UserRep {
 	return &UserRep{
 		db:     db,
 		logger: l,
