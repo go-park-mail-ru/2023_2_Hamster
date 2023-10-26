@@ -28,6 +28,7 @@ func TestCreateUser(t *testing.T) {
 		Password: "password",
 		Salt:     "salt",
 	}
+
 	id := uuid.New()
 	columns := []string{"id"}
 	pgxRows := pgxpoolmock.NewRows(columns).AddRow(id.String())

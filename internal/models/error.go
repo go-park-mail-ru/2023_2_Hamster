@@ -12,7 +12,13 @@ func (e *UnathorizedError) Error() string {
 	return "unathorized"
 }
 
+// =========================================UserError================================================
+
 type NoSuchUserError struct {
+	UserID uuid.UUID
+}
+
+type NoSuchTransactionError struct {
 	UserID uuid.UUID
 }
 
@@ -51,3 +57,9 @@ func (e *NoSuchAccounts) Error() string {
 func (e *NoSuchUserError) Error() string {
 	return fmt.Sprintf("No Such user: %s doesn't exist", e.UserID.String())
 }
+
+func (e *NoSuchTransactionError) Error() string {
+	return fmt.Sprintf("No Such transaction: %s doesn't exist", e.UserID.String())
+}
+
+// =========================================UserError================================================

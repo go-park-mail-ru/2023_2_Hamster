@@ -1,4 +1,4 @@
-package transactoin
+package transaction
 
 import (
 	"context"
@@ -8,15 +8,17 @@ import (
 )
 
 type Usecase interface {
-	DeleteTransaction(ctx context.Context, transactionID uuid.UUID) error
-	CreateTransaction(ctx context.Context, transaction models.Transaction) (uuid.UUID, error)
+	// DeleteTransaction(ctx context.Context, transactionID uuid.UUID) error
+	// CreateTransaction(ctx context.Context, transaction models.Transaction) (uuid.UUID, error)
+	// GetTransaction(ctx context.Context, transaction models.Transaction) *models.Transaction
 	GetFeed(ctx context.Context, userID uuid.UUID) ([]models.Transaction, error)
-	UpdateTransaction(ctx context.Context, transaction *models.Transaction) error
+	// UpdateTransaction(ctx context.Context, transaction *models.Transaction) error
 }
 
 type Repository interface {
-	DeleteTransaction(ctx context.Context, transactionID uuid.UUID) error
-	CreateTransaction(ctx context.Context, transaction models.Transaction) (uuid.UUID, error)
+	// DeleteTransaction(ctx context.Context, transactionID uuid.UUID) error
+	// CreateTransaction(ctx context.Context, transaction models.Transaction) (uuid.UUID, error)
 	GetFeed(ctx context.Context, userID uuid.UUID) ([]models.Transaction, error)
-	UpdateTransaction(ctx context.Context, transaction *models.Transaction) error
+	// GetTransaction(ctx context.Context, transaction models.Transaction) *models.Transaction
+	// UpdateTransaction(ctx context.Context, transaction *models.Transaction) error
 }

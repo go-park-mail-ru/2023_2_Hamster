@@ -9,6 +9,20 @@ definitions:
       status:
         type: integer
     type: object
+  http.Response-models_TransactionTransfer:
+    properties:
+      body:
+        $ref: '#/definitions/models.TransactionTransfer'
+      status:
+        type: integer
+    type: object
+  http.Response-string:
+    properties:
+      body:
+        type: string
+      status:
+        type: integer
+    type: object
   http.Response-transfer_models_Account:
     properties:
       body:
@@ -90,6 +104,25 @@ definitions:
       user_id:
         type: string
     type: object
+  models.TransactionTransfer:
+    properties:
+      account_id:
+        type: string
+      category_id:
+        type: string
+      date:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      is_income:
+        type: boolean
+      payer:
+        type: string
+      total:
+        type: number
+    type: object
   models.User:
     properties:
       avatar_url:
@@ -162,7 +195,7 @@ definitions:
     type: object
   transfer_models.UserUdate:
     properties:
-      plannedBudget:
+      planned_budget:
         type: number
       username:
         type: string
@@ -266,6 +299,39 @@ paths:
       summary: Sign Up
       tags:
       - Auth
+  /api/transaction/{userID}/all:
+    get:
+      description: Get User all transaction
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Show actual budget
+          schema:
+            $ref: '#/definitions/http.Response-models_TransactionTransfer'
+        "204":
+          description: Show actual accounts
+          schema:
+            $ref: '#/definitions/http.Response-string'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Get all transaction
+      tags:
+      - Transaction
   /api/user/{userID}/:
     get:
       description: Get user with chosen ID
@@ -273,7 +339,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: Show balance
+          description: Show user
           schema:
             $ref: '#/definitions/http.Response-transfer_models_UserTransfer'
         "400":
@@ -308,7 +374,7 @@ paths:
         "204":
           description: Show actual accounts
           schema:
-            $ref: '#/definitions/http.Response-transfer_models_Account'
+            $ref: '#/definitions/http.Response-string'
         "400":
           description: Client error
           schema:

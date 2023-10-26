@@ -156,7 +156,9 @@ func (r *UserRep) GetAccounts(ctx context.Context, user_id uuid.UUID) ([]models.
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
-
+	if len(accounts) == 0 {
+		return nil, fmt.Errorf("[repo] %w: %v", &models.NoSuchAccounts{UserID: user_id}, err)
+	}
 	return accounts, nil
 }
 
