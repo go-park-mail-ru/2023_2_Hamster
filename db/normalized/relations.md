@@ -119,8 +119,8 @@ erDiagram
     account ||--o{ deposit : has
     account ||--o{ credit : has
     user ||--o{ investment : has
-    user ||--o{ userAccount : has
-    account ||--o{ userAccount : has
+    user ||--o{ user_account : has
+    account ||--o{ user_account : has
     user ||--o{ category : has
     user ||--o{ transaction : has
     account ||--o{ transaction : has
