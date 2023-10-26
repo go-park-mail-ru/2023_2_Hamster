@@ -36,77 +36,86 @@
 
 ```mermaid
 erDiagram
-    User {
-        id uuid PK
-        username string 
-        login string 
-        password_hash string 
-        salt string 
-        planned_budget money 
-        avatar_url uuid
+    user {
+        id              uuid PK
+        login           string
+        username        string
+        password_hash   string
+        planned_budget  money
+        avatar_url      uuid
     }
-    Account {
-        id uuid  PK
-        user_id uuid  FK
-        balance money 
+
+    account {
+        id           uuid PK
+        user_id      uuid FK
+        bank_name    string
+        balance      money
+        description  text
         mean_payment string
     }
-    Category {
-        id uuid  PK
+    
+    category {
+        id      uuid  PK
         user_id uuid  FK
-        name string 
+        name    string
     }
-    Transaction {
-        id uuid  PK
-        user_id uuid  FK
+
+    transaction {
+        id          uuid  PK
+        user_id     uuid  FK
         category_id uuid  FK
+        account_id  uuid  FK
+        is_income   boolean
+        total       money
+        date        date
+        payer       string
+        description string
+    }
+    
+    user_account {
+        id         uuid  PK
+        user_id    uuid  FK
         account_id uuid  FK
-        total money 
-        is_income boolean 
-        date date
-        payer string 
-        description string 
     }
-    UserAccount {
-        id uuid  PK
-        user_id uuid  FK
-        account_id uuid  FK
+
+    goal {
+        id          uuid  PK
+        user_id     uuid  FK
+        name        string
+        description string
+        amount      money
+        start_date  date
     }
-    Goal {
-        id uuid  PK
-        user_id uuid  FK
-        name string 
-        description string 
-        total money 
-        date date
+
+    investment {
+        id             uuid  PK
+        user_id        uuid  FK
+        asset_type     string
+        asset_name     string
+        price          money
+        quantity       numeric
+        purchase_date  date
     }
-    Investment {
-        id uuid  PK
-        user_id uuid  FK
-        name string 
-        total numeric 
-        date_start date
-        price money
-        percentage numeric
-    }
-    Credit {
-        id uuid  PK
-        account_id uuid  FK
-        total_amount money 
-        date_start date 
-        date_end date 
-        status string
-        credit_type string 
+
+    credit {
+        id              uuid  PK
+        account_id      uuid  FK        total_amount    money
+        date_start      date
+        date_end        date
+        status          string
+        credit_type     string
         monthly_payment money
     }
-    Deposit {
-        id uuid  PK
-        account_id uuid  FK
-        total money 
-        date_start date 
-        date_end date 
-        interest_rate numeric 
+    
+    deposit {
+        id            uuid  PK
+        account_id    uuid  FK
+        total         money
+        date_start    date
+        date_end      date
+        interest_rate numeric
     }
+
     Account ||--o{ Deposit : has
     Account ||--o{ Credit : has
     User ||--o{ Investment : has
