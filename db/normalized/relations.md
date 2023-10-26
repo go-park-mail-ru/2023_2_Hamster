@@ -2,11 +2,11 @@
 ## User
 - Хранит информацию о пользователях.
 - {id} -> {username, login, password_hash, salt, planned_budget, avatar_url}
-- {login}->{username, password_hash, salt, planned_budget, avatar_url}
+- {login}->{id, username, password_hash, salt, planned_budget, avatar_url}
 ## Account
 - Хранит информацию о банковских счетах пользователя.
 - {id} -> {user_id, balance, mean_payment}
-- {user_id} -> {id}
+- {user_id} -> {id, balance, mean_payment}
 ## Investment
 - Хранит информацию о инвестициях пользователя.
 - id -> {name, total, date start, price, percentage}
@@ -83,11 +83,11 @@ erDiagram
     Investment {
         id uuid  PK
         user_id uuid  FK
-        name string 
-        total numeric 
-        date_start date
-        price money
-        percentage numeric
+        asset_type string
+        asset_name string
+        purchase_price money 
+        purchase_date date
+
     }
     Credit {
         id uuid  PK

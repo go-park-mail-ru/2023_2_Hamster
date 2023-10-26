@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS "user" (
     full_name  VARCHAR(255) NOT NULL,
     username   VARCHAR(50)  UNIQUE NOT NULL
     password_hash  VARCHAR(256)             NOT NULL,
-	planned_budget MONEY DEFAULT '$0.00',
+	planned_budget MONEY DEFAULT '$0.00' NOT NULL,
     avatar_url     UUID
 );
 
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS "transaction" (
     is_income BOOLEAN,
     total_money MONEY DEFAULT '$0.00',
     transaction_date DATE,
-    payer_name VARCHAR(40) DEFAULT '',
+    payer_name VARCHAR(40) DEFAULT '' NOT NULL,
     transaction_description TEXT,
     created_at_timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at_timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS "transaction" (
 CREATE TABLE IF NOT EXISTS deposit (
     deposit_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     account_id UUID REFERENCES account(account_id),
-    total_money MONEY DEFAULT '$0.00',
+    total_money MONEY DEFAULT '$0.00' NOT NULL,
     start_date DATE DEFAULT CURRENT_DATE,
     end_date DATE,
     interest_rate DECIMAL(5, 2) DEFAULT 0.00,
@@ -67,14 +67,14 @@ CREATE TABLE IF NOT EXISTS credit (
     start_date DATE  DEFAULT CURRENT_DATE,
     end_date DATE,
     calculation_details VARCHAR(30) DEFAULT '',
-    payments_received MONEY DEFAULT '$0.00',
+    payments_received MONEY DEFAULT '$0.00' NOT NULL,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
 CREATE TABLE IF NOT EXISTS investment (
-    investment_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID REFERENCES "user"(user_id) NOT NULL,
     asset_type VARCHAR(255) NOT NULL,
     asset_name VARCHAR(255) NOT NULL,
@@ -87,12 +87,12 @@ CREATE TABLE IF NOT EXISTS investment (
 
 
 CREATE TABLE IF NOT EXISTS goal (
-    goal_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID REFERENCES "user"(user_id) NOT NULL,
-    goal_name VARCHAR(255),
-    goal_description TEXT DEFAULT '',
-    goal_target MONEY DEFAULT '$0.00',
-    goal_date DATE
+    name VARCHAR(255),
+    description TEXT DEFAULT '' NOT NULL,
+    target MONEY DEFAULT '$0.00' NOT NULL,
+    date DATE
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
