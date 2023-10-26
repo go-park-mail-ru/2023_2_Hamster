@@ -87,7 +87,6 @@ erDiagram
         asset_name string
         purchase_price money 
         purchase_date date
-
     }
     Credit {
         id uuid  PK
