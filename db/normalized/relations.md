@@ -2,7 +2,7 @@
 ## User
 - Хранит информацию о пользователях.
 - {id} -> {username, login, password_hash, salt, planned_budget, avatar_url}
-- {login}->{username, password_hash, salt, planned_budget, avatar_url}
+- {login}-> {username, password_hash, salt, planned_budget, avatar_url}
 ## Account
 - Хранит информацию о банковских счетах пользователя.
 - {id} -> {user_id, balance, mean_payment}
@@ -116,15 +116,15 @@ erDiagram
         interest_rate numeric
     }
 
-    Account ||--o{ Deposit : has
-    Account ||--o{ Credit : has
-    User ||--o{ Investment : has
-    User ||--o{ UserAccount : has
-    Account ||--o{ UserAccount : has
-    User ||--o{ Category : has
-    User ||--o{ Transaction : has
-    Account ||--o{ Transaction : has
-    Category ||--o{ Transaction : has
-    User ||--o{ Goal : has
+    account ||--o{ deposit : has
+    account ||--o{ credit : has
+    user ||--o{ investment : has
+    user ||--o{ userAccount : has
+    account ||--o{ userAccount : has
+    user ||--o{ category : has
+    user ||--o{ transaction : has
+    account ||--o{ transaction : has
+    category ||--o{ transaction : has
+    user ||--o{ goal : has
     
 ```
