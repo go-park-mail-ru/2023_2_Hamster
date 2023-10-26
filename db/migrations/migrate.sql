@@ -11,26 +11,26 @@ CREATE TABLE IF NOT EXISTS "user" (
 
 
 CREATE TABLE IF NOT EXISTS account (
-    account_id UUID      DEFAULT uuid_generate_v4() PRIMARY KEY,
-    account_balance    MONEY DEFAULT '$0.00',
+    account_id          UUID        DEFAULT uuid_generate_v4() PRIMARY KEY,
+    account_balance     MONEY       DEFAULT 0.00,
     account_description TEXT,
-    bank_name VARCHAR(255) DEFAULT '',
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
+    bank_name           VARCHAR(30),
+    created_at          TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at          TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
 CREATE TABLE IF NOT EXISTS user_account (
-    user_account_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    user_id UUID REFERENCES "user"(user_id),
-    account_id UUID REFERENCES account(account_id)
+    user_account_id UUID DEFAULT uuid_generate_v4()     PRIMARY KEY,
+    user_id         UUID REFERENCES "user"(user_id)     CONSTRAINT fk_user      NOT NULL,
+    account_id      UUID REFERENCES account(account_id) CONSTRAINT fk_account   NOT NULL
 );
 
 
 CREATE TABLE IF NOT EXISTS category (
-    category_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    user_id UUID REFERENCES user(user_id),
-    category_name VARCHAR(20) NOT NULL
+    category_id   UUID          DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id       UUID          REFERENCES "user"(user_id)   CONSTRAINT fk_user_category  NOT NULL,
+    "name"        VARCHAR(20)                                                             NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "transaction" (
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS "transaction" (
 CREATE TABLE IF NOT EXISTS deposit (
     deposit_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     account_id UUID REFERENCES account(account_id),
-    total_money MONEY DEFAULT '$0.00' NOT NULL,
+    total_money MONEY DEFAULT '$0.00',
     start_date DATE DEFAULT CURRENT_DATE,
     end_date DATE,
     interest_rate DECIMAL(5, 2) DEFAULT 0.00,
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS credit (
 
 
 CREATE TABLE IF NOT EXISTS investment (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    investment_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID REFERENCES "user"(user_id) NOT NULL,
     asset_type VARCHAR(255) NOT NULL,
     asset_name VARCHAR(255) NOT NULL,
@@ -90,9 +90,53 @@ CREATE TABLE IF NOT EXISTS goal (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID REFERENCES "user"(user_id) NOT NULL,
     name VARCHAR(255),
-    description TEXT DEFAULT '' NOT NULL,
+    description TEXT DEFAULT '',
     target MONEY DEFAULT '$0.00' NOT NULL,
     date DATE
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
+
+CREATE OR REPLACE FUNCTION public.moddatetime()
+    RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER modify_updated_at
+    BEFORE UPDATE
+    ON account
+    FOR EACH ROW
+EXECUTE PROCEDURE public.moddatetime(updated_at);
+
+CREATE OR REPLACE TRIGGER modify_updated_at
+    BEFORE UPDATE
+    ON "transaction"
+    FOR EACH ROW
+EXECUTE PROCEDURE public.moddatetime(updated_at);
+
+CREATE OR REPLACE TRIGGER modify_updated_at
+    BEFORE UPDATE
+    ON deposit
+    FOR EACH ROW
+EXECUTE PROCEDURE public.moddatetime(updated_at);
+
+CREATE OR REPLACE TRIGGER modify_updated_at
+    BEFORE UPDATE
+    ON credit
+    FOR EACH ROW
+EXECUTE PROCEDURE public.moddatetime(updated_at);
+
+CREATE OR REPLACE TRIGGER modify_updated_at
+    BEFORE UPDATE
+    ON investment
+    FOR EACH ROW
+EXECUTE PROCEDURE public.moddatetime(updated_at);
+
+CREATE OR REPLACE TRIGGER modify_updated_at
+    BEFORE UPDATE
+    ON goal
+    FOR EACH ROW
+EXECUTE PROCEDURE public.moddatetime(updated_at);
