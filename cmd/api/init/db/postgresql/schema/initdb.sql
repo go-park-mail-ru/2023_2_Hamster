@@ -46,6 +46,8 @@ ALTER COLUMN planned_budget SET DEFAULT 0.0;
 INSERT INTO "users"(login, username, password_hash, salt, planned_budget)
 VALUES ('kossmatof','komarov', 'hash', 'fdsf', 10000);
 
+INSERT INTO "users"(login, username, password_hash, salt, planned_budget)
+VALUES ('test','test1', 'hash', 'fdsf', 10000);
 
 INSERT INTO "accounts"(user_id, balance, mean_payment)
 VALUES ((SELECT id FROM Users limit 1), 533, 'Кошелек');

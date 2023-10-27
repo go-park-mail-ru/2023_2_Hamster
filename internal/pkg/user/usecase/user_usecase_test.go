@@ -358,3 +358,98 @@ func TestUsecase_GetFeed(t *testing.T) {
 		})
 	}
 }
+
+func TestUsecase_UpdateUser(t *testing.T) {
+	testCases := []struct {
+		name        string
+		expectedErr error
+		mockRepoFn  func(*mock.MockRepository)
+	}{
+		{
+			name:        "Successful update",
+			expectedErr: nil,
+			mockRepoFn: func(mockRepository *mock.MockRepository) {
+				mockRepository.EXPECT().CheckUser(gomock.Any(), gomock.Any()).Return(nil)
+				mockRepository.EXPECT().UpdateUser(gomock.Any(), gomock.Any()).Return(nil)
+			},
+		},
+		{
+			name:        "Error Check User",
+			expectedErr: fmt.Errorf("[usecase] can't get check user from repository some err"),
+			mockRepoFn: func(mockRepository *mock.MockRepository) {
+				mockRepository.EXPECT().CheckUser(gomock.Any(), gomock.Any()).Return(errors.New("some err"))
+			},
+		},
+		{
+			name:        "Error Update User",
+			expectedErr: fmt.Errorf("[usecase] can't update user some error"),
+			mockRepoFn: func(mockRepository *mock.MockRepository) {
+				mockRepository.EXPECT().CheckUser(gomock.Any(), gomock.Any()).Return(nil)
+				mockRepository.EXPECT().UpdateUser(gomock.Any(), gomock.Any()).Return(errors.New("some error"))
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockRepo := mock.NewMockRepository(ctrl)
+			tc.mockRepoFn(mockRepo)
+
+			mockUsecase := NewUsecase(mockRepo, *logger.CreateCustomLogger())
+
+			user := &models.User{}
+
+			err := mockUsecase.UpdateUser(context.Background(), user)
+
+			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
+				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
+			}
+		})
+	}
+}
+
+func TestUsecase_UpdatePhoto(t *testing.T) {
+	testCases := []struct {
+		name        string
+		expectedErr error
+		mockRepoFn  func(*mock.MockRepository)
+	}{
+		{
+			name:        "Successful update",
+			expectedErr: nil,
+			mockRepoFn: func(mockRepository *mock.MockRepository) {
+				mockRepository.EXPECT().UpdatePhoto(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+			},
+		},
+		{
+			name:        "Error",
+			expectedErr: fmt.Errorf("some err"),
+			mockRepoFn: func(mockRepository *mock.MockRepository) {
+				mockRepository.EXPECT().UpdatePhoto(gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("some err"))
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockRepo := mock.NewMockRepository(ctrl)
+			tc.mockRepoFn(mockRepo)
+
+			mockUsecase := NewUsecase(mockRepo, *logger.CreateCustomLogger())
+
+			userID := uuid.New()
+
+			_, err := mockUsecase.UpdatePhoto(context.Background(), userID)
+
+			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
+				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
+			}
+		})
+	}
+}

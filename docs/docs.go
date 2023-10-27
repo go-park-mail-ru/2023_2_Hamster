@@ -156,6 +156,56 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/transaction/{userID}/all": {
+            "get": {
+                "description": "Get User all transaction",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Get all transaction",
+                "responses": {
+                    "200": {
+                        "description": "Show actual budget",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-models_TransactionTransfer"
+                        }
+                    },
+                    "204": {
+                        "description": "Show actual accounts",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-string"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/user/{userID}/": {
             "get": {
                 "description": "Get user with chosen ID",
@@ -168,7 +218,7 @@ const docTemplate = `{
                 "summary": "Get User",
                 "responses": {
                     "200": {
-                        "description": "Show balance",
+                        "description": "Show user",
                         "schema": {
                             "$ref": "#/definitions/http.Response-transfer_models_UserTransfer"
                         }
@@ -220,7 +270,7 @@ const docTemplate = `{
                     "204": {
                         "description": "Show actual accounts",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-transfer_models_Account"
+                            "$ref": "#/definitions/http.Response-string"
                         }
                     },
                     "400": {
@@ -570,6 +620,28 @@ const docTemplate = `{
                 }
             }
         },
+        "http.Response-models_TransactionTransfer": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/models.TransactionTransfer"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "http.Response-string": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
         "http.Response-transfer_models_Account": {
             "type": "object",
             "properties": {
@@ -697,6 +769,35 @@ const docTemplate = `{
                 }
             }
         },
+        "models.TransactionTransfer": {
+            "type": "object",
+            "properties": {
+                "account_id": {
+                    "type": "string"
+                },
+                "category_id": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_income": {
+                    "type": "boolean"
+                },
+                "payer": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "number"
+                }
+            }
+        },
         "models.User": {
             "type": "object",
             "properties": {
@@ -809,7 +910,7 @@ const docTemplate = `{
         "transfer_models.UserUdate": {
             "type": "object",
             "properties": {
-                "plannedBudget": {
+                "planned_budget": {
                     "type": "number"
                 },
                 "username": {

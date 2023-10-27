@@ -37,7 +37,7 @@ func NewHandler(uu user.Usecase, l logger.CustomLogger) *Handler {
 // @Tags		User
 // @Description	Get user with chosen ID
 // @Produce		json
-// @Success		200		{object}	Response[transfer_models.UserTransfer] "Show balance"
+// @Success		200		{object}	Response[transfer_models.UserTransfer] "Show user"
 // @Failure		400		{object}	ResponseError	"Client error"
 // @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
 // @Failure     403    	{object}  	ResponseError  		"Forbidden user"
@@ -175,7 +175,7 @@ func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
 // @Description	Get User accounts
 // @Produce		json
 // @Success		200		{object}	Response[transfer_models.Account]	     	"Show actual accounts"
-// @Success		204		{object}	Response[transfer_models.Account]	     	"Show actual accounts"
+// @Success		204		{object}	Response[string]	     	"Show actual accounts"
 // @Failure		400		{object}	ResponseError		"Client error"
 // @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
 // @Failure     403    	{object}  	ResponseError  		"Forbidden user"

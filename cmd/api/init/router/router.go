@@ -6,9 +6,9 @@ import (
 	"net/http"
 
 	_ "github.com/go-park-mail-ru/2023_2_Hamster/docs"
+	transaction "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/transaction/delivery/http"
 	user "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/delivery/http"
 	"github.com/gorilla/mux"
-
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
@@ -31,7 +31,7 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Initialize router and describes all app's endpoints
-func InitRouter( /*auth *auth.Handler,*/ user *user.Handler /*mid *middleware.Middleware*/) *mux.Router {
+func InitRouter( /*auth *auth.Handler,*/ user *user.Handler, transaction *transaction.Handler /*mid *middleware.Middleware*/) *mux.Router {
 	r := mux.NewRouter()
 
 	http.Handle("/", r)
@@ -68,13 +68,14 @@ func InitRouter( /*auth *auth.Handler,*/ user *user.Handler /*mid *middleware.Mi
 		userRouter.Methods("GET").Path("/feed").HandlerFunc(user.GetFeed)
 	}
 
-	// transactionRouter := apiRouter.PathPrefix("/transaction").Subrouter()
-	// {
-	// 	transactionRouter.Methods("GET").Path("/all").HandlerFunc(transaction.GetFeed)
-	// 	transactionRouter.Methods("PUT").Path("/{transactionID}/update").HandlerFunc(transaction.Update) // ?
-	// 	transactionRouter.Methods("POST").Path("/create").HandlerFunc(transaction.Create)
-	// 	transactionRouter.Methods("DELETE").Path("/delete").HandlerFunc(transaction.Delete)
-	// }
+	transactionRouter := apiRouter.PathPrefix("/transaction").Subrouter()
+	{
+		transactionRouter.Methods("GET").Path("/{userID}/all").HandlerFunc(transaction.GetFeed) // выведет все транзакции юзера
+		// 	transactionRouter.Methods("GET").Path("/{transaction_id}/").HandlerFunc(transaction.Get)
+		// transactionRouter.Methods("PUT").Path("/update").HandlerFunc(transaction.Update) // ?
+		// transactionRouter.Methods("POST").Path("/create").HandlerFunc(transaction.Create)
+		// transactionRouter.Methods("DELETE").Path("/delete").HandlerFunc(transaction.Delete)
+	}
 
 	// categoryRouter := apiRouter.PathPrefix("/category").Subrouter()
 	// {
