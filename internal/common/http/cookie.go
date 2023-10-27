@@ -15,6 +15,8 @@ func InitCookie(name, value string, expire time.Time, path string) *http.Cookie 
 		Value:    value,
 		Expires:  expire,
 		Path:     path,
-		HttpOnly: true,
+		HttpOnly: true,                    // No JS permision
+		Secure:   true,                    // httpsOnly
+		SameSite: http.SameSiteStrictMode, // CSRF protection: No cross-site cookie
 	}
 }

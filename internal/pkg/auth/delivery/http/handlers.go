@@ -7,6 +7,7 @@ import (
 
 	response "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions"
 	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user"
@@ -43,30 +44,31 @@ func NewHandler(
 // @Failure		429		{object}	ResponseError					"Server error"
 // @Router		/api/auth/signup	[post]
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
-	var signUser auth.SignUser
+	var signUpUser auth.SignUpInput
 
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&signUser); err != nil {
+	if err := decoder.Decode(&signUpUser); err != nil {
 		h.log.Error(err.Error())
 		response.ErrorResponse(w, http.StatusBadRequest, err, "Corrupted request body can't unmarshal", h.log)
 		return
 	}
+	defer r.Body.Close()
 
-	user, err := h.au.SignUp(r.Context(), signUser)
+	id, username, err := h.au.SignUp(r.Context(), signUpUser)
 	if err != nil {
-		h.log.Errorf("[usecase] Error in sign up: %v", err)
+		h.log.Errorf("Error in sign up: %v", err)
 		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't Sign Up user", h.log)
 	}
 
-	session, err := h.su.CreateSessionById(r.Context(), user.ID)
+	session, err := h.su.CreateSessionById(r.Context(), id)
 	if err != nil {
-		h.log.Errorf("[usecase] Error in sign up session creation: %v", err)
+		h.log.Errorf("Error in sign up session creation: %v", err)
 		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't Sign Up user", h.log)
 	}
 
 	regUser := auth.SignResponse{
 		ID:       session.UserId,
-		Username: user.Username,
+		Username: username,
 	}
 
 	http.SetCookie(w, response.InitCookie(response.AuthTag, session.Cookie, time.Now().Add(7*24*time.Hour), "/api"))
@@ -83,31 +85,32 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Failure		400			{object}	ResponseError			"Incorrect Input"
 // @Failure		500			{object}	ResponseError			"Server error"
 // @Router		/api/auth/signin	[post]
-func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
-	var signUser auth.SignUser
+func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
+	var loginUser auth.LoginInput
 
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&signUser); err != nil {
+	if err := decoder.Decode(&loginUser); err != nil {
 		h.log.Error(err.Error())
 		response.ErrorResponse(w, http.StatusBadRequest, err, "Corrupted request body can't unmarshal", h.log)
 		return
 	}
+	defer r.Body.Close()
 
-	user, err := h.au.Login(r.Context(), signUser)
+	id, login, err := h.au.Login(r.Context(), loginUser)
 	if err != nil {
-		h.log.Errorf("[usecase] Error in login: %v", err)
+		h.log.Errorf("Error in login: %v", err)
 		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't Login user", h.log)
 	}
 
-	session, err := h.su.CreateSessionById(r.Context(), user.ID)
+	session, err := h.su.CreateSessionById(r.Context(), id)
 	if err != nil {
-		h.log.Errorf("[usecase] Error in login: %v", err)
+		h.log.Errorf("Error in login: %v", err)
 		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't Login user", h.log)
 	}
 
 	regUser := auth.SignResponse{
-		ID:       session.UserId,
-		Username: user.Username,
+		ID:       id,
+		Username: login,
 	}
 
 	http.SetCookie(w, response.InitCookie(response.AuthTag, session.Cookie, time.Now().Add(7*24*time.Hour), "/api"))
@@ -125,6 +128,19 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 // @Failure		500		{object}	ResponseError				"Server error: cookie read fail"
 // @Router		/api/auth/checkAuth	[post]
 func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("session_id")
+	if err != nil {
+		h.log.Errorf("Auth check error: %v", err)
+		response.ErrorResponse(w, http.StatusForbidden, err, "No cookie provided", h.log)
+	}
+
+	session, err := h.su.GetSessionByCookie(r.Context(), cookie.Value)
+	if err != nil {
+		h.log.Errorf("Auth check error: %v", err)
+		response.ErrorResponse(w, http.StatusUnauthorized, err, "Session doesn't exist login", h.log)
+	}
+
+	response.SuccessResponse[models.Session](w, http.StatusOK, session)
 }
 
 // @Summary		Validate Auth
@@ -138,15 +154,15 @@ func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 // @Failure		500		{object}	ResponseError				"Server error: cookie read fail"
 // @Router		/api/auth/checkAuth	[post]
 func (h *Handler) LogOut(w http.ResponseWriter, r *http.Request) {
-	session, err := r.Cookie("session")
+	session, err := r.Cookie("session_id")
 	if err != nil {
-		h.log.Errorf("[usecase] Log out error: %v", err)
+		h.log.Errorf("Log out error: %v", err)
 		response.ErrorResponse(w, http.StatusBadRequest, err, "No cookie provided", h.log)
 	}
 
 	err = h.su.DeleteSessionByCookie(r.Context(), session.Name)
 	if err != nil {
-		h.log.Errorf("[usecase] Error session delete: %v", err)
+		h.log.Errorf("Error session delete: %v", err)
 		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't delete session", h.log)
 	}
 

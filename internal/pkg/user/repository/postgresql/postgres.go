@@ -21,8 +21,8 @@ const (
 	UserUpdate           = `UPDATE users SET username = $2, planned_budget = $3, avatar_url = $4 WHERE id = $1;`
 	UserCheckLoginUnique = "SELECT COUNT(*) FROM users WHERE login = $1"
 	UserUpdatePhoto      = `UPDATE users SET avatar_url = $2 WHERE id = $1;`
-	AccountBalance       = "SELECT SUM(balance) FROM accounts WHERE user_id = $1"
-	AccountGet           = `SELECT * FROM accounts WHERE user_id = $1`
+	AccountBalance       = "SELECT SUM(balance) FROM accounts WHERE user_id = $1" // TODO: move accounts
+	AccountGet           = `SELECT * FROM accounts WHERE user_id = $1`            // TODO: move accounts
 )
 
 type UserRep struct {
@@ -38,7 +38,7 @@ func NewRepository(db *pgx.Conn, l logger.CustomLogger) *UserRep {
 }
 
 func (r *UserRep) CreateUser(ctx context.Context, u models.User) (uuid.UUID, error) { // need test
-	row := r.db.QueryRow(ctx, UserCreate, u.Login, u.Username, u.Password, u.Salt)
+	row := r.db.QueryRow(ctx, UserCreate, u.Login, u.Username, u.Password)
 	var id uuid.UUID
 
 	err := row.Scan(&id)
@@ -52,7 +52,7 @@ func (r *UserRep) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, 
 	row := r.db.QueryRow(ctx, UserIDGetByID, userID)
 	var u models.User
 
-	err := row.Scan(&u.ID, &u.Login, &u.Username, &u.Password, &u.Salt, &u.PlannedBudget, &u.AvatarURL)
+	err := row.Scan(&u.ID, &u.Login, &u.Username, &u.Password, &u.PlannedBudget, &u.AvatarURL)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, fmt.Errorf("[repo] %w: %v", &models.NoSuchUserError{UserID: userID}, err)
 	} else if err != nil {
@@ -63,10 +63,10 @@ func (r *UserRep) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, 
 	return &u, nil
 }
 
-func (r *UserRep) GetUserByUsername(ctx context.Context, username string) (*models.User, error) { // need test
-	row := r.db.QueryRow(ctx, UserGetByUserName, username)
+func (r *UserRep) GetUserByLogin(ctx context.Context, login string) (*models.User, error) { // need test
+	row := r.db.QueryRow(ctx, UserGetByUserName, login)
 	var u models.User
-	err := row.Scan(&u.ID, &u.Login, &u.Username, &u.Password, &u.PlannedBudget, &u.AvatarURL, &u.Salt)
+	err := row.Scan(&u.ID, &u.Login, &u.Username, &u.Password, &u.PlannedBudget, &u.AvatarURL)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, fmt.Errorf("[repository] nothing found for this request %w", err)

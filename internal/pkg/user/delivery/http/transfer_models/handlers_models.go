@@ -91,7 +91,6 @@ func (ui *UserUdate) ToUser(user *models.User) *models.User {
 		PlannedBudget: ui.PlannedBudget,
 		Password:      user.Password,
 		AvatarURL:     user.AvatarURL,
-		Salt:          user.Salt,
 	}
 }
 

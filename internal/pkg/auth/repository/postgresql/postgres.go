@@ -5,13 +5,11 @@ import (
 	"fmt"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
 const (
-	userExist = "smth"
+	UserCheckLoginUnique = "SELECT COUNT(*) FROM users WHERE login = $1"
 )
 
 type AuthRep struct {
@@ -26,42 +24,12 @@ func NewRepository(db *pgx.Conn, l logger.CustomLogger) *AuthRep {
 	}
 }
 
-/*func (r *AuthRepo) CreateUser() {
-	userID := uuid.New()
-
-	_, err := r.db.ExecContext(ctx)
-}*/
-
-func (r *AuthRep) CheckUser(username string) (bool, error) {
-	var exists bool
-	query := `SELECT exists(SELECT 1 FROM users WHERE username=\$1)`
-	err := r.db.QueryRow(query, username).Scan(&exists)
+func (r *AuthRep) CheckLoginUnique(ctx context.Context, login string) (bool, error) {
+	var count int
+	err := r.db.QueryRow(ctx, UserCheckLoginUnique, login).Scan(&count)
 	if err != nil {
-		return false, fmt.Errorf("[repository] user %s don't exist: %v", username, err)
+		return false, fmt.Errorf("[repo] failed login unique check %w", err)
 	}
-	return exists, nil
-}
 
-func (r *AuthRep) GetUserByAuthData(ctx context.Context, userID uuid.UUID) (*models.User, error) {
-	query := fmt.Sprintf(
-		`SELECT 
-		CASE 
-			WHEN is_income = true THEN SUM(total)
-			WHEN is_income = false THEN -SUM(total)
-		END AS calculated_total
-	FROM 
-		Transaction
-	WHERE 
-		user_id = \$1
-		AND date >= DATE_TRUNC('month', CURRENT_DATE)
-		AND date < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month';`)
-
-	var user models.User
-	err := r.db.QueryRow(query, userID).Scan(&user.ID, &user.Username,
-		&user.PlannedBudget, &user.Password,
-		&user.AvatarURL, &user.Salt)
-	if err != nil {
-		return nil, fmt.Errorf("[repository] Error: %v", err)
-	}
-	return &user, nil
+	return count == 0, nil
 }

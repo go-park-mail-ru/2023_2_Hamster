@@ -234,7 +234,7 @@ func TestUsecase_GetUser(t *testing.T) {
 				PlannedBudget: 100.0,
 				Password:      "hash",
 				AvatarURL:     uuid.Nil,
-				Salt:          "a"},
+			},
 
 			expectedErr: fmt.Errorf("[usecase] can't get user from repository some error"),
 			mockRepoFn: func(mockRepository *mock.MockRepository) {
@@ -243,7 +243,7 @@ func TestUsecase_GetUser(t *testing.T) {
 					PlannedBudget: 100.0,
 					Password:      "hash",
 					AvatarURL:     uuid.Nil,
-					Salt:          "a"}, errors.New("some error"))
+				}, errors.New("some error"))
 			},
 		},
 		{

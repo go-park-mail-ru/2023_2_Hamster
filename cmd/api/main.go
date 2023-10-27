@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/app"
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/db/postgresql"
+	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/db/redis"
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/server"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 )
@@ -32,7 +33,7 @@ func main() {
 	defer cancel()
 
 	log := logger.CreateCustomLogger()
-
+	// Postgre Connection
 	db, err := postgresql.InitPostgresDB(ctx)
 	if err != nil {
 		log.Errorf("Error Initializing PostgreSQL database: %v", err)
@@ -40,6 +41,20 @@ func main() {
 	}
 	defer func() {
 		if err := db.Close(ctx); err != nil {
+			log.Errorf("Error Closing database connection: %v", err)
+		}
+		log.Info("Db closed without errors")
+	}()
+	log.Info("Db connection successfully")
+
+	// redis-cli init
+	redisCli, err := redis.InitRedisCli(ctx)
+	if err != nil {
+		log.Errorf("Error Initializing Redis-cli: %v", err)
+		return
+	}
+	defer func() {
+		if err := redisCli.Close(); err != nil {
 			log.Errorf("Error Closing database connection: %v", err)
 		}
 		log.Info("Db closed without errors")
