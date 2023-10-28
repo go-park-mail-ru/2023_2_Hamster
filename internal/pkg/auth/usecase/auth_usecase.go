@@ -9,7 +9,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
@@ -17,12 +16,6 @@ type Usecase struct {
 	authRepo auth.Repository
 	userRepo user.Repository
 	logger   logger.CustomLogger
-}
-
-type authClaims struct {
-	UserID   uuid.UUID `json:"id"`
-	Username string    `json:"username"`
-	jwt.RegisteredClaims
 }
 
 func NewUsecase(
@@ -42,7 +35,8 @@ func (u *Usecase) SignUp(ctx context.Context, input auth.SignUpInput) (uuid.UUID
 
 	ok, err := u.authRepo.CheckLoginUnique(ctx, input.Login)
 	if !ok {
-		return uuid.Nil, "", err
+		u.logger.Error("Login already exist ", input.Login)
+		return uuid.Nil, "", fmt.Errorf("[usecase] username already exist")
 	}
 
 	hash, err := hasher.GeneratePasswordHash(input.PlaintPassword)
@@ -61,7 +55,7 @@ func (u *Usecase) SignUp(ctx context.Context, input auth.SignUpInput) (uuid.UUID
 
 	user.ID = userId
 
-	return userId, user.Login, nil
+	return userId, user.Username, nil
 }
 
 func (u *Usecase) Login(ctx context.Context, login, plainPassword string) (uuid.UUID, string, error) {
@@ -78,7 +72,7 @@ func (u *Usecase) Login(ctx context.Context, login, plainPassword string) (uuid.
 		return uuid.Nil, "", fmt.Errorf("[usecase] incorrect password")
 	}
 
-	return user.ID, user.Login, nil
+	return user.ID, user.Username, nil
 }
 
 func (u *Usecase) IsLoginUnique(ctx context.Context, login string) (bool, error) { // TODO: move to auth repo

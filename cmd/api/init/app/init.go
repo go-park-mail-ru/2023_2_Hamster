@@ -27,7 +27,7 @@ func Init(db pgxtype.Querier, redis *redis.Client, log *logger.CustomLogger) *mu
 	transactionRep := transactionRep.NewRepository(db, *log)
 
 	authUsecase := authUsecase.NewUsecase(authRep, userRep, *log)
-	sessionUsecase := sessionUsecase.NewSessionUsecase(sessionRep)
+	sessionUsecase := sessionUsecase.NewSessionUsecase(sessionRep, *log)
 	userUsecase := userUsecase.NewUsecase(userRep, *log)
 	transactionUsecase := transactionUsecase.NewUsecase(transactionRep, *log)
 	//middlewear := middleware.NewMiddleware(authUsecase, *log)

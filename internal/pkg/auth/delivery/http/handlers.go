@@ -73,7 +73,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		Username: username,
 	}
 
-	http.SetCookie(w, response.InitCookie(response.AuthTag, session.Cookie, time.Now().Add(7*24*time.Hour), "/api"))
+	http.SetCookie(w, response.InitCookie("session_id", session.Cookie, time.Now().Add(7*24*time.Hour), "/api"))
 	response.SuccessResponse[auth.SignResponse](w, http.StatusAccepted, regUser)
 }
 
@@ -117,7 +117,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		Username: login,
 	}
 
-	http.SetCookie(w, response.InitCookie(response.AuthTag, session.Cookie, time.Now().Add(7*24*time.Hour), "/api"))
+	http.SetCookie(w, response.InitCookie("session_id", session.Cookie, time.Now().Add(7*24*time.Hour), "/api"))
 	response.SuccessResponse[auth.SignResponse](w, http.StatusAccepted, regUser)
 }
 
@@ -127,7 +127,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 // @Accept 		json
 // @Produce		json
 // @Param			user		body		models.User		true		"user info"
-// @Success		200		{object}	ResponseError				"User status"
+// @Success		200		{object}	Response[auth.SignResponse]	"User status"
 // @Failure		400		{object}	ResponseError				"Invalid cookie"
 // @Failure		500		{object}	ResponseError				"Server error: cookie read fail"
 // @Router		/api/auth/checkAuth	[post]
@@ -155,7 +155,7 @@ func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 // @Accept 		json
 // @Produce		json
 // @Param			user		body		models.User		true		"user info"
-// @Success		200		{object}	ResponseError				"User status"
+// @Success		200		{object}	Response[auth.SignResponse]   "User status"
 // @Failure		400		{object}	ResponseError				"Invalid cookie"
 // @Failure		500		{object}	ResponseError				"Server error: cookie read fail"
 // @Router		/api/auth/checkAuth	[post]
@@ -170,7 +170,7 @@ func (h *Handler) LogOut(w http.ResponseWriter, r *http.Request) {
 	err = h.su.DeleteSessionByCookie(r.Context(), session.Name)
 	if err != nil {
 		h.log.Errorf("Error session delete: %v", err)
-		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't delete session", h.log)
+		response.ErrorResponse(w, http.StatusInternalServerError, err, "Can't delete session", h.log)
 		return
 	}
 
