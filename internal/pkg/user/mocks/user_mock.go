@@ -298,19 +298,19 @@ func (mr *MockRepositoryMockRecorder) GetUserBalance(ctx, userID interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserBalance", reflect.TypeOf((*MockRepository)(nil).GetUserBalance), ctx, userID)
 }
 
-// GetUserByUsername mocks base method.
-func (m *MockRepository) GetUserByUsername(ctx context.Context, username string) (*models.User, error) {
+// GetUserByLogin mocks base method.
+func (m *MockRepository) GetUserByLogin(ctx context.Context, login string) (*models.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserByUsername", ctx, username)
+	ret := m.ctrl.Call(m, "GetUserByLogin", ctx, login)
 	ret0, _ := ret[0].(*models.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetUserByUsername indicates an expected call of GetUserByUsername.
-func (mr *MockRepositoryMockRecorder) GetUserByUsername(ctx, username interface{}) *gomock.Call {
+// GetUserByLogin indicates an expected call of GetUserByLogin.
+func (mr *MockRepositoryMockRecorder) GetUserByLogin(ctx, login interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByUsername", reflect.TypeOf((*MockRepository)(nil).GetUserByUsername), ctx, username)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByLogin", reflect.TypeOf((*MockRepository)(nil).GetUserByLogin), ctx, login)
 }
 
 // IsLoginUnique mocks base method.

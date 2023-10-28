@@ -32,7 +32,7 @@ func NewHandler(uu transaction.Usecase, l logger.CustomLogger) *Handler {
 // @Tags			Transaction
 // @Description	Get User all transaction
 // @Produce		json
-// @Success		200		{object}	Response[models.TransactionTransfer]	"Show actual budget"
+// @Success		200		{object}	Response[MasTransaction]	"Show transaction"
 // @Success		204		{object}	Response[string]	     	"Show actual accounts"
 // @Failure		400		{object}	ResponseError			"Client error"
 // @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
@@ -65,6 +65,12 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 	for _, transaction := range dataFeed {
 		dataResponse = append(dataResponse, models.InitTransactionTransfer(transaction))
 	}
-	commonHttp.SuccessResponse(w, http.StatusOK, dataResponse)
+
+	response := MasTransaction{Transactions: dataResponse}
+	commonHttp.SuccessResponse(w, http.StatusOK, response)
+
+}
+
+func (h *Handler) CreateTransaction(w http.ResponseWriter, r *http.Request) {
 
 }

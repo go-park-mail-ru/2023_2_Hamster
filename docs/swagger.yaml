@@ -1,18 +1,46 @@
 basePath: /user/{userID}/account/feed
 definitions:
+  auth.LoginInput:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  auth.SignResponse:
+    properties:
+      user_id:
+        type: string
+      username:
+        type: string
+    type: object
+  http.MasTransaction:
+    properties:
+      transaction:
+        items:
+          $ref: '#/definitions/models.TransactionTransfer'
+        type: array
+    type: object
   http.NilBody:
+    type: object
+  http.Response-auth_SignResponse:
+    properties:
+      body:
+        $ref: '#/definitions/auth.SignResponse'
+      status:
+        type: integer
+    type: object
+  http.Response-http_MasTransaction:
+    properties:
+      body:
+        $ref: '#/definitions/http.MasTransaction'
+      status:
+        type: integer
     type: object
   http.Response-http_NilBody:
     properties:
       body:
         $ref: '#/definitions/http.NilBody'
-      status:
-        type: integer
-    type: object
-  http.Response-models_TransactionTransfer:
-    properties:
-      body:
-        $ref: '#/definitions/models.TransactionTransfer'
       status:
         type: integer
     type: object
@@ -79,20 +107,6 @@ definitions:
       status:
         type: integer
     type: object
-  http.signInput:
-    properties:
-      password:
-        type: string
-      username:
-        type: string
-    type: object
-  http.signUpResponse:
-    properties:
-      id:
-        type: string
-      username:
-        type: string
-    type: object
   models.Accounts:
     properties:
       balance:
@@ -135,8 +149,6 @@ definitions:
         type: string
       planned_budget:
         type: number
-      salt:
-        type: string
       username:
         type: string
     type: object
@@ -250,14 +262,14 @@ paths:
         name: userInput
         required: true
         schema:
-          $ref: '#/definitions/http.signInput'
+          $ref: '#/definitions/auth.LoginInput'
       produces:
       - application/json
       responses:
         "200":
           description: User logedin
           schema:
-            $ref: '#/definitions/http.signUpResponse'
+            $ref: '#/definitions/http.Response-auth_SignResponse'
         "400":
           description: Incorrect Input
           schema:
@@ -287,12 +299,12 @@ paths:
         "200":
           description: User Created
           schema:
-            $ref: '#/definitions/http.signUpResponse'
+            $ref: '#/definitions/http.Response-auth_SignResponse'
         "400":
           description: Incorrect Input
           schema:
             $ref: '#/definitions/http.ResponseError'
-        "500":
+        "429":
           description: Server error
           schema:
             $ref: '#/definitions/http.ResponseError'
@@ -306,9 +318,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: Show actual budget
+          description: Show transaction
           schema:
-            $ref: '#/definitions/http.Response-models_TransactionTransfer'
+            $ref: '#/definitions/http.Response-http_MasTransaction'
         "204":
           description: Show actual accounts
           schema:

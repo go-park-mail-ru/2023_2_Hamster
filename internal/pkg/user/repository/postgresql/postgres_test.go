@@ -26,7 +26,6 @@ func TestCreateUser(t *testing.T) {
 		Login:    "testuser",
 		Username: "Test User",
 		Password: "password",
-		Salt:     "salt",
 	}
 
 	id := uuid.New()

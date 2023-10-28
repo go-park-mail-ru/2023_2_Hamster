@@ -39,7 +39,7 @@ func NewHandler(
 // @Accept 		json
 // @Produce		json
 // @Param			user		body		models.User			true		"user info"
-// @Success		200		{object}	Response[RegistredUser]			"User Created"
+// @Success		200		{object}	Response[auth.SignResponse]			"User Created"
 // @Failure		400		{object}	ResponseError					"Incorrect Input"
 // @Failure		429		{object}	ResponseError					"Server error"
 // @Router		/api/auth/signup	[post]
@@ -80,8 +80,8 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Description	Login account
 // @Accept 		json
 // @Produce		json
-// @Param			userInput		body		signInput		true		"username && password"
-// @Success		200			{object}	Response[RegistredUser]			"User logedin"
+// @Param			userInput		body		auth.LoginInput		true		"username && password"
+// @Success		200			{object}	Response[auth.SignResponse]			"User logedin"
 // @Failure		400			{object}	ResponseError			"Incorrect Input"
 // @Failure		500			{object}	ResponseError			"Server error"
 // @Router		/api/auth/signin	[post]

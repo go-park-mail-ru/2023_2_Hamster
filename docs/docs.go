@@ -84,7 +84,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/http.signInput"
+                            "$ref": "#/definitions/auth.LoginInput"
                         }
                     }
                 ],
@@ -92,7 +92,7 @@ const docTemplate = `{
                     "200": {
                         "description": "User logedin",
                         "schema": {
-                            "$ref": "#/definitions/http.signUpResponse"
+                            "$ref": "#/definitions/http.Response-auth_SignResponse"
                         }
                     },
                     "400": {
@@ -138,7 +138,7 @@ const docTemplate = `{
                     "200": {
                         "description": "User Created",
                         "schema": {
-                            "$ref": "#/definitions/http.signUpResponse"
+                            "$ref": "#/definitions/http.Response-auth_SignResponse"
                         }
                     },
                     "400": {
@@ -147,7 +147,7 @@ const docTemplate = `{
                             "$ref": "#/definitions/http.ResponseError"
                         }
                     },
-                    "500": {
+                    "429": {
                         "description": "Server error",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
@@ -168,9 +168,9 @@ const docTemplate = `{
                 "summary": "Get all transaction",
                 "responses": {
                     "200": {
-                        "description": "Show actual budget",
+                        "description": "Show transaction",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-models_TransactionTransfer"
+                            "$ref": "#/definitions/http.Response-http_MasTransaction"
                         }
                     },
                     "204": {
@@ -606,25 +606,69 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "auth.LoginInput": {
+            "type": "object",
+            "properties": {
+                "login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.SignResponse": {
+            "type": "object",
+            "properties": {
+                "user_id": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "http.MasTransaction": {
+            "type": "object",
+            "properties": {
+                "transaction": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.TransactionTransfer"
+                    }
+                }
+            }
+        },
         "http.NilBody": {
             "type": "object"
         },
-        "http.Response-http_NilBody": {
+        "http.Response-auth_SignResponse": {
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/http.NilBody"
+                    "$ref": "#/definitions/auth.SignResponse"
                 },
                 "status": {
                     "type": "integer"
                 }
             }
         },
-        "http.Response-models_TransactionTransfer": {
+        "http.Response-http_MasTransaction": {
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/models.TransactionTransfer"
+                    "$ref": "#/definitions/http.MasTransaction"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "http.Response-http_NilBody": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/http.NilBody"
                 },
                 "status": {
                     "type": "integer"
@@ -730,28 +774,6 @@ const docTemplate = `{
                 }
             }
         },
-        "http.signInput": {
-            "type": "object",
-            "properties": {
-                "password": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "http.signUpResponse": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
         "models.Accounts": {
             "type": "object",
             "properties": {
@@ -815,9 +837,6 @@ const docTemplate = `{
                 },
                 "planned_budget": {
                     "type": "number"
-                },
-                "salt": {
-                    "type": "string"
                 },
                 "username": {
                     "type": "string"
