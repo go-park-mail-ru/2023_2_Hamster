@@ -20,9 +20,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func Init(db pgxtype.Querier, redis redis.Client, log *logger.CustomLogger) *mux.Router {
+func Init(db pgxtype.Querier, redis *redis.Client, log *logger.CustomLogger) *mux.Router {
 	authRep := authRep.NewRepository(db, *log)
-	sessionRep := sessionRep.NewSessionRepository(&redis)
+	sessionRep := sessionRep.NewSessionRepository(redis)
 	userRep := userRep.NewRepository(db, *log)
 	transactionRep := transactionRep.NewRepository(db, *log)
 

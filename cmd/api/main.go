@@ -53,13 +53,13 @@ func main() {
 	}
 	defer func() {
 		if err := redisCli.Close(); err != nil {
-			log.Errorf("Error Closing database connection: %v", err)
+			log.Errorf("Error Closing Redis connection: %v", err)
 		}
-		log.Info("Db closed without errors")
+		log.Info("Redis closed without errors")
 	}()
-	log.Info("Db connection successfully")
+	log.Info("Redis connection successfully")
 
-	router := app.Init(db, *redisCli, log)
+	router := app.Init(db, redisCli, log)
 	var srv server.Server
 	go func() {
 		if err := srv.Run(router); err != nil {
