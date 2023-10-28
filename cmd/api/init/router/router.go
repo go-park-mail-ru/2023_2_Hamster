@@ -47,13 +47,13 @@ func InitRouter(auth *auth.Handler, user *user.Handler, transaction *transaction
 	apiRouter := r.PathPrefix("/api").Subrouter()
 	//apiRouter.Use(corsmiddleware.CorsMiddleware)
 
-	// authRouter := apiRouter.PathPrefix("/auth").Subrouter()
-	// {
-	// 	authRouter.Methods("POST").Path("/signin").HandlerFunc(auth.SignIn)
-	// 	authRouter.Methods("POST").Path("/signup").HandlerFunc(auth.SignUp)
-	// 	authRouter.Methods("POST").Path("/checkAuth").HandlerFunc(auth.AccessVerification)
-	// 	authRouter.Methods("POST").Path("/logout").HandlerFunc(auth.LogOut)
-	// }
+	authRouter := apiRouter.PathPrefix("/auth").Subrouter()
+	{
+		authRouter.Methods("POST").Path("/signin").HandlerFunc(auth.Login)
+		authRouter.Methods("POST").Path("/signup").HandlerFunc(auth.SignUp)
+		authRouter.Methods("POST").Path("/checkAuth").HandlerFunc(auth.HealthCheck)
+		authRouter.Methods("POST").Path("/logout").HandlerFunc(auth.LogOut)
+	}
 
 	userRouter := apiRouter.PathPrefix("/user/{userID}").Subrouter()
 	//userRouter.Use(mid.Authentication)
