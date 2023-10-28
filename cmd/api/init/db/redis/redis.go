@@ -42,7 +42,7 @@ func InitRedisCli(ctx context.Context) (*redis.Client, error) {
 	}
 
 	return redis.NewClient(&redis.Options{
-		Addr:     cfg.addr + cfg.port,
+		Addr:     cfg.addr + ":" + cfg.port,
 		Password: "",
 		DB:       0,
 	}), nil
