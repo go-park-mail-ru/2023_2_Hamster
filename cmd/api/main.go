@@ -59,7 +59,7 @@ func main() {
 	}()
 	log.Info("Db connection successfully")
 
-	router := app.Init(db, log)
+	router := app.Init(db, *redisCli, log)
 	var srv server.Server
 	go func() {
 		if err := srv.Run(router); err != nil {

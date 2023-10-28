@@ -4,7 +4,10 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/router"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/jackc/pgtype/pgxtype"
+	"github.com/redis/go-redis/v9"
 
+	authRep "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth/repository/postgresql"
+	authUsecase "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth/usecase"
 	transactionDelivery "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/transaction/delivery/http"
 	transactionRep "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/transaction/repository/postgresql"
 	transactionUsecase "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/transaction/usecase"
@@ -14,12 +17,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func Init(db pgxtype.Querier, log *logger.CustomLogger) *mux.Router {
-	//authRep := authRep.NewRepository(db, *log)
+func Init(db pgxtype.Querier, redis redis.Client, log *logger.CustomLogger) *mux.Router {
+	authRep := authRep.NewRepository(db, *log)
 	userRep := userRep.NewRepository(db, *log)
 	transactionRep := transactionRep.NewRepository(db, *log)
 
-	//authUsecase := authUsecase.NewUsecase(authRep, userRep, *log)
+	authUsecase := authUsecase.NewUsecase(authRep, userRep, *log)
 	userUsecase := userUsecase.NewUsecase(userRep, *log)
 	transactionUsecase := transactionUsecase.NewUsecase(transactionRep, *log)
 	//middlewear := middleware.NewMiddleware(authUsecase, *log)
