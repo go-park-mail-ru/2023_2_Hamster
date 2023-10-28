@@ -58,12 +58,14 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.log.Errorf("Error in sign up: %v", err)
 		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't Sign Up user", h.log)
+		return
 	}
 
 	session, err := h.su.CreateSessionById(r.Context(), id)
 	if err != nil {
 		h.log.Errorf("Error in sign up session creation: %v", err)
 		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't Sign Up user", h.log)
+		return
 	}
 
 	regUser := auth.SignResponse{
@@ -100,12 +102,14 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.log.Errorf("Error in login: %v", err)
 		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't Login user", h.log)
+		return
 	}
 
 	session, err := h.su.CreateSessionById(r.Context(), id)
 	if err != nil {
 		h.log.Errorf("Error in login: %v", err)
 		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't Login user", h.log)
+		return
 	}
 
 	regUser := auth.SignResponse{
@@ -132,12 +136,14 @@ func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.log.Errorf("Auth check error: %v", err)
 		response.ErrorResponse(w, http.StatusForbidden, err, "No cookie provided", h.log)
+		return
 	}
 
 	session, err := h.su.GetSessionByCookie(r.Context(), cookie.Value)
 	if err != nil {
 		h.log.Errorf("Auth check error: %v", err)
 		response.ErrorResponse(w, http.StatusUnauthorized, err, "Session doesn't exist login", h.log)
+		return
 	}
 
 	response.SuccessResponse[models.Session](w, http.StatusOK, session)
@@ -158,12 +164,14 @@ func (h *Handler) LogOut(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.log.Errorf("Log out error: %v", err)
 		response.ErrorResponse(w, http.StatusBadRequest, err, "No cookie provided", h.log)
+		return
 	}
 
 	err = h.su.DeleteSessionByCookie(r.Context(), session.Name)
 	if err != nil {
 		h.log.Errorf("Error session delete: %v", err)
 		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't delete session", h.log)
+		return
 	}
 
 	http.SetCookie(w, response.InitCookie("session", "", time.Now().AddDate(0, 0, -1), "/api"))
