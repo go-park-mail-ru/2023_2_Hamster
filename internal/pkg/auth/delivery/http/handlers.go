@@ -96,7 +96,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	id, login, err := h.au.Login(r.Context(), loginUser)
+	id, login, err := h.au.Login(r.Context(), loginUser.Login, loginUser.PlaintPassword)
 	if err != nil {
 		h.log.Errorf("Error in login: %v", err)
 		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't Login user", h.log)

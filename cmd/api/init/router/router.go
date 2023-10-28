@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	_ "github.com/go-park-mail-ru/2023_2_Hamster/docs"
+	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth/delivery/http"
 	transaction "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/transaction/delivery/http"
 	user "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/delivery/http"
 	"github.com/gorilla/mux"
@@ -31,7 +32,7 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Initialize router and describes all app's endpoints
-func InitRouter( /*auth *auth.Handler,*/ user *user.Handler, transaction *transaction.Handler /*mid *middleware.Middleware*/) *mux.Router {
+func InitRouter(auth *auth.Handler, user *user.Handler, transaction *transaction.Handler /*mid *middleware.Middleware*/) *mux.Router {
 	r := mux.NewRouter()
 
 	http.Handle("/", r)

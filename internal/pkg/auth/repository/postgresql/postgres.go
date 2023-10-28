@@ -37,3 +37,7 @@ func (r *AuthRep) CheckLoginUnique(ctx context.Context, login string) (bool, err
 func (r *AuthRep) CheckCorrectPassword(ctx context.Context, password string) error {
 	return nil
 }
+
+func (r *AuthRep) CheckExistUsername(ctx context.Context, username string) error {
+	return nil
+}
