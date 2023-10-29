@@ -1,27 +1,34 @@
 include .env
+export
 
-.PHONY: dc run test lint down
+.PHONY: run run-in build clean db app down doc test lint
 
-run:
+run: ## Start the application in detached mode
 	docker-compose up -d
 
-run-in:
+run-in: ## Start the application in interactive mode
 	docker-compose up
 
-dock-build:
+build: ## Build Docker images
 	docker-compose build
 
-dock-clean:
-	docker rmi -f $(docker images -q)
+clean: ## Remove unused Docker images
+	docker rmi -f $$(docker images -q)
 
-con-db:
-	docker exec -it 2023_2_hamster-db-1 psql -U kosmatoff -d Hamster
+db: ## Connect to the database
+	docker exec -it $(PROJECT_NAME)_db-1 psql -U $(DB_USER) -d $(DB_NAME)
 
-con-app:
-	docker exec -it 2023_2_hamster-server-1 ./app
+app: ## Connect to the application container
+	docker exec -it $(PROJECT_NAME)_server-1 ./app
 
-down:
+down: ## Stop and remove containers, networks, images, and volumes
 	docker-compose down
 
-doc:
+doc: ## Generate API documentation using swag
 	swag init -g cmd/api/main.go
+
+test: ## Run tests
+	# Add your test command here
+
+lint: ## Run linters
+	golangci-lint run
