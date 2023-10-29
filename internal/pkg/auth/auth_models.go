@@ -22,7 +22,7 @@ type (
 	}
 
 	SignResponse struct {
-		ID       uuid.UUID `json:"user_id"`
+		ID       uuid.UUID `json:"id"`
 		Username string    `json:"username"`
 	}
 )

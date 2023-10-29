@@ -42,7 +42,7 @@ func (r *SessionRep) GetSessionByCookie(ctx context.Context, cookie string) (mod
 }
 
 func (r *SessionRep) CreateSession(ctx context.Context, session models.Session) error {
-	err := r.db.Set(context.TODO(), session.Cookie, session.UserId, 0).Err()
+	err := r.db.Set(context.TODO(), session.Cookie, session.UserId.String(), 0).Err()
 	return err
 }
 

@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/app"
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/db/postgresql"
-	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/db/redis"
+	redisDB "github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/db/redis"
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/server"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 )
@@ -46,20 +46,25 @@ func main() {
 	log.Info("Db connection successfully")
 
 	// redis-cli init
-	redisCli, err := redis.InitRedisCli(ctx)
+	redisCli, err := redisDB.InitRedisCli(ctx)
 	if err != nil {
 		log.Errorf("Error Initializing Redis-cli: %v", err)
 		return
 	}
 	defer func() {
 		if err := redisCli.Close(); err != nil {
-			log.Errorf("Error Closing database connection: %v", err)
+			log.Errorf("Error Closing Redis connection: %v", err)
 		}
-		log.Info("Db closed without errors")
+		log.Info("Redis closed without errors")
 	}()
-	log.Info("Db connection successfully")
 
-	router := app.Init(db, log)
+	_, pingErr := redisCli.Ping(context.Background()).Result()
+	if pingErr != nil {
+		log.Fatalf("Failed to ping Redis server: %v", pingErr)
+	}
+	log.Info("Redis connection successfully")
+
+	router := app.Init(db, redisCli, log)
 	var srv server.Server
 	go func() {
 		if err := srv.Run(router); err != nil {

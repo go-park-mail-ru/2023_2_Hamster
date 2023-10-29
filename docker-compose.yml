@@ -19,10 +19,6 @@ services:
       - redis
     env_file:
       - .env
-    volumes:
-      - type: bind
-        source: /images # тут должна быть папка фронта для фотографий на машине(заменить!)
-        target: /images
 
   db:
     image: postgres:latest
@@ -36,7 +32,7 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - ./internal/common/postgresql/schema/:/docker-entrypoint-initdb.d/
+      - ./cmd/api/init/db/postgresql/schema/:/docker-entrypoint-initdb.d/
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 5s

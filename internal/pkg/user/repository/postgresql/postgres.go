@@ -13,9 +13,9 @@ import (
 )
 
 const (
-	UserCreate           = `INSERT INTO users (login, username, password) VALUES ($1, $2, $3) RETURNING id;`
+	UserCreate           = `INSERT INTO users (login, username, password_hash) VALUES ($1, $2, $3) RETURNING id;`
 	UserIDGetByID        = `SELECT * FROM users WHERE id = $1;`
-	UserGetByUserName    = `SELECT id, username, password_hash, planned_budget, avatar_url, salt From users WHERE (username=$1)`
+	UserGetByUserName    = `SELECT id, username, password_hash, planned_budget, avatar_url From users WHERE (username=$1)`
 	UserGetPlannedBudget = "SELECT planned_budget FROM users WHERE id = $1"
 	UserCheck            = `SELECT EXISTS(SELECT 1 FROM users WHERE id = $1);`
 	UserUpdate           = `UPDATE users SET username = $2, planned_budget = $3, avatar_url = $4 WHERE id = $1;`

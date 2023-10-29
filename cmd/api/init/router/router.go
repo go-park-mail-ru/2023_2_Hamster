@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	_ "github.com/go-park-mail-ru/2023_2_Hamster/docs"
+	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth/delivery/http"
 	transaction "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/transaction/delivery/http"
 	user "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/delivery/http"
 	"github.com/gorilla/mux"
@@ -31,7 +32,7 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Initialize router and describes all app's endpoints
-func InitRouter( /*auth *auth.Handler,*/ user *user.Handler, transaction *transaction.Handler /*mid *middleware.Middleware*/) *mux.Router {
+func InitRouter(auth *auth.Handler, user *user.Handler, transaction *transaction.Handler /*mid *middleware.Middleware*/) *mux.Router {
 	r := mux.NewRouter()
 
 	http.Handle("/", r)
@@ -46,13 +47,13 @@ func InitRouter( /*auth *auth.Handler,*/ user *user.Handler, transaction *transa
 	apiRouter := r.PathPrefix("/api").Subrouter()
 	//apiRouter.Use(corsmiddleware.CorsMiddleware)
 
-	// authRouter := apiRouter.PathPrefix("/auth").Subrouter()
-	// {
-	// 	authRouter.Methods("POST").Path("/signin").HandlerFunc(auth.SignIn)
-	// 	authRouter.Methods("POST").Path("/signup").HandlerFunc(auth.SignUp)
-	// 	authRouter.Methods("POST").Path("/checkAuth").HandlerFunc(auth.AccessVerification)
-	// 	authRouter.Methods("POST").Path("/logout").HandlerFunc(auth.LogOut)
-	// }
+	authRouter := apiRouter.PathPrefix("/auth").Subrouter()
+	{
+		authRouter.Methods("POST").Path("/signin").HandlerFunc(auth.Login)
+		authRouter.Methods("POST").Path("/signup").HandlerFunc(auth.SignUp)
+		authRouter.Methods("POST").Path("/checkAuth").HandlerFunc(auth.HealthCheck)
+		authRouter.Methods("POST").Path("/logout").HandlerFunc(auth.LogOut)
+	}
 
 	userRouter := apiRouter.PathPrefix("/user/{userID}").Subrouter()
 	//userRouter.Use(mid.Authentication)
