@@ -1,6 +1,7 @@
 package http
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -71,6 +72,42 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h *Handler) CreateTransaction(w http.ResponseWriter, r *http.Request) {
+// @Summary		Create transaction
+// @Tags			Transaction
+// @Description	Create transaction
+// @Produce		json
+// @Param			transaction		body		CreateTransaction		true		"Input transactin create"
+// @Success		200		{object}	Response[TransactionCreateResponse]	"Create transaction"
+// @Failure		400		{object}	ResponseError			"Client error"
+// @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
+// @Failure     403    	{object}  	ResponseError  		"Forbidden user"
+// @Failure		500		{object}	ResponseError			"Server error"
+// @Router		/api/transaction/create [post]
+func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
+	user, err := commonHttp.GetUserFromRequest(r)
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusUnauthorized, err, commonHttp.ErrUnauthorized.Error(), h.logger)
+		return
+	}
 
+	var transactionInput CreateTransaction
+
+	if err := json.NewDecoder(r.Body).Decode(&transactionInput); err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidBodyRequest, h.logger)
+		return
+	}
+
+	if err := transactionInput.CheckValid(); err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidBodyRequest, h.logger)
+		return
+	}
+
+	transactionID, err := h.transactionService.CreateTransaction(r.Context(), transactionInput.ToTransaction(user))
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, TransactionNotCreate, h.logger)
+		return
+	}
+
+	transactionResponse := TransactionCreateResponse{TransactionID: transactionID}
+	commonHttp.SuccessResponse(w, http.StatusOK, transactionResponse)
 }

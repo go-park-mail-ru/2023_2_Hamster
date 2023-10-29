@@ -29,7 +29,7 @@ CREATE TABLE Transaction (
 	user_id      UUID REFERENCES Users(id),
 	category_id  UUID REFERENCES Category(id),
 	account_id   UUID REFERENCES Accounts(id),
-	total        numeric(10, 2) CHECK (Total > 0),
+	total        numeric(10, 2),
 	is_income    bool,
 	date         DATE DEFAULT now(),
 	payer        VARCHAR(20),

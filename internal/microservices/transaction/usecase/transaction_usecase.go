@@ -30,6 +30,14 @@ func (t *Usecase) GetFeed(ctx context.Context, userID uuid.UUID) ([]models.Trans
 
 		return transaction, fmt.Errorf("[usecase] can't get transactions from repository %w", err)
 	}
-
 	return transaction, nil
+}
+
+func (t *Usecase) CreateTransaction(ctx context.Context, transaction *models.Transaction) (uuid.UUID, error) {
+	transactionID, err := t.transactionRepo.CreateTransaction(ctx, transaction)
+
+	if err != nil {
+		return transactionID, fmt.Errorf("[usecase] can't create transaction into repository: %w", err)
+	}
+	return transactionID, nil
 }
