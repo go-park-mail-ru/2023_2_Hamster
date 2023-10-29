@@ -14,6 +14,23 @@ definitions:
       username:
         type: string
     type: object
+  http.CreateTransaction:
+    properties:
+      account_id:
+        type: string
+      category_id:
+        type: string
+      date:
+        type: string
+      description:
+        type: string
+      is_income:
+        type: boolean
+      payer:
+        type: string
+      total:
+        type: number
+    type: object
   http.MasTransaction:
     properties:
       transaction:
@@ -41,6 +58,13 @@ definitions:
     properties:
       body:
         $ref: '#/definitions/http.NilBody'
+      status:
+        type: integer
+    type: object
+  http.Response-http_TransactionCreateResponse:
+    properties:
+      body:
+        $ref: '#/definitions/http.TransactionCreateResponse'
       status:
         type: integer
     type: object
@@ -106,6 +130,11 @@ definitions:
         type: string
       status:
         type: integer
+    type: object
+  http.TransactionCreateResponse:
+    properties:
+      transaction_id:
+        type: string
     type: object
   models.Accounts:
     properties:
@@ -342,6 +371,42 @@ paths:
           schema:
             $ref: '#/definitions/http.ResponseError'
       summary: Get all transaction
+      tags:
+      - Transaction
+  /api/transaction/create:
+    post:
+      description: Create transaction
+      parameters:
+      - description: Input transactin create
+        in: body
+        name: transaction
+        required: true
+        schema:
+          $ref: '#/definitions/http.CreateTransaction'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Create transaction
+          schema:
+            $ref: '#/definitions/http.Response-http_TransactionCreateResponse'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Create transaction
       tags:
       - Transaction
   /api/user/{userID}/:

@@ -11,7 +11,15 @@ import (
 )
 
 const (
-	transactionGetFeed = "SELECT * FROM transaction WHERE user_id = $1"
+	transactionCreate               = "INSERT INTO transaction (user_id, category_id, account_id, total, is_income, date, payer, description) VALUES ($1, $2, $3) RETURNING id;"
+	transactionGetFeed              = "SELECT * FROM transaction WHERE user_id = $1"
+	transactionUpdateBalanceAccount = `UPDATE accounts
+										SET balance = CASE
+											WHEN isIncome = true THEN balance + $2
+											WHEN isIncome = false THEN balance - $2
+											ELSE balance
+											END
+										WHERE account_id = $1;`
 )
 
 type transactionRep struct {
@@ -27,9 +35,7 @@ func NewRepository(db pgxtype.Querier, l logger.CustomLogger) *transactionRep {
 }
 
 func (r *transactionRep) GetFeed(ctx context.Context, user_id uuid.UUID) ([]models.Transaction, error) { // need test
-
 	var transactions []models.Transaction
-
 	rows, err := r.db.Query(ctx, transactionGetFeed, user_id)
 	if err != nil {
 		return nil, err
@@ -61,5 +67,33 @@ func (r *transactionRep) GetFeed(ctx context.Context, user_id uuid.UUID) ([]mode
 	if len(transactions) == 0 {
 		return nil, fmt.Errorf("[repo] %w: %v", &models.NoSuchTransactionError{UserID: user_id}, err)
 	}
+
 	return transactions, nil
+}
+
+func (r *transactionRep) CreateTransaction(ctx context.Context, transaction models.Transaction) (uuid.UUID, error) { // need test
+	row := r.db.QueryRow(ctx, transactionGetFeed,
+		transaction.UserID,
+		transaction.CategoryID,
+		transaction.AccountID,
+		transaction.Total,
+		transaction.IsIncome,
+		transaction.Date,
+		transaction.Payer,
+		transaction.Description)
+
+	var id uuid.UUID
+
+	err := row.Scan(&id)
+	if err != nil {
+		return id, fmt.Errorf("[repo] %w", err)
+	}
+
+	_, err = r.db.Exec(ctx, transactionUpdateBalanceAccount, transaction.AccountID, transaction.Total)
+
+	if err != nil {
+		return id, fmt.Errorf("[repo] %v", err)
+	}
+
+	return id, nil
 }

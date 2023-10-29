@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	UserCreate           = `INSERT INTO users (login, username, password) VALUES ($1, $2, $3, $4) RETURNING id;`
+	UserCreate           = `INSERT INTO users (login, username, password) VALUES ($1, $2, $3) RETURNING id;`
 	UserIDGetByID        = `SELECT * FROM users WHERE id = $1;`
 	UserGetByUserName    = `SELECT id, username, password_hash, planned_budget, avatar_url, salt From users WHERE (username=$1)`
 	UserGetPlannedBudget = "SELECT planned_budget FROM users WHERE id = $1"

@@ -156,6 +156,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/transaction/create": {
+            "post": {
+                "description": "Create transaction",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Create transaction",
+                "parameters": [
+                    {
+                        "description": "Input transactin create",
+                        "name": "transaction",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/http.CreateTransaction"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Create transaction",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-http_TransactionCreateResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/transaction/{userID}/all": {
             "get": {
                 "description": "Get User all transaction",
@@ -628,6 +683,32 @@ const docTemplate = `{
                 }
             }
         },
+        "http.CreateTransaction": {
+            "type": "object",
+            "properties": {
+                "account_id": {
+                    "type": "string"
+                },
+                "category_id": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "is_income": {
+                    "type": "boolean"
+                },
+                "payer": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "number"
+                }
+            }
+        },
         "http.MasTransaction": {
             "type": "object",
             "properties": {
@@ -669,6 +750,17 @@ const docTemplate = `{
             "properties": {
                 "body": {
                     "$ref": "#/definitions/http.NilBody"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "http.Response-http_TransactionCreateResponse": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/http.TransactionCreateResponse"
                 },
                 "status": {
                     "type": "integer"
@@ -771,6 +863,14 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "integer"
+                }
+            }
+        },
+        "http.TransactionCreateResponse": {
+            "type": "object",
+            "properties": {
+                "transaction_id": {
+                    "type": "string"
                 }
             }
         },

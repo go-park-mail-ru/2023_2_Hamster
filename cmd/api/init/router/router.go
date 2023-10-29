@@ -73,7 +73,7 @@ func InitRouter( /*auth *auth.Handler,*/ user *user.Handler, transaction *transa
 		transactionRouter.Methods("GET").Path("/{userID}/all").HandlerFunc(transaction.GetFeed) // выведет все транзакции юзера
 		// 	transactionRouter.Methods("GET").Path("/{transaction_id}/").HandlerFunc(transaction.Get)
 		// transactionRouter.Methods("PUT").Path("/update").HandlerFunc(transaction.Update) // ?
-		// transactionRouter.Methods("POST").Path("/create").HandlerFunc(transaction.Create)
+		transactionRouter.Methods("POST").Path("/create").HandlerFunc(transaction.Create)
 		// transactionRouter.Methods("DELETE").Path("/delete").HandlerFunc(transaction.Delete)
 	}
 
