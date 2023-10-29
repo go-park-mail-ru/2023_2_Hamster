@@ -65,9 +65,14 @@ func main() {
 	log.Info("Redis connection successfully")
 
 	router := app.Init(db, redisCli, log)
+
 	var srv server.Server
+	if err := srv.Init(router); err != nil {
+		log.Fatalf("error while launching server: %v", err)
+	}
+
 	go func() {
-		if err := srv.Run(router); err != nil {
+		if err := srv.Run(); err != nil {
 			log.Fatalf("can't launch server: %v", err)
 		}
 	}()
