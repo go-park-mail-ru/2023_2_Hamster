@@ -15,8 +15,8 @@ const (
 	transactionGetFeed              = "SELECT * FROM transaction WHERE user_id = $1"
 	transactionUpdateBalanceAccount = `UPDATE accounts
 										SET balance = CASE
-											WHEN isIncome = true THEN balance + $2
-											WHEN isIncome = false THEN balance - $2
+											WHEN is_income = true THEN balance + $2
+											WHEN is_income = false THEN balance - $2
 											ELSE balance
 											END
 										WHERE account_id = $1;`
