@@ -46,7 +46,7 @@ const docTemplate = `{
                     "200": {
                         "description": "User status",
                         "schema": {
-                            "$ref": "#/definitions/http.ResponseError"
+                            "$ref": "#/definitions/http.Response-auth_SignResponse"
                         }
                     },
                     "400": {
@@ -620,7 +620,7 @@ const docTemplate = `{
         "auth.SignResponse": {
             "type": "object",
             "properties": {
-                "user_id": {
+                "id": {
                     "type": "string"
                 },
                 "username": {

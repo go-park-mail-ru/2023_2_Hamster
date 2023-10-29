@@ -1,0 +1,6 @@
+linters:
+  enable:
+    - deadcode
+    - gocyclo
+    - golint
+    - varcheck

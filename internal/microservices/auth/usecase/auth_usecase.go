@@ -6,9 +6,9 @@ import (
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/hasher"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user"
 	"github.com/google/uuid"
 )
 
@@ -34,6 +34,11 @@ func (u *Usecase) SignUp(ctx context.Context, input auth.SignUpInput) (uuid.UUID
 	var user models.User
 
 	ok, err := u.authRepo.CheckLoginUnique(ctx, input.Login)
+	if err != nil {
+		u.logger.Error("Error checking login uniqueness: ", err)
+		return uuid.Nil, "", fmt.Errorf("[usecase] error checking login uniqueness: %w", err)
+	}
+
 	if !ok {
 		u.logger.Error("Login already exist ", input.Login)
 		return uuid.Nil, "", fmt.Errorf("[usecase] username already exist")

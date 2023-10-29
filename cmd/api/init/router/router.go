@@ -6,9 +6,9 @@ import (
 	"net/http"
 
 	_ "github.com/go-park-mail-ru/2023_2_Hamster/docs"
-	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth/delivery/http"
-	transaction "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/transaction/delivery/http"
-	user "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/delivery/http"
+	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/http"
+	transaction "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/transaction/delivery/http"
+	user "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user/delivery/http"
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
 )

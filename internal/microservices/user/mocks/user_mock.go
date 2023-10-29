@@ -8,8 +8,8 @@ import (
 	context "context"
 	reflect "reflect"
 
+	transfer_models "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user/delivery/http/transfer_models"
 	models "github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
-	transfer_models "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user/delivery/http/transfer_models"
 	gomock "github.com/golang/mock/gomock"
 	uuid "github.com/google/uuid"
 )

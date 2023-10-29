@@ -5,10 +5,6 @@ import (
 	"time"
 )
 
-const (
-	sessionTag = "session_id"
-)
-
 func InitCookie(name, value string, expire time.Time, path string) *http.Cookie {
 	return &http.Cookie{
 		Name:     name,

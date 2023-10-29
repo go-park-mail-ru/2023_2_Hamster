@@ -9,7 +9,7 @@ definitions:
     type: object
   auth.SignResponse:
     properties:
-      user_id:
+      id:
         type: string
       username:
         type: string
@@ -239,7 +239,7 @@ paths:
         "200":
           description: User status
           schema:
-            $ref: '#/definitions/http.ResponseError'
+            $ref: '#/definitions/http.Response-auth_SignResponse'
         "400":
           description: Invalid cookie
           schema:

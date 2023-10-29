@@ -50,7 +50,7 @@ func (s *Server) Run(handler http.Handler) error {
 		Handler: handler,
 	}
 
-	if s.httpServer.ListenAndServe(); err != nil {
+	if err := s.httpServer.ListenAndServe(); err != nil {
 		return err
 	}
 

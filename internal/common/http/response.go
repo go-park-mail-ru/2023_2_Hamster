@@ -49,7 +49,10 @@ func ErrorResponse(w http.ResponseWriter, code int, err error, message string, l
 	if err := encoder.Encode(errorMsg); err != nil {
 		log.Errorf("Error failed to marshal error message: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Can't encode error message into json, massage: " + message))
+
+		if _, writeErr := w.Write([]byte("Can't encode error message into json, message: " + message)); writeErr != nil {
+			log.Errorf("Error writing response: %s", writeErr.Error())
+		}
 	}
 }
 

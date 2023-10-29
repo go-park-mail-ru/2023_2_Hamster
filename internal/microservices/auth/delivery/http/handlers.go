@@ -7,10 +7,10 @@ import (
 
 	response "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
+	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions"
-	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/user"
 )
 
 type Handler struct {
