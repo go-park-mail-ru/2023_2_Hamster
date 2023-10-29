@@ -71,7 +71,7 @@ func (r *transactionRep) GetFeed(ctx context.Context, user_id uuid.UUID) ([]mode
 	return transactions, nil
 }
 
-func (r *transactionRep) CreateTransaction(ctx context.Context, transaction models.Transaction) (uuid.UUID, error) { // need test
+func (r *transactionRep) CreateTransaction(ctx context.Context, transaction *models.Transaction) (uuid.UUID, error) { // need test
 	row := r.db.QueryRow(ctx, transactionGetFeed,
 		transaction.UserID,
 		transaction.CategoryID,
