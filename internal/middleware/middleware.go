@@ -4,60 +4,61 @@ import (
 	"context"
 	"net/http"
 
+	response "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth"
+	userRep "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions"
 )
 
 type Middleware struct {
-	au  auth.Usecase
+	ur  userRep.Repository
+	su  sessions.Usecase
 	log logger.CustomLogger
 }
 
-func NewMiddleware(au auth.Usecase, log logger.CustomLogger) *Middleware {
+func NewMiddleware(su sessions.Usecase, ur userRep.Repository, log logger.CustomLogger) *Middleware {
 	return &Middleware{
-		au:  au,
+		su:  su,
+		ur:  ur,
 		log: log,
 	}
 }
 
 func (m *Middleware) Authentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		/*cookie, err := r.Cookie(cookiePkg.AuthCookie)
+		cookie, err := r.Cookie("session_id")
 		if err != nil {
 			m.log.Errorf("[middleware] no cookie Authentication")
-			commonHttp.ErrorResponse(w, http.StatusUnauthorized, err, "missing token unauthorized", m.log)
-			// next.ServeHTTP(w, r)
+			response.ErrorResponse(w, http.StatusUnauthorized, err, "missing token unauthorized", m.log)
 			return
 		}
-		reqToken := cookie.Value
+		session := cookie.Value
 
-		m.log.Info("auth token : " + reqToken)
+		m.log.Info("session : " + session)
 
 		if cookie.Value == "" {
 			m.log.Errorf("[middleware] missing token")
-			commonHttp.ErrorResponse(w, http.StatusUnauthorized, err, "missing token unauthorized", m.log) // missing token
+			response.ErrorResponse(w, http.StatusUnauthorized, err, "missing token unauthorized", m.log) // missing token
 			return
 		}
 
-		userId, _, err := m.au.ValidateAccessToken(reqToken)
+		userSession, err := m.su.GetSessionByCookie(context.TODO(), session)
 		if err != nil {
 			m.log.Errorf("[middleware] validation error: %s", err.Error())
-			commonHttp.ErrorResponse(w, http.StatusUnauthorized, err, "token validation failed unauthorized", m.log) // token check failed
+			response.ErrorResponse(w, http.StatusUnauthorized, err, "token validation failed unauthorized", m.log) // token check failed
 			return
 		}
 
-		//fmt.Println(userId)
-		user, err := m.au.GetUserByAuthData(r.Context(), userId)
+		user, err := m.ur.GetByID(r.Context(), userSession.UserId)
 		if err != nil {
 			m.log.Infof("[middleware] get user error: %s", err.Error())
-			commonHttp.ErrorResponse(w, http.StatusUnauthorized, err, "userAuth check failed", m.log) // UserAuth data check failed
+			response.ErrorResponse(w, http.StatusUnauthorized, err, "userAuth check failed", m.log) // UserAuth data check failed
 			return
 		}
 
 		m.log.Infof("user accepted : %d", user.ID)
-		*/
-		ctx := context.WithValue(r.Context(), models.ContextKeyUserType{}, models.User{}) // Empty user
-		next.ServeHTTP(w, r.WithContext(ctx))                                             // token check successed
+		ctx := context.WithValue(r.Context(), models.ContextKeyUserType{}, user) // Empty user
+		next.ServeHTTP(w, r.WithContext(ctx))                                    // token check successed
 	})
 }

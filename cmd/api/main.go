@@ -60,7 +60,7 @@ func main() {
 
 	_, pingErr := redisCli.Ping(context.Background()).Result()
 	if pingErr != nil {
-		log.Fatalf("Failed to ping Redis server: %v", pingErr)
+		log.Errorf("Failed to ping Redis server: %v", pingErr)
 	}
 	log.Info("Redis connection successfully")
 

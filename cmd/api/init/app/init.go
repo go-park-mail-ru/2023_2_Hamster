@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/router"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware"
 	"github.com/jackc/pgtype/pgxtype"
 	"github.com/redis/go-redis/v9"
 
@@ -30,12 +31,13 @@ func Init(db pgxtype.Querier, redis *redis.Client, log *logger.CustomLogger) *mu
 	sessionUsecase := sessionUsecase.NewSessionUsecase(sessionRep, *log)
 	userUsecase := userUsecase.NewUsecase(userRep, *log)
 	transactionUsecase := transactionUsecase.NewUsecase(transactionRep, *log)
-	//middlewear := middleware.NewMiddleware(authUsecase, *log)
+
+	middlewear := middleware.NewMiddleware(sessionUsecase, userRep, *log)
 
 	authHandler := authDelivery.NewHandler(authUsecase, userUsecase, sessionUsecase, *log)
 	userHandler := userDelivery.NewHandler(userUsecase, *log)
 	transactionHandler := transactionDelivery.NewHandler(transactionUsecase, *log)
 
-	return router.InitRouter(authHandler, userHandler, transactionHandler /*, middlewear*/)
+	return router.InitRouter(authHandler, userHandler, transactionHandler, middlewear)
 
 }

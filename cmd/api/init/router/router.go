@@ -9,6 +9,7 @@ import (
 	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/http"
 	transaction "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/transaction/delivery/http"
 	user "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user/delivery/http"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware"
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
@@ -32,7 +33,7 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Initialize router and describes all app's endpoints
-func InitRouter(auth *auth.Handler, user *user.Handler, transaction *transaction.Handler /*mid *middleware.Middleware*/) *mux.Router {
+func InitRouter(auth *auth.Handler, user *user.Handler, transaction *transaction.Handler, mid *middleware.Middleware) *mux.Router {
 	r := mux.NewRouter()
 
 	http.Handle("/", r)
@@ -56,7 +57,7 @@ func InitRouter(auth *auth.Handler, user *user.Handler, transaction *transaction
 	}
 
 	userRouter := apiRouter.PathPrefix("/user/{userID}").Subrouter()
-	//userRouter.Use(mid.Authentication)
+	userRouter.Use(mid.Authentication)
 	{
 		userRouter.Methods("GET").Path("/").HandlerFunc(user.Get)
 		userRouter.Methods("GET").Path("/check-unique-login/{login}").HandlerFunc(user.IsLoginUnique) // move from auth router
