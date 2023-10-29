@@ -9,7 +9,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgtype/pgxtype"
 )
 
 const (
@@ -26,18 +26,18 @@ const (
 )
 
 type UserRep struct {
-	db     *pgxpool.Pool
+	db     pgxtype.Querier
 	logger logger.CustomLogger
 }
 
-func NewRepository(db *pgxpool.Pool, l logger.CustomLogger) *UserRep {
+func NewRepository(db pgxtype.Querier, l logger.CustomLogger) *UserRep {
 	return &UserRep{
 		db:     db,
 		logger: l,
 	}
 }
 
-func (r *UserRep) CreateUser(ctx context.Context, u models.User) (uuid.UUID, error) { // need test
+func (r *UserRep) CreateUser(ctx context.Context, u models.User) (uuid.UUID, error) { // need testr.
 	row := r.db.QueryRow(ctx, UserCreate, u.Login, u.Username, u.Password)
 	var id uuid.UUID
 
