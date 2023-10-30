@@ -3,6 +3,7 @@ package http
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
@@ -37,4 +38,32 @@ func GetUserFromRequest(r *http.Request) (*models.User, error) {
 	}
 
 	return user, nil
+}
+
+func GetQueryParam(r *http.Request) (int, int, error) {
+	values := r.URL.Query()
+	var page, perPage int
+	var err error
+
+	if pageStr := values.Get("page"); pageStr != "" {
+		page, err = strconv.Atoi(pageStr)
+		if page < 0 {
+			return 0, 0, errors.New("error page < 0")
+		}
+		if err != nil {
+			return 0, 0, err
+		}
+	}
+
+	if perPageStr := values.Get("page_size"); perPageStr != "" {
+		perPage, err = strconv.Atoi(perPageStr)
+		if perPage < 0 {
+			return 0, 0, errors.New("error page_size < 0")
+		}
+		if err != nil {
+			return 0, 0, err
+		}
+	}
+
+	return page, perPage, nil
 }

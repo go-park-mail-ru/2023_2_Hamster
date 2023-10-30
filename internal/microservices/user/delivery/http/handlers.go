@@ -43,7 +43,7 @@ func NewHandler(uu user.Usecase, l logger.CustomLogger) *Handler {
 // @Failure     403    	{object}  	ResponseError  		"Forbidden user"
 // @Failure		500		{object}	ResponseError	"Server error"
 // @Router		/api/user/{userID}/ [get]
-func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Get(w http.ResponseWriter, r *http.Request) { // ?
 	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
 	if err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
@@ -76,14 +76,14 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 // @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
 // @Failure     403    	{object}  	ResponseError  		"Forbidden user"
 // @Failure		500		{object}	ResponseError	"Server error"
-// @Router		/api/user/{userID}/balance [get]
-func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
-	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
+// @Router		/api/user/balance [get]
+func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) { // ?
+	user, err := commonHttp.GetUserFromRequest(r)
 	if err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
 		return
 	}
-	balance, err := h.userService.GetUserBalance(r.Context(), userID)
+	balance, err := h.userService.GetUserBalance(r.Context(), user.ID)
 
 	var errNoSuchUserIdBalanceError *models.NoSuchUserIdBalanceError
 	if errors.As(err, &errNoSuchUserIdBalanceError) {
@@ -109,16 +109,16 @@ func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 // @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
 // @Failure     403    	{object}  	ResponseError  		"Forbidden user"
 // @Failure		500		{object}	ResponseError			"Server error"
-// @Router		/api/user/{userID}/plannedBudget [get]
+// @Router		/api/user/plannedBudget [get]
 func (h *Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {
-	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
+	user, err := commonHttp.GetUserFromRequest(r)
 
 	if err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
 		return
 	}
 
-	budget, err := h.userService.GetPlannedBudget(r.Context(), userID)
+	budget, err := h.userService.GetPlannedBudget(r.Context(), user.ID)
 
 	var errNoSuchPlannedBudgetError *models.NoSuchPlannedBudgetError
 	if errors.As(err, &errNoSuchPlannedBudgetError) {
@@ -144,16 +144,16 @@ func (h *Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {
 // @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
 // @Failure     403    	{object}  	ResponseError  		"Forbidden user"
 // @Failure		500		{object}	ResponseError			"Server error"
-// @Router		/api/user/{userID}/actualBudget [get]
+// @Router		/api/user/actualBudget [get]
 func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
-	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
+	user, err := commonHttp.GetUserFromRequest(r)
 
 	if err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
 		return
 	}
 
-	budget, err := h.userService.GetCurrentBudget(r.Context(), userID)
+	budget, err := h.userService.GetCurrentBudget(r.Context(), user.ID)
 
 	// var errNoSuchCurrentBudget *models.NoSuchCurrentBudget
 	// if errors.As(err, &errNoSuchCurrentBudget) {
@@ -180,16 +180,16 @@ func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
 // @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
 // @Failure     403    	{object}  	ResponseError  		"Forbidden user"
 // @Failure		500		{object}	ResponseError		"Server error"
-// @Router		/api/user/{userID}/accounts/all [get]
+// @Router		/api/user/accounts/all [get]
 func (h *Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
-	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
+	user, err := commonHttp.GetUserFromRequest(r)
 
 	if err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
 		return
 	}
 
-	accountInfo, err := h.userService.GetAccounts(r.Context(), userID)
+	accountInfo, err := h.userService.GetAccounts(r.Context(), user.ID)
 
 	var errNoSuchAccounts *models.NoSuchAccounts
 
@@ -217,16 +217,16 @@ func (h *Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 // @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
 // @Failure     403    	{object}  	ResponseError  		"Forbidden user"
 // @Failure		500		{object}	ResponseError		"Server error"
-// @Router		/api/user/{userID}/feed [get]
+// @Router		/api/user/feed [get]
 func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
-	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
+	user, err := commonHttp.GetUserFromRequest(r)
 
 	if err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
 		return
 	}
 
-	dataFeed, err := h.userService.GetFeed(r.Context(), userID)
+	dataFeed, err := h.userService.GetFeed(r.Context(), user.ID)
 
 	var errNoSuchPlannedBudgetError *models.NoSuchPlannedBudgetError
 	var errNoSuchUserIdBalanceError *models.NoSuchUserIdBalanceError
@@ -259,8 +259,8 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 // @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
 // @Failure     403    	{object}  	ResponseError  		"Forbidden user"
 // @Failure		500		{object}	ResponseError		"Server error"
-// @Router		/api/user/{userID}/update [put]
-func (h *Handler) Update(w http.ResponseWriter, r *http.Request) { // need test
+// @Router		/api/user/update [put]
+func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	user, err := commonHttp.GetUserFromRequest(r)
 	if err != nil && errors.Is(err, commonHttp.ErrUnauthorized) {
 		commonHttp.ErrorResponse(w, http.StatusUnauthorized, err, commonHttp.ErrUnauthorized.Error(), h.logger)
@@ -295,18 +295,6 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) { // need test
 	commonHttp.SuccessResponse(w, http.StatusOK, commonHttp.NilBody{})
 }
 
-func (h *Handler) IsLoginUnique(w http.ResponseWriter, r *http.Request) { /// move auth rep
-	userLogin := commonHttp.GetloginFromRequest(userloginUrlParam, r)
-	fmt.Println(userLogin)
-	isUnique, err := h.userService.IsLoginUnique(r.Context(), userLogin)
-
-	if err != nil {
-		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, "can't get unique info login", h.logger)
-		return
-	}
-	commonHttp.SuccessResponse(w, http.StatusOK, isUnique)
-}
-
 // @Summary     PUT Update Photo
 // @Tags        User
 // @Description Update user photo
@@ -320,9 +308,9 @@ func (h *Handler) IsLoginUnique(w http.ResponseWriter, r *http.Request) { /// mo
 // @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
 // @Failure     403    	{object}  	ResponseError  		"Forbidden user"
 // @Failure     500           {object} ResponseError   "Server error"
-// @Router      /api/user/{userID}/updatePhoto [put]
+// @Router      /api/user/updatePhoto [put]
 func (h *Handler) UpdatePhoto(w http.ResponseWriter, r *http.Request) { // need test
-	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
+	user, err := commonHttp.GetUserFromRequest(r)
 
 	if err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserNotFound, h.logger)
@@ -369,7 +357,7 @@ func (h *Handler) UpdatePhoto(w http.ResponseWriter, r *http.Request) { // need 
 		}
 	}
 
-	name, err := h.userService.UpdatePhoto(r.Context(), userID)
+	name, err := h.userService.UpdatePhoto(r.Context(), user.ID)
 	var errNoSuchUser *models.NoSuchUserError
 	if errors.As(err, &errNoSuchUser) {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserNotFound, h.logger)

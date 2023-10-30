@@ -13,6 +13,10 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions"
 )
 
+const (
+	userloginUrlParam = "login"
+)
+
 type Handler struct {
 	au  auth.Usecase
 	uu  user.Usecase
@@ -176,4 +180,23 @@ func (h *Handler) LogOut(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, response.InitCookie("session", "", time.Now().AddDate(0, 0, -1), "/api"))
 	response.SuccessResponse[response.NilBody](w, http.StatusOK, response.NIL())
+}
+
+// @Summary		Get unique login info
+// @Tags		Auth
+// @Description	Get bool parametrs about unique login
+// @Produce		json
+// @Success		200		{object}	Response[bool] "Show user"
+// @Failure		400		{object}	ResponseError	"Client error"
+// @Failure		500		{object}	ResponseError	"Server error"
+// @Router		/api/auth//check-unique-login/{login} [get]
+func (h *Handler) CheckLoginUnique(w http.ResponseWriter, r *http.Request) {
+	userLogin := response.GetloginFromRequest(userloginUrlParam, r)
+	isUnique, err := h.au.CheckLoginUnique(r.Context(), userLogin)
+
+	if err != nil {
+		response.ErrorResponse(w, http.StatusInternalServerError, err, "Can't get unique info login", h.log)
+		return
+	}
+	response.SuccessResponse(w, http.StatusOK, isUnique)
 }

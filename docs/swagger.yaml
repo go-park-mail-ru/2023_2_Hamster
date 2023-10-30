@@ -33,7 +33,9 @@ definitions:
     type: object
   http.MasTransaction:
     properties:
-      transaction:
+      is_all:
+        type: boolean
+      transactions:
         items:
           $ref: '#/definitions/models.TransactionTransfer'
         type: array
@@ -44,6 +46,13 @@ definitions:
     properties:
       body:
         $ref: '#/definitions/auth.SignResponse'
+      status:
+        type: integer
+    type: object
+  http.Response-bool:
+    properties:
+      body:
+        type: boolean
       status:
         type: integer
     type: object
@@ -136,6 +145,25 @@ definitions:
       transaction_id:
         type: string
     type: object
+  http.UpdTransaction:
+    properties:
+      account_id:
+        type: string
+      category_id:
+        type: string
+      date:
+        type: string
+      description:
+        type: string
+      is_income:
+        type: boolean
+      payer:
+        type: string
+      total:
+        type: number
+      transaction_id:
+        type: string
+    type: object
   models.Accounts:
     properties:
       balance:
@@ -183,7 +211,7 @@ definitions:
     type: object
   transfer_models.Account:
     properties:
-      account:
+      accounts:
         items:
           $ref: '#/definitions/models.Accounts'
         type: array
@@ -195,12 +223,12 @@ definitions:
     type: object
   transfer_models.BudgetActualResponse:
     properties:
-      actual_balance:
+      actual_budget:
         type: number
     type: object
   transfer_models.BudgetPlannedResponse:
     properties:
-      planned_balance:
+      planned_budget:
         type: number
     type: object
   transfer_models.PhotoUpdate:
@@ -210,15 +238,15 @@ definitions:
     type: object
   transfer_models.UserFeed:
     properties:
-      account:
+      accounts:
         items:
           $ref: '#/definitions/models.Accounts'
         type: array
-      actual_balance:
+      actual_budget:
         type: number
       balance:
         type: number
-      planned_balance:
+      planned_budget:
         type: number
     type: object
   transfer_models.UserTransfer:
@@ -250,6 +278,72 @@ info:
   title: Hamster API
   version: 1.0.1
 paths:
+  /api/all:
+    get:
+      description: Get User all transaction
+      parameters:
+      - example: 1
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      - example: 10
+        in: query
+        maximum: 20
+        minimum: 1
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Show transaction
+          schema:
+            $ref: '#/definitions/http.Response-http_MasTransaction'
+        "204":
+          description: Show actual accounts
+          schema:
+            $ref: '#/definitions/http.Response-string'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Get all transaction
+      tags:
+      - Transaction
+  /api/auth//check-unique-login/{login}:
+    get:
+      description: Get bool parametrs about unique login
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Show user
+          schema:
+            $ref: '#/definitions/http.Response-bool'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Get unique login info
+      tags:
+      - Auth
   /api/auth/checkAuth:
     post:
       consumes:
@@ -340,39 +434,6 @@ paths:
       summary: Sign Up
       tags:
       - Auth
-  /api/transaction/{userID}/all:
-    get:
-      description: Get User all transaction
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Show transaction
-          schema:
-            $ref: '#/definitions/http.Response-http_MasTransaction'
-        "204":
-          description: Show actual accounts
-          schema:
-            $ref: '#/definitions/http.Response-string'
-        "400":
-          description: Client error
-          schema:
-            $ref: '#/definitions/http.ResponseError'
-        "401":
-          description: Unauthorized user
-          schema:
-            $ref: '#/definitions/http.ResponseError'
-        "403":
-          description: Forbidden user
-          schema:
-            $ref: '#/definitions/http.ResponseError'
-        "500":
-          description: Server error
-          schema:
-            $ref: '#/definitions/http.ResponseError'
-      summary: Get all transaction
-      tags:
-      - Transaction
   /api/transaction/create:
     post:
       description: Create transaction
@@ -409,6 +470,42 @@ paths:
       summary: Create transaction
       tags:
       - Transaction
+  /api/transaction/update:
+    put:
+      description: Put transaction
+      parameters:
+      - description: Input transactin update
+        in: body
+        name: transaction
+        required: true
+        schema:
+          $ref: '#/definitions/http.UpdTransaction'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Update transaction
+          schema:
+            $ref: '#/definitions/http.Response-http_NilBody'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: PUT Update
+      tags:
+      - Transaction
   /api/user/{userID}/:
     get:
       description: Get user with chosen ID
@@ -438,7 +535,7 @@ paths:
       summary: Get User
       tags:
       - User
-  /api/user/{userID}/accounts/all:
+  /api/user/accounts/all:
     get:
       description: Get User accounts
       produces:
@@ -471,7 +568,7 @@ paths:
       summary: Get User Accounts
       tags:
       - User
-  /api/user/{userID}/actualBudget:
+  /api/user/actualBudget:
     get:
       description: Get User actual budget
       produces:
@@ -500,7 +597,7 @@ paths:
       summary: Get Actual Budget
       tags:
       - User
-  /api/user/{userID}/balance:
+  /api/user/balance:
     get:
       description: Get User balance
       produces:
@@ -529,7 +626,7 @@ paths:
       summary: Get Balance
       tags:
       - User
-  /api/user/{userID}/feed:
+  /api/user/feed:
     get:
       description: Get Feed user info
       produces:
@@ -558,7 +655,7 @@ paths:
       summary: Get Feed
       tags:
       - User
-  /api/user/{userID}/plannedBudget:
+  /api/user/plannedBudget:
     get:
       description: Get User planned budget
       produces:
@@ -587,7 +684,7 @@ paths:
       summary: Get Planned Budget
       tags:
       - User
-  /api/user/{userID}/update:
+  /api/user/update:
     put:
       consumes:
       - application/json
@@ -625,7 +722,7 @@ paths:
       summary: PUT Update
       tags:
       - User
-  /api/user/{userID}/updatePhoto:
+  /api/user/updatePhoto:
     put:
       consumes:
       - multipart/form-data

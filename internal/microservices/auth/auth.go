@@ -10,6 +10,7 @@ type Usecase interface {
 	// Auth
 	SignUp(ctx context.Context, input SignUpInput) (uuid.UUID, string, error)
 	Login(ctx context.Context, login, plainPassword string) (uuid.UUID, string, error)
+	CheckLoginUnique(ctx context.Context, login string) (bool, error)
 }
 
 type Repository interface {
