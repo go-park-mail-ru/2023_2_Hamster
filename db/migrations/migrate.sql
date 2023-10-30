@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS user_account (
 
 
 CREATE TABLE IF NOT EXISTS category (
-    category_id   UUID          DEFAULT uuid_generate_v4() PRIMARY KEY,
+    category_id   UUID          DEFAULT uuid_generate_v4()   PRIMARY KEY,
     user_id       UUID          REFERENCES "user"(user_id)   CONSTRAINT fk_user_category  NOT NULL,
     "name"        VARCHAR(20)                                                             NOT NULL
 );
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS "transaction" (
     category_id             UUID REFERENCES "category"(category_id) CONSTRAINT fk_category_transaction NOT NULL,
     account_id              UUID REFERENCES "account"(account_id)   CONSTRAINT fk_account_transaction  NOT NULL,
     is_income               BOOLEAN                                                                    NOT NULL,
-    total_money             MONEY       DEFAULT 0.00                                                   NOT NULL,
+    total_amount             MONEY       DEFAULT 0.00                                                   NOT NULL,
     "date"                  DATE        DEFAULT CURRENT_DATE                                           NOT NULL,
     receiver_name           VARCHAR(40) DEFAULT '',
     "description"           TEXT,
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS deposit (
     deposit_id      UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     account_id      UUID REFERENCES account(account_id) CONSTRAINT fk_account_deposit NOT NULL,
     total_money     MONEY         DEFAULT 0.00                                        NOT NULL,
-    start_date      DATE          DEFAULT CURRENT_DATE                                NOT NULL,
+    start_at        DATE          DEFAULT CURRENT_DATE                                NOT NULL,
     end_date        DATE                                                              NOT NULL,
     interest_rate   DECIMAL(5, 2) DEFAULT 0.00                                        NOT NULL,
     created_at      TIMESTAMPTZ   DEFAULT CURRENT_TIMESTAMP                           NOT NULL,
@@ -64,8 +64,8 @@ CREATE TABLE IF NOT EXISTS credit (
     account_id          UUID REFERENCES account(account_id) CONSTRAINT fk_account_credit NOT NULL,
     total_amount        MONEY       DEFAULT 0.00                                         NOT NULL,
     monthly_payment     MONEY       DEFAULT 0.00                                         NOT NULL,
-    start_date          DATE        DEFAULT CURRENT_DATE                                 NOT NULL,
-    end_date            DATE,
+    start_at            DATE        DEFAULT CURRENT_DATE                                 NOT NULL,
+    end_at              DATE,
     calculation_details VARCHAR(30) DEFAULT 'annuity'                                    NOT NULL,
     payments_received   MONEY       DEFAULT 0.00,
     created_at          TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP                            NOT NULL,
@@ -76,8 +76,8 @@ CREATE TABLE IF NOT EXISTS credit (
 CREATE TABLE IF NOT EXISTS investment (
     investment_id   UUID            DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id         UUID            REFERENCES "user"(user_id) CONSTRAINT fk_user_investment NOT NULL,
-    asset_type      VARCHAR(255)                                                             NOT NULL,
-    asset_name      VARCHAR(255)                                                             NOT NULL,
+    asset_type      VARCHAR(50)                                                              NOT NULL,
+    asset_name      VARCHAR(50)                                                              NOT NULL,
     purchase_price  MONEY           DEFAULT 0.00                                             NOT NULL,
     quantity        NUMERIC                                                                  NOT NULL,
     purchase_date   DATE            DEFAULT CURRENT_DATE                                     NOT NULL,
@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS goal (
     "name"           VARCHAR(255)                                                      NOT NULL,
     "description"    TEXT           DEFAULT '',
     amount           MONEY          DEFAULT 0.00                                       NOT NULL,
-    start_date        DATE                                                              NOT NULL,
+    start_at         DATE                                                             NOT NULL,
     created_at       TIMESTAMPTZ    DEFAULT CURRENT_TIMESTAMP                          NOT NULL,
     updated_at       TIMESTAMPTZ    DEFAULT CURRENT_TIMESTAMP                          NOT NULL
 );
