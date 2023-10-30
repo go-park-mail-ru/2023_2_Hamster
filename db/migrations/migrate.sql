@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS category (
 CREATE TABLE IF NOT EXISTS "transaction" (
     transaction_id          UUID        DEFAULT    uuid_generate_v4()       PRIMARY KEY,
     user_id                 UUID        REFERENCES "user"(user_id),
-    category_id             UUID        REFERENCES "category"(category_id),
+    category_id             UUID        REFERENCES "category"(category_id), 
     account_id              UUID        REFERENCES "account"(account_id),
     is_income               BOOLEAN,
     total_money             MONEY       DEFAULT 0.00,
