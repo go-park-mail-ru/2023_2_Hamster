@@ -32,6 +32,7 @@ const (
 										WHERE id = $1;`
 	transactionUpdate = "UPDATE transaction set category_id=$2, account_id=$3, total=$4, is_income=$5, date=$6, payer=$7, description=$8 WHERE id = $1;"
 	transactionGet    = "SELECT total, is_income, account_id FROM transaction WHERE id = $1"
+	transactionCheck  = "SELECT EXISTS(SELECT id FROM transaction WHERE id = $1 AND user_id = $2);"
 )
 
 type transactionRep struct {
@@ -149,5 +150,20 @@ func (r *transactionRep) UpdateTransaction(ctx context.Context, transaction *mod
 	if err != nil {
 		return fmt.Errorf("[repo] failed update account %s, %w", transactionUpdateBalanceAccount, err)
 	}
+	return nil
+}
+
+func (r *transactionRep) CheckTransaciont(ctx context.Context, transactionID uuid.UUID, userID uuid.UUID) error {
+	var exists bool
+	err := r.db.QueryRow(ctx, transactionCheck, transactionID, userID).Scan(&exists)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return fmt.Errorf("[repo] %w: %v", &models.NoSuchTransactionError{UserID: transactionID}, err)
+	}
+
+	if err != nil {
+		return fmt.Errorf("[repo] %s: %v", transactionCheck, err)
+	}
+
 	return nil
 }

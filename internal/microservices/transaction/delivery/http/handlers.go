@@ -17,10 +17,12 @@ type Handler struct {
 	logger             logger.CustomLogger
 }
 
-// const (
-// 	userIdUrlParam    = "userID"
-// 	userloginUrlParam = "login"
-// )
+const (
+	transaction_id = "transaction_id"
+
+// userIdUrlParam    = "userID"
+// userloginUrlParam = "login"
+)
 
 func NewHandler(uu transaction.Usecase, l logger.CustomLogger) *Handler {
 	return &Handler{
@@ -161,5 +163,32 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	commonHttp.SuccessResponse(w, http.StatusOK, commonHttp.NilBody{})
+
+}
+
+// @Summary		Delete Transaction
+// @Tags		Transaction
+// @Description	Delete transaction with chosen ID
+// @Produce		json
+// @Success		200		{object}	Response[NilBody]	  	"Transaction deleted"
+// @Failure		400		{object}	http.Error				"Transaction error"
+// @Failure		401		{object}	http.Error  			"User unathorized"
+// @Failure		403		{object}	http.Error				"User hasn't rights"
+// @Failure		500		{object}	http.Error				"Server error"
+// @Router		/api/transaction/{transaction_id}/delete [delete]
+func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
+	transactionID, err := commonHttp.GetIDFromRequest(transaction_id, r)
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
+		return
+	}
+	user, err := commonHttp.GetUserFromRequest(r)
+
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
+		return
+	}
+
+	err = h.transactionService.DeleteTransaction(r.Context(), transactionID, user.ID)
 
 }

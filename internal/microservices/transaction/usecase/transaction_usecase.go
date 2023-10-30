@@ -48,3 +48,9 @@ func (t *Usecase) UpdateTransaction(ctx context.Context, transaction *models.Tra
 	}
 	return nil
 }
+
+func (t *Usecase) DeleteTransaction(ctx context.Context, transactionID uuid.UUID, userID uuid.UUID) error {
+	if err := t.transactionRepo.CheckTransaciont(ctx, transactionID, userID); err != nil {
+		return fmt.Errorf("[usecase] transaction not have")
+	}
+}

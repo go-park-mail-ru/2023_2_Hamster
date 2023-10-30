@@ -61,7 +61,7 @@ func InitRouter(auth *auth.Handler, user *user.Handler, transaction *transaction
 	userRouter := apiRouter.PathPrefix("/user").Subrouter()
 	userRouter.Use(mid.Authentication)
 	{
-		userRouter.Methods("GET").Path("/").HandlerFunc(user.Get)
+		userRouter.Methods("GET").Path("/{userID}").HandlerFunc(user.Get)
 		userRouter.Methods("PUT").Path("/updatePhoto").HandlerFunc(user.UpdatePhoto)
 		userRouter.Path("/update").Methods("PUT").HandlerFunc(user.Update)
 
@@ -79,7 +79,7 @@ func InitRouter(auth *auth.Handler, user *user.Handler, transaction *transaction
 		// 	transactionRouter.Methods("GET").Path("/{transaction_id}/").HandlerFunc(transaction.Get)
 		transactionRouter.Methods("PUT").Path("/update").HandlerFunc(transaction.Update)
 		transactionRouter.Methods("POST").Path("/create").HandlerFunc(transaction.Create)
-		// transactionRouter.Methods("DELETE").Path("/delete").HandlerFunc(transaction.Delete)
+		transactionRouter.Methods("DELETE").Path("/{transaction_id}/delete").HandlerFunc(transaction.Delete)
 	}
 
 	// categoryRouter := apiRouter.PathPrefix("/category").Subrouter()
