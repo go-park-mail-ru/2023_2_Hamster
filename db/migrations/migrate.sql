@@ -2,10 +2,10 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE IF NOT EXISTS "user" (
     user_id        UUID         DEFAULT uuid_generate_v4() PRIMARY KEY,
+    username       VARCHAR(50)  UNIQUE                     NOT NULL,
     full_name      VARCHAR(255)                            NOT NULL,
-    username       VARCHAR(50)  UNIQUE                     NOT NULL
     password_hash  VARCHAR(256)                            NOT NULL,
-	planned_budget MONEY DEFAULT 0.00                      NOT NULL,
+	planned_budget MONEY        DEFAULT 0.00               NOT NULL,
     avatar_url     UUID
 );
 
@@ -40,12 +40,12 @@ CREATE TABLE IF NOT EXISTS "transaction" (
     category_id             UUID        REFERENCES "category"(category_id), 
     account_id              UUID        REFERENCES "account"(account_id),
     is_income               BOOLEAN,
-    total_money             MONEY       DEFAULT 0.00,
+    total                   MONEY       DEFAULT 0.00,
     "date"                  DATE        DEFAULT CURRENT_DATE                NOT NULL,
     payer_name              VARCHAR(40) DEFAULT ''                          NOT NULL,
     "description"           TEXT,
-    created_at_timestamp    TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP           NOT NULL,
-    updated_at_timestamp    TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP           NOT NULL
+    created_at              TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP           NOT NULL,
+    updated_at              TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP           NOT NULL
 );
 
 
@@ -64,6 +64,7 @@ CREATE TABLE IF NOT EXISTS credit (
     credit_id           UUID        DEFAULT uuid_generate_v4()     PRIMARY KEY,
     account_id          UUID        REFERENCES account(account_id) NOT NULL,
     total_amount        MONEY       DEFAULT 0.00                   NOT NULL,
+    "status"            VARCHAR(20) DEFAULT 'active'               NOT NULL,
     monthly_payment     MONEY       DEFAULT 0.00,
     start_at            DATE        DEFAULT CURRENT_DATE,
     end_at              DATE,
@@ -88,14 +89,14 @@ CREATE TABLE IF NOT EXISTS investment (
 
 
 CREATE TABLE IF NOT EXISTS goal (
-    id          UUID            DEFAULT uuid_generate_v4() PRIMARY KEY,
-    user_id     UUID            REFERENCES "user"(user_id) NOT NULL,
-    name        VARCHAR(255),
-    description TEXT            DEFAULT '',
-    target      MONEY           DEFAULT 0.00               NOT NULL,
-    date        DATE
-    created_at  TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP  NOT NULL,
-    updated_at  TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP  NOT NULL
+    goal_id       UUID            DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id       UUID            REFERENCES "user"(user_id) NOT NULL,
+    "name"        VARCHAR(255),
+    "description" TEXT            DEFAULT '',
+    "target"      MONEY           DEFAULT 0.00               NOT NULL,
+    "date"        DATE,
+    created_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP  NOT NULL,
+    updated_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP  NOT NULL
 );
 
 CREATE OR REPLACE FUNCTION public.moddatetime()

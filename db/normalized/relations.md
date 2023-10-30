@@ -27,19 +27,22 @@
 - {id} -> {account_id, total_amount, start_at, end_at, interest_rate}
 ## Credit
 - Хрнит информаци о кредитах на аккаунте на аккаунте
-- {id} -> {account_id, amount, date_start, date_end, status, credit_type, monthly_payment}
-## Debt
-- {id} -> {user_id, total, date, status, description, creditor}
+- {id} -> {account_id, total_amount, start_at, end_at, status, credit_type, monthly_payment}
 
 
+
+---
 
 
 ```mermaid
+---
+title: Entity Relation
+---
 erDiagram
     user {
         id              uuid PK
-        login           string
         username        string
+        full_name       string
         password_hash   string
         planned_budget  money
         avatar_url      uuid
@@ -47,10 +50,17 @@ erDiagram
 
     account {
         id           uuid PK
-        user_id      uuid FK
-        bank_name    string
         balance      money
+        description  string
+        bank_name    string
+        currency     money
         description  text
+    }
+
+    user_account {
+        id         uuid  PK
+        user_id    uuid  FK
+        account_id uuid  FK
     }
     
     category {
@@ -67,14 +77,8 @@ erDiagram
         is_income   boolean
         total       money
         date        date
-        payer       string
+        payer_name  string
         description string
-    }
-    
-    user_account {
-        id         uuid  PK
-        user_id    uuid  FK
-        account_id uuid  FK
     }
 
     goal {
@@ -82,37 +86,39 @@ erDiagram
         user_id     uuid  FK
         name        string
         description string
-        amount      money
+        target      money
         start_date  date
     }
+
     investment {
-        id uuid  PK
-        user_id uuid  FK
-        asset_type string
-        asset_name string
-        purchase_price money 
-        purchase_date date
-        quantity numeric
+        id             uuid  PK
+        user_id        uuid  FK
+        asset_type     string
+        asset_name     string
+        purchase_price money
+        quantity       numeric 
+        purchase_at    date
     }
 
     credit {
-        id              uuid  PK
-        account_id      uuid  FK        
-        total_amount    money
-        date_start      date
-        date_end        date
-        status          string
-        credit_type     string
-        monthly_payment money
+        id               uuid  PK
+        account_id       uuid  FK        
+        total_amount     money
+        status           string
+        monthly_payment  money
+        start_at         date
+        end_at           date
+        credit_type      string
+        payments_recived money
     }
     
     deposit {
         id            uuid  PK
         account_id    uuid  FK
         total         money
-        date_start    date
-        date_end      date
-        interest_rate numeric
+        interest_rate decimal
+        start_at      date
+        end_at        date
     }
 
     account ||--o{ deposit : has
