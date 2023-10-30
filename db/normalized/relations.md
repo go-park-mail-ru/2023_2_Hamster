@@ -2,11 +2,11 @@
 ## User
 - Хранит информацию о пользователях.
 - {id} -> {username, login, password_hash, salt, planned_budget, avatar_url}
-- {login}->{username, password_hash, salt, planned_budget, avatar_url}
+- {login}->{id, username, password_hash, salt, planned_budget, avatar_url}
 ## Account
 - Хранит информацию о банковских счетах пользователя.
 - {id} -> {user_id, balance, mean_payment}
-- {user_id} -> {id}
+- {user_id} -> {id, balance, mean_payment}
 ## Investment
 - Хранит информацию о инвестициях пользователя.
 - id -> {name, total, date start, price, percentage}
@@ -86,15 +86,13 @@ erDiagram
         amount      money
         start_date  date
     }
-
     investment {
-        id             uuid  PK
-        user_id        uuid  FK
-        asset_type     string
-        asset_name     string
-        price          money
-        quantity       numeric
-        purchase_date  date
+        id uuid  PK
+        user_id uuid  FK
+        asset_type string
+        asset_name string
+        purchase_price money 
+        purchase_date date
     }
 
     credit {
@@ -116,15 +114,15 @@ erDiagram
         interest_rate numeric
     }
 
-    Account ||--o{ Deposit : has
-    Account ||--o{ Credit : has
-    User ||--o{ Investment : has
-    User ||--o{ UserAccount : has
-    Account ||--o{ UserAccount : has
-    User ||--o{ Category : has
-    User ||--o{ Transaction : has
-    Account ||--o{ Transaction : has
-    Category ||--o{ Transaction : has
-    User ||--o{ Goal : has
+    account ||--o{ deposit : has
+    account ||--o{ credit : has
+    user ||--o{ investment : has
+    user ||--o{ user_account : has
+    account ||--o{ user_account : has
+    user ||--o{ category : has
+    user ||--o{ transaction : has
+    account ||--o{ transaction : has
+    category ||--o{ transaction : has
+    user ||--o{ goal : has
     
 ```
