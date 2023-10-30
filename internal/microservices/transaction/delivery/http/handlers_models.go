@@ -22,7 +22,7 @@ type TransactionCreateResponse struct {
 }
 
 type MasTransaction struct {
-	Transactions []models.TransactionTransfer `json:"transaction"`
+	Transactions []models.TransactionTransfer `json:"transactions"`
 	IsAll        bool                         `json:"is_all"`
 }
 
