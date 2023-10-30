@@ -4,6 +4,7 @@ import (
 	//auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth/delivery/http"
 	"encoding/json"
 	"net/http"
+	"time"
 
 	_ "github.com/go-park-mail-ru/2023_2_Hamster/docs"
 	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/http"
@@ -11,6 +12,7 @@ import (
 	user "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user/delivery/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware"
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
@@ -33,8 +35,12 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Initialize router and describes all app's endpoints
-func InitRouter(auth *auth.Handler, user *user.Handler, transaction *transaction.Handler, mid *middleware.Middleware) *mux.Router {
+func InitRouter(auth *auth.Handler,
+	user *user.Handler,
+	transaction *transaction.Handler,
+	mid *middleware.Middleware) *mux.Router {
 	r := mux.NewRouter()
+	r.Use(loggingMiddleware)
 
 	http.Handle("/", r)
 	r.Path("/ping").HandlerFunc(HelloHandler)
@@ -87,4 +93,22 @@ func InitRouter(auth *auth.Handler, user *user.Handler, transaction *transaction
 	// 	categoryRouter.Methods("DELETE").Path("/delete").HandlerFunc(category.Delete)
 	// }
 	return r
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		startTime := time.Now()
+
+		// Call the next handler in the chain
+		next.ServeHTTP(w, r)
+
+		// Log the request details using logrus
+		logrus.Infof(
+			"%s %s %s %v",
+			r.Method,
+			r.RequestURI,
+			r.Proto,
+			time.Since(startTime),
+		)
+	})
 }
