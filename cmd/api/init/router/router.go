@@ -36,9 +36,11 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 func InitRouter(auth *auth.Handler, user *user.Handler, transaction *transaction.Handler, mid *middleware.Middleware) *mux.Router {
 	r := mux.NewRouter()
 
-	http.Handle("/", r)
-	r.Path("/ping").HandlerFunc(HelloHandler)
+	r.Use(mid.Panic())
 
+	http.Handle("/", r)
+
+	r.Path("/ping").HandlerFunc(HelloHandler)
 	r.PathPrefix("/swagger/").Handler(httpSwagger.Handler(
 		httpSwagger.DeepLinking(true),
 		httpSwagger.DocExpansion("none"),
@@ -47,7 +49,6 @@ func InitRouter(auth *auth.Handler, user *user.Handler, transaction *transaction
 
 	apiRouter := r.PathPrefix("/api").Subrouter()
 	//apiRouter.Use(corsmiddleware.CorsMiddleware)
-
 	authRouter := apiRouter.PathPrefix("/auth").Subrouter()
 	{
 		authRouter.Methods("POST").Path("/signin").HandlerFunc(auth.Login)
