@@ -1,8 +1,8 @@
 # Описание Таблиц
 ## User
 - Хранит информацию о пользователях.
-- {id} -> {username, login, password_hash, salt, planned_budget, avatar_url}
-- {login}->{id, username, password_hash, salt, planned_budget, avatar_url}
+- {id} -> {username, login, password_hash, planned_budget, avatar_url}
+- {login}->{id, username, password_hash, planned_budget, avatar_url}
 ## Account
 - Хранит информацию о банковских счетах пользователя.
 - {id} -> {user_id, balance, mean_payment}
