@@ -23,6 +23,7 @@ const (
 							OFFSET $3
 						) AS subquery
 						ORDER BY date DESC;`
+
 	transactionUpdateBalanceAccount = `UPDATE accounts
 										SET balance = CASE
 											WHEN $3 = true THEN balance + $2
@@ -30,9 +31,10 @@ const (
 											ELSE balance
 											END
 										WHERE id = $1;`
-	transactionUpdate = "UPDATE transaction set category_id=$2, account_id=$3, total=$4, is_income=$5, date=$6, payer=$7, description=$8 WHERE id = $1;"
-	transactionGet    = "SELECT total, is_income, account_id FROM transaction WHERE id = $1"
-	transactionCheck  = "SELECT EXISTS(SELECT id FROM transaction WHERE id = $1 AND user_id = $2);"
+	transactionUpdate      = "UPDATE transaction set category_id=$2, account_id=$3, total=$4, is_income=$5, date=$6, payer=$7, description=$8 WHERE id = $1;"
+	transactionGet         = "SELECT total, is_income, account_id FROM transaction WHERE id = $1"
+	TransactionGetUserByID = "SELECT user_id FROM transaction WHERE id = $1"
+	transactionDelete      = "DELETE FROM transaction WHERE $1 = id"
 )
 
 type transactionRep struct {
@@ -119,7 +121,6 @@ func (r *transactionRep) UpdateTransaction(ctx context.Context, transaction *mod
 	var isIncome bool
 	var accountID uuid.UUID
 	err := row.Scan(&total, &isIncome, &accountID)
-	fmt.Println(total, isIncome, accountID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return fmt.Errorf("[repo] %w: %v", &models.NoSuchTransactionError{UserID: transaction.ID}, err)
 	} else if err != nil {
@@ -153,16 +154,41 @@ func (r *transactionRep) UpdateTransaction(ctx context.Context, transaction *mod
 	return nil
 }
 
-func (r *transactionRep) CheckTransaciont(ctx context.Context, transactionID uuid.UUID, userID uuid.UUID) error {
-	var exists bool
-	err := r.db.QueryRow(ctx, transactionCheck, transactionID, userID).Scan(&exists)
+func (r *transactionRep) GetByID(ctx context.Context, transactinID uuid.UUID) (uuid.UUID, error) { // need test
+	var userID uuid.UUID
+	row := r.db.QueryRow(ctx, TransactionGetUserByID, transactinID)
 
+	err := row.Scan(&userID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return userID, fmt.Errorf("[repo] %w: %v", &models.NoSuchTransactionError{UserID: transactinID}, err)
+	} else if err != nil {
+		return userID,
+			fmt.Errorf("failed request db %s, %w", TransactionGetUserByID, err)
+	}
+	return userID, nil
+}
+
+func (r *transactionRep) DeleteTransaction(ctx context.Context, transactionID uuid.UUID, userID uuid.UUID) error {
+	row := r.db.QueryRow(ctx, transactionGet, transactionID)
+
+	var total float64
+	var isIncome bool
+	var accountID uuid.UUID
+	err := row.Scan(&total, &isIncome, &accountID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return fmt.Errorf("[repo] %w: %v", &models.NoSuchTransactionError{UserID: transactionID}, err)
+	} else if err != nil {
+		return fmt.Errorf("[repo] failed request db %s, %w", transactionGet, err)
 	}
 
+	_, err = r.db.Exec(ctx, transactionUpdateBalanceAccount, accountID, total, !isIncome)
 	if err != nil {
-		return fmt.Errorf("[repo] %s: %v", transactionCheck, err)
+		return fmt.Errorf("[repo] failed update transaction %s, %w", transactionUpdateBalanceAccount, err)
+	}
+
+	_, err = r.db.Exec(ctx, transactionDelete, transactionID)
+	if err != nil {
+		return fmt.Errorf("[repo] failed delete transaction %s, %w", transactionDelete, err)
 	}
 
 	return nil

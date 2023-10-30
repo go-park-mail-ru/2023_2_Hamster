@@ -50,7 +50,19 @@ func (t *Usecase) UpdateTransaction(ctx context.Context, transaction *models.Tra
 }
 
 func (t *Usecase) DeleteTransaction(ctx context.Context, transactionID uuid.UUID, userID uuid.UUID) error {
-	if err := t.transactionRepo.CheckTransaciont(ctx, transactionID, userID); err != nil {
-		return fmt.Errorf("[usecase] transaction not have")
+	userIDCheck, err := t.transactionRepo.GetByID(ctx, transactionID)
+	if err != nil {
+		return fmt.Errorf("[usecase] can't find artist in repository")
 	}
+
+	if userIDCheck == userID {
+		return fmt.Errorf("[usecase] can't be deleted by user: %w", &models.ForbiddenUserError{})
+	}
+
+	err = t.DeleteTransaction(ctx, transactionID, userID)
+	if err != nil {
+		return fmt.Errorf("[usecase] can`t be deleted from repository")
+	}
+
+	return nil
 }

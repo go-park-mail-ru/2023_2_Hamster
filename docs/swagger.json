@@ -359,6 +359,50 @@
                 }
             }
         },
+        "/api/transaction/{transaction_id}/delete": {
+            "delete": {
+                "description": "Delete transaction with chosen ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Delete Transaction",
+                "responses": {
+                    "200": {
+                        "description": "Transaction deleted",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-http_NilBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Transaction error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "User unathorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "User hasn't rights",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/user/accounts/all": {
             "get": {
                 "description": "Get User accounts",

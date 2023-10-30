@@ -171,10 +171,10 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 // @Description	Delete transaction with chosen ID
 // @Produce		json
 // @Success		200		{object}	Response[NilBody]	  	"Transaction deleted"
-// @Failure		400		{object}	http.Error				"Transaction error"
-// @Failure		401		{object}	http.Error  			"User unathorized"
-// @Failure		403		{object}	http.Error				"User hasn't rights"
-// @Failure		500		{object}	http.Error				"Server error"
+// @Failure		400		{object}	ResponseError				"Transaction error"
+// @Failure		401		{object}	ResponseError  			"User unathorized"
+// @Failure		403		{object}	ResponseError				"User hasn't rights"
+// @Failure		500		{object}	ResponseError				"Server error"
 // @Router		/api/transaction/{transaction_id}/delete [delete]
 func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	transactionID, err := commonHttp.GetIDFromRequest(transaction_id, r)
@@ -190,5 +190,21 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = h.transactionService.DeleteTransaction(r.Context(), transactionID, user.ID)
+
+	if err != nil {
+		var errNoSuchTransaction *models.NoSuchTransactionError
+		if errors.As(err, &errNoSuchTransaction) {
+			commonHttp.ErrorResponse(w, http.StatusBadRequest, err, TransactionNotSuch, h.logger)
+			return
+		}
+
+		var errForbiddenUser *models.ForbiddenUserError
+		if errors.As(err, &errForbiddenUser) {
+			commonHttp.ErrorResponse(w, http.StatusForbidden, err, commonHttp.ForbiddenUser, h.logger)
+			return
+		}
+
+		commonHttp.SuccessResponse(w, http.StatusOK, commonHttp.NilBody{})
+	}
 
 }
