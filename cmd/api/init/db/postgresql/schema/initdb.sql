@@ -31,7 +31,7 @@ CREATE TABLE Transaction (
 	account_id   UUID REFERENCES Accounts(id),
 	total        numeric(10, 2),
 	is_income    bool,
-	date         DATE DEFAULT now(),
+	date         timestamp DEFAULT now(),
 	payer        VARCHAR(20),
 	description  VARCHAR(100)
 );
@@ -44,17 +44,10 @@ ALTER COLUMN planned_budget SET DEFAULT 0.0;
 --=============================================================================
 
 INSERT INTO "users"(login, username, password_hash, planned_budget)
-<<<<<<< HEAD
-VALUES ('kossmatof','komarov', 'hash', 'fdsf', 10000);
+VALUES ('kossmatof','komarov', '$argon2id$v=19$m=65536,t=1,p=4$m8qhM3XLae+RCTGirBFEww$Znu5RBnxlam2xRoVtwBzbdSrN4/sRCm1IMOVX4N2uxw', 10000);
 
 INSERT INTO "users"(login, username, password_hash, planned_budget)
-VALUES ('test','test1', 'hash', 'fdsf', 10000);
-=======
-VALUES ('kossmatof','komarov', 'hash', 10000);
-
-INSERT INTO "users"(login, username, password_hash, planned_budget)
-VALUES ('test','test1', 'hash', 10000);
->>>>>>> 3c3e1a2db1003a8d04f35a5dcc8908b0235e1bc1
+VALUES ('test','test1', '$argon2id$v=19$m=65536,t=1,p=4$m8qhM3XLae+RCTGirBFEww$Znu5RBnxlam2xRoVtwBzbdSrN4/sRCm1IMOVX4N2uxw', 10000);
 
 INSERT INTO "accounts"(user_id, balance, mean_payment)
 VALUES ((SELECT id FROM Users limit 1), 533, 'Кошелек');
@@ -69,16 +62,11 @@ INSERT INTO "category"(user_id, name)
 VALUES ((SELECT id FROM Users limit 1), 'Стипендия');
 
 INSERT INTO "transaction" (user_id, category_id, account_id, total, is_income, date, payer, description)
-VALUES ((SELECT id FROM Users limit 1), (SELECT id FROM Category limit 1), (SELECT id FROM Accounts limit 1), 12400.50, false, '2023-10-01', 'МОСЖКХ', 'Оплата недвижки');
+VALUES ((SELECT id FROM Users limit 1), (SELECT id FROM Category limit 1), (SELECT id FROM Accounts limit 1), 12400.50, false, '2023-10-01 15:30:00+03', 'МОСЖКХ', 'Оплата недвижки');
 
 INSERT INTO "transaction"(user_id, category_id, account_id, total, is_income, date, payer, description)
-VALUES ((SELECT id FROM Users limit 1), (SELECT id FROM Category limit 1), (SELECT id FROM Accounts limit 1), 12450.50, false, '2023-10-02',  'МОСЖКХ', 'Оплата недвижки');
+VALUES ((SELECT id FROM Users limit 1), (SELECT id FROM Category limit 1), (SELECT id FROM Accounts limit 1), 12450.50, false, '2023-10-02 15:30:00+03',  'МОСЖКХ', 'Оплата недвижки');
 
 INSERT INTO "transaction"(user_id, category_id, account_id, total, is_income, date, payer, description)
-VALUES ((SELECT id FROM Users limit 1), (SELECT id FROM Category limit 1), (SELECT id FROM Accounts limit 1), 12450.50, false, '2023-10-02',  'МОСЖКХ', 'Оплата недвижки');
+VALUES ((SELECT id FROM Users limit 1), (SELECT id FROM Category limit 1), (SELECT id FROM Accounts limit 1), 12450.50, false, '2023-10-02 15:30:00+03',  'МОСЖКХ', 'Оплата недвижки');
 
-INSERT INTO "transaction"(user_id, category_id, account_id, total, is_income, date, payer, description)
-VALUES ((SELECT id FROM Users limit 1), (SELECT id FROM Category limit 1), (SELECT id FROM Accounts limit 1), 40000, true, '2023-10-02', 'VK', 'Зарплата');
-
-INSERT INTO "transaction"(user_id, category_id, account_id, total, is_income, date, payer, description)
-VALUES ((SELECT id FROM Users limit 1), (SELECT id FROM Category limit 1), (SELECT id FROM Accounts limit 1), 40000, true, '2023-09-02', 'VK', 'Зарплата');

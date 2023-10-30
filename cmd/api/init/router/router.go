@@ -56,26 +56,28 @@ func InitRouter(auth *auth.Handler, user *user.Handler, transaction *transaction
 		authRouter.Methods("POST").Path("/logout").HandlerFunc(auth.LogOut)
 	}
 
-	userRouter := apiRouter.PathPrefix("/user/{userID}").Subrouter()
+	userRouter := apiRouter.PathPrefix("/user").Subrouter()
 	userRouter.Use(mid.Authentication)
 	{
 		userRouter.Methods("GET").Path("/").HandlerFunc(user.Get)
 		userRouter.Methods("GET").Path("/check-unique-login/{login}").HandlerFunc(user.IsLoginUnique) // move from auth router
-		userRouter.Methods("PUT").Path("/update").HandlerFunc(user.Update)
 		userRouter.Methods("PUT").Path("/updatePhoto").HandlerFunc(user.UpdatePhoto)
-		userRouter.Methods("GET").Path("/balance").HandlerFunc(user.GetUserBalance)
-		userRouter.Methods("GET").Path("/plannedBudget").HandlerFunc(user.GetPlannedBudget)
-		userRouter.Methods("GET").Path("/actualBudget").HandlerFunc(user.GetCurrentBudget)
+		userRouter.Path("/update").Methods("PUT").HandlerFunc(user.Update)
+
+		// userRouter.Methods("GET").Path("/balance").HandlerFunc(user.GetUserBalance)
+		// userRouter.Methods("GET").Path("/plannedBudget").HandlerFunc(user.GetPlannedBudget)
+		// userRouter.Methods("GET").Path("/actualBudget").HandlerFunc(user.GetCurrentBudget)
 		userRouter.Methods("GET").Path("/account/all").HandlerFunc(user.GetAccounts)
 		userRouter.Methods("GET").Path("/feed").HandlerFunc(user.GetFeed)
 	}
 
 	transactionRouter := apiRouter.PathPrefix("/transaction").Subrouter()
+	transactionRouter.Use(mid.Authentication)
 	{
-		transactionRouter.Methods("GET").Path("/{userID}/all").HandlerFunc(transaction.GetFeed) // выведет все транзакции юзера
+		transactionRouter.Methods("GET").Path("/all").HandlerFunc(transaction.GetFeed)
 		// 	transactionRouter.Methods("GET").Path("/{transaction_id}/").HandlerFunc(transaction.Get)
-		// transactionRouter.Methods("PUT").Path("/update").HandlerFunc(transaction.Update) // ?
-		// transactionRouter.Methods("POST").Path("/create").HandlerFunc(transaction.Create)
+		transactionRouter.Methods("PUT").Path("/update").HandlerFunc(transaction.Update)
+		transactionRouter.Methods("POST").Path("/create").HandlerFunc(transaction.Create)
 		// transactionRouter.Methods("DELETE").Path("/delete").HandlerFunc(transaction.Delete)
 	}
 

@@ -24,13 +24,13 @@ func NewUsecase(
 	}
 }
 
-func (t *Usecase) GetFeed(ctx context.Context, userID uuid.UUID) ([]models.Transaction, error) {
-	transaction, err := t.transactionRepo.GetFeed(ctx, userID)
+func (t *Usecase) GetFeed(ctx context.Context, userID uuid.UUID, page int, pageSize int) ([]models.Transaction, bool, error) {
+	transaction, isAll, err := t.transactionRepo.GetFeed(ctx, userID, page, pageSize)
 	if err != nil {
 
-		return transaction, fmt.Errorf("[usecase] can't get transactions from repository %w", err)
+		return transaction, isAll, fmt.Errorf("[usecase] can't get transactions from repository %w", err)
 	}
-	return transaction, nil
+	return transaction, isAll, nil
 }
 
 func (t *Usecase) CreateTransaction(ctx context.Context, transaction *models.Transaction) (uuid.UUID, error) {
@@ -40,4 +40,11 @@ func (t *Usecase) CreateTransaction(ctx context.Context, transaction *models.Tra
 		return transactionID, fmt.Errorf("[usecase] can't create transaction into repository: %w", err)
 	}
 	return transactionID, nil
+}
+
+func (t *Usecase) UpdateTransaction(ctx context.Context, transaction *models.Transaction) error {
+	if err := t.transactionRepo.UpdateTransaction(ctx, transaction); err != nil {
+		return fmt.Errorf("[usecase] can't update transaction %w", err)
+	}
+	return nil
 }

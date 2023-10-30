@@ -106,10 +106,6 @@ func (u *Usecase) GetFeed(ctx context.Context, userID uuid.UUID) (*tranfer_model
 }
 
 func (u *Usecase) UpdateUser(ctx context.Context, user *models.User) error { // need test
-	if err := u.userRepo.CheckUser(ctx, user.ID); err != nil {
-		return fmt.Errorf("[usecase] can't get check user from repository %w", err)
-	}
-
 	if err := u.userRepo.UpdateUser(ctx, user); err != nil {
 		return fmt.Errorf("[usecase] can't update user %w", err)
 	}

@@ -40,7 +40,7 @@ func ErrorResponse(w http.ResponseWriter, code int, err error, message string, l
 	}
 
 	if code < minErrorToLogCode {
-		log.Infof("invalid id: %v:", err) // delete invalid id text?
+		log.Infof("invalid request: %v:", err)
 	} else {
 		log.Error(err.Error())
 	}

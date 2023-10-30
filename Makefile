@@ -6,6 +6,9 @@ export
 run: ## Start the application in detached mode
 	docker-compose up -d
 
+run-develop:
+	docker-compose -f local-docker-compose.yaml up
+
 run-in: ## Start the application in interactive mode
 	docker-compose up
 
@@ -13,13 +16,16 @@ build: ## Build Docker images
 	docker-compose build
 
 clean: ## Remove unused Docker images
-	docker rmi -f $$(docker images -q)
+	docker system prune -af
+	docker volume prune -af
+	docker system df
+	docker rmi -f $$(docker images -q) || true
 
 db: ## Connect to the database
-	docker exec -it $(PROJECT_NAME)_db-1 psql -U $(DB_USER) -d $(DB_NAME)
+	docker exec -it 2023_2_hamster-db-1 psql -U $(DB_USER) -d $(DB_NAME)
 
 app: ## Connect to the application container
-	docker exec -it $(PROJECT_NAME)_server-1 ./app
+	docker exec -it 2023_2_hamster-server-1 ./app
 
 down: ## Stop and remove containers, networks, images, and volumes
 	docker-compose down

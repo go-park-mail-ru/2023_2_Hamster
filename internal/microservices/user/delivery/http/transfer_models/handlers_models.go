@@ -42,15 +42,15 @@ type BalanceResponse struct {
 }
 
 type BudgetPlannedResponse struct {
-	BudgetPlanned float64 `json:"planned_balance"`
+	BudgetPlanned float64 `json:"planned_budget"`
 }
 
 type BudgetActualResponse struct {
-	BudgetActual float64 `json:"actual_balance"`
+	BudgetActual float64 `json:"actual_budget"`
 }
 
 type Account struct {
-	AccountMas []models.Accounts `json:"account"`
+	AccountMas []models.Accounts `json:"accounts"`
 }
 
 type PhotoUpdate struct {
@@ -74,7 +74,7 @@ type UserTransfer struct {
 
 type UserUdate struct {
 	Username      string  `json:"username" valid:"required,maxstringlength(20)"`
-	PlannedBudget float64 `json:"planned_budget" valid:"required,float"`
+	PlannedBudget float64 `json:"planned_budget" valid:"float"`
 }
 
 func (ui *UserUdate) CheckValid() error {

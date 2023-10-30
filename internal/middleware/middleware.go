@@ -57,8 +57,13 @@ func (m *Middleware) Authentication(next http.Handler) http.Handler {
 			return
 		}
 
-		m.log.Infof("user accepted : %d", user.ID)
-		ctx := context.WithValue(r.Context(), models.ContextKeyUserType{}, user) // Empty user
-		next.ServeHTTP(w, r.WithContext(ctx))                                    // token check successed
+		m.log.Infof("user accepted : %s", user.ID.String())
+		reqWithUser := WrapUser(r, user) // Empty user
+		next.ServeHTTP(w, reqWithUser)   // token check successed
 	})
+}
+
+func WrapUser(r *http.Request, user *models.User) *http.Request {
+	ctx := context.WithValue(r.Context(), models.ContextKeyUserType{}, user)
+	return r.WithContext(ctx)
 }

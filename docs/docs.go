@@ -18,6 +18,73 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/all": {
+            "get": {
+                "description": "Get User all transaction",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Get all transaction",
+                "parameters": [
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "example": 1,
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 20,
+                        "minimum": 1,
+                        "type": "integer",
+                        "example": 10,
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Show transaction",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-http_MasTransaction"
+                        }
+                    },
+                    "204": {
+                        "description": "Show actual accounts",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-string"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/auth/checkAuth": {
             "post": {
                 "description": "Validate auth",
@@ -211,27 +278,32 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/transaction/{userID}/all": {
-            "get": {
-                "description": "Get User all transaction",
+        "/api/transaction/update": {
+            "put": {
+                "description": "Put transaction",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Transaction"
                 ],
-                "summary": "Get all transaction",
+                "summary": "PUT Update",
+                "parameters": [
+                    {
+                        "description": "Input transactin update",
+                        "name": "transaction",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/http.UpdTransaction"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Show transaction",
+                        "description": "Update transaction",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-http_MasTransaction"
-                        }
-                    },
-                    "204": {
-                        "description": "Show actual accounts",
-                        "schema": {
-                            "$ref": "#/definitions/http.Response-string"
+                            "$ref": "#/definitions/http.Response-http_NilBody"
                         }
                     },
                     "400": {
@@ -261,51 +333,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/user/{userID}/": {
-            "get": {
-                "description": "Get user with chosen ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "summary": "Get User",
-                "responses": {
-                    "200": {
-                        "description": "Show user",
-                        "schema": {
-                            "$ref": "#/definitions/http.Response-transfer_models_UserTransfer"
-                        }
-                    },
-                    "400": {
-                        "description": "Client error",
-                        "schema": {
-                            "$ref": "#/definitions/http.ResponseError"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized user",
-                        "schema": {
-                            "$ref": "#/definitions/http.ResponseError"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden user",
-                        "schema": {
-                            "$ref": "#/definitions/http.ResponseError"
-                        }
-                    },
-                    "500": {
-                        "description": "Server error",
-                        "schema": {
-                            "$ref": "#/definitions/http.ResponseError"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/user/{userID}/accounts/all": {
+        "/api/user/accounts/all": {
             "get": {
                 "description": "Get User accounts",
                 "produces": [
@@ -355,7 +383,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/user/{userID}/actualBudget": {
+        "/api/user/actualBudget": {
             "get": {
                 "description": "Get User actual budget",
                 "produces": [
@@ -399,7 +427,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/user/{userID}/balance": {
+        "/api/user/balance": {
             "get": {
                 "description": "Get User balance",
                 "produces": [
@@ -443,7 +471,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/user/{userID}/feed": {
+        "/api/user/feed": {
             "get": {
                 "description": "Get Feed user info",
                 "produces": [
@@ -487,7 +515,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/user/{userID}/plannedBudget": {
+        "/api/user/plannedBudget": {
             "get": {
                 "description": "Get User planned budget",
                 "produces": [
@@ -531,7 +559,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/user/{userID}/update": {
+        "/api/user/update": {
             "put": {
                 "description": "Update user info",
                 "consumes": [
@@ -589,7 +617,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/user/{userID}/updatePhoto": {
+        "/api/user/updatePhoto": {
             "put": {
                 "description": "Update user photo",
                 "consumes": [
@@ -630,6 +658,50 @@ const docTemplate = `{
                         "description": "Photo updated successfully",
                         "schema": {
                             "$ref": "#/definitions/http.Response-transfer_models_PhotoUpdate"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/{userID}/": {
+            "get": {
+                "description": "Get user with chosen ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get User",
+                "responses": {
+                    "200": {
+                        "description": "Show user",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-transfer_models_UserTransfer"
                         }
                     },
                     "400": {
@@ -712,6 +784,9 @@ const docTemplate = `{
         "http.MasTransaction": {
             "type": "object",
             "properties": {
+                "is_all": {
+                    "type": "boolean"
+                },
                 "transaction": {
                     "type": "array",
                     "items": {
@@ -874,6 +949,35 @@ const docTemplate = `{
                 }
             }
         },
+        "http.UpdTransaction": {
+            "type": "object",
+            "properties": {
+                "account_id": {
+                    "type": "string"
+                },
+                "category_id": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "is_income": {
+                    "type": "boolean"
+                },
+                "payer": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "number"
+                },
+                "transaction_id": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Accounts": {
             "type": "object",
             "properties": {
@@ -946,7 +1050,7 @@ const docTemplate = `{
         "transfer_models.Account": {
             "type": "object",
             "properties": {
-                "account": {
+                "accounts": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.Accounts"
@@ -965,7 +1069,7 @@ const docTemplate = `{
         "transfer_models.BudgetActualResponse": {
             "type": "object",
             "properties": {
-                "actual_balance": {
+                "actual_budget": {
                     "type": "number"
                 }
             }
@@ -973,7 +1077,7 @@ const docTemplate = `{
         "transfer_models.BudgetPlannedResponse": {
             "type": "object",
             "properties": {
-                "planned_balance": {
+                "planned_budget": {
                     "type": "number"
                 }
             }
@@ -989,19 +1093,19 @@ const docTemplate = `{
         "transfer_models.UserFeed": {
             "type": "object",
             "properties": {
-                "account": {
+                "accounts": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.Accounts"
                     }
                 },
-                "actual_balance": {
+                "actual_budget": {
                     "type": "number"
                 },
                 "balance": {
                     "type": "number"
                 },
-                "planned_balance": {
+                "planned_budget": {
                     "type": "number"
                 }
             }
