@@ -19,7 +19,6 @@ const (
 	UserGetPlannedBudget = "SELECT planned_budget FROM users WHERE id = $1"
 	UserCheck            = `SELECT EXISTS(SELECT 1 FROM users WHERE id = $1);`
 	UserUpdate           = `UPDATE users SET username = $2, planned_budget = $3, avatar_url = $4 WHERE id = $1;`
-	UserCheckLoginUnique = "SELECT COUNT(*) FROM users WHERE login = $1"
 	UserUpdatePhoto      = `UPDATE users SET avatar_url = $2 WHERE id = $1;`
 	AccountBalance       = "SELECT SUM(balance) FROM accounts WHERE user_id = $1" // TODO: move accounts
 	AccountGet           = `SELECT * FROM accounts WHERE user_id = $1`            // TODO: move accounts
@@ -184,16 +183,6 @@ func (r *UserRep) UpdateUser(ctx context.Context, user *models.User) error { // 
 	}
 
 	return nil
-}
-
-func (r *UserRep) IsLoginUnique(ctx context.Context, login string) (bool, error) {
-	var count int
-	err := r.db.QueryRow(ctx, UserCheckLoginUnique, login).Scan(&count)
-	if err != nil {
-		return false, fmt.Errorf("[repo] failed login unique check %w", err)
-	}
-
-	return count == 0, nil
 }
 
 func (r *UserRep) UpdatePhoto(ctx context.Context, userID uuid.UUID, path uuid.UUID) error {

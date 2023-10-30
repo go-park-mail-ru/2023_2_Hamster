@@ -53,6 +53,7 @@ func InitRouter(auth *auth.Handler, user *user.Handler, transaction *transaction
 		authRouter.Methods("POST").Path("/signin").HandlerFunc(auth.Login)
 		authRouter.Methods("POST").Path("/signup").HandlerFunc(auth.SignUp)
 		authRouter.Methods("POST").Path("/checkAuth").HandlerFunc(auth.HealthCheck)
+		authRouter.Methods("GET").Path("/check-unique-login/{login}").HandlerFunc(auth.CheckLoginUnique)
 		authRouter.Methods("POST").Path("/logout").HandlerFunc(auth.LogOut)
 	}
 
@@ -60,7 +61,6 @@ func InitRouter(auth *auth.Handler, user *user.Handler, transaction *transaction
 	userRouter.Use(mid.Authentication)
 	{
 		userRouter.Methods("GET").Path("/").HandlerFunc(user.Get)
-		userRouter.Methods("GET").Path("/check-unique-login/{login}").HandlerFunc(user.IsLoginUnique) // move from auth router
 		userRouter.Methods("PUT").Path("/updatePhoto").HandlerFunc(user.UpdatePhoto)
 		userRouter.Path("/update").Methods("PUT").HandlerFunc(user.Update)
 

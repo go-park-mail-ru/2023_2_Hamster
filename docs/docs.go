@@ -85,6 +85,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/auth//check-unique-login/{login}": {
+            "get": {
+                "description": "Get bool parametrs about unique login",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Get unique login info",
+                "responses": {
+                    "200": {
+                        "description": "Show user",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-bool"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/auth/checkAuth": {
             "post": {
                 "description": "Validate auth",
@@ -803,6 +835,17 @@ const docTemplate = `{
             "properties": {
                 "body": {
                     "$ref": "#/definitions/auth.SignResponse"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "http.Response-bool": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "boolean"
                 },
                 "status": {
                     "type": "integer"

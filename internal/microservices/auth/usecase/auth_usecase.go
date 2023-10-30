@@ -80,7 +80,7 @@ func (u *Usecase) Login(ctx context.Context, login, plainPassword string) (uuid.
 	return user.ID, user.Username, nil
 }
 
-func (u *Usecase) IsLoginUnique(ctx context.Context, login string) (bool, error) { // TODO: move to auth repo
+func (u *Usecase) CheckLoginUnique(ctx context.Context, login string) (bool, error) { // move from auth rep
 	isUnique, err := u.authRepo.CheckLoginUnique(ctx, login)
 
 	if err != nil {

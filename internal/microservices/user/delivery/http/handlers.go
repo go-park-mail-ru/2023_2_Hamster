@@ -295,18 +295,6 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	commonHttp.SuccessResponse(w, http.StatusOK, commonHttp.NilBody{})
 }
 
-func (h *Handler) IsLoginUnique(w http.ResponseWriter, r *http.Request) { /// move auth rep
-	userLogin := commonHttp.GetloginFromRequest(userloginUrlParam, r)
-	fmt.Println(userLogin)
-	isUnique, err := h.userService.IsLoginUnique(r.Context(), userLogin)
-
-	if err != nil {
-		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, "can't get unique info login", h.logger)
-		return
-	}
-	commonHttp.SuccessResponse(w, http.StatusOK, isUnique)
-}
-
 // @Summary     PUT Update Photo
 // @Tags        User
 // @Description Update user photo

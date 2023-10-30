@@ -13,8 +13,16 @@ import (
 )
 
 const (
-	transactionCreate               = "INSERT INTO transaction (user_id, category_id, account_id, total, is_income, date, payer, description) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;"
-	transactionGetFeed              = "SELECT * FROM transaction WHERE user_id = $1 LIMIT $2 OFFSET $3"
+	transactionCreate  = "INSERT INTO transaction (user_id, category_id, account_id, total, is_income, date, payer, description) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;"
+	transactionGetFeed = `SELECT * 
+						FROM (
+							SELECT * 
+							FROM transaction 
+							WHERE user_id = $1
+							LIMIT $2 
+							OFFSET $3
+						) AS subquery
+						ORDER BY date DESC;`
 	transactionUpdateBalanceAccount = `UPDATE accounts
 										SET balance = CASE
 											WHEN $3 = true THEN balance + $2
