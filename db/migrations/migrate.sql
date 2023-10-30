@@ -11,17 +11,18 @@ CREATE TABLE IF NOT EXISTS "user" (
 
 
 CREATE TABLE IF NOT EXISTS account (
-    account_id          UUID        DEFAULT uuid_generate_v4() PRIMARY KEY,
-    balance             MONEY       DEFAULT 0.00,
+    account_id          UUID            DEFAULT uuid_generate_v4() PRIMARY KEY,
+    balance             MONEY           DEFAULT 0.00,
     "description"       TEXT,
     bank_name           VARCHAR(30),
-    created_at          TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at          TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
+    currency            VARCHAR(3)   DEFAULT 'RUB',
+    created_at          TIMESTAMPTZ  DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at          TIMESTAMPTZ  DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
 CREATE TABLE IF NOT EXISTS user_account (
-    user_account_id UUID DEFAULT uuid_generate_v4()     PRIMARY KEY,
+    user_account_id UUID DEFAULT    uuid_generate_v4()     PRIMARY KEY,
     user_id         UUID REFERENCES "user"(user_id)     CONSTRAINT fk_user      NOT NULL,
     account_id      UUID REFERENCES account(account_id) CONSTRAINT fk_account   NOT NULL
 );
@@ -40,7 +41,7 @@ CREATE TABLE IF NOT EXISTS "transaction" (
     account_id              UUID        REFERENCES "account"(account_id),
     is_income               BOOLEAN,
     total_money             MONEY       DEFAULT 0.00,
-    "date"                  DATE,
+    "date"                  DATE        DEFAULT CURRENT_DATE                NOT NULL,
     payer_name              VARCHAR(40) DEFAULT ''                          NOT NULL,
     "description"           TEXT,
     created_at_timestamp    TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP           NOT NULL,
@@ -51,10 +52,10 @@ CREATE TABLE IF NOT EXISTS "transaction" (
 CREATE TABLE IF NOT EXISTS deposit (
     deposit_id    UUID          DEFAULT uuid_generate_v4()      PRIMARY KEY,
     account_id    UUID          REFERENCES account(account_id),
-    total_money   MONEY         DEFAULT 0.00,
-    start_at      DATE          DEFAULT CURRENT_DATE,
-    end_at        DATE,
+    total_amount  MONEY         DEFAULT 0.00,
     interest_rate DECIMAL(5, 2) DEFAULT 0.00,
+    start_at      DATE          DEFAULT CURRENT_DATE            NOT NULL,
+    end_at        DATE,
     created_at    TIMESTAMPTZ   DEFAULT CURRENT_TIMESTAMP       NOT NULL,
     updated_at    TIMESTAMPTZ   DEFAULT CURRENT_TIMESTAMP       NOT NULL
 );
@@ -80,7 +81,7 @@ CREATE TABLE IF NOT EXISTS investment (
     asset_name      VARCHAR(255)                            NOT NULL,
     purchase_price  MONEY        DEFAULT 0.00               NOT NULL,
     quantity        NUMERIC                                 NOT NULL,
-    purchase_date   DATE         DEFAULT CURRENT_DATE       NOT NULL,
+    purchase_at     DATE         DEFAULT CURRENT_DATE       NOT NULL,
     created_at      TIMESTAMPTZ  DEFAULT CURRENT_TIMESTAMP  NOT NULL,
     updated_at      TIMESTAMPTZ  DEFAULT CURRENT_TIMESTAMP  NOT NULL
 );
