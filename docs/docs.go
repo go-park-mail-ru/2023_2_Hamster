@@ -787,7 +787,7 @@ const docTemplate = `{
                 "is_all": {
                     "type": "boolean"
                 },
-                "transaction": {
+                "transactions": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.TransactionTransfer"
