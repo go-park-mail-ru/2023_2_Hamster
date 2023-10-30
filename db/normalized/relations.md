@@ -5,11 +5,11 @@
 - {login}->{id, username, password_hash, salt, planned_budget, avatar_url}
 ## Account
 - Хранит информацию о банковских счетах пользователя.
-- {id} -> {user_id, balance, mean_payment}
-- {user_id} -> {id, balance, mean_payment}
+- {id} -> {user_id, balance}
+- {user_id} -> {id, balance}
 ## Investment
 - Хранит информацию о инвестициях пользователя.
-- id -> {name, total, date start, price, percentage}
+- id -> {asset_type, asset_name, purchase_price quantity, purchase_date, created_at, updated_at}
 ## Category
 - Хранит информацию о категориях транзакций.
 - {id} -> {user_id, name}
@@ -51,7 +51,6 @@ erDiagram
         bank_name    string
         balance      money
         description  text
-        mean_payment string
     }
     
     category {
@@ -93,11 +92,13 @@ erDiagram
         asset_name string
         purchase_price money 
         purchase_date date
+        quantity numeric
     }
 
     credit {
         id              uuid  PK
-        account_id      uuid  FK        total_amount    money
+        account_id      uuid  FK        
+        total_amount    money
         date_start      date
         date_end        date
         status          string
