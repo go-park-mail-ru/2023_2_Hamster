@@ -47,8 +47,8 @@ func (t *Usecase) UpdateTransaction(ctx context.Context, transaction *models.Tra
 		return fmt.Errorf("[usecase] can't find transaction in repository")
 	}
 
-	if userIDCheck == transaction.UserID {
-		return fmt.Errorf("[usecase] can't be deleted by user: %w", &models.ForbiddenUserError{})
+	if userIDCheck != transaction.UserID {
+		return fmt.Errorf("[usecase] can't be update by user: %w", &models.ForbiddenUserError{})
 	}
 
 	if err := t.transactionRepo.UpdateTransaction(ctx, transaction); err != nil {
@@ -63,11 +63,15 @@ func (t *Usecase) DeleteTransaction(ctx context.Context, transactionID uuid.UUID
 		return fmt.Errorf("[usecase] can't find transaction in repository")
 	}
 
-	if userIDCheck == userID {
+	if userIDCheck != userID {
 		return fmt.Errorf("[usecase] can't be deleted by user: %w", &models.ForbiddenUserError{})
 	}
+	err = t.transactionRepo.Check(ctx, transactionID)
+	if err != nil {
+		return fmt.Errorf("[usecase] cant't find transaction with id %s: %w", transactionID.String(), err)
+	}
 
-	err = t.DeleteTransaction(ctx, transactionID, userID)
+	err = t.transactionRepo.DeleteTransaction(ctx, transactionID, userID)
 	if err != nil {
 		return fmt.Errorf("[usecase] can`t be deleted from repository")
 	}

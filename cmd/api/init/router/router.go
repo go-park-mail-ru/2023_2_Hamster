@@ -75,7 +75,7 @@ func InitRouter(auth *auth.Handler, user *user.Handler, transaction *transaction
 	transactionRouter := apiRouter.PathPrefix("/transaction").Subrouter()
 	transactionRouter.Use(mid.Authentication)
 	{
-		transactionRouter.Methods("GET").Path("/all").HandlerFunc(transaction.GetFeed)
+		transactionRouter.Methods("GET").Path("/feed").HandlerFunc(transaction.GetFeed)
 		// 	transactionRouter.Methods("GET").Path("/{transaction_id}/").HandlerFunc(transaction.Get)
 		transactionRouter.Methods("PUT").Path("/update").HandlerFunc(transaction.Update)
 		transactionRouter.Methods("POST").Path("/create").HandlerFunc(transaction.Create)

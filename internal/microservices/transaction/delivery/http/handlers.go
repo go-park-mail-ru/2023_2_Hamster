@@ -18,10 +18,10 @@ type Handler struct {
 }
 
 const (
-	transaction_id = "transaction_id"
+	transactionID = "transaction_id"
 
-// userIdUrlParam    = "userID"
-// userloginUrlParam = "login"
+	// userIdUrlParam    = "userID"
+	// userloginUrlParam = "login"
 )
 
 func NewHandler(uu transaction.Usecase, l logger.CustomLogger) *Handler {
@@ -42,7 +42,7 @@ func NewHandler(uu transaction.Usecase, l logger.CustomLogger) *Handler {
 // @Failure     401    	{object}  	ResponseError  				"Unauthorized user"
 // @Failure     403    	{object}  	ResponseError  				"Forbidden user"
 // @Failure		500		{object}	ResponseError				"Server error"
-// @Router		/api/transaction/all [get]
+// @Router		/api/transaction/feed [get]
 func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 	user, err := commonHttp.GetUserFromRequest(r)
 	if err != nil && errors.Is(err, commonHttp.ErrUnauthorized) {
@@ -183,7 +183,8 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 // @Failure		500		{object}	ResponseError				"Server error"
 // @Router		/api/transaction/{transaction_id}/delete [delete]
 func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
-	transactionID, err := commonHttp.GetIDFromRequest(transaction_id, r)
+	transactionID, err := commonHttp.GetIDFromRequest(transactionID, r)
+
 	if err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
 		return
@@ -209,7 +210,9 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 			commonHttp.ErrorResponse(w, http.StatusForbidden, err, commonHttp.ForbiddenUser, h.logger)
 			return
 		}
-
+		if err != nil {
+			commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
+		}
 		commonHttp.SuccessResponse(w, http.StatusOK, commonHttp.NilBody{})
 	}
 

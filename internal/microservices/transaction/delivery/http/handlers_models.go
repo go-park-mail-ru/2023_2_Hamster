@@ -29,8 +29,8 @@ type MasTransaction struct {
 type CreateTransaction struct {
 	AccountIncomeID  uuid.UUID   `json:"account_income" valid:"required"`
 	AccountOutcomeID uuid.UUID   `json:"account_outcome" valid:"required"`
-	Income           float64     `json:"income" valid:"required"`
-	Outcome          float64     `json:"outcome" valid:"required"`
+	Income           float64     `json:"income" valid:"-"`
+	Outcome          float64     `json:"outcome" valid:"-"`
 	Date             time.Time   `json:"date" valid:"required"`
 	Payer            string      `json:"payer" valid:"-"`
 	Description      string      `json:"description" valid:""`
@@ -39,14 +39,14 @@ type CreateTransaction struct {
 
 type UpdTransaction struct {
 	ID               uuid.UUID   `json:"transaction_id" valid:"required"`
-	AccountIncomeID  uuid.UUID   `json:"account_income" valid:"required"`
-	AccountOutcomeID uuid.UUID   `json:"account_outcome" valid:"required"`
-	Income           float64     `json:"income" valid:"required"`
-	Outcome          float64     `json:"outcome" valid:"required"`
+	AccountIncomeID  uuid.UUID   `json:"account_income" valid:"-"`
+	AccountOutcomeID uuid.UUID   `json:"account_outcome" valid:"-"`
+	Income           float64     `json:"income" valid:"-"`
+	Outcome          float64     `json:"outcome" valid:"-"`
 	Date             time.Time   `json:"date" valid:"required"`
-	Payer            string      `json:"payer" valid:"required"`
-	Description      string      `json:"description" valid:"required"`
-	Categories       []uuid.UUID `json:"categories" valid:"required"`
+	Payer            string      `json:"payer" valid:"-"`
+	Description      string      `json:"description" valid:"-"`
+	Categories       []uuid.UUID `json:"categories"`
 }
 
 func (cr *CreateTransaction) CheckValid() error {

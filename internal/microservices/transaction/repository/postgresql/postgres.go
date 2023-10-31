@@ -24,22 +24,15 @@ const (
 						) AS subquery
 						ORDER BY date DESC;`
 
-	transactionUpdateBalanceAccount = `UPDATE accounts
-						SET balance = CASE
-							WHEN id = $1 THEN balance + $2
-							WHEN id = $3 THEN balance - $4
-							ELSE balance
-							END
-						WHERE id IN ($1, $3);`
-
 	transactionUpdate         = "UPDATE transaction set account_income=$2, account_outcome=$3, income=$4, outcome=$5, date=$6, payer=$7, description=$8 WHERE id = $1;"
 	transactionGet            = "SELECT income, outcome, account_income, account_outcome FROM transaction WHERE id = $1;"
 	TransactionGetUserByID    = "SELECT user_id FROM transaction WHERE id = $1;"
-	transactionDelete         = "DELETE FROM transaction WHERE $1 = id;"
+	transactionDelete         = "DELETE FROM transaction WHERE id = $1;"
 	transactionGetCategory    = "SELECT category_id FROM TransactionCategory WHERE transaction_id = $1;"
 	transactionCreateCategory = "INSERT INTO transactionCategory (transaction_id, category_id) VALUES ($1, $2);"
-	transactionDeleteCategory = "DELETE FROM transactionCategory WHERE transaction_id;"
-	transacitonUpdateOld      = "UPDATE accounts SET balance = balance - $1 WHERE id = $2;"
+	transactionDeleteCategory = "DELETE FROM transactionCategory WHERE transaction_id = $1;"
+	transacitonUpdateAccount  = "UPDATE accounts SET balance = balance - $1 WHERE id = $2;"
+	transactionCheck          = "SELECT EXISTS( SELECT id FROM transaction WHERE id = $1);"
 )
 
 type transactionRep struct {
@@ -62,8 +55,6 @@ func (r *transactionRep) GetFeed(ctx context.Context, user_id uuid.UUID, page in
 	if err != nil {
 		return nil, false, err
 	}
-	defer rows.Close()
-
 	for rows.Next() {
 		var transaction models.Transaction
 		if err := rows.Scan(
@@ -139,11 +130,14 @@ func (r *transactionRep) CreateTransaction(ctx context.Context, transaction *mod
 		return id, fmt.Errorf("[repo] failed create transaction %w", err)
 	}
 
-	_, err = r.db.Exec(ctx, transactionUpdateBalanceAccount,
-		transaction.AccountIncomeID, transaction.Income,
-		transaction.AccountOutcomeID, transaction.Outcome)
+	_, err = r.db.Exec(ctx, transacitonUpdateAccount, -transaction.Income, transaction.AccountIncomeID)
 	if err != nil {
-		return id, fmt.Errorf("[repo] failed to update account balances: %w", err)
+		return id, fmt.Errorf("failed to update old AccountIncome balance: %w", err)
+	}
+
+	_, err = r.db.Exec(ctx, transacitonUpdateAccount, transaction.Outcome, transaction.AccountOutcomeID)
+	if err != nil {
+		return id, fmt.Errorf("failed to update old AccountIncome balance: %w", err)
 	}
 
 	for _, categoryID := range transaction.Categories {
@@ -167,27 +161,28 @@ func (r *transactionRep) UpdateTransaction(ctx context.Context, transaction *mod
 		return fmt.Errorf("[repo] failed request db %s, %w", transactionGet, err)
 	}
 
-	_, err = r.db.Exec(ctx, transactionUpdateBalanceAccount, -existingIncome, existingAccountIncomeID)
+	_, err = r.db.Exec(ctx, transacitonUpdateAccount, existingIncome, existingAccountIncomeID)
 	if err != nil {
-		return fmt.Errorf("failed to update old AccountIncome balance: %w", err)
+		return fmt.Errorf("failed to update old AccountIncome balance: %s, %w", transacitonUpdateAccount, err)
 	}
 
-	_, err = r.db.Exec(ctx, transactionUpdateBalanceAccount, -existingOutcome, existingAccountOutcomeID)
+	_, err = r.db.Exec(ctx, transacitonUpdateAccount, -existingOutcome, existingAccountOutcomeID)
 	if err != nil {
-		return fmt.Errorf("failed to update old AccountOutcome balance: %w", err)
+		return fmt.Errorf("failed to update old AccountOutcome balance: %s, %w", transacitonUpdateAccount, err)
 	}
 
-	_, err = r.db.Exec(ctx, transactionUpdateBalanceAccount, transaction.Income, transaction.AccountIncomeID)
+	_, err = r.db.Exec(ctx, transacitonUpdateAccount, -transaction.Income, transaction.AccountIncomeID)
 	if err != nil {
-		return fmt.Errorf("failed to update new AccountIncome balance: %w", err)
+		return fmt.Errorf("failed to update new AccountIncome balance: %s, %w", transacitonUpdateAccount, err)
 	}
 
-	_, err = r.db.Exec(ctx, transactionUpdateBalanceAccount, transaction.Outcome, transaction.AccountOutcomeID)
+	_, err = r.db.Exec(ctx, transacitonUpdateAccount, transaction.Outcome, transaction.AccountOutcomeID)
 	if err != nil {
-		return fmt.Errorf("failed to update new AccountOutcome balance: %w", err)
+		return fmt.Errorf("failed to update new AccountOutcome balance: %s, %w", transacitonUpdateAccount, err)
 	}
 
 	_, err = r.db.Exec(ctx, transactionUpdate,
+		transaction.ID,
 		transaction.AccountIncomeID,
 		transaction.AccountOutcomeID,
 		transaction.Income,
@@ -196,18 +191,18 @@ func (r *transactionRep) UpdateTransaction(ctx context.Context, transaction *mod
 		transaction.Payer,
 		transaction.Description)
 	if err != nil {
-		return fmt.Errorf("[repo] failed to update transaction information: %w", err)
+		return fmt.Errorf("[repo] failed to update transaction information: %s, %w", transactionUpdate, err)
 	}
 
 	_, err = r.db.Exec(ctx, transactionDeleteCategory, transaction.ID)
 	if err != nil {
-		return fmt.Errorf("[repo] failed to delete existing category associations: %w", err)
+		return fmt.Errorf("[repo] failed to delete existing category associations: %s, %w", transactionUpdate, err)
 	}
 
 	for _, categoryID := range transaction.Categories {
 		_, err = r.db.Exec(ctx, transactionCreateCategory, transaction.ID, categoryID)
 		if err != nil {
-			return fmt.Errorf("[repo] failed to insert category associations: %w", err)
+			return fmt.Errorf("[repo] failed to insert category associations: %s, %w", transactionUpdate, err)
 		}
 	}
 
@@ -239,14 +234,38 @@ func (r *transactionRep) DeleteTransaction(ctx context.Context, transactionID uu
 		return fmt.Errorf("[repo] failed request db %s, %w", transactionGet, err)
 	}
 
-	_, err = r.db.Exec(ctx, transactionUpdateBalanceAccount, -existingIncome, existingAccountIncomeID)
+	_, err = r.db.Exec(ctx, transacitonUpdateAccount, existingIncome, existingAccountIncomeID)
 	if err != nil {
-		return fmt.Errorf("failed to update old AccountIncome balance: %w", err)
+		return fmt.Errorf("[repo] failed to update old AccountIncome balance: %w", err)
 	}
 
-	_, err = r.db.Exec(ctx, transactionUpdateBalanceAccount, -existingOutcome, existingAccountOutcomeID)
+	_, err = r.db.Exec(ctx, transacitonUpdateAccount, -existingOutcome, existingAccountOutcomeID)
 	if err != nil {
-		return fmt.Errorf("failed to update old AccountOutcome balance: %w", err)
+		return fmt.Errorf("[repo] failed to update old AccountOutcome balance: %w", err)
+	}
+
+	_, err = r.db.Exec(ctx, transactionDeleteCategory, transactionID)
+	if err != nil {
+		return fmt.Errorf("[repo] failed to delete existing category associations: %s, %w", transactionUpdate, err)
+	}
+
+	_, err = r.db.Exec(ctx, transactionDelete, transactionID)
+	if err != nil {
+		return fmt.Errorf("[repo] failed to delete transaction %s, %w", transactionDelete, err)
+	}
+	fmt.Println("fdsafasd")
+	return nil
+}
+
+func (r *transactionRep) Check(ctx context.Context, transactionID uuid.UUID) error {
+	var exists bool
+	err := r.db.QueryRow(ctx, transactionCheck, transactionID).Scan(&exists)
+	if err != nil {
+		return fmt.Errorf("(repo) failed to exec query: %s, %w", transactionCheck, err)
+	}
+
+	if !exists {
+		return fmt.Errorf("(repo) %w: %w", &models.NoSuchTransactionError{UserID: transactionID}, err)
 	}
 
 	return nil

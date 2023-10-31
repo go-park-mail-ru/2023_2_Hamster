@@ -22,5 +22,5 @@ type Repository interface {
 	// GetTransaction(ctx context.Context, transaction models.Transaction) *models.Transaction
 	UpdateTransaction(ctx context.Context, transaction *models.Transaction) error
 	CheckForbidden(ctx context.Context, transactinID uuid.UUID) (uuid.UUID, error)
-	GetTransactionByID(ctx context.Context, transactionID uuid.UUID)
+	Check(ctx context.Context, transactionID uuid.UUID) error
 }

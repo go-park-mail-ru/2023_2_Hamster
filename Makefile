@@ -6,7 +6,7 @@ export
 run: ## Start the application in detached mode
 	docker-compose up -d
 
-run-develop:
+run-debug:
 	docker-compose -f local-docker-compose.yaml up
 
 run-in: ## Start the application in interactive mode
