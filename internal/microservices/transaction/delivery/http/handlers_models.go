@@ -27,24 +27,26 @@ type MasTransaction struct {
 }
 
 type CreateTransaction struct {
-	CategoryID  uuid.UUID `json:"category_id" valid:"required"`
-	AccountID   uuid.UUID `json:"account_id" valid:"required"`
-	Total       float64   `json:"total" valid:"required"`
-	IsIncome    bool      `json:"is_income" valid:""`
-	Date        time.Time `json:"date" valid:"required"`
-	Payer       string    `json:"payer" valid:""`
-	Description string    `json:"description" valid:""`
+	AccountIncomeID  uuid.UUID   `json:"account_income" valid:"required"`
+	AccountOutcomeID uuid.UUID   `json:"account_outcome" valid:"required"`
+	Income           float64     `json:"income" valid:"required"`
+	Outcome          float64     `json:"outcome" valid:"required"`
+	Date             time.Time   `json:"date" valid:"required"`
+	Payer            string      `json:"payer" valid:"-"`
+	Description      string      `json:"description" valid:""`
+	Categories       []uuid.UUID `json:"categories" valid:"-"`
 }
 
 type UpdTransaction struct {
-	ID          uuid.UUID `json:"transaction_id" valid:"required"`
-	CategoryID  uuid.UUID `json:"category_id" valid:"required"`
-	AccountID   uuid.UUID `json:"account_id" valid:"required"`
-	Total       float64   `json:"total" valid:"required"`
-	IsIncome    bool      `json:"is_income" valid:""`
-	Date        time.Time `json:"date" valid:"required"`
-	Payer       string    `json:"payer" valid:"required"`
-	Description string    `json:"description" valid:"required"`
+	ID               uuid.UUID   `json:"transaction_id" valid:"required"`
+	AccountIncomeID  uuid.UUID   `json:"account_income" valid:"required"`
+	AccountOutcomeID uuid.UUID   `json:"account_outcome" valid:"required"`
+	Income           float64     `json:"income" valid:"required"`
+	Outcome          float64     `json:"outcome" valid:"required"`
+	Date             time.Time   `json:"date" valid:"required"`
+	Payer            string      `json:"payer" valid:"required"`
+	Description      string      `json:"description" valid:"required"`
+	Categories       []uuid.UUID `json:"categories" valid:"required"`
 }
 
 func (cr *CreateTransaction) CheckValid() error {
@@ -72,25 +74,27 @@ type QueryListOptions struct {
 
 func (cr *CreateTransaction) ToTransaction(user *models.User) *models.Transaction {
 	return &models.Transaction{
-		UserID:      user.ID,
-		CategoryID:  cr.CategoryID,
-		AccountID:   cr.AccountID,
-		Total:       cr.Total,
-		IsIncome:    cr.IsIncome,
-		Date:        cr.Date,
-		Description: cr.Description,
+		UserID:           user.ID,
+		AccountIncomeID:  cr.AccountIncomeID,
+		AccountOutcomeID: cr.AccountOutcomeID,
+		Income:           cr.Income,
+		Outcome:          cr.Outcome,
+		Date:             cr.Date,
+		Description:      cr.Description,
+		Categories:       cr.Categories,
 	}
 }
 
 func (ut *UpdTransaction) ToTransaction(user *models.User) *models.Transaction {
 	return &models.Transaction{
-		ID:          ut.ID,
-		UserID:      user.ID,
-		CategoryID:  ut.CategoryID,
-		AccountID:   ut.AccountID,
-		Total:       ut.Total,
-		IsIncome:    ut.IsIncome,
-		Date:        ut.Date,
-		Description: ut.Description,
+		ID:               ut.ID,
+		UserID:           user.ID,
+		AccountIncomeID:  ut.AccountIncomeID,
+		AccountOutcomeID: ut.AccountOutcomeID,
+		Income:           ut.Income,
+		Outcome:          ut.Outcome,
+		Date:             ut.Date,
+		Description:      ut.Description,
+		Categories:       ut.Categories,
 	}
 }

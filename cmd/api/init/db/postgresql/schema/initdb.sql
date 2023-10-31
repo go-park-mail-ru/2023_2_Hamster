@@ -23,19 +23,29 @@ CREATE TABLE Category (
     name VARCHAR(15) UNIQUE NOT NULL
 );
 
+CREATE TABLE SUB_Category {
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    category_id UUID REFERENCES Category(id)
+    name VARCHAR(15) UNIQUE NOT NULL
+}
 
 CREATE TABLE Transaction (
 	id           UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
 	user_id      UUID REFERENCES Users(id),
-	category_id  UUID REFERENCES Category(id),
-	account_id   UUID REFERENCES Accounts(id),
-	total        numeric(10, 2),
-	is_income    bool,
+    account_income UUID REFERENCES Accounts(id),
+    account_outcome UUID REFERENCES Accounts(id),
+	income       numeric(10, 2),
+    outcome      numeric(10, 2),
 	date         timestamp DEFAULT now(),
 	payer        VARCHAR(20),
 	description  VARCHAR(100)
 );
 
+CREATE TABLE TransactionCategory (
+    transaction_id UUID REFERENCES Transaction(id),
+    category_id UUID REFERENCES Category(id),
+    PRIMARY KEY (transaction_id, category_id)
+);
 --=============================================================================
 
 ALTER TABLE Users

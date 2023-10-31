@@ -21,5 +21,6 @@ type Repository interface {
 	GetFeed(ctx context.Context, userID uuid.UUID, page int, pageSize int) ([]models.Transaction, bool, error)
 	// GetTransaction(ctx context.Context, transaction models.Transaction) *models.Transaction
 	UpdateTransaction(ctx context.Context, transaction *models.Transaction) error
-	GetByID(ctx context.Context, transactinID uuid.UUID) (uuid.UUID, error)
+	CheckForbidden(ctx context.Context, transactinID uuid.UUID) (uuid.UUID, error)
+	GetTransactionByID(ctx context.Context, transactionID uuid.UUID)
 }

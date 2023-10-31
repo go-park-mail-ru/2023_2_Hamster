@@ -27,7 +27,6 @@ func NewUsecase(
 func (t *Usecase) GetFeed(ctx context.Context, userID uuid.UUID, page int, pageSize int) ([]models.Transaction, bool, error) {
 	transaction, isAll, err := t.transactionRepo.GetFeed(ctx, userID, page, pageSize)
 	if err != nil {
-
 		return transaction, isAll, fmt.Errorf("[usecase] can't get transactions from repository %w", err)
 	}
 	return transaction, isAll, nil
@@ -43,6 +42,15 @@ func (t *Usecase) CreateTransaction(ctx context.Context, transaction *models.Tra
 }
 
 func (t *Usecase) UpdateTransaction(ctx context.Context, transaction *models.Transaction) error {
+	userIDCheck, err := t.transactionRepo.CheckForbidden(ctx, transaction.ID)
+	if err != nil {
+		return fmt.Errorf("[usecase] can't find transaction in repository")
+	}
+
+	if userIDCheck == transaction.UserID {
+		return fmt.Errorf("[usecase] can't be deleted by user: %w", &models.ForbiddenUserError{})
+	}
+
 	if err := t.transactionRepo.UpdateTransaction(ctx, transaction); err != nil {
 		return fmt.Errorf("[usecase] can't update transaction %w", err)
 	}
@@ -50,9 +58,9 @@ func (t *Usecase) UpdateTransaction(ctx context.Context, transaction *models.Tra
 }
 
 func (t *Usecase) DeleteTransaction(ctx context.Context, transactionID uuid.UUID, userID uuid.UUID) error {
-	userIDCheck, err := t.transactionRepo.GetByID(ctx, transactionID)
+	userIDCheck, err := t.transactionRepo.CheckForbidden(ctx, transactionID)
 	if err != nil {
-		return fmt.Errorf("[usecase] can't find artist in repository")
+		return fmt.Errorf("[usecase] can't find transaction in repository")
 	}
 
 	if userIDCheck == userID {
