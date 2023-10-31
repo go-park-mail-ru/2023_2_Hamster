@@ -41,9 +41,11 @@ func InitRouter(auth *auth.Handler,
 	r := mux.NewRouter()
 	r.Use(logMid.LoggerMiddleware)
 
-	http.Handle("/", r)
-	r.Path("/ping").HandlerFunc(HelloHandler)
+	r.Use(mid.Panic())
 
+	http.Handle("/", r)
+
+	r.Path("/ping").HandlerFunc(HelloHandler)
 	r.PathPrefix("/swagger/").Handler(httpSwagger.Handler(
 		httpSwagger.DeepLinking(true),
 		httpSwagger.DocExpansion("none"),
@@ -51,7 +53,6 @@ func InitRouter(auth *auth.Handler,
 	)).Methods(http.MethodGet)
 
 	apiRouter := r.PathPrefix("/api").Subrouter()
-
 	authRouter := apiRouter.PathPrefix("/auth").Subrouter()
 	{
 		authRouter.Methods("POST").Path("/signin").HandlerFunc(auth.Login)
@@ -64,7 +65,7 @@ func InitRouter(auth *auth.Handler,
 	userRouter := apiRouter.PathPrefix("/user").Subrouter()
 	userRouter.Use(authMid.Authentication)
 	{
-		userRouter.Methods("GET").Path("/").HandlerFunc(user.Get)
+		userRouter.Methods("GET").Path("/{userID}").HandlerFunc(user.Get)
 		userRouter.Methods("PUT").Path("/updatePhoto").HandlerFunc(user.UpdatePhoto)
 		userRouter.Path("/update").Methods("PUT").HandlerFunc(user.Update)
 
@@ -78,11 +79,11 @@ func InitRouter(auth *auth.Handler,
 	transactionRouter := apiRouter.PathPrefix("/transaction").Subrouter()
 	transactionRouter.Use(authMid.Authentication)
 	{
-		transactionRouter.Methods("GET").Path("/all").HandlerFunc(transaction.GetFeed)
+		transactionRouter.Methods("GET").Path("/feed").HandlerFunc(transaction.GetFeed)
 		// 	transactionRouter.Methods("GET").Path("/{transaction_id}/").HandlerFunc(transaction.Get)
 		transactionRouter.Methods("PUT").Path("/update").HandlerFunc(transaction.Update)
 		transactionRouter.Methods("POST").Path("/create").HandlerFunc(transaction.Create)
-		// transactionRouter.Methods("DELETE").Path("/delete").HandlerFunc(transaction.Delete)
+		transactionRouter.Methods("DELETE").Path("/{transaction_id}/delete").HandlerFunc(transaction.Delete)
 	}
 
 	// categoryRouter := apiRouter.PathPrefix("/category").Subrouter()

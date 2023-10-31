@@ -18,73 +18,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/all": {
-            "get": {
-                "description": "Get User all transaction",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Transaction"
-                ],
-                "summary": "Get all transaction",
-                "parameters": [
-                    {
-                        "minimum": 1,
-                        "type": "integer",
-                        "example": 1,
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "maximum": 20,
-                        "minimum": 1,
-                        "type": "integer",
-                        "example": 10,
-                        "name": "page_size",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Show transaction",
-                        "schema": {
-                            "$ref": "#/definitions/http.Response-http_MasTransaction"
-                        }
-                    },
-                    "204": {
-                        "description": "Show actual accounts",
-                        "schema": {
-                            "$ref": "#/definitions/http.Response-string"
-                        }
-                    },
-                    "400": {
-                        "description": "Client error",
-                        "schema": {
-                            "$ref": "#/definitions/http.ResponseError"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized user",
-                        "schema": {
-                            "$ref": "#/definitions/http.ResponseError"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden user",
-                        "schema": {
-                            "$ref": "#/definitions/http.ResponseError"
-                        }
-                    },
-                    "500": {
-                        "description": "Server error",
-                        "schema": {
-                            "$ref": "#/definitions/http.ResponseError"
-                        }
-                    }
-                }
-            }
-        },
         "/api/auth//check-unique-login/{login}": {
             "get": {
                 "description": "Get bool parametrs about unique login",
@@ -255,6 +188,73 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/transaction/all": {
+            "get": {
+                "description": "Get User all transaction",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Get all transaction",
+                "parameters": [
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "example": 1,
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 20,
+                        "minimum": 1,
+                        "type": "integer",
+                        "example": 10,
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Show transaction",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-http_MasTransaction"
+                        }
+                    },
+                    "204": {
+                        "description": "Show actual accounts",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-string"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/transaction/create": {
             "post": {
                 "description": "Create transaction",
@@ -352,6 +352,50 @@ const docTemplate = `{
                     },
                     "403": {
                         "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/transaction/{transaction_id}/delete": {
+            "delete": {
+                "description": "Delete transaction with chosen ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Delete Transaction",
+                "responses": {
+                    "200": {
+                        "description": "Transaction deleted",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-http_NilBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Transaction error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "User unathorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "User hasn't rights",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
                         }
@@ -790,11 +834,17 @@ const docTemplate = `{
         "http.CreateTransaction": {
             "type": "object",
             "properties": {
-                "account_id": {
+                "account_income": {
                     "type": "string"
                 },
-                "category_id": {
+                "account_outcome": {
                     "type": "string"
+                },
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "date": {
                     "type": "string"
@@ -802,14 +852,14 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
-                "is_income": {
-                    "type": "boolean"
+                "income": {
+                    "type": "number"
+                },
+                "outcome": {
+                    "type": "number"
                 },
                 "payer": {
                     "type": "string"
-                },
-                "total": {
-                    "type": "number"
                 }
             }
         },
@@ -995,11 +1045,17 @@ const docTemplate = `{
         "http.UpdTransaction": {
             "type": "object",
             "properties": {
-                "account_id": {
+                "account_income": {
                     "type": "string"
                 },
-                "category_id": {
+                "account_outcome": {
                     "type": "string"
+                },
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "date": {
                     "type": "string"
@@ -1007,14 +1063,14 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
-                "is_income": {
-                    "type": "boolean"
+                "income": {
+                    "type": "number"
+                },
+                "outcome": {
+                    "type": "number"
                 },
                 "payer": {
                     "type": "string"
-                },
-                "total": {
-                    "type": "number"
                 },
                 "transaction_id": {
                     "type": "string"
@@ -1041,11 +1097,17 @@ const docTemplate = `{
         "models.TransactionTransfer": {
             "type": "object",
             "properties": {
-                "account_id": {
+                "account_income": {
                     "type": "string"
                 },
-                "category_id": {
+                "account_outcome": {
                     "type": "string"
+                },
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "date": {
                     "type": "string"
@@ -1056,14 +1118,14 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "is_income": {
-                    "type": "boolean"
+                "income": {
+                    "type": "number"
+                },
+                "outcome": {
+                    "type": "number"
                 },
                 "payer": {
                     "type": "string"
-                },
-                "total": {
-                    "type": "number"
                 }
             }
         },

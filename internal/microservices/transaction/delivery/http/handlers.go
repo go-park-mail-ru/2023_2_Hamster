@@ -17,10 +17,12 @@ type Handler struct {
 	logger             logger.CustomLogger
 }
 
-// const (
-// 	userIdUrlParam    = "userID"
-// 	userloginUrlParam = "login"
-// )
+const (
+	transactionID = "transaction_id"
+
+	// userIdUrlParam    = "userID"
+	// userloginUrlParam = "login"
+)
 
 func NewHandler(uu transaction.Usecase, l logger.CustomLogger) *Handler {
 	return &Handler{
@@ -40,7 +42,7 @@ func NewHandler(uu transaction.Usecase, l logger.CustomLogger) *Handler {
 // @Failure     401    	{object}  	ResponseError  				"Unauthorized user"
 // @Failure     403    	{object}  	ResponseError  				"Forbidden user"
 // @Failure		500		{object}	ResponseError				"Server error"
-// @Router		/api/all [get]
+// @Router		/api/transaction/feed [get]
 func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 	user, err := commonHttp.GetUserFromRequest(r)
 	if err != nil && errors.Is(err, commonHttp.ErrUnauthorized) {
@@ -154,6 +156,12 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		var errForbiddenUser *models.ForbiddenUserError
+		if errors.As(err, &errForbiddenUser) {
+			commonHttp.ErrorResponse(w, http.StatusForbidden, err, commonHttp.ForbiddenUser, h.logger)
+			return
+		}
+
 		if err != nil {
 			commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, TransactionCreateServerError, h.logger)
 			return
@@ -161,5 +169,51 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	commonHttp.SuccessResponse(w, http.StatusOK, commonHttp.NilBody{})
+
+}
+
+// @Summary		Delete Transaction
+// @Tags		Transaction
+// @Description	Delete transaction with chosen ID
+// @Produce		json
+// @Success		200		{object}	Response[NilBody]	  	    "Transaction deleted"
+// @Failure		400		{object}	ResponseError				"Transaction error"
+// @Failure		401		{object}	ResponseError  			    "User unathorized"
+// @Failure		403		{object}	ResponseError				"User hasn't rights"
+// @Failure		500		{object}	ResponseError				"Server error"
+// @Router		/api/transaction/{transaction_id}/delete [delete]
+func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
+	transactionID, err := commonHttp.GetIDFromRequest(transactionID, r)
+
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
+		return
+	}
+	user, err := commonHttp.GetUserFromRequest(r)
+
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
+		return
+	}
+
+	err = h.transactionService.DeleteTransaction(r.Context(), transactionID, user.ID)
+
+	if err != nil {
+		var errNoSuchTransaction *models.NoSuchTransactionError
+		if errors.As(err, &errNoSuchTransaction) {
+			commonHttp.ErrorResponse(w, http.StatusBadRequest, err, TransactionNotSuch, h.logger)
+			return
+		}
+
+		var errForbiddenUser *models.ForbiddenUserError
+		if errors.As(err, &errForbiddenUser) {
+			commonHttp.ErrorResponse(w, http.StatusForbidden, err, commonHttp.ForbiddenUser, h.logger)
+			return
+		}
+		if err != nil {
+			commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
+		}
+		commonHttp.SuccessResponse(w, http.StatusOK, commonHttp.NilBody{})
+	}
 
 }

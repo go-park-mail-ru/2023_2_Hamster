@@ -10,6 +10,7 @@ import (
 const (
 	InvalidURLParameter = "invalid url parameter"
 	InvalidBodyRequest  = "invalid input body"
+	ForbiddenUser       = "user has no rights"
 )
 
 const minErrorToLogCode = 500

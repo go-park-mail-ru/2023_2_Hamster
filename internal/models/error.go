@@ -38,6 +38,12 @@ type NoSuchAccounts struct {
 	UserID uuid.UUID
 }
 
+type ForbiddenUserError struct{}
+
+func (e *ForbiddenUserError) Error() string {
+	return "user has no rights"
+}
+
 func (e *NoSuchUserIdBalanceError) Error() string {
 	return fmt.Sprintf("balance from user: %s doesn't exist", e.UserID.String())
 }
