@@ -4,7 +4,6 @@ import (
 	//auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth/delivery/http"
 	"encoding/json"
 	"net/http"
-	"time"
 
 	_ "github.com/go-park-mail-ru/2023_2_Hamster/docs"
 	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/http"
@@ -12,7 +11,6 @@ import (
 	user "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user/delivery/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware"
 	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
@@ -38,9 +36,10 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 func InitRouter(auth *auth.Handler,
 	user *user.Handler,
 	transaction *transaction.Handler,
-	mid *middleware.Middleware) *mux.Router {
+	authMid *middleware.AuthMiddleware,
+	logMid *middleware.LogMiddleware) *mux.Router {
 	r := mux.NewRouter()
-	r.Use(loggingMiddleware)
+	r.Use(logMid.LoggerMiddleware)
 
 	http.Handle("/", r)
 	r.Path("/ping").HandlerFunc(HelloHandler)
@@ -52,7 +51,6 @@ func InitRouter(auth *auth.Handler,
 	)).Methods(http.MethodGet)
 
 	apiRouter := r.PathPrefix("/api").Subrouter()
-	//apiRouter.Use(corsmiddleware.CorsMiddleware)
 
 	authRouter := apiRouter.PathPrefix("/auth").Subrouter()
 	{
@@ -64,7 +62,7 @@ func InitRouter(auth *auth.Handler,
 	}
 
 	userRouter := apiRouter.PathPrefix("/user").Subrouter()
-	userRouter.Use(mid.Authentication)
+	userRouter.Use(authMid.Authentication)
 	{
 		userRouter.Methods("GET").Path("/").HandlerFunc(user.Get)
 		userRouter.Methods("PUT").Path("/updatePhoto").HandlerFunc(user.UpdatePhoto)
@@ -78,7 +76,7 @@ func InitRouter(auth *auth.Handler,
 	}
 
 	transactionRouter := apiRouter.PathPrefix("/transaction").Subrouter()
-	transactionRouter.Use(mid.Authentication)
+	transactionRouter.Use(authMid.Authentication)
 	{
 		transactionRouter.Methods("GET").Path("/all").HandlerFunc(transaction.GetFeed)
 		// 	transactionRouter.Methods("GET").Path("/{transaction_id}/").HandlerFunc(transaction.Get)
@@ -95,22 +93,4 @@ func InitRouter(auth *auth.Handler,
 	// 	categoryRouter.Methods("DELETE").Path("/delete").HandlerFunc(category.Delete)
 	// }
 	return r
-}
-
-func loggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		startTime := time.Now()
-
-		// Call the next handler in the chain
-		next.ServeHTTP(w, r)
-
-		// Log the request details using logrus
-		logrus.Infof(
-			"%s %s %s %v",
-			r.Method,
-			r.RequestURI,
-			r.Proto,
-			time.Since(startTime),
-		)
-	})
 }

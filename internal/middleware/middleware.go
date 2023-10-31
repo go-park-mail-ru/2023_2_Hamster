@@ -2,7 +2,10 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"sync/atomic"
+	"time"
 
 	response "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
@@ -11,21 +14,34 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions"
 )
 
-type Middleware struct {
+// Key to use when setting the request ID.
+type ctxKeyRequestID int
+
+// RequestIDKey is the key that holds the unique request ID in a request context.
+const RequestIDKey ctxKeyRequestID = 0
+
+// RequestIDHeader is the name of the HTTP Header which contains the request id.
+// Exported so that it can be changed by developers
+var RequestIDHeader = "X-Request-Id"
+
+type AuthMiddleware struct {
 	ur  userRep.Repository
 	su  sessions.Usecase
 	log logger.CustomLogger
 }
 
-func NewMiddleware(su sessions.Usecase, ur userRep.Repository, log logger.CustomLogger) *Middleware {
-	return &Middleware{
+var prefix string
+var reqid uint64
+
+func NewAuthMiddleware(su sessions.Usecase, ur userRep.Repository, log logger.CustomLogger) *AuthMiddleware {
+	return &AuthMiddleware{
 		su:  su,
 		ur:  ur,
 		log: log,
 	}
 }
 
-func (m *Middleware) Authentication(next http.Handler) http.Handler {
+func (m *AuthMiddleware) Authentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("session_id")
 		if err != nil {
@@ -66,4 +82,76 @@ func (m *Middleware) Authentication(next http.Handler) http.Handler {
 func WrapUser(r *http.Request, user *models.User) *http.Request {
 	ctx := context.WithValue(r.Context(), models.ContextKeyUserType{}, user)
 	return r.WithContext(ctx)
+}
+
+type LogMiddleware struct {
+	log logger.CustomLogger
+}
+
+func NewLogMiddleware(log logger.CustomLogger) *LogMiddleware {
+	return &LogMiddleware{
+		log: log,
+	}
+}
+
+func (m *LogMiddleware) LoggerMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		startTime := time.Now()
+
+		ip, err := response.GetIpFromRequest(r)
+		if err != nil {
+			m.log.Error(err.Error())
+		}
+
+		// Call the next handler in the chain
+		next.ServeHTTP(w, r)
+
+		params := logger.LogFormatterParams{
+			TimeStamp:  time.Now(),
+			StatusCode: 200,
+			Latency:    time.Since(startTime),
+			ClientIP:   ip,
+			Method:     r.Method,
+			Path:       r.URL.RawPath,
+		}
+
+		logMsg := logger.DefaultLogFormatter(params)
+
+		m.log.Info(logMsg)
+
+	})
+}
+
+func RequestID(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		requestID := r.Header.Get(RequestIDHeader)
+		if requestID == "" {
+			myid := atomic.AddUint64(&reqid, 1)
+			requestID = fmt.Sprintf("%s-%06d", prefix, myid)
+		}
+		ctx = context.WithValue(ctx, RequestIDKey, requestID)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	}
+	return http.HandlerFunc(fn)
+}
+
+// New will create a new middleware handler from a http.Handler.
+func New(h http.Handler) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		})
+	}
+}
+
+// contextKey is a value for use with context.WithValue. It's used as
+// a pointer so it fits in an interface{} without allocation. This technique
+// for defining context keys was copied from Go 1.7's new use of context in net/http.
+type contextKey struct {
+	name string
+}
+
+func (k *contextKey) String() string {
+	return "chi/middleware context value " + k.name
 }
