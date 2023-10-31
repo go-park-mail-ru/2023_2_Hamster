@@ -18,7 +18,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/auth//check-unique-login/{login}": {
+        "/api/auth/check-unique-login/{login}": {
             "get": {
                 "description": "Get bool parametrs about unique login",
                 "produces": [
@@ -188,7 +188,62 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/transaction/all": {
+        "/api/transaction/create": {
+            "post": {
+                "description": "Create transaction",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Create transaction",
+                "parameters": [
+                    {
+                        "description": "Input transactin create",
+                        "name": "transaction",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/http.CreateTransaction"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Create transaction",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-http_TransactionCreateResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/transaction/feed": {
             "get": {
                 "description": "Get User all transaction",
                 "produces": [
@@ -226,61 +281,6 @@ const docTemplate = `{
                         "description": "Show actual accounts",
                         "schema": {
                             "$ref": "#/definitions/http.Response-string"
-                        }
-                    },
-                    "400": {
-                        "description": "Client error",
-                        "schema": {
-                            "$ref": "#/definitions/http.ResponseError"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized user",
-                        "schema": {
-                            "$ref": "#/definitions/http.ResponseError"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden user",
-                        "schema": {
-                            "$ref": "#/definitions/http.ResponseError"
-                        }
-                    },
-                    "500": {
-                        "description": "Server error",
-                        "schema": {
-                            "$ref": "#/definitions/http.ResponseError"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/transaction/create": {
-            "post": {
-                "description": "Create transaction",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Transaction"
-                ],
-                "summary": "Create transaction",
-                "parameters": [
-                    {
-                        "description": "Input transactin create",
-                        "name": "transaction",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/http.CreateTransaction"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Create transaction",
-                        "schema": {
-                            "$ref": "#/definitions/http.Response-http_TransactionCreateResponse"
                         }
                     },
                     "400": {
