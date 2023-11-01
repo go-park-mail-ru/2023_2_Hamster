@@ -179,7 +179,7 @@ func (h *Handler) LogOut(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, response.InitCookie("session", "", time.Now().AddDate(0, 0, -1), "/api"))
-	response.SuccessResponse[response.NilBody](w, http.StatusOK, response.NIL())
+	response.SuccessResponse[response.NilBody](w, http.StatusOK, response.NilBody{})
 }
 
 // @Summary		Get unique login info
