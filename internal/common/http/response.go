@@ -3,8 +3,6 @@ package http
 import (
 	"encoding/json"
 	"net/http"
-
-	logging "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 )
 
 const (
@@ -31,7 +29,7 @@ func NIL() NilBody {
 	return NilBody{}
 }
 
-func ErrorResponse(w http.ResponseWriter, code int, err error, message string, log logging.Logger) {
+func ErrorResponse(w http.ResponseWriter, code int, err error, message string, log logger.CustomLogger) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(code)
 

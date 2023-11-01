@@ -290,7 +290,7 @@ info:
   title: Hamster API
   version: 1.0.1
 paths:
-  /api/auth//check-unique-login/{login}:
+  /api/auth/check-unique-login/{login}:
     get:
       description: Get bool parametrs about unique login
       produces:
@@ -430,7 +430,43 @@ paths:
       summary: Delete Transaction
       tags:
       - Transaction
-  /api/transaction/all:
+  /api/transaction/create:
+    post:
+      description: Create transaction
+      parameters:
+      - description: Input transactin create
+        in: body
+        name: transaction
+        required: true
+        schema:
+          $ref: '#/definitions/http.CreateTransaction'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Create transaction
+          schema:
+            $ref: '#/definitions/http.Response-http_TransactionCreateResponse'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Create transaction
+      tags:
+      - Transaction
+  /api/transaction/feed:
     get:
       description: Get User all transaction
       parameters:
@@ -473,42 +509,6 @@ paths:
           schema:
             $ref: '#/definitions/http.ResponseError'
       summary: Get all transaction
-      tags:
-      - Transaction
-  /api/transaction/create:
-    post:
-      description: Create transaction
-      parameters:
-      - description: Input transactin create
-        in: body
-        name: transaction
-        required: true
-        schema:
-          $ref: '#/definitions/http.CreateTransaction'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Create transaction
-          schema:
-            $ref: '#/definitions/http.Response-http_TransactionCreateResponse'
-        "400":
-          description: Client error
-          schema:
-            $ref: '#/definitions/http.ResponseError'
-        "401":
-          description: Unauthorized user
-          schema:
-            $ref: '#/definitions/http.ResponseError'
-        "403":
-          description: Forbidden user
-          schema:
-            $ref: '#/definitions/http.ResponseError'
-        "500":
-          description: Server error
-          schema:
-            $ref: '#/definitions/http.ResponseError'
-      summary: Create transaction
       tags:
       - Transaction
   /api/transaction/update:

@@ -9,7 +9,7 @@ import (
 type UnathorizedError struct{}
 
 func (e *UnathorizedError) Error() string {
-	return "unathorized"
+	return "unauthorized"
 }
 
 // =========================================UserError================================================

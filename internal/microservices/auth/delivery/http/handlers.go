@@ -189,7 +189,7 @@ func (h *Handler) LogOut(w http.ResponseWriter, r *http.Request) {
 // @Success		200		{object}	Response[bool] "Show user"
 // @Failure		400		{object}	ResponseError	"Client error"
 // @Failure		500		{object}	ResponseError	"Server error"
-// @Router		/api/auth//check-unique-login/{login} [get]
+// @Router		/api/auth/check-unique-login/{login} [get]
 func (h *Handler) CheckLoginUnique(w http.ResponseWriter, r *http.Request) {
 	userLogin := response.GetloginFromRequest(userloginUrlParam, r)
 	isUnique, err := h.au.CheckLoginUnique(r.Context(), userLogin)

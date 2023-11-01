@@ -46,7 +46,7 @@ func NewHandler(uu user.Usecase, l logger.CustomLogger) *Handler {
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) { // ?
 	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
 	if err != nil {
-		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.ErrUnauthorized.Error(), h.logger)
 		return
 	}
 
@@ -80,7 +80,7 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) { // ?
 func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) { // ?
 	user, err := commonHttp.GetUserFromRequest(r)
 	if err != nil {
-		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
+		commonHttp.ErrorResponse(w, http.StatusUnauthorized, err, commonHttp.ErrUnauthorized.Error(), h.logger)
 		return
 	}
 	balance, err := h.userService.GetUserBalance(r.Context(), user.ID)
@@ -114,7 +114,7 @@ func (h *Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {
 	user, err := commonHttp.GetUserFromRequest(r)
 
 	if err != nil {
-		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
+		commonHttp.ErrorResponse(w, http.StatusUnauthorized, err, commonHttp.ErrUnauthorized.Error(), h.logger)
 		return
 	}
 
@@ -149,7 +149,7 @@ func (h *Handler) GetCurrentBudget(w http.ResponseWriter, r *http.Request) {
 	user, err := commonHttp.GetUserFromRequest(r)
 
 	if err != nil {
-		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
+		commonHttp.ErrorResponse(w, http.StatusUnauthorized, err, commonHttp.ErrUnauthorized.Error(), h.logger)
 		return
 	}
 
@@ -185,7 +185,7 @@ func (h *Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 	user, err := commonHttp.GetUserFromRequest(r)
 
 	if err != nil {
-		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
+		commonHttp.ErrorResponse(w, http.StatusUnauthorized, err, commonHttp.ErrUnauthorized.Error(), h.logger)
 		return
 	}
 
@@ -222,7 +222,7 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 	user, err := commonHttp.GetUserFromRequest(r)
 
 	if err != nil {
-		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
+		commonHttp.ErrorResponse(w, http.StatusUnauthorized, err, commonHttp.ErrUnauthorized.Error(), h.logger)
 		return
 	}
 
@@ -313,7 +313,7 @@ func (h *Handler) UpdatePhoto(w http.ResponseWriter, r *http.Request) { // need 
 	user, err := commonHttp.GetUserFromRequest(r)
 
 	if err != nil {
-		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserNotFound, h.logger)
+		commonHttp.ErrorResponse(w, http.StatusUnauthorized, err, commonHttp.ErrUnauthorized.Error(), h.logger)
 		return
 	}
 

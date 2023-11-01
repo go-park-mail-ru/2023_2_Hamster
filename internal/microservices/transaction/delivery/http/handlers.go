@@ -192,7 +192,7 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	user, err := commonHttp.GetUserFromRequest(r)
 
 	if err != nil {
-		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
+		commonHttp.ErrorResponse(w, http.StatusUnauthorized, err, commonHttp.ErrUnauthorized.Error(), h.logger)
 		return
 	}
 
@@ -211,9 +211,10 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if err != nil {
-			commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
+			commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, TransactionDeleteServerError, h.logger)
+			return
 		}
-		commonHttp.SuccessResponse(w, http.StatusOK, commonHttp.NilBody{})
 	}
+	commonHttp.SuccessResponse(w, http.StatusOK, commonHttp.NilBody{})
 
 }
