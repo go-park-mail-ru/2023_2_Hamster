@@ -6,14 +6,14 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/db/postgresql"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
 )
 
 const (
-	UserCreate           = `INSERT INTO users (login, username, password_hash) VALUES ($1, $2, $3) RETURNING id;`
+	UserCreate           = "INSERT INTO users (login, username, password_hash) VALUES ($1, $2, $3) RETURNING id;"
 	UserIDGetByID        = `SELECT * FROM users WHERE id = $1;`
 	UserGetByUserName    = `SELECT id, login, username, password_hash, planned_budget, avatar_url From users WHERE (login=$1)`
 	UserGetPlannedBudget = "SELECT planned_budget FROM users WHERE id = $1"
@@ -25,11 +25,11 @@ const (
 )
 
 type UserRep struct {
-	db     *pgx.Conn
+	db     postgresql.DbConn
 	logger logger.CustomLogger
 }
 
-func NewRepository(db *pgx.Conn, l logger.CustomLogger) *UserRep {
+func NewRepository(db postgresql.DbConn, l logger.CustomLogger) *UserRep {
 	return &UserRep{
 		db:     db,
 		logger: l,
