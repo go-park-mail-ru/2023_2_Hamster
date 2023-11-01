@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"bytes"
 	"context"
 	"log"
 	"net/http"
@@ -36,9 +35,10 @@ var (
 //	r.Use(middleware.Logger)        // <--<< Logger should come before Recoverer
 //	r.Use(middleware.Recoverer)
 //	r.Get("/", handler)
-func Logger(next http.Handler) http.Handler {
-	return DefaultLogger(next)
-}
+
+//        func Logger(next http.Handler) http.Handler {
+//        	return DefaultLogger(next)
+//        }
 
 // RequestLogger returns a logger handler using a custom LogFormatter.
 func RequestLogger(f LogFormatter) func(next http.Handler) http.Handler {
@@ -83,85 +83,91 @@ func WithLogEntry(r *http.Request, entry LogEntry) *http.Request {
 	return r
 }
 
+/*
 // LoggerInterface accepts printing to stdlib logger or compatible logger.
-type LoggerInterface interface {
-	Print(v ...interface{})
-}
+
+	type LoggerInterface interface {
+		Print(v ...interface{})
+	}
 
 // DefaultLogFormatter is a simple logger that implements a LogFormatter.
-type DefaultLogFormatter struct {
-	Logger  LoggerInterface
-	NoColor bool
-}
+
+	type DefaultLogFormatter struct {
+		Logger  LoggerInterface
+		NoColor bool
+	}
 
 // NewLogEntry creates a new LogEntry for the request.
-func (l *DefaultLogFormatter) NewLogEntry(r *http.Request) LogEntry {
-	useColor := !l.NoColor
-	entry := &defaultLogEntry{
-		DefaultLogFormatter: l,
-		request:             r,
-		buf:                 &bytes.Buffer{},
-		useColor:            useColor,
+
+	func (l *DefaultLogFormatter) NewLogEntry(r *http.Request) LogEntry {
+		useColor := !l.NoColor
+		entry := &defaultLogEntry{
+			DefaultLogFormatter: l,
+			request:             r,
+			buf:                 &bytes.Buffer{},
+			useColor:            useColor,
+		}
+
+		reqID := GetReqID(r.Context())
+		if reqID != "" {
+			colorWrite(entry.buf, useColor, nYellow, "[%s] ", reqID)
+		}
+		colorWrite(entry.buf, useColor, nCyan, "\"")
+		colorWrite(entry.buf, useColor, bMagenta, "%s ", r.Method)
+
+		scheme := "http"
+		if r.TLS != nil {
+			scheme = "https"
+		}
+
+		colorWrite(entry.buf, useColor, nCyan, "%s://%s%s %s\" ", scheme, r.Host, r.RequestURI, r.Proto)
+
+		entry.buf.WriteString("from ")
+		entry.buf.WriteString(r.RemoteAddr)
+		entry.buf.WriteString(" - ")
+
+		return entry
 	}
 
-	reqID := GetReqID(r.Context())
-	if reqID != "" {
-		cW(entry.buf, useColor, nYellow, "[%s] ", reqID)
-	}
-	cW(entry.buf, useColor, nCyan, "\"")
-	cW(entry.buf, useColor, bMagenta, "%s ", r.Method)
-	scheme := "http"
-	if r.TLS != nil {
-		scheme = "https"
-	}
-	cW(entry.buf, useColor, nCyan, "%s://%s%s %s\" ", scheme, r.Host, r.RequestURI, r.Proto)
-
-	entry.buf.WriteString("from ")
-	entry.buf.WriteString(r.RemoteAddr)
-	entry.buf.WriteString(" - ")
-
-	return entry
-}
-
-type defaultLogEntry struct {
-	*DefaultLogFormatter
-	request  *http.Request
-	buf      *bytes.Buffer
-	useColor bool
-}
-
-func (l *defaultLogEntry) Write(status, bytes int, header http.Header, elapsed time.Duration, extra interface{}) {
-	switch {
-	case status < 200:
-		cW(l.buf, l.useColor, bBlue, "%03d", status)
-	case status < 300:
-		cW(l.buf, l.useColor, bGreen, "%03d", status)
-	case status < 400:
-		cW(l.buf, l.useColor, bCyan, "%03d", status)
-	case status < 500:
-		cW(l.buf, l.useColor, bYellow, "%03d", status)
-	default:
-		cW(l.buf, l.useColor, bRed, "%03d", status)
+	type defaultLogEntry struct {
+		*DefaultLogFormatter
+		request  *http.Request
+		buf      *bytes.Buffer
+		useColor bool
 	}
 
-	cW(l.buf, l.useColor, bBlue, " %dB", bytes)
+	func (l *defaultLogEntry) Write(status, bytes int, header http.Header, elapsed time.Duration, extra interface{}) {
+		switch {
+		case status < 200:
+			colorWrite(l.buf, l.useColor, bBlue, "%03d", status)
+		case status < 300:
+			colorWrite(l.buf, l.useColor, bGreen, "%03d", status)
+		case status < 400:
+			colorWrite(l.buf, l.useColor, bCyan, "%03d", status)
+		case status < 500:
+			colorWrite(l.buf, l.useColor, bYellow, "%03d", status)
+		default:
+			colorWrite(l.buf, l.useColor, bRed, "%03d", status)
+		}
 
-	l.buf.WriteString(" in ")
-	if elapsed < 500*time.Millisecond {
-		cW(l.buf, l.useColor, nGreen, "%s", elapsed)
-	} else if elapsed < 5*time.Second {
-		cW(l.buf, l.useColor, nYellow, "%s", elapsed)
-	} else {
-		cW(l.buf, l.useColor, nRed, "%s", elapsed)
+		colorWrite(l.buf, l.useColor, bBlue, " %dB", bytes)
+
+		l.buf.WriteString(" in ")
+		if elapsed < 500*time.Millisecond {
+			colorWrite(l.buf, l.useColor, nGreen, "%s", elapsed)
+		} else if elapsed < 5*time.Second {
+			colorWrite(l.buf, l.useColor, nYellow, "%s", elapsed)
+		} else {
+			colorWrite(l.buf, l.useColor, nRed, "%s", elapsed)
+		}
+
+		l.Logger.Print(l.buf.String())
 	}
 
-	l.Logger.Print(l.buf.String())
-}
-
-func (l *defaultLogEntry) Panic(v interface{}, stack []byte) {
-	PrintPrettyStack(v)
-}
-
+	func (l *defaultLogEntry) Panic(v interface{}, stack []byte) {
+		PrintPrettyStack(v)
+	}
+*/
 func init() {
 	color := true
 	if runtime.GOOS == "windows" {

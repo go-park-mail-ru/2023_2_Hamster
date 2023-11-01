@@ -10,10 +10,10 @@ services:
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
-      POSTGRES_PORT: $(DB_PORT)
+      POSTGRES_PORT: ${DB_PORT}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "5436:5432"
+      - "5432:5432"
     volumes:
       - ./cmd/api/init/db/postgresql/schema/:/docker-entrypoint-initdb.d/
  

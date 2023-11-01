@@ -2,9 +2,7 @@ package middleware
 
 import (
 	"context"
-	"fmt"
 	"net/http"
-	"sync/atomic"
 	"time"
 
 	response "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
@@ -14,24 +12,11 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions"
 )
 
-// Key to use when setting the request ID.
-type ctxKeyRequestID int
-
-// RequestIDKey is the key that holds the unique request ID in a request context.
-const RequestIDKey ctxKeyRequestID = 0
-
-// RequestIDHeader is the name of the HTTP Header which contains the request id.
-// Exported so that it can be changed by developers
-var RequestIDHeader = "X-Request-Id"
-
 type AuthMiddleware struct {
 	ur  userRep.Repository
 	su  sessions.Usecase
 	log logger.CustomLogger
 }
-
-var prefix string
-var reqid uint64
 
 func NewAuthMiddleware(su sessions.Usecase, ur userRep.Repository, log logger.CustomLogger) *AuthMiddleware {
 	return &AuthMiddleware{
@@ -120,20 +105,6 @@ func (m *LogMiddleware) LoggerMiddleware(next http.Handler) http.Handler {
 		m.log.Info(logMsg)
 
 	})
-}
-
-func RequestID(next http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		requestID := r.Header.Get(RequestIDHeader)
-		if requestID == "" {
-			myid := atomic.AddUint64(&reqid, 1)
-			requestID = fmt.Sprintf("%s-%06d", prefix, myid)
-		}
-		ctx = context.WithValue(ctx, RequestIDKey, requestID)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	}
-	return http.HandlerFunc(fn)
 }
 
 // New will create a new middleware handler from a http.Handler.

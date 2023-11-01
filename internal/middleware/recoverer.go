@@ -1,8 +1,5 @@
 package middleware
 
-// The original work was derived from Goji's middleware, source:
-// https://github.com/zenazn/goji/tree/master/web/middleware
-
 import (
 	"bytes"
 	"errors"
@@ -14,11 +11,15 @@ import (
 	"strings"
 )
 
+// The original work was derived from Goji's middleware, source:
+// https://github.com/zenazn/goji/tree/master/web/middleware
+
 // Recoverer is a middleware that recovers from panics, logs the panic (and a
 // backtrace), and returns a HTTP 500 (Internal Server Error) status if
 // possible. Recoverer prints a request ID if one is provided.
 //
 // Alternatively, look at https://github.com/go-chi/httplog middleware pkgs.
+
 func Recoverer(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
@@ -48,7 +49,7 @@ func Recoverer(next http.Handler) http.Handler {
 	return http.HandlerFunc(fn)
 }
 
-// for ability to test the PrintPrettyStack function
+// / for ability to test the PrintPrettyStack function
 var recovererErrorWriter io.Writer = os.Stderr
 
 func PrintPrettyStack(rvr interface{}) {
@@ -70,16 +71,13 @@ func (s prettyStack) parse(debugStack []byte, rvr interface{}) ([]byte, error) {
 	var err error
 	useColor := true
 	buf := &bytes.Buffer{}
-
-	cW(buf, false, bRed, "\n")
-	cW(buf, useColor, bCyan, " panic: ")
-	cW(buf, useColor, bBlue, "%v", rvr)
-	cW(buf, false, bWhite, "\n \n")
-
+	colorWrite(buf, false, bRed, "\n")
+	colorWrite(buf, useColor, bCyan, " panic: ")
+	colorWrite(buf, useColor, bBlue, "%v", rvr)
+	colorWrite(buf, false, bWhite, "\n \n")
 	// process debug stack info
 	stack := strings.Split(string(debugStack), "\n")
 	lines := []string{}
-
 	// locate panic line, as we may have nested panics
 	for i := len(stack) - 1; i > 0; i-- {
 		lines = append(lines, stack[i])
@@ -88,13 +86,11 @@ func (s prettyStack) parse(debugStack []byte, rvr interface{}) ([]byte, error) {
 			break
 		}
 	}
-
 	// reverse
 	for i := len(lines)/2 - 1; i >= 0; i-- {
 		opp := len(lines) - 1 - i
 		lines[i], lines[opp] = lines[opp], lines[i]
 	}
-
 	// decorate
 	for i, line := range lines {
 		lines[i], err = s.decorateLine(line, useColor, i)
@@ -102,7 +98,6 @@ func (s prettyStack) parse(debugStack []byte, rvr interface{}) ([]byte, error) {
 			return nil, err
 		}
 	}
-
 	for _, l := range lines {
 		fmt.Fprintf(buf, "%s", l)
 	}
@@ -151,15 +146,15 @@ func (s prettyStack) decorateFuncCallLine(line string, useColor bool, num int) (
 	methodColor := bGreen
 
 	if num == 0 {
-		cW(buf, useColor, bRed, " -> ")
+		colorWrite(buf, useColor, bRed, " -> ")
 		pkgColor = bMagenta
 		methodColor = bRed
 	} else {
-		cW(buf, useColor, bWhite, "    ")
+		colorWrite(buf, useColor, bWhite, "    ")
 	}
-	cW(buf, useColor, pkgColor, "%s", pkg)
-	cW(buf, useColor, methodColor, "%s\n", method)
-	// cW(buf, useColor, nBlack, "%s", addr)
+	colorWrite(buf, useColor, pkgColor, "%s", pkg)
+	colorWrite(buf, useColor, methodColor, "%s\n", method)
+	//colorWrite(buf, useColor, nBlack, "%s", addr)
 	return buf.String(), nil
 }
 
@@ -185,19 +180,19 @@ func (s prettyStack) decorateSourceLine(line string, useColor bool, num int) (st
 	lineColor := bGreen
 
 	if num == 1 {
-		cW(buf, useColor, bRed, " ->   ")
+		colorWrite(buf, useColor, bRed, " ->   ")
 		fileColor = bRed
 		lineColor = bMagenta
 	} else {
-		cW(buf, false, bWhite, "      ")
+		colorWrite(buf, false, bWhite, "      ")
 	}
-	cW(buf, useColor, bWhite, "%s", dir)
-	cW(buf, useColor, fileColor, "%s", file)
-	cW(buf, useColor, lineColor, "%s", lineno)
+	colorWrite(buf, useColor, bWhite, "%s", dir)
+	colorWrite(buf, useColor, fileColor, "%s", file)
+	colorWrite(buf, useColor, lineColor, "%s", lineno)
 	if num == 1 {
-		cW(buf, false, bWhite, "\n")
+		colorWrite(buf, false, bWhite, "\n")
 	}
-	cW(buf, false, bWhite, "\n")
+	colorWrite(buf, false, bWhite, "\n")
 
 	return buf.String(), nil
 }
