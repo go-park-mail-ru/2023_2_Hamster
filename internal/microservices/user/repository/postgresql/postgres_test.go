@@ -6,7 +6,9 @@ import (
 
 	"github.com/driftprogramming/pgxpoolmock"
 	"github.com/google/uuid"
+	"github.com/pashagolub/pgxmock"
 
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -16,11 +18,11 @@ func TestCreateUser(t *testing.T) {
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
 
-	mockConn := pgxpoolmock.NewMockPgxPool(ctl)
-	// logger := logger.CreateCustomLogger()
+	mockConn, err := pgxmock.NewConn()
+	logger := logger.CreateCustomLogger()
 
-	// repo := NewRepository(mockConn, *logger)
-	repo := pgxpoolmock.NewMockPgxPool(ctl)
+	repo := NewRepository(mockConn, *logger)
+	//repo := pgxpoolmock.NewMockPgxPool(ctl)
 
 	user := models.User{
 		Login:    "testuser",
