@@ -369,22 +369,13 @@ func TestUsecase_UpdateUser(t *testing.T) {
 			name:        "Successful update",
 			expectedErr: nil,
 			mockRepoFn: func(mockRepository *mock.MockRepository) {
-				mockRepository.EXPECT().CheckUser(gomock.Any(), gomock.Any()).Return(nil)
 				mockRepository.EXPECT().UpdateUser(gomock.Any(), gomock.Any()).Return(nil)
-			},
-		},
-		{
-			name:        "Error Check User",
-			expectedErr: fmt.Errorf("[usecase] can't get check user from repository some err"),
-			mockRepoFn: func(mockRepository *mock.MockRepository) {
-				mockRepository.EXPECT().CheckUser(gomock.Any(), gomock.Any()).Return(errors.New("some err"))
 			},
 		},
 		{
 			name:        "Error Update User",
 			expectedErr: fmt.Errorf("[usecase] can't update user some error"),
 			mockRepoFn: func(mockRepository *mock.MockRepository) {
-				mockRepository.EXPECT().CheckUser(gomock.Any(), gomock.Any()).Return(nil)
 				mockRepository.EXPECT().UpdateUser(gomock.Any(), gomock.Any()).Return(errors.New("some error"))
 			},
 		},

@@ -15,6 +15,7 @@ const (
 	TransactionNotSuch   = "can't such transactoin"
 
 	TransactionCreateServerError = "can't get transaction"
+	TransactionDeleteServerError = "cat't delete transaction"
 )
 
 type TransactionCreateResponse struct {
@@ -32,7 +33,7 @@ type CreateTransaction struct {
 	Income           float64     `json:"income" valid:"-"`
 	Outcome          float64     `json:"outcome" valid:"-"`
 	Date             time.Time   `json:"date" valid:"required"`
-	Payer            string      `json:"payer" valid:"-"`
+	Payer            string      `json:"payer" valid:"maxstringlength(20)"`
 	Description      string      `json:"description" valid:""`
 	Categories       []uuid.UUID `json:"categories" valid:"-"`
 }
@@ -44,7 +45,7 @@ type UpdTransaction struct {
 	Income           float64     `json:"income" valid:"-"`
 	Outcome          float64     `json:"outcome" valid:"-"`
 	Date             time.Time   `json:"date" valid:"required"`
-	Payer            string      `json:"payer" valid:"-"`
+	Payer            string      `json:"payer" valid:"maxstringlength(20)"`
 	Description      string      `json:"description" valid:"-"`
 	Categories       []uuid.UUID `json:"categories"`
 }

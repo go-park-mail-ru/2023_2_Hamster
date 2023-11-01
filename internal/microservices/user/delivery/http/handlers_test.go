@@ -29,10 +29,12 @@ import (
 
 func TestHandler_GetUserBalance(t *testing.T) {
 	uuidTest := uuid.New()
+	user := &models.User{ID: uuidTest}
 	tests := []struct {
 		name          string
 		userID        string
 		expectedCode  int
+		funcCtxUser   func(*models.User, context.Context) context.Context
 		expectedBody  string
 		mockUsecaseFn func(*mocks.MockUsecase)
 	}{
@@ -40,6 +42,9 @@ func TestHandler_GetUserBalance(t *testing.T) {
 			name:         "Successful call to GetUserBalance",
 			userID:       uuid.New().String(),
 			expectedCode: http.StatusOK,
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.WithValue(ctx, models.ContextKeyUserType{}, user)
+			},
 			expectedBody: `{"status":200,"body":{"balance":100}}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
 				expectedBalance := 100.0
@@ -47,18 +52,12 @@ func TestHandler_GetUserBalance(t *testing.T) {
 			},
 		},
 		{
-			name:         "Invalid userID",
-			userID:       "invalidUserID",
-			expectedCode: http.StatusBadRequest,
-			expectedBody: `{"status":400,"message":"invalid url parameter"}`,
-			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
-				// No expectations for mockUsecase.
-			},
-		},
-		{
 			name:         "Error from GetUserBalance",
 			userID:       uuidTest.String(),
 			expectedCode: http.StatusBadRequest,
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.WithValue(ctx, models.ContextKeyUserType{}, user)
+			},
 			expectedBody: `{"status":400,"message":"no such balance"}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
 				errorUserID := uuidTest
@@ -70,12 +69,28 @@ func TestHandler_GetUserBalance(t *testing.T) {
 			name:         "Internal server error",
 			userID:       uuid.New().String(),
 			expectedCode: http.StatusInternalServerError,
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.WithValue(ctx, models.ContextKeyUserType{}, user)
+			},
 			expectedBody: `{"status":500,"message":"can't get balance"}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
 				//internalErrorUserID := uuid.New()
 				internalError := errors.New("internal server error")
 				mockUsecase.EXPECT().GetUserBalance(gomock.Any(), gomock.Any()).Return(0.0, internalError)
 			},
+		},
+		{
+			name:   "Unauthorized Request",
+			userID: uuid.New().String(),
+
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.Background()
+			},
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+
+			},
+			expectedCode: http.StatusUnauthorized,
+			expectedBody: `{"status":401,"message":"unauthorized"}`,
 		},
 	}
 
@@ -89,11 +104,14 @@ func TestHandler_GetUserBalance(t *testing.T) {
 
 			mockHandler := NewHandler(mockUsecase, *logger.CreateCustomLogger())
 
-			url := "/api/user/" + tt.userID + "/balance"
+			url := "/api/user/" + user.ID.String() + "/balance"
 			req := httptest.NewRequest("GET", url, nil)
-			req = mux.SetURLVars(req, map[string]string{"userID": tt.userID})
+			ctx := tt.funcCtxUser(user, req.Context())
 
+			req = req.WithContext(ctx)
 			recorder := httptest.NewRecorder()
+			req = req.WithContext(ctx)
+
 			mockHandler.GetUserBalance(recorder, req)
 
 			actual := strings.TrimSpace(recorder.Body.String())
@@ -106,10 +124,12 @@ func TestHandler_GetUserBalance(t *testing.T) {
 
 func TestHandler_GetPlannedBudget(t *testing.T) {
 	uuidTest := uuid.New()
+	user := &models.User{ID: uuidTest}
 	tests := []struct {
 		name          string
 		userID        string
 		expectedCode  int
+		funcCtxUser   func(*models.User, context.Context) context.Context
 		expectedBody  string
 		mockUsecaseFn func(*mocks.MockUsecase)
 	}{
@@ -117,25 +137,35 @@ func TestHandler_GetPlannedBudget(t *testing.T) {
 			name:         "Successful call to GetPlannedBudget",
 			userID:       uuid.New().String(),
 			expectedCode: http.StatusOK,
-			expectedBody: `{"status":200,"body":{"planned_balance":100}}`,
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.WithValue(ctx, models.ContextKeyUserType{}, user)
+			},
+			expectedBody: `{"status":200,"body":{"planned_budget":500}}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
-				expectedBudget := 100.0
-				mockUsecase.EXPECT().GetPlannedBudget(gomock.Any(), gomock.Any()).Return(expectedBudget, nil)
+				expectedPlannedBudget := 500.0
+				mockUsecase.EXPECT().GetPlannedBudget(gomock.Any(), gomock.Any()).Return(expectedPlannedBudget, nil)
 			},
 		},
 		{
-			name:         "Invalid userID",
-			userID:       "invalidUserID",
-			expectedCode: http.StatusBadRequest,
-			expectedBody: `{"status":400,"message":"invalid url parameter"}`,
-			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
-				// No expectations for mockUsecase.
+			name:   "Unauthorized Request",
+			userID: uuid.New().String(),
+
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.Background()
 			},
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+
+			},
+			expectedCode: http.StatusUnauthorized,
+			expectedBody: `{"status":401,"message":"unauthorized"}`,
 		},
 		{
 			name:         "Error from GetPlannedBudget",
 			userID:       uuidTest.String(),
 			expectedCode: http.StatusBadRequest,
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.WithValue(ctx, models.ContextKeyUserType{}, user)
+			},
 			expectedBody: `{"status":400,"message":"no such planned budget"}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
 				errorUserID := uuidTest
@@ -147,6 +177,9 @@ func TestHandler_GetPlannedBudget(t *testing.T) {
 			name:         "Internal server error",
 			userID:       uuid.New().String(),
 			expectedCode: http.StatusInternalServerError,
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.WithValue(ctx, models.ContextKeyUserType{}, user)
+			},
 			expectedBody: `{"status":500,"message":"can't get planned budget"}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
 				internalError := errors.New("internal server error")
@@ -165,11 +198,14 @@ func TestHandler_GetPlannedBudget(t *testing.T) {
 
 			mockHandler := NewHandler(mockUsecase, *logger.CreateCustomLogger())
 
-			url := "/api/user/" + tt.userID + "/planned_budget"
+			url := "/api/user/" + user.ID.String() + "/planned-budget"
 			req := httptest.NewRequest("GET", url, nil)
-			req = mux.SetURLVars(req, map[string]string{"userID": tt.userID})
+			ctx := tt.funcCtxUser(user, req.Context())
 
+			req = req.WithContext(ctx)
 			recorder := httptest.NewRecorder()
+			req = req.WithContext(ctx)
+
 			mockHandler.GetPlannedBudget(recorder, req)
 
 			actual := strings.TrimSpace(recorder.Body.String())
@@ -181,10 +217,13 @@ func TestHandler_GetPlannedBudget(t *testing.T) {
 }
 
 func TestHandler_GetCurrentBudget(t *testing.T) {
+	uuidTest := uuid.New()
+	user := &models.User{ID: uuidTest}
 	tests := []struct {
 		name          string
 		userID        string
 		expectedCode  int
+		funcCtxUser   func(*models.User, context.Context) context.Context
 		expectedBody  string
 		mockUsecaseFn func(*mocks.MockUsecase)
 	}{
@@ -192,17 +231,23 @@ func TestHandler_GetCurrentBudget(t *testing.T) {
 			name:         "Successful call to GetCurrentBudget",
 			userID:       uuid.New().String(),
 			expectedCode: http.StatusOK,
-			expectedBody: `{"status":200,"body":{"actual_balance":100}}`,
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.WithValue(ctx, models.ContextKeyUserType{}, user)
+			},
+			expectedBody: `{"status":200,"body":{"actual_budget":100}}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
 				expectedBudget := 100.0
 				mockUsecase.EXPECT().GetCurrentBudget(gomock.Any(), gomock.Any()).Return(expectedBudget, nil)
 			},
 		},
 		{
-			name:         "Invalid userID",
+			name:         "Unauthorized Request",
 			userID:       "invalidUserID",
-			expectedCode: http.StatusBadRequest,
-			expectedBody: `{"status":400,"message":"invalid url parameter"}`,
+			expectedCode: http.StatusUnauthorized,
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.Background()
+			},
+			expectedBody: `{"status":401,"message":"unauthorized"}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
 				// No expectations for mockUsecase.
 			},
@@ -211,6 +256,9 @@ func TestHandler_GetCurrentBudget(t *testing.T) {
 			name:         "Internal server error",
 			userID:       uuid.New().String(),
 			expectedCode: http.StatusInternalServerError,
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.WithValue(ctx, models.ContextKeyUserType{}, user)
+			},
 			expectedBody: `{"status":500,"message":"can't get current budget"}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
 				internalError := errors.New("internal server error")
@@ -231,9 +279,12 @@ func TestHandler_GetCurrentBudget(t *testing.T) {
 
 			url := "/api/user/" + tt.userID + "/current_budget"
 			req := httptest.NewRequest("GET", url, nil)
-			req = mux.SetURLVars(req, map[string]string{"userID": tt.userID})
+			ctx := tt.funcCtxUser(user, req.Context())
 
+			req = req.WithContext(ctx)
 			recorder := httptest.NewRecorder()
+			req = req.WithContext(ctx)
+
 			mockHandler.GetCurrentBudget(recorder, req)
 
 			actual := strings.TrimSpace(recorder.Body.String())
@@ -246,10 +297,12 @@ func TestHandler_GetCurrentBudget(t *testing.T) {
 
 func TestHandler_GetAccounts(t *testing.T) {
 	uuidTest := uuid.New()
+	user := &models.User{ID: uuidTest}
 	tests := []struct {
 		name          string
 		userID        string
 		expectedCode  int
+		funcCtxUser   func(*models.User, context.Context) context.Context
 		expectedBody  string
 		mockUsecaseFn func(*mocks.MockUsecase)
 	}{
@@ -257,16 +310,22 @@ func TestHandler_GetAccounts(t *testing.T) {
 			name:         "Successful call to GetAccounts",
 			userID:       uuid.New().String(),
 			expectedCode: http.StatusOK,
-			expectedBody: `{"status":200,"body":{"account":[]}}`,
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.WithValue(ctx, models.ContextKeyUserType{}, user)
+			},
+			expectedBody: `{"status":200,"body":{"accounts":[]}}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
 				mockUsecase.EXPECT().GetAccounts(gomock.Any(), gomock.Any()).Return([]models.Accounts{}, nil)
 			},
 		},
 		{
-			name:         "Invalid userID",
+			name:         "Unauthorized Request",
 			userID:       "invalidUserID",
-			expectedCode: http.StatusBadRequest,
-			expectedBody: `{"status":400,"message":"invalid url parameter"}`,
+			expectedCode: http.StatusUnauthorized,
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.Background()
+			},
+			expectedBody: `{"status":401,"message":"unauthorized"}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
 				// No expectations for mockUsecase.
 			},
@@ -275,6 +334,9 @@ func TestHandler_GetAccounts(t *testing.T) {
 			name:         "No accounts found",
 			userID:       uuidTest.String(),
 			expectedCode: http.StatusOK,
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.WithValue(ctx, models.ContextKeyUserType{}, user)
+			},
 			expectedBody: `{"status":204,"body":""}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
 				expectedError := models.NoSuchAccounts{}
@@ -285,6 +347,9 @@ func TestHandler_GetAccounts(t *testing.T) {
 			name:         "Internal server error",
 			userID:       uuid.New().String(),
 			expectedCode: http.StatusInternalServerError,
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.WithValue(ctx, models.ContextKeyUserType{}, user)
+			},
 			expectedBody: `{"status":500,"message":"no such account"}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
 				internalError := errors.New("internal server error")
@@ -305,9 +370,12 @@ func TestHandler_GetAccounts(t *testing.T) {
 
 			url := "/api/user/" + tt.userID + "/accounts"
 			req := httptest.NewRequest("GET", url, nil)
-			req = mux.SetURLVars(req, map[string]string{"userID": tt.userID})
+			ctx := tt.funcCtxUser(user, req.Context())
 
+			req = req.WithContext(ctx)
 			recorder := httptest.NewRecorder()
+			req = req.WithContext(ctx)
+
 			mockHandler.GetAccounts(recorder, req)
 
 			actual := strings.TrimSpace(recorder.Body.String())
@@ -320,10 +388,12 @@ func TestHandler_GetAccounts(t *testing.T) {
 
 func TestHandler_GetFeed(t *testing.T) {
 	uuidTest := uuid.New()
+	user := &models.User{ID: uuidTest}
 	tests := []struct {
 		name          string
 		userID        string
 		expectedCode  int
+		funcCtxUser   func(*models.User, context.Context) context.Context
 		expectedBody  string
 		mockUsecaseFn func(*mocks.MockUsecase)
 	}{
@@ -331,17 +401,23 @@ func TestHandler_GetFeed(t *testing.T) {
 			name:         "Successful call to GetFeed",
 			userID:       uuid.New().String(),
 			expectedCode: http.StatusOK,
-			expectedBody: `{"status":200,"body":{"account":null,"balance":0,"planned_balance":0,"actual_balance":0}}`,
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.WithValue(ctx, models.ContextKeyUserType{}, user)
+			},
+			expectedBody: `{"status":200,"body":{"accounts":null,"balance":0,"planned_budget":0,"actual_budget":0}}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
 				userFeed := &transfer_models.UserFeed{}
 				mockUsecase.EXPECT().GetFeed(gomock.Any(), gomock.Any()).Return(userFeed, nil)
 			},
 		},
 		{
-			name:         "Invalid userID",
+			name:         "Unauthorized Request",
 			userID:       "invalidUserID",
-			expectedCode: http.StatusBadRequest,
-			expectedBody: `{"status":400,"message":"invalid url parameter"}`,
+			expectedCode: http.StatusUnauthorized,
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.Background()
+			},
+			expectedBody: `{"status":401,"message":"unauthorized"}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
 				// No expectations for mockUsecase.
 			},
@@ -350,6 +426,9 @@ func TestHandler_GetFeed(t *testing.T) {
 			name:         "No feed found",
 			userID:       uuidTest.String(),
 			expectedCode: http.StatusBadRequest,
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.WithValue(ctx, models.ContextKeyUserType{}, user)
+			},
 			expectedBody: `{"status":400,"message":"no such feed info"}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
 				expectedError := models.NoSuchAccounts{}
@@ -361,6 +440,9 @@ func TestHandler_GetFeed(t *testing.T) {
 			name:         "Internal server error",
 			userID:       uuid.New().String(),
 			expectedCode: http.StatusInternalServerError,
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.WithValue(ctx, models.ContextKeyUserType{}, user)
+			},
 			expectedBody: `{"status":500,"message":"can't get feed info"}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
 				internalError := errors.New("internal server error")
@@ -382,9 +464,12 @@ func TestHandler_GetFeed(t *testing.T) {
 
 			url := "/api/user/" + tt.userID + "/accounts"
 			req := httptest.NewRequest("GET", url, nil)
-			req = mux.SetURLVars(req, map[string]string{"userID": tt.userID})
+			ctx := tt.funcCtxUser(user, req.Context())
 
+			req = req.WithContext(ctx)
 			recorder := httptest.NewRecorder()
+			req = req.WithContext(ctx)
+
 			mockHandler.GetFeed(recorder, req)
 
 			actual := strings.TrimSpace(recorder.Body.String())
@@ -394,7 +479,6 @@ func TestHandler_GetFeed(t *testing.T) {
 		})
 	}
 }
-
 func TestHandler_GetUser(t *testing.T) {
 	uuidTest := uuid.New()
 	tests := []struct {
@@ -416,10 +500,10 @@ func TestHandler_GetUser(t *testing.T) {
 			},
 		},
 		{
-			name:         "Invalid userID",
+			name:         "Unauthorized Request",
 			userID:       "invalidUserID",
 			expectedCode: http.StatusBadRequest,
-			expectedBody: `{"status":400,"message":"invalid url parameter"}`,
+			expectedBody: `{"status":400,"message":"unauthorized"}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
 				// No expectations for mockUsecase.
 			},
@@ -558,7 +642,7 @@ func TestHandler_Update(t *testing.T) {
 			},
 			user:         &models.User{},
 			expectedCode: http.StatusUnauthorized,
-			expectedBody: `{"status":401,"message":"unathorized"}`,
+			expectedBody: `{"status":401,"message":"unauthorized"}`,
 		},
 	}
 
@@ -592,18 +676,23 @@ func TestUserHandler_UpdateProfilePhoto(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	//pathName := uuid.New().String()
-
+	uuidTest := uuid.New()
+	user := &models.User{ID: uuidTest}
 	//usecaseMock := mocks.NewMockUsecase(ctrl)
 	mockUsecase := mocks.NewMockUsecase(ctrl)
 	tests := []struct {
 		name           string
 		userID         string
+		funcCtxUser    func(*models.User, context.Context) context.Context
 		mock           func() *http.Request
 		expectedStatus int
 	}{
 		{
 			name:   "OK",
 			userID: uuid.New().String(),
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.WithValue(ctx, models.ContextKeyUserType{}, user)
+			},
 			mock: func() *http.Request {
 				body := new(bytes.Buffer)
 
@@ -664,19 +753,25 @@ func TestUserHandler_UpdateProfilePhoto(t *testing.T) {
 			expectedStatus: http.StatusOK,
 		},
 		{
-			name:   "Invalid ID",
+			name:   "Unauthorized Request",
 			userID: "invaild_id",
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.Background()
+			},
 			mock: func() *http.Request {
 
 				r := httptest.NewRequest("POST", "/user/updateProfilePhoto",
 					nil)
 				return r
 			},
-			expectedStatus: http.StatusBadRequest,
+			expectedStatus: http.StatusUnauthorized,
 		},
 		{
 			name:   "Error parse path",
 			userID: uuid.New().String(),
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.WithValue(ctx, models.ContextKeyUserType{}, user)
+			},
 			mock: func() *http.Request {
 				body := new(bytes.Buffer)
 
@@ -738,6 +833,9 @@ func TestUserHandler_UpdateProfilePhoto(t *testing.T) {
 		{
 			name:   "Check large file",
 			userID: uuid.New().String(),
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.WithValue(ctx, models.ContextKeyUserType{}, user)
+			},
 			mock: func() *http.Request {
 				r := httptest.NewRequest("POST", "/user/updateProfilePhoto",
 					nil)
@@ -748,6 +846,9 @@ func TestUserHandler_UpdateProfilePhoto(t *testing.T) {
 		{
 			name:   "No upload file",
 			userID: uuid.New().String(),
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.WithValue(ctx, models.ContextKeyUserType{}, user)
+			},
 			mock: func() *http.Request {
 				body := new(bytes.Buffer)
 
@@ -774,6 +875,9 @@ func TestUserHandler_UpdateProfilePhoto(t *testing.T) {
 		{
 			name:   "Wrong data type",
 			userID: uuid.New().String(),
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.WithValue(ctx, models.ContextKeyUserType{}, user)
+			},
 			mock: func() *http.Request {
 				body := new(bytes.Buffer)
 
@@ -807,6 +911,9 @@ func TestUserHandler_UpdateProfilePhoto(t *testing.T) {
 		{
 			name:   "File upload error",
 			userID: uuid.New().String(),
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.WithValue(ctx, models.ContextKeyUserType{}, user)
+			},
 			mock: func() *http.Request {
 				body := new(bytes.Buffer)
 				writer := multipart.NewWriter(body)
@@ -827,6 +934,9 @@ func TestUserHandler_UpdateProfilePhoto(t *testing.T) {
 		{
 			name:   "Internal Server",
 			userID: uuid.New().String(),
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.WithValue(ctx, models.ContextKeyUserType{}, user)
+			},
 			mock: func() *http.Request {
 				body := new(bytes.Buffer)
 
@@ -852,10 +962,8 @@ func TestUserHandler_UpdateProfilePhoto(t *testing.T) {
 
 				img := image.NewRGBA(image.Rectangle{upLeft, lowRight})
 
-				// Colors are defined by Red, Green, Blue, Alpha uint8 values.
 				cyan := color.RGBA{100, 200, 200, 0xff}
 
-				// Set color for each pixel.
 				for x := 0; x < width; x++ {
 					for y := 0; y < height; y++ {
 						switch {
@@ -864,13 +972,10 @@ func TestUserHandler_UpdateProfilePhoto(t *testing.T) {
 						case x >= width/2 && y >= height/2: // lower right quadrant
 							img.Set(x, y, color.White)
 						default:
-							// Use zero value.
 						}
 					}
 				}
 
-				// Encode() takes an io.Writer. We pass the multipart field 'upload' that we defined
-				// earlier which, in turn, writes to our io.Pipe
 				err = png.Encode(part, img)
 				if err != nil {
 					t.Error(err)
@@ -889,6 +994,9 @@ func TestUserHandler_UpdateProfilePhoto(t *testing.T) {
 		{
 			name:   "No such User",
 			userID: uuid.New().String(),
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.WithValue(ctx, models.ContextKeyUserType{}, user)
+			},
 			mock: func() *http.Request {
 				body := new(bytes.Buffer)
 
@@ -957,9 +1065,10 @@ func TestUserHandler_UpdateProfilePhoto(t *testing.T) {
 
 			w := httptest.NewRecorder()
 			r := test.mock()
-			req := mux.SetURLVars(r, map[string]string{"userID": test.userID})
+			ctx := test.funcCtxUser(user, r.Context())
+			r = r.WithContext(ctx)
 
-			mockHandler.UpdatePhoto(w, req)
+			mockHandler.UpdatePhoto(w, r)
 			require.Equal(t, test.expectedStatus, w.Code, fmt.Errorf("%s :  expected %d, got %d,"+
 				" for test:%s, response %s", test.name, test.expectedStatus, w.Code, test.name, w.Body.String()))
 		})
