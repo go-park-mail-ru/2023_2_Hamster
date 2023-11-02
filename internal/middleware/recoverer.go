@@ -11,6 +11,39 @@ import (
 	"strings"
 )
 
+var (
+	// Normal colors
+	nBlack   = []byte{'\033', '[', '3', '0', 'm'}
+	nRed     = []byte{'\033', '[', '3', '1', 'm'}
+	nGreen   = []byte{'\033', '[', '3', '2', 'm'}
+	nYellow  = []byte{'\033', '[', '3', '3', 'm'}
+	nBlue    = []byte{'\033', '[', '3', '4', 'm'}
+	nMagenta = []byte{'\033', '[', '3', '5', 'm'}
+	nCyan    = []byte{'\033', '[', '3', '6', 'm'}
+	nWhite   = []byte{'\033', '[', '3', '7', 'm'}
+	// Bright colors
+	bBlack   = []byte{'\033', '[', '3', '0', ';', '1', 'm'}
+	bRed     = []byte{'\033', '[', '3', '1', ';', '1', 'm'}
+	bGreen   = []byte{'\033', '[', '3', '2', ';', '1', 'm'}
+	bYellow  = []byte{'\033', '[', '3', '3', ';', '1', 'm'}
+	bBlue    = []byte{'\033', '[', '3', '4', ';', '1', 'm'}
+	bMagenta = []byte{'\033', '[', '3', '5', ';', '1', 'm'}
+	bCyan    = []byte{'\033', '[', '3', '6', ';', '1', 'm'}
+	bWhite   = []byte{'\033', '[', '3', '7', ';', '1', 'm'}
+
+	reset = []byte{'\033', '[', '0', 'm'}
+)
+
+func colorWrite(w io.Writer, useColor bool, color []byte, s string, args ...interface{}) {
+	if useColor {
+		w.Write(color)
+	}
+	fmt.Fprintf(w, s, args...)
+	if useColor {
+		w.Write(reset)
+	}
+}
+
 // The original work was derived from Goji's middleware, source:
 // https://github.com/zenazn/goji/tree/master/web/middleware
 
@@ -30,12 +63,12 @@ func Recoverer(next http.Handler) http.Handler {
 					panic(rvr)
 				}
 
-				logEntry := GetLogEntry(r)
-				if logEntry != nil {
-					logEntry.Panic(rvr, debug.Stack())
-				} else {
-					PrintPrettyStack(rvr)
-				}
+				//logEntry := GetLogEntry(r)
+				//if logEntry != nil {
+				//	logEntry.Panic(rvr, debug.Stack())
+				//} else {
+				//	PrintPrettyStack(rvr)
+				//}
 
 				if r.Header.Get("Connection") != "Upgrade" {
 					w.WriteHeader(http.StatusInternalServerError)

@@ -1,4 +1,5 @@
 include .env
+include .golandcli.yml
 export
 
 .PHONY: run run-in build clean db app down doc test lint
@@ -38,3 +39,11 @@ test: ## Run tests
 
 lint: ## Run linters
 	golangci-lint run
+
+# New make
+
+b:
+	go build -o app ./cmd/api/main.go
+
+r: lint b	
+	./app

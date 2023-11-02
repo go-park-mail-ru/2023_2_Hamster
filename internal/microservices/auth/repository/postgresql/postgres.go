@@ -14,10 +14,10 @@ const (
 
 type AuthRep struct {
 	db     pgxtype.Querier
-	logger logger.CustomLogger
+	logger logger.Logger
 }
 
-func NewRepository(db pgxtype.Querier, l logger.CustomLogger) *AuthRep {
+func NewRepository(db pgxtype.Querier, l logger.Logger) *AuthRep {
 	return &AuthRep{
 		db:     db,
 		logger: l,

@@ -13,10 +13,10 @@ const ()
 
 type Repository struct {
 	db  pgxtype.Querier
-	log logger.CustomLogger
+	log logger.Logger
 }
 
-func NewRepository(db pgxtype.Querier, log logger.CustomLogger) *Repository {
+func NewRepository(db pgxtype.Querier, log logger.Logger) *Repository {
 	return &Repository{
 		db:  db,
 		log: log,

@@ -1,5 +1,6 @@
 package middleware
 
+/*
 import (
 	"context"
 	"log"
@@ -167,7 +168,7 @@ func WithLogEntry(r *http.Request, entry LogEntry) *http.Request {
 	func (l *defaultLogEntry) Panic(v interface{}, stack []byte) {
 		PrintPrettyStack(v)
 	}
-*/
+
 func init() {
 	color := true
 	if runtime.GOOS == "windows" {
@@ -175,3 +176,4 @@ func init() {
 	}
 	DefaultLogger = RequestLogger(&DefaultLogFormatter{Logger: log.New(os.Stdout, "", log.LstdFlags), NoColor: !color})
 }
+*/

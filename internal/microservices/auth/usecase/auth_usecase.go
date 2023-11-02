@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/hasher"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
+	logging "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
@@ -15,13 +15,13 @@ import (
 type Usecase struct {
 	authRepo auth.Repository
 	userRepo user.Repository
-	logger   logger.CustomLogger
+	logger   logging.Logger
 }
 
 func NewUsecase(
 	ar auth.Repository,
 	ur user.Repository,
-	log logger.CustomLogger) *Usecase {
+	log logging.Logger) *Usecase {
 	return &Usecase{
 		authRepo: ar,
 		userRepo: ur,

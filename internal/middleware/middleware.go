@@ -3,7 +3,6 @@ package middleware
 import (
 	"context"
 	"net/http"
-	"time"
 
 	response "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
@@ -15,10 +14,10 @@ import (
 type AuthMiddleware struct {
 	ur  userRep.Repository
 	su  sessions.Usecase
-	log logger.CustomLogger
+	log logger.Logger
 }
 
-func NewAuthMiddleware(su sessions.Usecase, ur userRep.Repository, log logger.CustomLogger) *AuthMiddleware {
+func NewAuthMiddleware(su sessions.Usecase, ur userRep.Repository, log logger.Logger) *AuthMiddleware {
 	return &AuthMiddleware{
 		su:  su,
 		ur:  ur,
@@ -67,62 +66,4 @@ func (m *AuthMiddleware) Authentication(next http.Handler) http.Handler {
 func WrapUser(r *http.Request, user *models.User) *http.Request {
 	ctx := context.WithValue(r.Context(), models.ContextKeyUserType{}, user)
 	return r.WithContext(ctx)
-}
-
-type LogMiddleware struct {
-	log logger.CustomLogger
-}
-
-func NewLogMiddleware(log logger.CustomLogger) *LogMiddleware {
-	return &LogMiddleware{
-		log: log,
-	}
-}
-
-func (m *LogMiddleware) LoggerMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		startTime := time.Now()
-
-		ip, err := response.GetIpFromRequest(r)
-		if err != nil {
-			m.log.Error(err.Error())
-		}
-
-		// Call the next handler in the chain
-		next.ServeHTTP(w, r)
-
-		params := logger.LogFormatterParams{
-			TimeStamp:  time.Now(),
-			StatusCode: 200,
-			Latency:    time.Since(startTime),
-			ClientIP:   ip,
-			Method:     r.Method,
-			Path:       r.URL.RawPath,
-		}
-
-		logMsg := logger.DefaultLogFormatter(params)
-
-		m.log.Info(logMsg)
-
-	})
-}
-
-// New will create a new middleware handler from a http.Handler.
-func New(h http.Handler) func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			h.ServeHTTP(w, r)
-		})
-	}
-}
-
-// contextKey is a value for use with context.WithValue. It's used as
-// a pointer so it fits in an interface{} without allocation. This technique
-// for defining context keys was copied from Go 1.7's new use of context in net/http.
-type contextKey struct {
-	name string
-}
-
-func (k *contextKey) String() string {
-	return "chi/middleware context value " + k.name
 }
