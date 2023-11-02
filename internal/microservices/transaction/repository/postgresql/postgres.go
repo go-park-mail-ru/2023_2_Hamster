@@ -113,8 +113,15 @@ func (r *transactionRep) getCategoriesForTransaction(ctx context.Context, transa
 	return categoryIDs, nil
 }
 
-func (r *transactionRep) CreateTransaction(ctx context.Context, transaction *models.Transaction) (uuid.UUID, error) { // need test
-	row := r.db.QueryRow(ctx, transactionCreate,
+func (r *transactionRep) CreateTransaction(ctx context.Context, transaction *models.Transaction) (uuid.UUID, error) {
+
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("failed to start transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	row := tx.QueryRow(ctx, transactionCreate,
 		transaction.UserID,
 		transaction.AccountIncomeID,
 		transaction.AccountOutcomeID,
@@ -125,63 +132,74 @@ func (r *transactionRep) CreateTransaction(ctx context.Context, transaction *mod
 		transaction.Description)
 	var id uuid.UUID
 
-	err := row.Scan(&id)
+	err = row.Scan(&id)
 	if err != nil {
-		return id, fmt.Errorf("[repo] failed create transaction %w", err)
+		return id, fmt.Errorf("[repo] failed create transaction: %w", err)
 	}
 
-	_, err = r.db.Exec(ctx, transacitonUpdateAccount, -transaction.Income, transaction.AccountIncomeID)
+	_, err = tx.Exec(ctx, transacitonUpdateAccount, -transaction.Income, transaction.AccountIncomeID)
 	if err != nil {
 		return id, fmt.Errorf("failed to update old AccountIncome balance: %w", err)
 	}
 
-	_, err = r.db.Exec(ctx, transacitonUpdateAccount, transaction.Outcome, transaction.AccountOutcomeID)
+	_, err = tx.Exec(ctx, transacitonUpdateAccount, transaction.Outcome, transaction.AccountOutcomeID)
 	if err != nil {
 		return id, fmt.Errorf("failed to update old AccountIncome balance: %w", err)
 	}
 
 	for _, categoryID := range transaction.Categories {
-		_, err = r.db.Exec(ctx, transactionCreateCategory, id, categoryID)
+		_, err = tx.Exec(ctx, transactionCreateCategory, id, categoryID)
 		if err != nil {
 			return id, fmt.Errorf("[repo] failed to insert category association: %w", err)
 		}
 	}
+
+	if err = tx.Commit(ctx); err != nil {
+		return id, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
 	return id, nil
 }
 
 func (r *transactionRep) UpdateTransaction(ctx context.Context, transaction *models.Transaction) error {
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to start transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
 	var existingIncome, existingOutcome float64
 	var existingAccountIncomeID, existingAccountOutcomeID uuid.UUID
 
-	row := r.db.QueryRow(ctx, transactionGet, transaction.ID)
-	err := row.Scan(&existingIncome, &existingOutcome, &existingAccountIncomeID, &existingAccountOutcomeID)
+	row := tx.QueryRow(ctx, transactionGet, transaction.ID)
+	err = row.Scan(&existingIncome, &existingOutcome, &existingAccountIncomeID, &existingAccountOutcomeID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return fmt.Errorf("[repo] %w: %v", &models.NoSuchTransactionError{UserID: transaction.ID}, err)
 	} else if err != nil {
 		return fmt.Errorf("[repo] failed request db %s, %w", transactionGet, err)
 	}
 
-	_, err = r.db.Exec(ctx, transacitonUpdateAccount, existingIncome, existingAccountIncomeID)
+	_, err = tx.Exec(ctx, transacitonUpdateAccount, existingIncome, existingAccountIncomeID)
 	if err != nil {
 		return fmt.Errorf("failed to update old AccountIncome balance: %s, %w", transacitonUpdateAccount, err)
 	}
 
-	_, err = r.db.Exec(ctx, transacitonUpdateAccount, -existingOutcome, existingAccountOutcomeID)
+	_, err = tx.Exec(ctx, transacitonUpdateAccount, -existingOutcome, existingAccountOutcomeID)
 	if err != nil {
 		return fmt.Errorf("failed to update old AccountOutcome balance: %s, %w", transacitonUpdateAccount, err)
 	}
 
-	_, err = r.db.Exec(ctx, transacitonUpdateAccount, -transaction.Income, transaction.AccountIncomeID)
+	_, err = tx.Exec(ctx, transacitonUpdateAccount, -transaction.Income, transaction.AccountIncomeID)
 	if err != nil {
 		return fmt.Errorf("failed to update new AccountIncome balance: %s, %w", transacitonUpdateAccount, err)
 	}
 
-	_, err = r.db.Exec(ctx, transacitonUpdateAccount, transaction.Outcome, transaction.AccountOutcomeID)
+	_, err = tx.Exec(ctx, transacitonUpdateAccount, transaction.Outcome, transaction.AccountOutcomeID)
 	if err != nil {
 		return fmt.Errorf("failed to update new AccountOutcome balance: %s, %w", transacitonUpdateAccount, err)
 	}
 
-	_, err = r.db.Exec(ctx, transactionUpdate,
+	_, err = tx.Exec(ctx, transactionUpdate,
 		transaction.ID,
 		transaction.AccountIncomeID,
 		transaction.AccountOutcomeID,
@@ -194,20 +212,25 @@ func (r *transactionRep) UpdateTransaction(ctx context.Context, transaction *mod
 		return fmt.Errorf("[repo] failed to update transaction information: %s, %w", transactionUpdate, err)
 	}
 
-	_, err = r.db.Exec(ctx, transactionDeleteCategory, transaction.ID)
+	_, err = tx.Exec(ctx, transactionDeleteCategory, transaction.ID)
 	if err != nil {
 		return fmt.Errorf("[repo] failed to delete existing category associations: %s, %w", transactionUpdate, err)
 	}
 
 	for _, categoryID := range transaction.Categories {
-		_, err = r.db.Exec(ctx, transactionCreateCategory, transaction.ID, categoryID)
+		_, err = tx.Exec(ctx, transactionCreateCategory, transaction.ID, categoryID)
 		if err != nil {
 			return fmt.Errorf("[repo] failed to insert category associations: %s, %w", transactionUpdate, err)
 		}
 	}
 
+	if err = tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
 	return nil
 }
+
 func (r *transactionRep) CheckForbidden(ctx context.Context, transactionID uuid.UUID) (uuid.UUID, error) { // need test
 	var userID uuid.UUID
 	row := r.db.QueryRow(ctx, TransactionGetUserByID, transactionID)
@@ -223,50 +246,59 @@ func (r *transactionRep) CheckForbidden(ctx context.Context, transactionID uuid.
 }
 
 func (r *transactionRep) DeleteTransaction(ctx context.Context, transactionID uuid.UUID, userID uuid.UUID) error {
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to start transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
 	var existingIncome, existingOutcome float64
 	var existingAccountIncomeID, existingAccountOutcomeID uuid.UUID
 
-	row := r.db.QueryRow(ctx, transactionGet, transactionID)
-	err := row.Scan(&existingIncome, &existingOutcome, &existingAccountIncomeID, &existingAccountOutcomeID)
+	row := tx.QueryRow(ctx, transactionGet, transactionID)
+	err = row.Scan(&existingIncome, &existingOutcome, &existingAccountIncomeID, &existingAccountOutcomeID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return fmt.Errorf("[repo] %w: %v", &models.NoSuchTransactionError{UserID: transactionID}, err)
 	} else if err != nil {
 		return fmt.Errorf("[repo] failed request db %s, %w", transactionGet, err)
 	}
 
-	_, err = r.db.Exec(ctx, transacitonUpdateAccount, existingIncome, existingAccountIncomeID)
+	_, err = tx.Exec(ctx, transacitonUpdateAccount, existingIncome, existingAccountIncomeID)
 	if err != nil {
 		return fmt.Errorf("[repo] failed to update old AccountIncome balance: %w", err)
 	}
 
-	_, err = r.db.Exec(ctx, transacitonUpdateAccount, -existingOutcome, existingAccountOutcomeID)
+	_, err = tx.Exec(ctx, transacitonUpdateAccount, -existingOutcome, existingAccountOutcomeID)
 	if err != nil {
 		return fmt.Errorf("[repo] failed to update old AccountOutcome balance: %w", err)
 	}
 
-	_, err = r.db.Exec(ctx, transactionDeleteCategory, transactionID)
+	_, err = tx.Exec(ctx, transactionDeleteCategory, transactionID)
 	if err != nil {
 		return fmt.Errorf("[repo] failed to delete existing category associations: %s, %w", transactionUpdate, err)
 	}
 
-	_, err = r.db.Exec(ctx, transactionDelete, transactionID)
+	_, err = tx.Exec(ctx, transactionDelete, transactionID)
 	if err != nil {
 		return fmt.Errorf("[repo] failed to delete transaction %s, %w", transactionDelete, err)
 	}
-	fmt.Println("fdsafasd")
+
+	if err = tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
 	return nil
 }
 
-func (r *transactionRep) Check(ctx context.Context, transactionID uuid.UUID) error {
-	var exists bool
-	err := r.db.QueryRow(ctx, transactionCheck, transactionID).Scan(&exists)
-	if err != nil {
-		return fmt.Errorf("(repo) failed to exec query: %s, %w", transactionCheck, err)
-	}
+// func (r *transactionRep) Check(ctx context.Context, transactionID uuid.UUID) error {
+// 	var exists bool
+// 	err := r.db.QueryRow(ctx, transactionCheck, transactionID).Scan(&exists)
+// 	if err != nil {
+// 		return fmt.Errorf("(repo) failed to exec query: %s, %w", transactionCheck, err)
+// 	}
 
-	if !exists {
-		return fmt.Errorf("(repo) %w: %w", &models.NoSuchTransactionError{UserID: transactionID}, err)
-	}
+// 	if !exists {
+// 		return fmt.Errorf("(repo) %w: %w", &models.NoSuchTransactionError{UserID: transactionID}, err)
+// 	}
 
-	return nil
-}
+// 	return nil
+// }

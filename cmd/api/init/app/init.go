@@ -4,7 +4,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/router"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/redis/go-redis/v9"
 
 	authDelivery "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/http"
@@ -21,7 +21,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func Init(db *pgx.Conn, redis *redis.Client, log *logger.CustomLogger) *mux.Router {
+func Init(db *pgxpool.Pool, redis *redis.Client, log *logger.CustomLogger) *mux.Router {
 	authRep := authRep.NewRepository(db, *log)
 	sessionRep := sessionRep.NewSessionRepository(redis)
 	userRep := userRep.NewRepository(db, *log)

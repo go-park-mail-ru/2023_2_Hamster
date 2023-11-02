@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
 )
 
@@ -47,7 +47,7 @@ func initPostgresConfigFromEnv() (PostgresConfig, error) {
 	return cfg, nil
 }
 
-func InitPostgresDB(ctx context.Context) (*pgx.Conn, error) {
+func InitPostgresDB(ctx context.Context) (*pgxpool.Pool, error) {
 	cfg, err := initPostgresConfigFromEnv()
 	if err != nil {
 		return nil, fmt.Errorf(err.Error())
@@ -56,18 +56,10 @@ func InitPostgresDB(ctx context.Context) (*pgx.Conn, error) {
 	connString := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBName, cfg.DBPassword, cfg.DBSSLMode)
 
-	conn, err := pgx.Connect(ctx, connString)
+	pool, err := pgxpool.Connect(ctx, connString)
 	if err != nil {
 		return nil, err
 	}
 
-	err = conn.Ping(ctx)
-	if err != nil {
-		errClose := conn.Close(ctx)
-		if errClose != nil {
-			return nil, fmt.Errorf("can't close postgresql (%w) after failed ping: %w", errClose, err)
-		}
-		return conn, err
-	}
-	return conn, nil
+	return pool, nil
 }

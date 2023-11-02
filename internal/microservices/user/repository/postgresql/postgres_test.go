@@ -15,7 +15,7 @@ import (
 )
 
 func TestCreateUser(t *testing.T) {
-	mock, _ := pgxmock.NewConn()
+	mock, _ := pgxmock.NewPool()
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
 
