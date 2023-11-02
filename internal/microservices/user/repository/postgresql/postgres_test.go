@@ -19,8 +19,8 @@ func TestCreateUser(t *testing.T) {
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
 
-	logger := logger.CreateCustomLogger()
-	repo := NewRepository(mock, *logger)
+	logger := logger.GetLogger()
+	repo := NewRepository(mock, logger)
 
 	user := models.User{
 		Login:    "testuser",

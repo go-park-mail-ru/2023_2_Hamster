@@ -78,3 +78,9 @@ func init() {
 
 	e = logrus.NewEntry(l)
 }
+
+func foo(x int) func() int {
+	return func() int {
+		return x * x
+	}
+}

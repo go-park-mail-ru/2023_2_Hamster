@@ -6,12 +6,8 @@ import (
 	"errors"
 	"fmt"
 
-<<<<<<< HEAD
-	logging "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
-=======
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/db/postgresql"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
->>>>>>> f586fb01253118dfd2b06c37b06b1eb7369e4d1f
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
 )
@@ -29,22 +25,14 @@ const (
 )
 
 type UserRep struct {
-<<<<<<< HEAD
-	db     pgxtype.Querier
-	logger logging.Logger
-}
-
-func NewRepository(db pgxtype.Querier, l logging.Logger) *UserRep {
-=======
 	db     postgresql.DbConn
-	logger logger.CustomLogger
+	logger logger.Logger
 }
 
-func NewRepository(db postgresql.DbConn, l logger.CustomLogger) *UserRep {
->>>>>>> f586fb01253118dfd2b06c37b06b1eb7369e4d1f
+func NewRepository(db postgresql.DbConn, log logger.Logger) *UserRep {
 	return &UserRep{
 		db:     db,
-		logger: l,
+		logger: log,
 	}
 }
 
