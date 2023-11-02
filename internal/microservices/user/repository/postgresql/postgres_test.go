@@ -2,25 +2,25 @@ package postgresql
 
 import (
 	"context"
+	"regexp"
 	"testing"
 
-	"github.com/driftprogramming/pgxpoolmock"
 	"github.com/google/uuid"
+	"github.com/pashagolub/pgxmock"
 
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateUser(t *testing.T) {
+	mock, _ := pgxmock.NewConn()
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
 
-	mockConn := pgxpoolmock.NewMockPgxPool(ctl)
-	// logger := logger.CreateCustomLogger()
-
-	// repo := NewRepository(mockConn, *logger)
-	repo := pgxpoolmock.NewMockPgxPool(ctl)
+	logger := logger.CreateCustomLogger()
+	repo := NewRepository(mock, *logger)
 
 	user := models.User{
 		Login:    "testuser",
@@ -29,9 +29,12 @@ func TestCreateUser(t *testing.T) {
 	}
 
 	id := uuid.New()
-	columns := []string{"id"}
-	pgxRows := pgxpoolmock.NewRows(columns).AddRow(id.String())
-	mockConn.EXPECT().QueryRow(gomock.Any(), UserCreate, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(pgxRows)
+
+	// Expect the query with the exact SQL string
+	escapedQuery := regexp.QuoteMeta(UserCreate)
+	mock.ExpectQuery(escapedQuery).
+		WithArgs(user.Login, user.Username, user.Password).
+		WillReturnRows(pgxmock.NewRows([]string{"id"}).AddRow(id))
 
 	result, err := repo.CreateUser(context.Background(), user)
 

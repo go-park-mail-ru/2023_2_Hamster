@@ -6,10 +6,10 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/db/postgresql"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
-	"github.com/jackc/pgtype/pgxtype"
 )
 
 const (
@@ -36,11 +36,11 @@ const (
 )
 
 type transactionRep struct {
-	db     pgxtype.Querier
+	db     postgresql.DbConn
 	logger logger.Logger
 }
 
-func NewRepository(db pgxtype.Querier, l logger.Logger) *transactionRep {
+func NewRepository(db postgresql.DbConn, l logger.Logger) *transactionRep {
 	return &transactionRep{
 		db:     db,
 		logger: l,

@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/db/postgresql"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
-	"github.com/jackc/pgtype/pgxtype"
 )
 
 const (
@@ -13,11 +13,11 @@ const (
 )
 
 type AuthRep struct {
-	db     pgxtype.Querier
+	db     postgresql.DbConn
 	logger logger.Logger
 }
 
-func NewRepository(db pgxtype.Querier, l logger.Logger) *AuthRep {
+func NewRepository(db postgresql.DbConn, l logger.Logger) *AuthRep {
 	return &AuthRep{
 		db:     db,
 		logger: l,
