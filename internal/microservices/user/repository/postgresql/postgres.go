@@ -26,13 +26,13 @@ const (
 
 type UserRep struct {
 	db     postgresql.DbConn
-	logger logger.CustomLogger
+	logger logger.Logger
 }
 
-func NewRepository(db postgresql.DbConn, l logger.CustomLogger) *UserRep {
+func NewRepository(db postgresql.DbConn, log logger.Logger) *UserRep {
 	return &UserRep{
 		db:     db,
-		logger: l,
+		logger: log,
 	}
 }
 

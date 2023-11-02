@@ -21,7 +21,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func Init(db *pgxpool.Pool, redis *redis.Client, log *logger.CustomLogger) *mux.Router {
+func Init(db *pgxpool.Pool, redis *redis.Client, log *logger.Logger) *mux.Router {
+
 	authRep := authRep.NewRepository(db, *log)
 	sessionRep := sessionRep.NewSessionRepository(redis)
 	userRep := userRep.NewRepository(db, *log)
@@ -32,12 +33,13 @@ func Init(db *pgxpool.Pool, redis *redis.Client, log *logger.CustomLogger) *mux.
 	userUsecase := userUsecase.NewUsecase(userRep, *log)
 	transactionUsecase := transactionUsecase.NewUsecase(transactionRep, *log)
 
-	middlewear := middleware.NewMiddleware(sessionUsecase, userRep, *log)
+	authMiddlewear := middleware.NewAuthMiddleware(sessionUsecase, userRep, *log)
+	// logMiddlewear := middleware.NewLogMiddleware(*log)
 
 	authHandler := authDelivery.NewHandler(authUsecase, userUsecase, sessionUsecase, *log)
 	userHandler := userDelivery.NewHandler(userUsecase, *log)
 	transactionHandler := transactionDelivery.NewHandler(transactionUsecase, *log)
 
-	return router.InitRouter(authHandler, userHandler, transactionHandler, middlewear)
+	return router.InitRouter(authHandler, userHandler, transactionHandler, authMiddlewear /*, logMiddlewear*/)
 
 }

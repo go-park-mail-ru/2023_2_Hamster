@@ -14,12 +14,12 @@ import (
 
 type Usecase struct {
 	userRepo user.Repository
-	logger   logger.CustomLogger
+	logger   logger.Logger
 }
 
 func NewUsecase(
 	ur user.Repository,
-	log logger.CustomLogger) *Usecase {
+	log logger.Logger) *Usecase {
 	return &Usecase{
 		userRepo: ur,
 		logger:   log,

@@ -18,7 +18,7 @@ import (
 
 type Handler struct {
 	userService user.Usecase
-	logger      logger.CustomLogger
+	logger      logger.Logger
 }
 
 const (
@@ -26,7 +26,7 @@ const (
 	userloginUrlParam = "login"
 )
 
-func NewHandler(uu user.Usecase, l logger.CustomLogger) *Handler {
+func NewHandler(uu user.Usecase, l logger.Logger) *Handler {
 	return &Handler{
 		userService: uu,
 		logger:      l,

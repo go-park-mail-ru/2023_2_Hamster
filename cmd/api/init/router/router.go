@@ -33,10 +33,16 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Initialize router and describes all app's endpoints
-func InitRouter(auth *auth.Handler, user *user.Handler, transaction *transaction.Handler, mid *middleware.Middleware) *mux.Router {
+func InitRouter(auth *auth.Handler,
+	user *user.Handler,
+	transaction *transaction.Handler,
+	authMid *middleware.AuthMiddleware,
+	/*logMid *middleware.LogMiddleware*/) *mux.Router {
 	r := mux.NewRouter()
-
-	r.Use(mid.Panic())
+	r.Use(middleware.RequestID)
+	// r.Use(logMid.LoggerMiddleware)
+	r.Use(middleware.Logger)
+	// r.Use(mid.Panic())
 
 	http.Handle("/", r)
 
@@ -48,7 +54,6 @@ func InitRouter(auth *auth.Handler, user *user.Handler, transaction *transaction
 	)).Methods(http.MethodGet)
 
 	apiRouter := r.PathPrefix("/api").Subrouter()
-	//apiRouter.Use(corsmiddleware.CorsMiddleware)
 	authRouter := apiRouter.PathPrefix("/auth").Subrouter()
 	{
 		authRouter.Methods("POST").Path("/signin").HandlerFunc(auth.Login)
@@ -59,7 +64,7 @@ func InitRouter(auth *auth.Handler, user *user.Handler, transaction *transaction
 	}
 
 	userRouter := apiRouter.PathPrefix("/user").Subrouter()
-	userRouter.Use(mid.Authentication)
+	userRouter.Use(authMid.Authentication)
 	{
 		userRouter.Methods("GET").Path("/{userID}").HandlerFunc(user.Get)
 		userRouter.Methods("PUT").Path("/updatePhoto").HandlerFunc(user.UpdatePhoto)
@@ -73,7 +78,7 @@ func InitRouter(auth *auth.Handler, user *user.Handler, transaction *transaction
 	}
 
 	transactionRouter := apiRouter.PathPrefix("/transaction").Subrouter()
-	transactionRouter.Use(mid.Authentication)
+	transactionRouter.Use(authMid.Authentication)
 	{
 		transactionRouter.Methods("GET").Path("/feed").HandlerFunc(transaction.GetFeed)
 		// 	transactionRouter.Methods("GET").Path("/{transaction_id}/").HandlerFunc(transaction.Get)

@@ -47,7 +47,7 @@ func TestUsecase_GetFeed(t *testing.T) {
 			mockRepo := mock.NewMockRepository(ctrl)
 			tc.mockRepoFn(mockRepo)
 
-			mockUsecase := NewUsecase(mockRepo, *logger.CreateCustomLogger())
+			mockUsecase := NewUsecase(mockRepo, logger.Logger{})
 
 			userID := uuid.New()
 
@@ -95,7 +95,7 @@ func TestUsecase_CreateTransaction(t *testing.T) {
 			mockRepo := mock.NewMockRepository(ctrl)
 			tc.mockRepoFn(mockRepo)
 
-			mockUsecase := NewUsecase(mockRepo, *logger.CreateCustomLogger())
+			mockUsecase := NewUsecase(mockRepo, logger.Logger{})
 
 			transaction := models.Transaction{}
 			transactionID, err := mockUsecase.CreateTransaction(context.Background(), &transaction)
@@ -156,7 +156,7 @@ func TestUsecase_UpdateTransaction(t *testing.T) {
 			mockRepo := mock.NewMockRepository(ctrl)
 			tc.mockRepoFn(mockRepo)
 
-			mockUsecase := NewUsecase(mockRepo, *logger.CreateCustomLogger())
+			mockUsecase := NewUsecase(mockRepo, logger.Logger{})
 
 			transaction := models.Transaction{UserID: userIdTest}
 			err := mockUsecase.UpdateTransaction(context.Background(), &transaction)
@@ -216,7 +216,7 @@ func TestUsecase_DeleteTransaction(t *testing.T) {
 			mockRepo := mock.NewMockRepository(ctrl)
 			tc.mockRepoFn(mockRepo)
 
-			mockUsecase := NewUsecase(mockRepo, *logger.CreateCustomLogger())
+			mockUsecase := NewUsecase(mockRepo, logger.Logger{})
 
 			err := mockUsecase.DeleteTransaction(context.Background(), userIdTest, userIdTest)
 			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {

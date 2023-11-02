@@ -116,7 +116,7 @@ func TestHandler_GetFeed(t *testing.T) {
 			mockService := mocks.NewMockUsecase(ctrl)
 			tt.mockUsecaseFn(mockService)
 
-			mockHandler := NewHandler(mockService, *logger.CreateCustomLogger())
+			mockHandler := NewHandler(mockService, logger.Logger{})
 
 			req := httptest.NewRequest("GET", "/api/user/balance", nil)
 
@@ -163,7 +163,7 @@ func TestHandler_GetUserFromRequest(t *testing.T) {
 			mockService := mocks.NewMockUsecase(ctrl)
 			tt.mockUsecaseFn(mockService)
 
-			mockHandler := NewHandler(mockService, *logger.CreateCustomLogger())
+			mockHandler := NewHandler(mockService, logger.Logger{})
 
 			req := httptest.NewRequest("GET", "/api/user/balance", nil)
 
@@ -277,7 +277,7 @@ func TestHandler_CreateTransaction(t *testing.T) {
 			mockService := mocks.NewMockUsecase(ctrl)
 			tt.mockUsecaseFn(mockService)
 
-			mockHandler := NewHandler(mockService, *logger.CreateCustomLogger())
+			mockHandler := NewHandler(mockService, logger.Logger{})
 
 			req := httptest.NewRequest("POST", "/api/transaction/create", tt.requestBody)
 
@@ -435,7 +435,7 @@ func TestHandler_UpdateTransaction(t *testing.T) {
 			mockService := mocks.NewMockUsecase(ctrl)
 			tt.mockUsecaseFn(mockService)
 
-			mockHandler := NewHandler(mockService, *logger.CreateCustomLogger())
+			mockHandler := NewHandler(mockService, logger.Logger{})
 
 			req := httptest.NewRequest("POST", "/api/transaction/update", tt.requestBody)
 
@@ -562,7 +562,7 @@ func TestHandler_TransactionDelete(t *testing.T) {
 			mockUsecase := mocks.NewMockUsecase(ctrl)
 			tt.mockUsecaseFn(mockUsecase)
 
-			mockHandler := NewHandler(mockUsecase, *logger.CreateCustomLogger())
+			mockHandler := NewHandler(mockUsecase, logger.Logger{})
 
 			url := "/api/transaction/" + tt.userID + "/delete"
 			req := httptest.NewRequest("GET", url, nil)

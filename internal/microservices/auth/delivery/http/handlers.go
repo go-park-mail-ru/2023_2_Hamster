@@ -21,14 +21,14 @@ type Handler struct {
 	au  auth.Usecase
 	uu  user.Usecase
 	su  sessions.Usecase
-	log logger.CustomLogger
+	log logger.Logger
 }
 
 func NewHandler(
 	au auth.Usecase,
 	uu user.Usecase,
 	su sessions.Usecase,
-	log logger.CustomLogger) *Handler {
+	log logger.Logger) *Handler {
 	return &Handler{
 		au:  au,
 		uu:  uu,

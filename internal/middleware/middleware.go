@@ -11,21 +11,21 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions"
 )
 
-type Middleware struct {
+type AuthMiddleware struct {
 	ur  userRep.Repository
 	su  sessions.Usecase
-	log logger.CustomLogger
+	log logger.Logger
 }
 
-func NewMiddleware(su sessions.Usecase, ur userRep.Repository, log logger.CustomLogger) *Middleware {
-	return &Middleware{
+func NewAuthMiddleware(su sessions.Usecase, ur userRep.Repository, log logger.Logger) *AuthMiddleware {
+	return &AuthMiddleware{
 		su:  su,
 		ur:  ur,
 		log: log,
 	}
 }
 
-func (m *Middleware) Authentication(next http.Handler) http.Handler {
+func (m *AuthMiddleware) Authentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("session_id")
 		if err != nil {

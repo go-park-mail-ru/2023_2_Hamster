@@ -8,15 +8,17 @@ import (
 )
 
 type Usecase interface {
-	DeleteCategory(ctx context.Context, categoryID uuid.UUID) error
 	CreateCategory(ctx context.Context, category models.Category) (uuid.UUID, error)
-	GetFeed(ctx context.Context, categoryID uuid.UUID) ([]models.Category, error)
 	UpdateCategory(ctx context.Context, category *models.Category) error
+	DeleteCategory(ctx context.Context, categoryID uuid.UUID) error
+
+	GetFeed(ctx context.Context, categoryID uuid.UUID) ([]models.Category, error)
 }
 
 type Repository interface {
-	DeleteCategory(ctx context.Context, categoryID uuid.UUID) error
 	CreateCategory(ctx context.Context, category models.Category) (uuid.UUID, error)
-	GetFeed(ctx context.Context, userID uuid.UUID) ([]models.Category, error)
 	UpdateCategory(ctx context.Context, transaction *models.Category) error
+	DeleteCategory(ctx context.Context, categoryID uuid.UUID) error
+
+	GetFeed(ctx context.Context, userID uuid.UUID) ([]models.Category, error)
 }

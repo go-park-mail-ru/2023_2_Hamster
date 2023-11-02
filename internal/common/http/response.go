@@ -27,7 +27,11 @@ type ResponseError struct {
 
 type NilBody struct{}
 
-func ErrorResponse(w http.ResponseWriter, code int, err error, message string, log logger.CustomLogger) {
+func NIL() NilBody {
+	return NilBody{}
+}
+
+func ErrorResponse(w http.ResponseWriter, code int, err error, message string, log logger.Logger) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(code)
 

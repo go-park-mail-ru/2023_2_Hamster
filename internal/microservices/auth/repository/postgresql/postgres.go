@@ -14,10 +14,10 @@ const (
 
 type AuthRep struct {
 	db     postgresql.DbConn
-	logger logger.CustomLogger
+	logger logger.Logger
 }
 
-func NewRepository(db postgresql.DbConn, l logger.CustomLogger) *AuthRep {
+func NewRepository(db postgresql.DbConn, l logger.Logger) *AuthRep {
 	return &AuthRep{
 		db:     db,
 		logger: l,

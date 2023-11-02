@@ -37,10 +37,10 @@ const (
 
 type transactionRep struct {
 	db     postgresql.DbConn
-	logger logger.CustomLogger
+	logger logger.Logger
 }
 
-func NewRepository(db postgresql.DbConn, l logger.CustomLogger) *transactionRep {
+func NewRepository(db postgresql.DbConn, l logger.Logger) *transactionRep {
 	return &transactionRep{
 		db:     db,
 		logger: l,

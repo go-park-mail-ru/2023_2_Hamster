@@ -12,10 +12,10 @@ import (
 
 type Usecase struct {
 	sessionRepo sessions.Repository
-	logger      logger.CustomLogger
+	logger      logger.Logger
 }
 
-func NewSessionUsecase(sessionRepo sessions.Repository, logger logger.CustomLogger) *Usecase {
+func NewSessionUsecase(sessionRepo sessions.Repository, logger logger.Logger) *Usecase {
 	return &Usecase{
 		sessionRepo: sessionRepo,
 		logger:      logger,

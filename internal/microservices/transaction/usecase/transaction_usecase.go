@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
+	logging "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/transaction"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
@@ -12,12 +12,12 @@ import (
 
 type Usecase struct {
 	transactionRepo transaction.Repository
-	logger          logger.CustomLogger
+	logger          logging.Logger
 }
 
 func NewUsecase(
 	tr transaction.Repository,
-	log logger.CustomLogger) *Usecase {
+	log logging.Logger) *Usecase {
 	return &Usecase{
 		transactionRepo: tr,
 		logger:          log,
