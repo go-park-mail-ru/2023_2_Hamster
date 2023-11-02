@@ -27,17 +27,18 @@ func initPostgresConfigFromEnv() (PostgresConfig, error) {
 
 	host, existHost := os.LookupEnv("DB_HOST")
 	user, existUser := os.LookupEnv("DB_USER")
+	port, existPort := os.LookupEnv("DB_PORT")
 	pass, existPass := os.LookupEnv("DB_PASSWORD")
 	dbname, existName := os.LookupEnv("DB_NAME")
 	dbsslmode, existSSL := os.LookupEnv("DB_SSLMODE")
 
-	if !existHost || !existUser || !existPass || !existName || !existSSL {
+	if !existHost || !existUser || !existPass || !existName || !existSSL || !existPort {
 		return cfg, errors.New("existHost or existPort or existUser or existPass or existName is Empty")
 	}
 
 	cfg = PostgresConfig{
 		DBHost:     host,
-		DBPort:     "5432",
+		DBPort:     port,
 		DBUser:     user,
 		DBName:     dbname,
 		DBPassword: pass,
