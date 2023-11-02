@@ -17,16 +17,21 @@ CREATE TABLE Accounts (
     mean_payment TEXT
 );
 
-CREATE TABLE Category (
-	id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    user_id UUID REFERENCES Users(id),
-    name VARCHAR(15) UNIQUE NOT NULL
+CREATE TABLE IF NOT EXISTS category (
+    id            UUID          DEFAULT uuid_generate_v4()   PRIMARY KEY,
+    user_id       UUID          REFERENCES Users(user_id)    CONSTRAINT fk_user_category  NOT NULL,
+    "name"        VARCHAR(30)   UNIQUE                                                    NOT NULL,
+    is_income     BOOLEAN
 );
 
-CREATE TABLE SUB_Category (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    category_id UUID REFERENCES Category(id),
-    name VARCHAR(15) UNIQUE NOT NULL
+CREATE TABLE IF NOT EXISTS primary_sub_category (
+    category_id     UUID REFERENCES Category(id)     NOT NULL,
+    sub_category_id UUID REFERENCES sub_category(id) NOT NULL
+)
+
+CREATE TABLE IF NOT EXISTS sub_category (
+    id          UUID        DEFAULT uuid_generate_v4() PRIMARY KEY,
+    "name"      VARCHAR(30) UNIQUE                     NOT NULL
 );
 
 CREATE TABLE Transaction (
