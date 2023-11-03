@@ -41,7 +41,7 @@ func InitRouter(auth *auth.Handler,
 	r := mux.NewRouter()
 	r.Use(middleware.RequestID)
 	// r.Use(logMid.LoggerMiddleware)
-	r.Use(middleware.Logger)
+	//r.Use(middleware.Logger)
 	// r.Use(mid.Panic())
 
 	http.Handle("/", r)

@@ -1,5 +1,5 @@
 include .env
-include .golandcli.yml
+# include .golandcli.yml
 export
 
 .PHONY: run run-in build clean db app down doc test lint
@@ -42,8 +42,8 @@ lint: ## Run linters
 
 # New make
 
-b:
-	go build -o app ./cmd/api/main.go
+# b:
+# 	go build -o app ./cmd/api/main.go
 
-r: lint b	
-	./app
+# r: lint b	
+# 	./app
