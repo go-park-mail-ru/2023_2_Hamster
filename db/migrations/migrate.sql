@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS "user" (
     password_hash  TEXT                                    NOT NULL,
 	planned_budget MONEY        DEFAULT 0.00               NOT NULL,
     avatar_url     UUID,
-    CHECK(LENGTH(usrname) <= 30),
+    CHECK(LENGTH(username) <= 30),
     CHECK(LENGTH(full_name) <= 60)
 );
 
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS account (
     updated_at          TIMESTAMPTZ  DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CHECK(LENGTH("description") <= 255),
     CHECK(LENGTH(bank_name) <= 60),
-    CHECK(LENGTH(currency) <= 60)
+    CHECK(LENGTH(currency) <= 3)
 );
 
 
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS deposit (
     start_at      DATE          DEFAULT CURRENT_DATE            NOT NULL,
     end_at        DATE,
     created_at    TIMESTAMPTZ   DEFAULT CURRENT_TIMESTAMP       NOT NULL,
-    updated_at    TIMESTAMPTZ   DEFAULT CURRENT_TIMESTAMP       NOT NULL,
+    updated_at    TIMESTAMPTZ   DEFAULT CURRENT_TIMESTAMP       NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS credit (
