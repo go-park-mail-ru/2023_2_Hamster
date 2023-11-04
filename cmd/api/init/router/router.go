@@ -66,7 +66,6 @@ func InitRouter(auth *auth.Handler,
 	userRouter := apiRouter.PathPrefix("/user").Subrouter()
 	userRouter.Use(authMid.Authentication)
 	{
-		userRouter.Methods("GET").Path("/{userID}").HandlerFunc(user.Get)
 		userRouter.Methods("PUT").Path("/updatePhoto").HandlerFunc(user.UpdatePhoto)
 		userRouter.Path("/update").Methods("PUT").HandlerFunc(user.Update)
 
@@ -75,6 +74,8 @@ func InitRouter(auth *auth.Handler,
 		// userRouter.Methods("GET").Path("/actualBudget").HandlerFunc(user.GetCurrentBudget)
 		userRouter.Methods("GET").Path("/account/all").HandlerFunc(user.GetAccounts)
 		userRouter.Methods("GET").Path("/feed").HandlerFunc(user.GetFeed)
+		userRouter.Methods("GET").Path("/").HandlerFunc(user.Get)
+
 	}
 
 	transactionRouter := apiRouter.PathPrefix("/transaction").Subrouter()

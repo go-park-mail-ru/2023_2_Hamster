@@ -219,65 +219,65 @@ func TestUsecase_GetCurrentBudget(t *testing.T) {
 	}
 }
 
-func TestUsecase_GetUser(t *testing.T) {
-	testUserID := uuid.New()
-	testCases := []struct {
-		name         string
-		expectedUser *models.User
-		expectedErr  error
-		mockRepoFn   func(*mock.MockRepository)
-	}{
-		{
-			name: "Success GetUser",
-			expectedUser: &models.User{ID: testUserID,
-				Username:      "kossmatoff",
-				PlannedBudget: 100.0,
-				Password:      "hash",
-				AvatarURL:     uuid.Nil,
-			},
+// func TestUsecase_GetUser(t *testing.T) {
+// 	testUserID := uuid.New()
+// 	testCases := []struct {
+// 		name         string
+// 		expectedUser *models.User
+// 		expectedErr  error
+// 		mockRepoFn   func(*mock.MockRepository)
+// 	}{
+// 		{
+// 			name: "Success GetUser",
+// 			expectedUser: &models.User{ID: testUserID,
+// 				Username:      "kossmatoff",
+// 				PlannedBudget: 100.0,
+// 				Password:      "hash",
+// 				AvatarURL:     uuid.Nil,
+// 			},
 
-			expectedErr: fmt.Errorf("[usecase] can't get user from repository some error"),
-			mockRepoFn: func(mockRepository *mock.MockRepository) {
-				mockRepository.EXPECT().GetByID(gomock.Any(), gomock.Any()).Return(&models.User{ID: testUserID,
-					Username:      "kossmatoff",
-					PlannedBudget: 100.0,
-					Password:      "hash",
-					AvatarURL:     uuid.Nil,
-				}, errors.New("some error"))
-			},
-		},
-		{
-			name:         "Error in UserGet issue",
-			expectedUser: &models.User{},
-			expectedErr:  nil,
-			mockRepoFn: func(mockRepository *mock.MockRepository) {
-				user := &models.User{}
-				mockRepository.EXPECT().GetByID(gomock.Any(), gomock.Any()).Return(user, nil)
-			},
-		},
-	}
+// 			expectedErr: fmt.Errorf("[usecase] can't get user from repository some error"),
+// 			mockRepoFn: func(mockRepository *mock.MockRepository) {
+// 				mockRepository.EXPECT().GetByID(gomock.Any(), gomock.Any()).Return(&models.User{ID: testUserID,
+// 					Username:      "kossmatoff",
+// 					PlannedBudget: 100.0,
+// 					Password:      "hash",
+// 					AvatarURL:     uuid.Nil,
+// 				}, errors.New("some error"))
+// 			},
+// 		},
+// 		{
+// 			name:         "Error in UserGet issue",
+// 			expectedUser: &models.User{},
+// 			expectedErr:  nil,
+// 			mockRepoFn: func(mockRepository *mock.MockRepository) {
+// 				user := &models.User{}
+// 				mockRepository.EXPECT().GetByID(gomock.Any(), gomock.Any()).Return(user, nil)
+// 			},
+// 		},
+// 	}
 
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
+// 	for _, tc := range testCases {
+// 		t.Run(tc.name, func(t *testing.T) {
+// 			ctrl := gomock.NewController(t)
+// 			defer ctrl.Finish()
 
-			mockRepo := mock.NewMockRepository(ctrl)
-			tc.mockRepoFn(mockRepo)
+// 			mockRepo := mock.NewMockRepository(ctrl)
+// 			tc.mockRepoFn(mockRepo)
 
-			mockUsecase := NewUsecase(mockRepo, logger.Logger{})
+// 			mockUsecase := NewUsecase(mockRepo, logger.Logger{})
 
-			userID := uuid.New()
+// 			userID := uuid.New()
 
-			userActual, err := mockUsecase.GetUser(context.Background(), userID)
+// 			userActual, err := mockUsecase.GetUser(context.Background(), userID)
 
-			assert.Equal(t, tc.expectedUser, userActual)
-			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
-				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
-			}
-		})
-	}
-}
+// 			assert.Equal(t, tc.expectedUser, userActual)
+// 			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
+// 				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
+// 			}
+// 		})
+// 	}
+// }
 
 func TestUsecase_GetFeed(t *testing.T) {
 	testUserID := uuid.New()

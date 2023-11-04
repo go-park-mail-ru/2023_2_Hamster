@@ -86,11 +86,11 @@ func (r *UserRep) GetUserBalance(ctx context.Context, userID uuid.UUID) (float64
 		return 0, fmt.Errorf("[repo] failed request db %w", err)
 	}
 
-	if !totalBalance.Valid {
-		return 0, fmt.Errorf("[repo] invalid type balance")
+	if totalBalance.Valid {
+		return totalBalance.Float64, nil
 	}
 
-	return totalBalance.Float64, nil
+	return 0, nil
 }
 
 func (r *UserRep) GetPlannedBudget(ctx context.Context, userID uuid.UUID) (float64, error) { // need check
@@ -103,21 +103,22 @@ func (r *UserRep) GetPlannedBudget(ctx context.Context, userID uuid.UUID) (float
 		return 0, fmt.Errorf("[repository] failed request db %w", err)
 	}
 
-	if !plannedBudget.Valid {
-		return 0, fmt.Errorf("[repo] invalid planned budget")
+	if plannedBudget.Valid {
+		return plannedBudget.Float64, nil
 	}
 
-	return plannedBudget.Float64, nil
+	return 0, nil
 }
 
 func (r *UserRep) GetCurrentBudget(ctx context.Context, userID uuid.UUID) (float64, error) { // need check
 	var currentBudget sql.NullFloat64
 
-	err := r.db.QueryRow(ctx, `SELECT SUM(total) AS total_sum
-					  FROM Transaction
+	err := r.db.QueryRow(ctx, `SELECT SUM(outcome) AS total_sum
+					  FROM transaction
 					  WHERE date_part('month', date) = date_part('month', CURRENT_DATE)
   					  AND date_part('year', date) = date_part('year', CURRENT_DATE)
-					  AND is_income = false
+					  AND outcome > 0
+					  AND account_income = account_outcome
 					  AND user_id = $1;`, userID).Scan(&currentBudget)
 
 	if err != nil {
@@ -136,7 +137,7 @@ func (r *UserRep) GetAccounts(ctx context.Context, user_id uuid.UUID) ([]models.
 
 	rows, err := r.db.Query(ctx, AccountGet, user_id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[repo] %w", err)
 	}
 	defer rows.Close()
 
@@ -148,13 +149,13 @@ func (r *UserRep) GetAccounts(ctx context.Context, user_id uuid.UUID) ([]models.
 			&account.Balance,
 			&account.MeanPayment,
 		); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("[repo] %w", err)
 		}
 		accounts = append(accounts, account)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[repo] %w", err)
 	}
 	if len(accounts) == 0 {
 		return nil, fmt.Errorf("[repo] %w: %v", &models.NoSuchAccounts{UserID: user_id}, err)
@@ -162,20 +163,20 @@ func (r *UserRep) GetAccounts(ctx context.Context, user_id uuid.UUID) ([]models.
 	return accounts, nil
 }
 
-func (r *UserRep) CheckUser(ctx context.Context, userID uuid.UUID) error {
-	var exists bool
-	err := r.db.QueryRow(ctx, UserCheck, userID).Scan(&exists)
+// func (r *UserRep) CheckUser(ctx context.Context, userID uuid.UUID) error {
+// 	var exists bool
+// 	err := r.db.QueryRow(ctx, UserCheck, userID).Scan(&exists)
 
-	if err != nil {
-		return fmt.Errorf("[repository] failed request checkUser %w", err)
-	}
+// 	if err != nil {
+// 		return fmt.Errorf("[repo] failed request checkUser %w", err)
+// 	}
 
-	if !exists {
-		return fmt.Errorf("[repo] %w: %v", &models.NoSuchUserError{UserID: userID}, err)
-	}
+// 	if !exists {
+// 		return fmt.Errorf("[repo] %w: %v", &models.NoSuchUserError{UserID: userID}, err)
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 func (r *UserRep) UpdateUser(ctx context.Context, user *models.User) error { // need test
 	_, err := r.db.Exec(ctx, UserUpdate, user.ID, user.Username, user.PlannedBudget, user.AvatarURL)
@@ -191,7 +192,7 @@ func (r *UserRep) UpdatePhoto(ctx context.Context, userID uuid.UUID, path uuid.U
 	if errors.Is(err, sql.ErrNoRows) {
 		return fmt.Errorf("[repo] %w: %v", &models.NoSuchUserError{UserID: userID}, err)
 	} else if err != nil {
-		return fmt.Errorf("[repo] failed request db %s, %w", UserUpdatePhoto, err)
+		return fmt.Errorf("[repo] failed request db: %s, %w", UserUpdatePhoto, err)
 	}
 	return nil
 }

@@ -254,7 +254,7 @@ func TestGetUserBalance(t *testing.T) {
 		{
 			name:     "InvalidBalance",
 			row:      pgxmock.NewRows([]string{"sum"}).AddRow(nil),
-			err:      fmt.Errorf("[repo] invalid type balance"),
+			err:      nil,
 			rowsErr:  nil,
 			expected: 0,
 		},
@@ -326,7 +326,7 @@ func TestGetPlannedBudget(t *testing.T) {
 		{
 			name:     "InvalidPlannedBudget",
 			row:      pgxmock.NewRows([]string{"planned_budget"}).AddRow(nil),
-			err:      fmt.Errorf("[repo] invalid planned budget"),
+			err:      nil,
 			rowsErr:  nil,
 			expected: 0,
 		},
@@ -360,6 +360,339 @@ func TestGetPlannedBudget(t *testing.T) {
 
 			if err := mock.ExpectationsWereMet(); err != nil {
 				t.Errorf("There were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
+
+func TestGetCurrentBudget(t *testing.T) {
+	userID := uuid.New()
+	tests := []struct {
+		name     string
+		row      *pgxmock.Rows
+		err      error
+		rowsErr  error
+		expected float64
+	}{
+		{
+			name:     "ValidCurrentBudget",
+			row:      pgxmock.NewRows([]string{"total_sum"}).AddRow(500.0),
+			err:      nil,
+			rowsErr:  nil,
+			expected: 500.0,
+		},
+
+		{
+			name:     "NoRows",
+			row:      pgxmock.NewRows([]string{"total_sum"}),
+			rowsErr:  sql.ErrNoRows,
+			err:      fmt.Errorf("[repository] failed request db sql: no rows in result set"),
+			expected: 0,
+		},
+		{
+			name:     "DatabaseError",
+			row:      pgxmock.NewRows([]string{"total_sum"}).AddRow(nil),
+			rowsErr:  errors.New("err"),
+			err:      fmt.Errorf("[repository] failed request db err"),
+			expected: 0,
+		},
+		{
+			name:     "InvalidPlannedBudget",
+			row:      pgxmock.NewRows([]string{"total_sum"}).AddRow(nil),
+			err:      nil,
+			rowsErr:  nil,
+			expected: 0,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mock, _ := pgxmock.NewPool()
+			ctl := gomock.NewController(t)
+			defer ctl.Finish()
+
+			logger := *logger.InitLogger()
+			repo := NewRepository(mock, logger)
+
+			escapedQuery := regexp.QuoteMeta(`SELECT SUM(outcome) AS total_sum
+			FROM transaction
+			WHERE date_part('month', date) = date_part('month', CURRENT_DATE)
+			  AND date_part('year', date) = date_part('year', CURRENT_DATE)
+			AND outcome > 0
+			AND account_income = account_outcome
+			AND user_id = $1;`)
+
+			mock.ExpectQuery(escapedQuery).
+				WithArgs(userID).
+				WillReturnRows(test.row).
+				WillReturnError(test.rowsErr)
+
+			currentBudget, err := repo.GetCurrentBudget(context.Background(), userID)
+
+			if currentBudget != test.expected {
+				t.Errorf("Expected current budget: %f, but got: %f", test.expected, currentBudget)
+			}
+
+			if (test.err == nil && err != nil) || (test.err != nil && err == nil) || (test.err != nil && err != nil && test.err.Error() != err.Error()) {
+				t.Errorf("Expected error: %v, but got: %v", test.err, err)
+			}
+
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("There were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
+
+func TestGetAccounts(t *testing.T) {
+	userID := uuid.New()
+	tests := []struct {
+		name     string
+		rows     *pgxmock.Rows
+		err      error
+		rowsErr  error
+		expected []models.Accounts
+	}{
+		{
+			name: "ValidAccounts",
+			rows: pgxmock.NewRows([]string{"id", "user_id", "balance", "mean_payment"}).
+				AddRow(userID, userID, 100.0, "Кошелек").
+				AddRow(userID, userID, 200.0, "Наличка"),
+			err: nil,
+			expected: []models.Accounts{
+				{
+					ID:          userID,
+					UserID:      userID,
+					Balance:     100.0,
+					MeanPayment: "Кошелек",
+				},
+				{
+					ID:          userID,
+					UserID:      userID,
+					Balance:     200.0,
+					MeanPayment: "Наличка",
+				},
+			},
+		},
+
+		{
+			name:     "NoAccountsFound",
+			rows:     pgxmock.NewRows([]string{"id", "user_id", "balance", "mean_payment"}),
+			rowsErr:  nil,
+			err:      fmt.Errorf("[repo] No Such Accounts from user: %s doesn't exist: <nil>", userID.String()),
+			expected: nil,
+		},
+		{
+			name:     "DatabaseError",
+			rows:     pgxmock.NewRows([]string{"id", "user_id", "balance", "mean_payment"}),
+			rowsErr:  errors.New("database error"),
+			err:      fmt.Errorf("[repo] %w", errors.New("database error")),
+			expected: nil,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mock, _ := pgxmock.NewPool()
+			ctl := gomock.NewController(t)
+			defer ctl.Finish()
+
+			logger := *logger.InitLogger()
+			repo := NewRepository(mock, logger)
+
+			escapedQuery := regexp.QuoteMeta(AccountGet)
+
+			mock.ExpectQuery(escapedQuery).
+				WithArgs(userID).
+				WillReturnRows(test.rows).
+				WillReturnError(test.rowsErr)
+
+			accounts, err := repo.GetAccounts(context.Background(), userID)
+
+			if !reflect.DeepEqual(test.expected, accounts) {
+				t.Errorf("Expected accounts: %+v, but got: %+v", test.expected, accounts)
+			}
+
+			if (test.err == nil && err != nil) || (test.err != nil && err == nil) || (test.err != nil && err != nil && test.err.Error() != err.Error()) {
+				t.Errorf("Expected error: %v, but got: %v", test.err, err)
+			}
+
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("There were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
+
+// func TestCheckUser(t *testing.T) {
+// 	userID := uuid.New()
+// 	tests := []struct {
+// 		name     string
+// 		rows     *pgxmock.Rows
+// 		err      error
+// 		rowsErr  error
+// 		expected error
+// 	}{
+// 		{
+// 			name: "UserExists",
+// 			rows: pgxmock.NewRows([]string{"exists"}).
+// 				AddRow(true),
+// 			err:      nil,
+// 			expected: nil,
+// 		},
+// 		{
+// 			name:     "UserDoesNotExist",
+// 			rows:     pgxmock.NewRows([]string{"exists"}),
+// 			rowsErr:  sql.ErrNoRows,
+// 			err:      fmt.Errorf("failed request checkUser %w: %v", &models.NoSuchUserError{UserID: userID}, sql.ErrNoRows),
+// 			expected: &models.NoSuchUserError{UserID: userID},
+// 		},
+// 		{
+// 			name:     "DatabaseError",
+// 			rows:     pgxmock.NewRows([]string{"exists"}),
+// 			rowsErr:  errors.New("database error"),
+// 			err:      fmt.Errorf("[repo] failed request checkUser %w", errors.New("database error")),
+// 			expected: errors.New("database error"),
+// 		},
+// 	}
+
+// 	for _, test := range tests {
+// 		t.Run(test.name, func(t *testing.T) {
+// 			mock, _ := pgxmock.NewPool()
+// 			ctl := gomock.NewController(t)
+// 			defer ctl.Finish()
+
+// 			logger := *logger.InitLogger()
+// 			repo := NewRepository(mock, logger)
+
+// 			escapedQuery := regexp.QuoteMeta(UserCheck)
+
+// 			mock.ExpectQuery(escapedQuery).
+// 				WithArgs(userID).
+// 				WillReturnRows(test.rows).
+// 				WillReturnError(test.rowsErr)
+
+// 			err := repo.CheckUser(context.Background(), userID)
+
+// 			if (test.err == nil && err != nil) || (test.err != nil && err == nil) || (test.err != nil && err != nil && test.err.Error() != err.Error()) {
+// 				t.Errorf("Expected error: %v, but got: %v", test.err, err)
+// 			}
+
+// 			if err := mock.ExpectationsWereMet(); err != nil {
+// 				t.Errorf("There were unfulfilled expectations: %s", err)
+// 			}
+// 		})
+// 	}
+// }
+
+func TestUpdateUser(t *testing.T) {
+	userID := uuid.New()
+	tests := []struct {
+		name     string
+		user     models.User
+		err      error
+		rowsErr  error
+		expected error
+	}{
+		{
+			name: "ValidUserUpdate",
+			user: models.User{
+				ID:            userID,
+				Username:      "Updated User",
+				PlannedBudget: 1000.0,
+				AvatarURL:     userID,
+			},
+			rowsErr:  nil,
+			expected: nil,
+		},
+		{
+			name: "InvalidUserUpdate",
+			user: models.User{
+				ID:            userID, // Invalid ID
+				Username:      "Updated User",
+				PlannedBudget: 1000.0,
+				AvatarURL:     userID,
+			},
+			rowsErr:  errors.New("Update failed"),
+			expected: errors.New("[repo] failed update user Update failed"),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mock, _ := pgxmock.NewPool()
+			ctl := gomock.NewController(t)
+			defer ctl.Finish()
+
+			logger := *logger.InitLogger()
+			repo := NewRepository(mock, logger)
+
+			escapedQuery := regexp.QuoteMeta(UserUpdate)
+
+			mock.ExpectExec(escapedQuery).
+				WithArgs(test.user.ID, test.user.Username, test.user.PlannedBudget, test.user.AvatarURL).
+				WillReturnError(test.rowsErr).
+				WillReturnResult(pgxmock.NewResult("UPDATE", 1))
+
+			err := repo.UpdateUser(context.Background(), &test.user)
+
+			if (test.expected == nil && err != nil) || (test.expected != nil && err == nil) || (test.expected != nil && err != nil && test.expected.Error() != err.Error()) {
+				t.Errorf("Expected error: %v, but got: %v", test.expected, err)
+			}
+		})
+	}
+}
+
+func TestUpdatePhoto(t *testing.T) {
+	userID := uuid.New()
+	tests := []struct {
+		name     string
+		userID   uuid.UUID
+		path     uuid.UUID
+		errRows  error
+		expected error
+	}{
+		{
+			name:     "ValidUpdate",
+			userID:   userID,
+			path:     userID,
+			errRows:  nil,
+			expected: nil,
+		},
+		{
+			name:     "InvalidUser",
+			userID:   userID,
+			path:     userID,
+			errRows:  sql.ErrNoRows,
+			expected: fmt.Errorf("[repo] No Such user: %s doesn't exist: sql: no rows in result set", userID.String()),
+		},
+		{
+			name:     "InvalidDB",
+			userID:   userID,
+			path:     userID,
+			errRows:  errors.New("err"),
+			expected: fmt.Errorf("[repo] failed request db: %s, %w", UserUpdatePhoto, errors.New("err")),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mock, _ := pgxmock.NewPool()
+			ctl := gomock.NewController(t)
+			defer ctl.Finish()
+			logger := *logger.InitLogger()
+			repo := NewRepository(mock, logger)
+
+			escapedQuery := regexp.QuoteMeta(UserUpdatePhoto)
+			mock.ExpectExec(escapedQuery).
+				WithArgs(test.userID, test.path).
+				WillReturnError(test.errRows).
+				WillReturnResult(pgxmock.NewResult("UPDATE", 1))
+
+			err := repo.UpdatePhoto(context.Background(), test.userID, test.path)
+
+			if (test.expected == nil && err != nil) || (test.expected != nil && err == nil) || (test.expected != nil && err != nil && test.expected.Error() != err.Error()) {
+				t.Errorf("Expected error: %v, but got: %v", test.expected, err)
 			}
 		})
 	}

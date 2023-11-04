@@ -26,14 +26,14 @@ func NewUsecase(
 	}
 }
 
-func (u *Usecase) GetUser(ctx context.Context, userID uuid.UUID) (*models.User, error) { // need test
-	user, err := u.userRepo.GetByID(ctx, userID)
-	if err != nil {
-		return user, fmt.Errorf("[usecase] can't get user from repository %w", err)
-	}
+// func (u *Usecase) GetUser(ctx context.Context, userID uuid.UUID) (*models.User, error) { // need test
+// 	user, err := u.userRepo.GetByID(ctx, userID)
+// 	if err != nil {
+// 		return user, fmt.Errorf("[usecase] can't get user from repository %w", err)
+// 	}
 
-	return user, nil
-}
+// 	return user, nil
+// }
 
 func (u *Usecase) GetUserBalance(ctx context.Context, userID uuid.UUID) (float64, error) {
 	balance, err := u.userRepo.GetUserBalance(ctx, userID)

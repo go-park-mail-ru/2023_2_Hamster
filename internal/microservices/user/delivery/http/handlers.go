@@ -42,27 +42,15 @@ func NewHandler(uu user.Usecase, l logger.Logger) *Handler {
 // @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
 // @Failure     403    	{object}  	ResponseError  		"Forbidden user"
 // @Failure		500		{object}	ResponseError	"Server error"
-// @Router		/api/user/{userID}/ [get]
+// @Router		/api/user/ [get]
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) { // ?
-	userID, err := commonHttp.GetIDFromRequest(userIdUrlParam, r)
+	user, err := commonHttp.GetUserFromRequest(r)
 	if err != nil {
-		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.ErrUnauthorized.Error(), h.logger)
+		commonHttp.ErrorResponse(w, http.StatusUnauthorized, err, commonHttp.ErrUnauthorized.Error(), h.logger)
 		return
 	}
 
-	var errNoSuchUser *models.NoSuchUserError
-	usr, err := h.userService.GetUser(r.Context(), userID)
-	if errors.As(err, &errNoSuchUser) {
-		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserNotFound, h.logger)
-		return
-	}
-
-	if err != nil {
-		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, transfer_models.UserServerError, h.logger)
-		return
-	}
-
-	usrTranfer := transfer_models.InitUserTransfer(*usr)
+	usrTranfer := transfer_models.InitUserTransfer(*user)
 
 	commonHttp.SuccessResponse(w, http.StatusOK, usrTranfer)
 }
