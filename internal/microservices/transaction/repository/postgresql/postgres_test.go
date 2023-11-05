@@ -2,6 +2,7 @@ package postgresql
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"reflect"
@@ -272,6 +273,387 @@ func TestInsertTransaction(t *testing.T) {
 			if !reflect.DeepEqual(transactinID, test.expected) {
 				t.Errorf("Expected transactions: %v, but got: %v", test.expected, transactinID)
 			}
+
+			if (test.err == nil && err != nil) || (test.err != nil && err == nil) || (test.err != nil && err != nil && test.err.Error() != err.Error()) {
+				t.Errorf("Expected error: %v, but got: %v", test.err, err)
+			}
+
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("There were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
+
+func TestUpdateAccountBalance(t *testing.T) {
+	transactionID := uuid.New()
+	tests := []struct {
+		name        string
+		transaction models.Transaction
+		errRows     error
+		returnRows  uuid.UUID
+		expected    uuid.UUID
+		err         error
+	}{
+		{
+			name:        "ValidTransaction",
+			transaction: models.Transaction{},
+			returnRows:  transactionID,
+			expected:    transactionID,
+			err:         nil,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mock, _ := pgxmock.NewPool()
+			ctl := gomock.NewController(t)
+			defer ctl.Finish()
+
+			logger := *logger.InitLogger()
+			repo := NewRepository(mock, logger)
+
+			escapedQuery := regexp.QuoteMeta(transactionUpdateAccount)
+			amount := 10.0
+			//"UPDATE accounts SET balance = balance - $1 WHERE id = $2;"
+			mock.ExpectExec(escapedQuery).
+				WithArgs(amount, transactionID).
+				WillReturnResult(pgxmock.NewResult("UPDATE", 1))
+
+			//mock.ExpectCommit()
+			err := repo.updateAccountBalance(context.Background(), mock, test.returnRows, amount)
+
+			if (test.err == nil && err != nil) || (test.err != nil && err == nil) || (test.err != nil && err != nil && test.err.Error() != err.Error()) {
+				t.Errorf("Expected error: %v, but got: %v", test.err, err)
+			}
+
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("There were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
+
+func TestUpdateAccountBalances(t *testing.T) {
+	transactionID := uuid.New()
+	tests := []struct {
+		name        string
+		transaction models.Transaction
+		errRows     error
+		returnRows  uuid.UUID
+		expected    uuid.UUID
+		err         error
+	}{
+		{
+			name:        "ValidTransaction",
+			transaction: models.Transaction{Income: 10, Outcome: 10, AccountIncomeID: transactionID, AccountOutcomeID: transactionID},
+			returnRows:  transactionID,
+			expected:    transactionID,
+			err:         fmt.Errorf("[repo] failed to update old AccountIncome balance: all expectations were already fulfilled, call to ExecQuery 'UPDATE accounts SET balance = balance - $1 WHERE id = $2;' with args [10 %s] was not expected", transactionID.String()),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mock, _ := pgxmock.NewPool()
+			ctl := gomock.NewController(t)
+			defer ctl.Finish()
+
+			logger := *logger.InitLogger()
+			repo := NewRepository(mock, logger)
+
+			escapedQuery := regexp.QuoteMeta(transactionUpdateAccount)
+			//"UPDATE accounts SET balance = balance - $1 WHERE id = $2;"
+			mock.ExpectExec(escapedQuery).
+				WillReturnResult(pgxmock.NewResult("UPDATE", 1))
+
+			//mock.ExpectCommit()
+			err := repo.updateAccountBalances(context.Background(), mock, &test.transaction)
+
+			if (test.err == nil && err != nil) || (test.err != nil && err == nil) || (test.err != nil && err != nil && test.err.Error() != err.Error()) {
+				t.Errorf("Expected error: %v, but got: %v", test.err, err)
+			}
+
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("There were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
+
+func TestInsertCategories(t *testing.T) {
+	transactionID := uuid.New()
+	tests := []struct {
+		name          string
+		errRows       error
+		transactionID uuid.UUID
+		categories    []uuid.UUID
+		err           error
+		rowsErr       error
+	}{
+		{
+			name:          "ValidCategories",
+			transactionID: transactionID,
+			categories:    []uuid.UUID{transactionID},
+			err:           nil,
+			rowsErr:       nil,
+		},
+		{
+			name:          "Error",
+			transactionID: transactionID,
+			categories:    []uuid.UUID{transactionID},
+			err:           fmt.Errorf("[repo] failed to insert category association: %w", errors.New("err")),
+			rowsErr:       errors.New("err"),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mock, _ := pgxmock.NewPool()
+			ctl := gomock.NewController(t)
+			defer ctl.Finish()
+
+			logger := *logger.InitLogger()
+			repo := NewRepository(mock, logger)
+
+			escapedQuery := regexp.QuoteMeta(transactionCreateCategory)
+			//"UPDATE accounts SET balance = balance - $1 WHERE id = $2;"
+			mock.ExpectExec(escapedQuery).
+				WithArgs(transactionID, transactionID).
+				WillReturnResult(pgxmock.NewResult("INSERT", 1)).
+				WillReturnError(test.rowsErr)
+
+			//mock.ExpectCommit()
+			err := repo.insertCategories(context.Background(), mock, transactionID, test.categories)
+
+			if (test.err == nil && err != nil) || (test.err != nil && err == nil) || (test.err != nil && err != nil && test.err.Error() != err.Error()) {
+				t.Errorf("Expected error: %v, but got: %v", test.err, err)
+			}
+
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("There were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
+
+func TestUpdateTransactionInfo(t *testing.T) {
+	tests := []struct {
+		name        string
+		errRows     error
+		transaction models.Transaction
+		err         error
+		rowsErr     error
+	}{
+		{
+			name:        "ValidCategories",
+			transaction: models.Transaction{},
+			err:         nil,
+			rowsErr:     nil,
+		},
+		{
+			name:        "Error",
+			transaction: models.Transaction{},
+			err:         fmt.Errorf("[repo] failed to update transaction information: err"),
+			rowsErr:     errors.New("err"),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mock, _ := pgxmock.NewPool()
+			ctl := gomock.NewController(t)
+			defer ctl.Finish()
+
+			logger := *logger.InitLogger()
+			repo := NewRepository(mock, logger)
+
+			escapedQuery := regexp.QuoteMeta(transactionUpdate)
+			//"UPDATE accounts SET balance = balance - $1 WHERE id = $2;"
+			// "UPDATE transaction set account_income=$2, account_outcome=$3, income=$4, outcome=$5, date=$6, payer=$7, description=$8 WHERE id = $1;"
+
+			mock.ExpectExec(escapedQuery).
+				WithArgs(test.transaction.AccountIncomeID,
+					test.transaction.AccountIncomeID,
+					test.transaction.AccountOutcomeID,
+					test.transaction.Income,
+					test.transaction.Outcome,
+					test.transaction.Date,
+					test.transaction.Payer,
+					test.transaction.Description).
+				WillReturnResult(pgxmock.NewResult("UPDATE", 1)).
+				WillReturnError(test.rowsErr)
+
+			//mock.ExpectCommit()
+			err := repo.updateTransactionInfo(context.Background(), mock, &test.transaction)
+
+			if (test.err == nil && err != nil) || (test.err != nil && err == nil) || (test.err != nil && err != nil && test.err.Error() != err.Error()) {
+				t.Errorf("Expected error: %v, but got: %v", test.err, err)
+			}
+
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("There were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
+
+func TestDeleteExistingCategoryAssociations(t *testing.T) {
+	transactionID := uuid.New()
+	tests := []struct {
+		name        string
+		errRows     error
+		transaction models.Transaction
+		err         error
+		rowsErr     error
+	}{
+		{
+			name:        "ValidCategories",
+			transaction: models.Transaction{},
+			err:         nil,
+			rowsErr:     nil,
+		},
+		{
+			name:        "Error",
+			transaction: models.Transaction{},
+			err:         fmt.Errorf("[repo] failed to delete existing category associations: err"),
+			rowsErr:     errors.New("err"),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mock, _ := pgxmock.NewPool()
+			ctl := gomock.NewController(t)
+			defer ctl.Finish()
+
+			logger := *logger.InitLogger()
+			repo := NewRepository(mock, logger)
+
+			escapedQuery := regexp.QuoteMeta(transactionDeleteCategory)
+			//"UPDATE accounts SET balance = balance - $1 WHERE id = $2;"
+			// "UPDATE transaction set account_income=$2, account_outcome=$3, income=$4, outcome=$5, date=$6, payer=$7, description=$8 WHERE id = $1;"
+
+			mock.ExpectExec(escapedQuery).
+				WithArgs(transactionID).
+				WillReturnResult(pgxmock.NewResult("DELETE", 1)).
+				WillReturnError(test.rowsErr)
+
+			//mock.ExpectCommit()
+			err := repo.deleteExistingCategoryAssociations(context.Background(), mock, transactionID)
+
+			if (test.err == nil && err != nil) || (test.err != nil && err == nil) || (test.err != nil && err != nil && test.err.Error() != err.Error()) {
+				t.Errorf("Expected error: %v, but got: %v", test.err, err)
+			}
+
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("There were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
+
+func TestDeleteAccountBalance(t *testing.T) {
+	transactionID := uuid.New()
+	tests := []struct {
+		name        string
+		transaction models.Transaction
+		errRows     error
+		returnRows  uuid.UUID
+		expected    uuid.UUID
+		err         error
+	}{
+		{
+			name:        "ValidTransaction",
+			transaction: models.Transaction{Income: 10, Outcome: 10, AccountIncomeID: transactionID, AccountOutcomeID: transactionID},
+			returnRows:  transactionID,
+			expected:    transactionID,
+			err:         fmt.Errorf("[repo] failed to update old AccountIncome balance: err"),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mock, _ := pgxmock.NewPool()
+			ctl := gomock.NewController(t)
+			defer ctl.Finish()
+
+			logger := *logger.InitLogger()
+			repo := NewRepository(mock, logger)
+
+			escapedQuery := regexp.QuoteMeta(transactionUpdateAccount)
+			//"UPDATE accounts SET balance = balance - $1 WHERE id = $2;"
+			mock.ExpectExec(escapedQuery).
+				WillReturnResult(pgxmock.NewResult("UPDATE", 1)).
+				WillReturnError(errors.New("err"))
+
+			//mock.ExpectCommit()
+			err := repo.deleteAccountBalance(context.Background(), mock, 10.0, 10.0, transactionID, transactionID)
+
+			if (test.err == nil && err != nil) || (test.err != nil && err == nil) || (test.err != nil && err != nil && test.err.Error() != err.Error()) {
+				t.Errorf("Expected error: %v, but got: %v", test.err, err)
+			}
+
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("There were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
+
+func TestCheckForbidden(t *testing.T) {
+	transactionID := uuid.New()
+	tests := []struct {
+		name        string
+		transaction uuid.UUID
+		errRows     error
+
+		returnRows *pgxmock.Rows
+		expected   uuid.UUID
+		err        error
+	}{
+		{
+			name:        "ValidTransaction",
+			transaction: transactionID,
+			returnRows:  pgxmock.NewRows([]string{"user_id"}).AddRow(transactionID),
+			expected:    transactionID,
+			errRows:     nil,
+			err:         nil,
+		},
+		{
+			name:        "ValidTransaction",
+			transaction: transactionID,
+			returnRows:  pgxmock.NewRows([]string{"user_id"}).AddRow(transactionID),
+			expected:    transactionID,
+			errRows:     sql.ErrNoRows,
+			err:         fmt.Errorf("[repo] No Such transaction: %s doesn't exist: sql: no rows in result set", transactionID.String()),
+		},
+		{
+			name:        "ValidTransaction",
+			transaction: transactionID,
+			returnRows:  pgxmock.NewRows([]string{"user_id"}).AddRow(transactionID),
+			expected:    transactionID,
+			errRows:     errors.New("err"),
+			err:         fmt.Errorf("[repo] failed request db SELECT user_id FROM transaction WHERE id = $1;, err"),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mock, _ := pgxmock.NewPool()
+			ctl := gomock.NewController(t)
+			defer ctl.Finish()
+
+			logger := *logger.InitLogger()
+			repo := NewRepository(mock, logger)
+
+			escapedQuery := regexp.QuoteMeta(TransactionGetUserByID)
+			mock.ExpectQuery(escapedQuery).
+				WithArgs(test.transaction).
+				WillReturnRows(test.returnRows).
+				WillReturnError(test.errRows)
+
+			_, err := repo.CheckForbidden(context.Background(), test.transaction)
 
 			if (test.err == nil && err != nil) || (test.err != nil && err == nil) || (test.err != nil && err != nil && test.err.Error() != err.Error()) {
 				t.Errorf("Expected error: %v, but got: %v", test.err, err)

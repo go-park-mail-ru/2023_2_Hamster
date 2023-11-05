@@ -94,12 +94,12 @@ func (u *Usecase) GetFeed(ctx context.Context, userID uuid.UUID) (*tranfer_model
 		return dataTranfer, err
 	}
 
-	dataTranfer.BudgetActual, err = u.GetCurrentBudget(ctx, userID)
+	dataTranfer.BudgetPlanned, err = u.GetPlannedBudget(ctx, userID)
 	if err != nil {
 		return dataTranfer, err
 	}
 
-	dataTranfer.BudgetPlanned, err = u.GetPlannedBudget(ctx, userID)
+	dataTranfer.BudgetActual, err = u.GetCurrentBudget(ctx, userID)
 	if err != nil {
 		return dataTranfer, err
 	}
