@@ -97,6 +97,7 @@ func (ui *UserUdate) ToUser(user *models.User) *models.User {
 func InitUserTransfer(user models.User) UserTransfer {
 	return UserTransfer{
 		ID:            user.ID,
+		Login:         user.Login,
 		Username:      user.Username,
 		PlannedBudget: user.PlannedBudget,
 		AvatarURL:     user.AvatarURL,

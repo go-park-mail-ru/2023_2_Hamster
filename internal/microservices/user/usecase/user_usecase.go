@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
@@ -81,9 +82,15 @@ func (u *Usecase) GetAccounts(ctx context.Context, userID uuid.UUID) ([]models.A
 func (u *Usecase) GetFeed(ctx context.Context, userID uuid.UUID) (*tranfer_models.UserFeed, error) { // need test!
 	dataTranfer := &tranfer_models.UserFeed{}
 	var err error
+	var errNoSuchAccounts *models.NoSuchAccounts
 
 	dataTranfer.Balance, err = u.GetUserBalance(ctx, userID)
 	if err != nil {
+		return dataTranfer, err
+	}
+
+	dataTranfer.AccountMas, err = u.GetAccounts(ctx, userID)
+	if err != nil && !errors.As(err, &errNoSuchAccounts) {
 		return dataTranfer, err
 	}
 
@@ -93,11 +100,6 @@ func (u *Usecase) GetFeed(ctx context.Context, userID uuid.UUID) (*tranfer_model
 	}
 
 	dataTranfer.BudgetPlanned, err = u.GetPlannedBudget(ctx, userID)
-	if err != nil {
-		return dataTranfer, err
-	}
-
-	dataTranfer.AccountMas, err = u.GetAccounts(ctx, userID)
 	if err != nil {
 		return dataTranfer, err
 	}

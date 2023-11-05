@@ -22,5 +22,8 @@ type Repository interface {
 	// GetTransaction(ctx context.Context, transaction models.Transaction) *models.Transaction
 	UpdateTransaction(ctx context.Context, transaction *models.Transaction) error
 	CheckForbidden(ctx context.Context, transactinID uuid.UUID) (uuid.UUID, error)
+	UpdateAccountBalance(ctx context.Context, transaction *models.Transaction) error
+	CreateTransactionCategory(ctx context.Context, transaction *models.Transaction) error
+	DeleteAccountBalance(ctx context.Context, transaction *models.Transaction) error
 	//Check(ctx context.Context, transactionID uuid.UUID) error
 }

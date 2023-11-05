@@ -26,9 +26,9 @@ type NoSuchUserIdBalanceError struct {
 	UserID uuid.UUID
 }
 
-type NoSuchCurrentBudget struct {
-	UserID uuid.UUID
-}
+// type NoSuchCurrentBudget struct {
+// 	UserID uuid.UUID
+// }
 
 type NoSuchPlannedBudgetError struct {
 	UserID uuid.UUID
@@ -52,9 +52,9 @@ func (e *NoSuchPlannedBudgetError) Error() string {
 	return fmt.Sprintf("planned budget from user: %s doesn't exist", e.UserID.String())
 }
 
-func (e *NoSuchCurrentBudget) Error() string {
-	return fmt.Sprintf("actual budget from user: %s doesn't exist", e.UserID.String())
-}
+// func (e *NoSuchCurrentBudget) Error() string {
+// 	return fmt.Sprintf("actual budget from user: %s doesn't exist", e.UserID.String())
+// }
 
 func (e *NoSuchAccounts) Error() string {
 	return fmt.Sprintf("No Such Accounts from user: %s doesn't exist", e.UserID.String())

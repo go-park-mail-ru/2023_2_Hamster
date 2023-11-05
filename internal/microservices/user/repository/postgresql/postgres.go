@@ -14,7 +14,7 @@ import (
 
 const (
 	UserCreate           = `INSERT INTO users (login, username, password_hash) VALUES ($1, $2, $3) RETURNING id;`
-	UserIDGetByID        = `SELECT * FROM users WHERE id = $1;`
+	UserIDGetByID        = `SELECT id, login, username, password_hash, planned_budget, avatar_url FROM users WHERE id = $1;`
 	UserGetByUserName    = `SELECT id, login, username, password_hash, planned_budget, avatar_url From users WHERE (login=$1)`
 	UserGetPlannedBudget = "SELECT planned_budget FROM users WHERE id = $1"
 	UserCheck            = `SELECT EXISTS(SELECT 1 FROM users WHERE id = $1);`
