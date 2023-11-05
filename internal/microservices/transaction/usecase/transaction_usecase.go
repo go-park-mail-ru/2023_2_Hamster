@@ -38,23 +38,6 @@ func (t *Usecase) CreateTransaction(ctx context.Context, transaction *models.Tra
 	if err != nil {
 		return transactionID, fmt.Errorf("[usecase] can't create transaction into repository: %w", err)
 	}
-	transaction.ID = transactionID
-
-	if t.transactionRepo.UpdateAccountBalance(ctx, transaction) != nil {
-		err = t.transactionRepo.DeleteTransaction(ctx, transactionID, transaction.UserID)
-		if err != nil {
-			return transactionID, fmt.Errorf("[usecase] can't delete bad transactionID %w", err)
-		}
-		return transactionID, fmt.Errorf("[usecase] can't create transaction %w", err)
-	}
-
-	if t.transactionRepo.CreateTransactionCategory(ctx, transaction) != nil {
-		err = t.DeleteTransaction(ctx, transactionID, transaction.UserID)
-		if err != nil {
-			return transactionID, fmt.Errorf("[usecase] can't delete bad transactionID %w", err)
-		}
-		return transactionID, fmt.Errorf("[usecase] can't create transaction %w", err)
-	}
 	return transactionID, nil
 }
 
@@ -68,31 +51,9 @@ func (t *Usecase) UpdateTransaction(ctx context.Context, transaction *models.Tra
 		return fmt.Errorf("[usecase] can't be update by user: %w", &models.ForbiddenUserError{})
 	}
 
-	if err := t.transactionRepo.DeleteAccountBalance(ctx, transaction); err != nil {
-		return fmt.Errorf("[usecase] can't delete old account balance %w", err)
-	}
-
-	if err := t.transactionRepo.UpdateAccountBalance(ctx, transaction); err != nil {
-		return fmt.Errorf("[usecase] can't update account balance %w", err)
-	}
-
-	if err = t.transactionRepo.UpdateTransactionCategory(ctx, transaction); err != nil {
-		if err = t.transactionRepo.RollBackAccountBalance(ctx, transaction); err != nil { // возвращаем баланс
-			return fmt.Errorf("[usecase] can't rollback account balance %w", err)
-		}
-		return fmt.Errorf("[usecase] can't update transaction, but data remained valid %w", err)
-	}
-
 	if err := t.transactionRepo.UpdateTransaction(ctx, transaction); err != nil {
-		if err = t.transactionRepo.RollBackAccountBalance(ctx, transaction); err != nil { // возвращаем баланс
-			return fmt.Errorf("[usecase] can't rollback account balance %w", err)
-		}
-		if err = t.transactionRepo.RollbackTransactionCategory(ctx, transaction); err != nil {
-			return fmt.Errorf("[usecase] can't rollback transactionCategory %w", err)
-		}
-		return fmt.Errorf("[usecase] cant't update transaction, but data remained valid %w", err)
+		return fmt.Errorf("[usecase] can't update transaction %w", err)
 	}
-
 	return nil
 }
 

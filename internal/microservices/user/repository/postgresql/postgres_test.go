@@ -110,7 +110,7 @@ func TestGetByID(t *testing.T) {
 			name:     "DatabaseError",
 			rows:     pgxmock.NewRows([]string{"id", "login", "username", "password", "planned_budget", "avatar_url"}),
 			rowsErr:  errors.New("database error"),
-			err:      errors.New("failed request db SELECT * FROM users WHERE id = $1;, database error"),
+			err:      errors.New("failed request db SELECT id, login, username, password_hash, planned_budget, avatar_url FROM users WHERE id = $1;, database error"),
 			expected: nil,
 		},
 	}
@@ -474,12 +474,26 @@ func TestGetAccounts(t *testing.T) {
 				},
 			},
 		},
-
+		{
+			name: "ValidAccounts",
+			rows: pgxmock.NewRows([]string{"id", "user_id", "balance", "mean_payment"}).
+				AddRow("fff", userID, 100.0, "Кошелек").
+				AddRow(userID, userID, 200.0, "Наличка"),
+			err:      fmt.Errorf("[repo] Scanning value error for column 'catygory_id': Scan: invalid UUID length: 3"),
+			expected: nil,
+		},
 		{
 			name:     "NoAccountsFound",
 			rows:     pgxmock.NewRows([]string{"id", "user_id", "balance", "mean_payment"}),
 			rowsErr:  nil,
 			err:      fmt.Errorf("[repo] No Such Accounts from user: %s doesn't exist: <nil>", userID.String()),
+			expected: nil,
+		},
+		{
+			name:     "Rows error",
+			rows:     pgxmock.NewRows([]string{"id", "user_id", "balance", "mean_payment"}).RowError(0, errors.New("err")),
+			rowsErr:  nil,
+			err:      fmt.Errorf("[repo] %w", errors.New("err")),
 			expected: nil,
 		},
 		{
