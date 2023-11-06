@@ -479,7 +479,7 @@ func TestGetAccounts(t *testing.T) {
 			rows: pgxmock.NewRows([]string{"id", "user_id", "balance", "mean_payment"}).
 				AddRow("fff", userID, 100.0, "Кошелек").
 				AddRow(userID, userID, 200.0, "Наличка"),
-			err:      fmt.Errorf("[repo] Scanning value error for column 'catygory_id': Scan: invalid UUID length: 3"),
+			err:      fmt.Errorf("[repo] Scanning value error for column 'id': Scan: invalid UUID length: 3"),
 			expected: nil,
 		},
 		{
