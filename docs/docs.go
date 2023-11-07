@@ -11,7 +11,7 @@ const docTemplate = `{
         "title": "{{.Title}}",
         "contact": {
             "name": "Hamster API Support",
-            "email": "dimka.komarov@bk.ru"
+            "email": "grigorikovalenko@gmail.com"
         },
         "version": "{{.Version}}"
     },
@@ -180,6 +180,38 @@ const docTemplate = `{
                         }
                     },
                     "429": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/csrf/": {
+            "get": {
+                "description": "Get csrf token",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Csrf"
+                ],
+                "summary": "Get csrf token",
+                "responses": {
+                    "200": {
+                        "description": "Csrf Token",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-http_getCSRFResponce"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
                         "description": "Server error",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
@@ -396,6 +428,50 @@ const docTemplate = `{
                     },
                     "403": {
                         "description": "User hasn't rights",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/": {
+            "get": {
+                "description": "Get user with chosen ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get User",
+                "responses": {
+                    "200": {
+                        "description": "Show user",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-transfer_models_UserTransfer"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
                         }
@@ -762,50 +838,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/api/user/{userID}/": {
-            "get": {
-                "description": "Get user with chosen ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "summary": "Get User",
-                "responses": {
-                    "200": {
-                        "description": "Show user",
-                        "schema": {
-                            "$ref": "#/definitions/http.Response-transfer_models_UserTransfer"
-                        }
-                    },
-                    "400": {
-                        "description": "Client error",
-                        "schema": {
-                            "$ref": "#/definitions/http.ResponseError"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized user",
-                        "schema": {
-                            "$ref": "#/definitions/http.ResponseError"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden user",
-                        "schema": {
-                            "$ref": "#/definitions/http.ResponseError"
-                        }
-                    },
-                    "500": {
-                        "description": "Server error",
-                        "schema": {
-                            "$ref": "#/definitions/http.ResponseError"
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
@@ -929,6 +961,17 @@ const docTemplate = `{
             "properties": {
                 "body": {
                     "$ref": "#/definitions/http.TransactionCreateResponse"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "http.Response-http_getCSRFResponce": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/http.getCSRFResponce"
                 },
                 "status": {
                     "type": "integer"
@@ -1073,6 +1116,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "transaction_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "http.getCSRFResponce": {
+            "type": "object",
+            "properties": {
+                "csrf": {
                     "type": "string"
                 }
             }

@@ -7,6 +7,7 @@ import (
 
 	_ "github.com/go-park-mail-ru/2023_2_Hamster/docs"
 	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/http"
+	csrf "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/csrf/delivery/http"
 	transaction "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/transaction/delivery/http"
 	user "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user/delivery/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware"
@@ -36,7 +37,9 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 func InitRouter(auth *auth.Handler,
 	user *user.Handler,
 	transaction *transaction.Handler,
+	csrf *csrf.Handler,
 	authMid *middleware.AuthMiddleware,
+	csrfMid *middleware.CSRFMiddleware,
 	/*logMid *middleware.LogMiddleware*/) *mux.Router {
 	r := mux.NewRouter()
 	r.Use(middleware.RequestID)
@@ -54,6 +57,11 @@ func InitRouter(auth *auth.Handler,
 	)).Methods(http.MethodGet)
 
 	apiRouter := r.PathPrefix("/api").Subrouter()
+
+	csrfRouter := apiRouter.PathPrefix("/csrf").Subrouter()
+	csrfRouter.Use(authMid.Authentication)
+	csrfRouter.Methods("GET").Path("/").HandlerFunc(csrf.GetCSRF)
+
 	authRouter := apiRouter.PathPrefix("/auth").Subrouter()
 	{
 		authRouter.Methods("POST").Path("/signin").HandlerFunc(auth.Login)
@@ -65,6 +73,7 @@ func InitRouter(auth *auth.Handler,
 
 	userRouter := apiRouter.PathPrefix("/user").Subrouter()
 	userRouter.Use(authMid.Authentication)
+	userRouter.Use(csrfMid.CheckCSRF)
 	{
 		userRouter.Methods("PUT").Path("/updatePhoto").HandlerFunc(user.UpdatePhoto)
 		userRouter.Path("/update").Methods("PUT").HandlerFunc(user.Update)
@@ -80,6 +89,7 @@ func InitRouter(auth *auth.Handler,
 
 	transactionRouter := apiRouter.PathPrefix("/transaction").Subrouter()
 	transactionRouter.Use(authMid.Authentication)
+	transactionRouter.Use(csrfMid.CheckCSRF)
 	{
 		transactionRouter.Methods("GET").Path("/feed").HandlerFunc(transaction.GetFeed)
 		// 	transactionRouter.Methods("GET").Path("/{transaction_id}/").HandlerFunc(transaction.Get)

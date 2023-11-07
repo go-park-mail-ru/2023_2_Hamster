@@ -10,6 +10,8 @@ import (
 	authDelivery "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/http"
 	authRep "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/repository/postgresql"
 	authUsecase "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/usecase"
+	csrfDelivery "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/csrf/delivery/http"
+	csrfUsecase "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/csrf/usecase"
 	transactionDelivery "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/transaction/delivery/http"
 	transactionRep "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/transaction/repository/postgresql"
 	transactionUsecase "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/transaction/usecase"
@@ -32,14 +34,17 @@ func Init(db *pgxpool.Pool, redis *redis.Client, log *logger.Logger) *mux.Router
 	sessionUsecase := sessionUsecase.NewSessionUsecase(sessionRep, *log)
 	userUsecase := userUsecase.NewUsecase(userRep, *log)
 	transactionUsecase := transactionUsecase.NewUsecase(transactionRep, *log)
+	csrfUsecase := csrfUsecase.NewUsecase(*log)
 
 	authMiddlewear := middleware.NewAuthMiddleware(sessionUsecase, userRep, *log)
+	csrfMiddlewear := middleware.NewCSRFMiddleware(csrfUsecase, *log)
 	// logMiddlewear := middleware.NewLogMiddleware(*log)
 
 	authHandler := authDelivery.NewHandler(authUsecase, userUsecase, sessionUsecase, *log)
 	userHandler := userDelivery.NewHandler(userUsecase, *log)
 	transactionHandler := transactionDelivery.NewHandler(transactionUsecase, *log)
+	csrfHandler := csrfDelivery.NewHandler(csrfUsecase, *log)
 
-	return router.InitRouter(authHandler, userHandler, transactionHandler, authMiddlewear /*, logMiddlewear*/)
+	return router.InitRouter(authHandler, userHandler, transactionHandler, csrfHandler, authMiddlewear, csrfMiddlewear /*, logMiddlewear*/)
 
 }
