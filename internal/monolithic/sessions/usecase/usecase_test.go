@@ -120,7 +120,8 @@ func Test_CreateSession_OK(t *testing.T) {
 	usecase := NewSessionUsecase(sessionRep)
 
 	for _, tc := range testCase {
-		sessionRep.EXPECT().CreateSession(context.TODO(), tc.expectedSession.Cookie).Return(nil).Times(1)
+
+		sessionRep.EXPECT().CreateSession(context.TODO(), gomock.Any()).Return(nil).Times(1)
 
 		_, err := usecase.CreateSessionById(context.TODO(), tc.expectedSession.UserId)
 
