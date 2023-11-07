@@ -25,9 +25,9 @@ jobs:
       - if: steps.go-cache.outputs.cache-hit != 'true'
         run: go mod download
 
-      - name: Create test folder
-        run: |
-          mkdir /images && sudo chmod -R 777 /images
+      #- name: Create test folder
+      #  run: |
+      #    mkdir /images && sudo chmod -R 777 /images
       
       - name: Run Unit tests
         run: |
