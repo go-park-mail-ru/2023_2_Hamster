@@ -42,9 +42,8 @@ func main() {
 		return
 	}
 	defer func() {
-		if err := db.Close(ctx); err != nil {
-			log.Errorf("Error Closing database connection: %v", err)
-		}
+		db.Close()
+
 		log.Info("Db closed without errors")
 	}()
 

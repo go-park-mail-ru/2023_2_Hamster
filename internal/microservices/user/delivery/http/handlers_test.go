@@ -19,7 +19,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user/delivery/http/transfer_models"
 	mocks "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user/mocks"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
-	"github.com/gorilla/mux"
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
@@ -480,55 +479,31 @@ func TestHandler_GetFeed(t *testing.T) {
 	}
 }
 func TestHandler_GetUser(t *testing.T) {
-	uuidTest := uuid.New()
 	tests := []struct {
-		name          string
-		userID        string
-		expectedCode  int
-		expectedBody  string
-		mockUsecaseFn func(*mocks.MockUsecase)
+		user         *models.User
+		name         string
+		userID       string
+		expectedCode int
+		expectedBody string
+		funcCtxUser  func(*models.User, context.Context) context.Context
 	}{
 		{
-			name:         "Successful call to GetUser",
-			userID:       uuid.New().String(),
+			name: "Successful call to GetUser",
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.WithValue(ctx, models.ContextKeyUserType{}, user)
+			},
+			user:         &models.User{},
 			expectedCode: http.StatusOK,
 			expectedBody: `{"status":200,"body":{"id":"00000000-0000-0000-0000-000000000000","login":"","username":"","planned_budget":0,"avatar_url":"00000000-0000-0000-0000-000000000000"}}`,
-			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
-
-				usr := &models.User{}
-				mockUsecase.EXPECT().GetUser(gomock.Any(), gomock.Any()).Return(usr, nil)
-			},
 		},
 		{
-			name:         "Unauthorized Request",
-			userID:       "invalidUserID",
-			expectedCode: http.StatusBadRequest,
-			expectedBody: `{"status":400,"message":"unauthorized"}`,
-			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
-				// No expectations for mockUsecase.
+			name: "Unauthorized Request",
+			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
+				return context.Background()
 			},
-		},
-		{
-			name:         "No user found",
-			userID:       uuidTest.String(),
-			expectedCode: http.StatusBadRequest,
-			expectedBody: `{"status":400,"message":"no such user"}`,
-			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
-				expectedError := models.NoSuchUserError{}
-				user := &models.User{}
-				mockUsecase.EXPECT().GetUser(gomock.Any(), gomock.Any()).Return(user, &expectedError)
-			},
-		},
-		{
-			name:         "Internal server error",
-			userID:       uuid.New().String(),
-			expectedCode: http.StatusInternalServerError,
-			expectedBody: `{"status":500,"message":"can't get user"}`,
-			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
-				internalError := errors.New("internal server error")
-				user := &models.User{}
-				mockUsecase.EXPECT().GetUser(gomock.Any(), gomock.Any()).Return(user, internalError)
-			},
+			user:         &models.User{},
+			expectedCode: http.StatusUnauthorized,
+			expectedBody: `{"status":401,"message":"unauthorized"}`,
 		},
 	}
 
@@ -538,14 +513,13 @@ func TestHandler_GetUser(t *testing.T) {
 			defer ctrl.Finish()
 
 			mockUsecase := mocks.NewMockUsecase(ctrl)
-			tt.mockUsecaseFn(mockUsecase)
 
 			mockHandler := NewHandler(mockUsecase, *logger.NewLogger(context.TODO()))
 
 			url := "/api/user/" + tt.userID + "/accounts"
 			req := httptest.NewRequest("GET", url, nil)
-			req = mux.SetURLVars(req, map[string]string{"userID": tt.userID})
-
+			ctx := tt.funcCtxUser(tt.user, req.Context())
+			req = req.WithContext(ctx)
 			recorder := httptest.NewRecorder()
 			mockHandler.Get(recorder, req)
 

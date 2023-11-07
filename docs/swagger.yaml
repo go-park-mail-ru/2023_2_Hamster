@@ -81,6 +81,13 @@ definitions:
       status:
         type: integer
     type: object
+  http.Response-http_getCSRFResponce:
+    properties:
+      body:
+        $ref: '#/definitions/http.getCSRFResponce'
+      status:
+        type: integer
+    type: object
   http.Response-string:
     properties:
       body:
@@ -170,6 +177,11 @@ definitions:
       payer:
         type: string
       transaction_id:
+        type: string
+    type: object
+  http.getCSRFResponce:
+    properties:
+      csrf:
         type: string
     type: object
   models.Accounts:
@@ -284,7 +296,7 @@ definitions:
 host: localhost:8090
 info:
   contact:
-    email: dimka.komarov@bk.ru
+    email: grigorikovalenko@gmail.com
     name: Hamster API Support
   description: Server API for Hamster Money Service Application
   title: Hamster API
@@ -401,6 +413,27 @@ paths:
       summary: Sign Up
       tags:
       - Auth
+  /api/csrf/:
+    get:
+      description: Get csrf token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Csrf Token
+          schema:
+            $ref: '#/definitions/http.Response-http_getCSRFResponce'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Get csrf token
+      tags:
+      - Csrf
   /api/transaction/{transaction_id}/delete:
     delete:
       description: Delete transaction with chosen ID
@@ -547,7 +580,7 @@ paths:
       summary: PUT Update
       tags:
       - Transaction
-  /api/user/{userID}/:
+  /api/user/:
     get:
       description: Get user with chosen ID
       produces:

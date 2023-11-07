@@ -5,28 +5,17 @@ import (
 
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type DbConn interface {
-	QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row
+	Acquire(ctx context.Context) (*pgxpool.Conn, error)
 	Begin(ctx context.Context) (pgx.Tx, error)
-	BeginFunc(ctx context.Context, f func(pgx.Tx) error) (err error)
+	BeginFunc(ctx context.Context, f func(pgx.Tx) error) error
 	BeginTx(ctx context.Context, txOptions pgx.TxOptions) (pgx.Tx, error)
-	BeginTxFunc(ctx context.Context, txOptions pgx.TxOptions, f func(pgx.Tx) error) (err error)
-	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
+	BeginTxFunc(ctx context.Context, txOptions pgx.TxOptions, f func(pgx.Tx) error) error
 	Exec(ctx context.Context, sql string, arguments ...interface{}) (pgconn.CommandTag, error)
-
-	// Close(ctx context.Context) error
-	// Config() *pgx.ConnConfig
-	// ConnInfo() *pgtype.ConnInfo
-	// CopyFrom(ctx context.Context, tableName pgx.Identifier, columnNames []string, rowSrc pgx.CopyFromSource) (int64, error)
-	// Deallocate(ctx context.Context, name string) error
-	// IsClosed() bool
-	// PgConn() *pgconn.PgConn
-	// Ping(ctx context.Context) error
-	// Prepare(ctx context.Context, name string, sql string) (sd *pgconn.StatementDescription, err error)
-	// QueryFunc(ctx context.Context, sql string, args []interface{}, scans []interface{}, f func(pgx.QueryFuncRow) error) (pgconn.CommandTag, error)
-	// SendBatch(ctx context.Context, b *pgx.Batch) pgx.BatchResults
-	// StatementCache() stmtcache.Cache
-	// WaitForNotification(ctx context.Context) (*pgconn.Notification, error)
+	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
+	QueryFunc(ctx context.Context, sql string, args []interface{}, scans []interface{}, f func(pgx.QueryFuncRow) error) (pgconn.CommandTag, error)
+	QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row
 }

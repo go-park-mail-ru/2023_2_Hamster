@@ -41,8 +41,8 @@ lint: ## Run linters
 
 # New make
 
-b:
-	go build -o app ./cmd/api/main.go
+# b:
+# 	go build -o app ./cmd/api/main.go
 
-r: lint b	
-	./app
+# r: lint b	
+# 	./app

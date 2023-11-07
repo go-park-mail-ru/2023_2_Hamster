@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
@@ -26,14 +27,14 @@ func NewUsecase(
 	}
 }
 
-func (u *Usecase) GetUser(ctx context.Context, userID uuid.UUID) (*models.User, error) { // need test
-	user, err := u.userRepo.GetByID(ctx, userID)
-	if err != nil {
-		return user, fmt.Errorf("[usecase] can't get user from repository %w", err)
-	}
+// func (u *Usecase) GetUser(ctx context.Context, userID uuid.UUID) (*models.User, error) { // need test
+// 	user, err := u.userRepo.GetByID(ctx, userID)
+// 	if err != nil {
+// 		return user, fmt.Errorf("[usecase] can't get user from repository %w", err)
+// 	}
 
-	return user, nil
-}
+// 	return user, nil
+// }
 
 func (u *Usecase) GetUserBalance(ctx context.Context, userID uuid.UUID) (float64, error) {
 	balance, err := u.userRepo.GetUserBalance(ctx, userID)
@@ -81,14 +82,15 @@ func (u *Usecase) GetAccounts(ctx context.Context, userID uuid.UUID) ([]models.A
 func (u *Usecase) GetFeed(ctx context.Context, userID uuid.UUID) (*tranfer_models.UserFeed, error) { // need test!
 	dataTranfer := &tranfer_models.UserFeed{}
 	var err error
+	var errNoSuchAccounts *models.NoSuchAccounts
 
 	dataTranfer.Balance, err = u.GetUserBalance(ctx, userID)
 	if err != nil {
 		return dataTranfer, err
 	}
 
-	dataTranfer.BudgetActual, err = u.GetCurrentBudget(ctx, userID)
-	if err != nil {
+	dataTranfer.AccountMas, err = u.GetAccounts(ctx, userID)
+	if err != nil && !errors.As(err, &errNoSuchAccounts) {
 		return dataTranfer, err
 	}
 
@@ -97,7 +99,7 @@ func (u *Usecase) GetFeed(ctx context.Context, userID uuid.UUID) (*tranfer_model
 		return dataTranfer, err
 	}
 
-	dataTranfer.AccountMas, err = u.GetAccounts(ctx, userID)
+	dataTranfer.BudgetActual, err = u.GetCurrentBudget(ctx, userID)
 	if err != nil {
 		return dataTranfer, err
 	}

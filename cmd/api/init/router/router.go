@@ -7,8 +7,10 @@ import (
 	"time"
 
 	_ "github.com/go-park-mail-ru/2023_2_Hamster/docs"
+
 	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/http"
 	category "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/category/delivery/http"
+	csrf "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/csrf/delivery/http"
 	transaction "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/transaction/delivery/http"
 	user "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user/delivery/http"
 
@@ -22,10 +24,12 @@ import (
 func InitRouter(auth *auth.Handler,
 	user *user.Handler,
 	transaction *transaction.Handler,
-	authMid *middleware.AuthMiddleware,
 	category *category.Handler,
+	csrf *csrf.Handler,
 	logMid *middleware.LoggingMiddleware,
-	recoveryMid *middleware.RecoveryMiddleware) *mux.Router {
+	recoveryMid *middleware.RecoveryMiddleware,
+	authMid *middleware.AuthMiddleware,
+	csrfMid *middleware.CSRFMiddleware) *mux.Router {
 
 	r := mux.NewRouter()
 	r.Use(middleware.RequestID)
@@ -43,6 +47,11 @@ func InitRouter(auth *auth.Handler,
 	)).Methods(http.MethodGet)
 
 	apiRouter := r.PathPrefix("/api").Subrouter()
+
+	csrfRouter := apiRouter.PathPrefix("/csrf").Subrouter()
+	csrfRouter.Use(authMid.Authentication)
+	csrfRouter.Methods("GET").Path("/").HandlerFunc(csrf.GetCSRF)
+
 	authRouter := apiRouter.PathPrefix("/auth").Subrouter()
 	{
 		authRouter.Methods("POST").Path("/signin").HandlerFunc(auth.Login)
@@ -54,8 +63,8 @@ func InitRouter(auth *auth.Handler,
 
 	userRouter := apiRouter.PathPrefix("/user").Subrouter()
 	userRouter.Use(authMid.Authentication)
+	userRouter.Use(csrfMid.CheckCSRF)
 	{
-		userRouter.Methods("GET").Path("/{userID}").HandlerFunc(user.Get)
 		userRouter.Methods("PUT").Path("/updatePhoto").HandlerFunc(user.UpdatePhoto)
 		userRouter.Path("/update").Methods("PUT").HandlerFunc(user.Update)
 
@@ -64,10 +73,13 @@ func InitRouter(auth *auth.Handler,
 		// userRouter.Methods("GET").Path("/actualBudget").HandlerFunc(user.GetCurrentBudget)
 		userRouter.Methods("GET").Path("/account/all").HandlerFunc(user.GetAccounts)
 		userRouter.Methods("GET").Path("/feed").HandlerFunc(user.GetFeed)
+		userRouter.Methods("GET").Path("/").HandlerFunc(user.Get)
+
 	}
 
 	transactionRouter := apiRouter.PathPrefix("/transaction").Subrouter()
 	transactionRouter.Use(authMid.Authentication)
+	transactionRouter.Use(csrfMid.CheckCSRF)
 	{
 		transactionRouter.Methods("GET").Path("/feed").HandlerFunc(transaction.GetFeed)
 		// 	transactionRouter.Methods("GET").Path("/{transaction_id}/").HandlerFunc(transaction.Get)

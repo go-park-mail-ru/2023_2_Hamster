@@ -17,7 +17,7 @@ type Usecase interface {
 	GetCurrentBudget(ctx context.Context, userID uuid.UUID) (float64, error)
 	GetAccounts(ctx context.Context, userID uuid.UUID) ([]models.Accounts, error)
 	GetFeed(ctx context.Context, userID uuid.UUID) (*transfer_models.UserFeed, error)
-	GetUser(ctx context.Context, userID uuid.UUID) (*models.User, error)
+	//GetUser(ctx context.Context, userID uuid.UUID) (*models.User, error)
 	UpdateUser(ctx context.Context, user *models.User) error
 	UpdatePhoto(ctx context.Context, usserID uuid.UUID) (uuid.UUID, error)
 }
@@ -34,6 +34,6 @@ type Repository interface {
 	GetAccounts(ctx context.Context, userID uuid.UUID) ([]models.Accounts, error) // TODO: transfer account repository
 	// IncreaseUserVersion(ctx context.Context, ctx context.Context, userID uuid.UUID) error
 	UpdateUser(ctx context.Context, user *models.User) error
-	CheckUser(ctx context.Context, userID uuid.UUID) error
+	//CheckUser(ctx context.Context, userID uuid.UUID) error
 	UpdatePhoto(ctx context.Context, userID uuid.UUID, path uuid.UUID) error
 }
