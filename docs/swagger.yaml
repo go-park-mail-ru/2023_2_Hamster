@@ -14,6 +14,21 @@ definitions:
       username:
         type: string
     type: object
+  category.TagInput:
+    properties:
+      name:
+        type: string
+      parent_id:
+        type: string
+      regular:
+        type: boolean
+      show_income:
+        type: boolean
+      show_outcome:
+        type: boolean
+      user_id:
+        type: string
+    type: object
   http.CreateTransaction:
     properties:
       account_income:
@@ -45,6 +60,15 @@ definitions:
         type: array
     type: object
   http.NilBody:
+    type: object
+  http.Response-array_models_Category:
+    properties:
+      body:
+        items:
+          $ref: '#/definitions/models.Category'
+        type: array
+      status:
+        type: integer
     type: object
   http.Response-auth_SignResponse:
     properties:
@@ -85,6 +109,13 @@ definitions:
     properties:
       body:
         $ref: '#/definitions/http.getCSRFResponce'
+      status:
+        type: integer
+    type: object
+  http.Response-models_Category:
+    properties:
+      body:
+        $ref: '#/definitions/models.Category'
       status:
         type: integer
     type: object
@@ -144,6 +175,13 @@ definitions:
       status:
         type: integer
     type: object
+  http.Response-uuid_UUID:
+    properties:
+      body:
+        type: string
+      status:
+        type: integer
+    type: object
   http.ResponseError:
     properties:
       message:
@@ -192,6 +230,23 @@ definitions:
         type: string
       mean_payment:
         type: string
+      user_id:
+        type: string
+    type: object
+  models.Category:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      parent_id:
+        type: string
+      regular:
+        type: boolean
+      show_income:
+        type: boolean
+      show_outcome:
+        type: boolean
       user_id:
         type: string
     type: object
@@ -302,27 +357,40 @@ info:
   title: Hamster API
   version: 1.0.1
 paths:
-  /api/auth/check-unique-login/{login}:
-    get:
-      description: Get bool parametrs about unique login
+  /api/addTag:
+    post:
+      consumes:
+      - application/json
+      description: Creates tag
+      parameters:
+      - description: tag info
+        in: body
+        name: tag
+        required: true
+        schema:
+          $ref: '#/definitions/category.TagInput'
       produces:
       - application/json
       responses:
         "200":
-          description: Show user
+          description: tag with id creted
           schema:
-            $ref: '#/definitions/http.Response-bool'
+            $ref: '#/definitions/http.Response-uuid_UUID'
         "400":
-          description: Client error
+          description: Incorrect Input
           schema:
             $ref: '#/definitions/http.ResponseError'
-        "500":
+        "401":
+          description: auth error relogin
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "429":
           description: Server error
           schema:
             $ref: '#/definitions/http.ResponseError'
-      summary: Get unique login info
+      summary: Create Tag
       tags:
-      - Auth
+      - Category
   /api/auth/checkAuth:
     post:
       consumes:
@@ -353,6 +421,27 @@ paths:
       summary: Validate Auth
       tags:
       - Auth
+  /api/auth/checkLogin/{login}:
+    get:
+      description: Get bool parametrs about unique login
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Show user
+          schema:
+            $ref: '#/definitions/http.Response-bool'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Get unique login info
+      tags:
+      - Auth
   /api/auth/signin:
     post:
       consumes:
@@ -368,7 +457,7 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
+        "202":
           description: User logedin
           schema:
             $ref: '#/definitions/http.Response-auth_SignResponse'
@@ -376,7 +465,7 @@ paths:
           description: Incorrect Input
           schema:
             $ref: '#/definitions/http.ResponseError'
-        "500":
+        "429":
           description: Server error
           schema:
             $ref: '#/definitions/http.ResponseError'
@@ -398,7 +487,7 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
+        "202":
           description: User Created
           schema:
             $ref: '#/definitions/http.Response-auth_SignResponse'
@@ -434,6 +523,40 @@ paths:
       summary: Get csrf token
       tags:
       - Csrf
+  /api/getTags:
+    post:
+      consumes:
+      - application/json
+      description: Get all tags for user
+      parameters:
+      - description: tag info
+        in: body
+        name: tag
+        required: true
+        schema:
+          $ref: '#/definitions/models.Category'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: tag slice
+          schema:
+            $ref: '#/definitions/http.Response-models_Category'
+        "400":
+          description: Incorrect Input
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: auth error relogin
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "429":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Update Tag
+      tags:
+      - Category
   /api/transaction/{transaction_id}/delete:
     delete:
       description: Delete transaction with chosen ID

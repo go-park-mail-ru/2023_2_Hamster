@@ -29,8 +29,8 @@ func NewHandler(cu category.Usecase, log logger.Logger) *Handler {
 // @Description	Creates tag
 // @Accept 		json
 // @Produce		json
-// @Param			tag		body		category.Tag			true		"tag info"
-// @Success		200		{object}	Response[id]					"tag with id creted"
+// @Param			tag		body		category.TagInput			true			"tag info"
+// @Success		200		{object}	Response[uuid.UUID]					"tag with id creted"
 // @Failure		400		{object}	ResponseError					"Incorrect Input"
 // @Failure		401		{object}	ResponseError					"auth error relogin"
 // @Failure		429		{object}	ResponseError					"Server error"

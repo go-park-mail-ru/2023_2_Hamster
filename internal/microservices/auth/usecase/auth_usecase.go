@@ -7,24 +7,20 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/hasher"
 	logging "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
 )
 
 type Usecase struct {
 	authRepo auth.Repository
-	userRepo user.Repository
 	logger   logging.Logger
 }
 
 func NewUsecase(
 	ar auth.Repository,
-	ur user.Repository,
 	log logging.Logger) *Usecase {
 	return &Usecase{
 		authRepo: ar,
-		userRepo: ur,
 		logger:   log,
 	}
 }
@@ -53,7 +49,7 @@ func (u *Usecase) SignUp(ctx context.Context, input auth.SignUpInput) (uuid.UUID
 	user.Username = input.Username
 	user.Password = hash
 
-	userId, err := u.userRepo.CreateUser(ctx, user)
+	userId, err := u.authRepo.CreateUser(ctx, user)
 	if err != nil {
 		return uuid.Nil, "", fmt.Errorf("[usecase] cannot create user: %w", err)
 	}
@@ -64,7 +60,7 @@ func (u *Usecase) SignUp(ctx context.Context, input auth.SignUpInput) (uuid.UUID
 }
 
 func (u *Usecase) Login(ctx context.Context, login, plainPassword string) (uuid.UUID, string, error) {
-	user, err := u.userRepo.GetUserByLogin(ctx, login)
+	user, err := u.authRepo.GetUserByLogin(ctx, login)
 	if err != nil {
 		return uuid.Nil, "", fmt.Errorf("[usecase] can't find user: %w", err)
 	}

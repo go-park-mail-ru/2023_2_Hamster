@@ -10,7 +10,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions"
 )
 
@@ -44,7 +43,7 @@ func NewHandler(
 // @Accept 		json
 // @Produce		json
 // @Param			user		body		models.User			true		"user info"
-// @Success		200		{object}	Response[auth.SignResponse]		"User Created"
+// @Success		202		{object}	Response[auth.SignResponse]		"User Created"
 // @Failure		400		{object}	ResponseError					"Incorrect Input"
 // @Failure		429		{object}	ResponseError					"Server error"
 // @Router		/api/auth/signup	[post]
@@ -81,7 +80,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, response.InitCookie("session_id", session.Cookie, time.Now().Add(7*24*time.Hour), "/api"))
-	response.SuccessResponse[auth.SignResponse](w, http.StatusAccepted, regUser)
+	response.SuccessResponse(w, http.StatusAccepted, regUser)
 }
 
 // @Summary		Sign In
@@ -90,9 +89,9 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Accept 		json
 // @Produce		json
 // @Param			userInput		body		auth.LoginInput		true		"username && password"
-// @Success		200			{object}	Response[auth.SignResponse]			"User logedin"
-// @Failure		400			{object}	ResponseError			"Incorrect Input"
-// @Failure		500			{object}	ResponseError			"Server error"
+// @Success		202			{object}	Response[auth.SignResponse]		"User logedin"
+// @Failure		400			{object}	ResponseError					"Incorrect Input"
+// @Failure		429			{object}	ResponseError					"Server error"
 // @Router		/api/auth/signin	[post]
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	var loginUser auth.LoginInput
@@ -135,7 +134,8 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 // @Produce		json
 // @Param			user		body		models.User		true		"user info"
 // @Success		200		{object}	Response[auth.SignResponse]	"User status"
-// @Failure		400		{object}	ResponseError				"Invalid cookie"
+// @Failure		401		{object}	ResponseError				"Session doesn't exist"
+// @Failure		403		{object}	ResponseError				"Invalid cookie"
 // @Failure		500		{object}	ResponseError				"Server error: cookie read fail"
 // @Router		/api/auth/checkAuth	[post]
 func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
@@ -153,7 +153,7 @@ func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response.SuccessResponse[models.Session](w, http.StatusOK, session)
+	response.SuccessResponse(w, http.StatusOK, session)
 }
 
 // @Summary		Validate Auth
@@ -181,18 +181,18 @@ func (h *Handler) LogOut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.SetCookie(w, response.InitCookie("session", "", time.Now().AddDate(0, 0, -1), "/api"))
-	response.SuccessResponse[response.NilBody](w, http.StatusOK, response.NilBody{})
+	http.SetCookie(w, response.InitCookie("session_id", "", time.Now().AddDate(0, 0, -1), "/api"))
+	response.SuccessResponse(w, http.StatusOK, response.NilBody{})
 }
 
 // @Summary		Get unique login info
-// @Tags		Auth
+// @Tags			Auth
 // @Description	Get bool parametrs about unique login
 // @Produce		json
 // @Success		200		{object}	Response[bool] "Show user"
 // @Failure		400		{object}	ResponseError	"Client error"
 // @Failure		500		{object}	ResponseError	"Server error"
-// @Router		/api/auth/check-unique-login/{login} [get]
+// @Router		/api/auth/checkLogin/{login} [get]
 func (h *Handler) CheckLoginUnique(w http.ResponseWriter, r *http.Request) {
 	userLogin := response.GetloginFromRequest(userloginUrlParam, r)
 	isUnique, err := h.au.CheckLoginUnique(r.Context(), userLogin)

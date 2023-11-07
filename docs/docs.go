@@ -18,30 +18,50 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/auth/check-unique-login/{login}": {
-            "get": {
-                "description": "Get bool parametrs about unique login",
+        "/api/addTag": {
+            "post": {
+                "description": "Creates tag",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Auth"
+                    "Category"
                 ],
-                "summary": "Get unique login info",
+                "summary": "Create Tag",
+                "parameters": [
+                    {
+                        "description": "tag info",
+                        "name": "tag",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/category.TagInput"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Show user",
+                        "description": "tag with id creted",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-bool"
+                            "$ref": "#/definitions/http.Response-uuid_UUID"
                         }
                     },
                     "400": {
-                        "description": "Client error",
+                        "description": "Incorrect Input",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
                         }
                     },
-                    "500": {
+                    "401": {
+                        "description": "auth error relogin",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "429": {
                         "description": "Server error",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
@@ -96,6 +116,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/auth/checkLogin/{login}": {
+            "get": {
+                "description": "Get bool parametrs about unique login",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Get unique login info",
+                "responses": {
+                    "200": {
+                        "description": "Show user",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-bool"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/auth/signin": {
             "post": {
                 "description": "Login account",
@@ -121,7 +173,7 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "202": {
                         "description": "User logedin",
                         "schema": {
                             "$ref": "#/definitions/http.Response-auth_SignResponse"
@@ -133,7 +185,7 @@ const docTemplate = `{
                             "$ref": "#/definitions/http.ResponseError"
                         }
                     },
-                    "500": {
+                    "429": {
                         "description": "Server error",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
@@ -167,7 +219,7 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "202": {
                         "description": "User Created",
                         "schema": {
                             "$ref": "#/definitions/http.Response-auth_SignResponse"
@@ -212,6 +264,58 @@ const docTemplate = `{
                         }
                     },
                     "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/getTags": {
+            "post": {
+                "description": "Get all tags for user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Category"
+                ],
+                "summary": "Update Tag",
+                "parameters": [
+                    {
+                        "description": "tag info",
+                        "name": "tag",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Category"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "tag slice",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-models_Category"
+                        }
+                    },
+                    "400": {
+                        "description": "Incorrect Input",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "auth error relogin",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "429": {
                         "description": "Server error",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
@@ -863,6 +967,29 @@ const docTemplate = `{
                 }
             }
         },
+        "category.TagInput": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "parent_id": {
+                    "type": "string"
+                },
+                "regular": {
+                    "type": "boolean"
+                },
+                "show_income": {
+                    "type": "boolean"
+                },
+                "show_outcome": {
+                    "type": "boolean"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "http.CreateTransaction": {
             "type": "object",
             "properties": {
@@ -911,6 +1038,20 @@ const docTemplate = `{
         },
         "http.NilBody": {
             "type": "object"
+        },
+        "http.Response-array_models_Category": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Category"
+                    }
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
         },
         "http.Response-auth_SignResponse": {
             "type": "object",
@@ -972,6 +1113,17 @@ const docTemplate = `{
             "properties": {
                 "body": {
                     "$ref": "#/definitions/http.getCSRFResponce"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "http.Response-models_Category": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/models.Category"
                 },
                 "status": {
                     "type": "integer"
@@ -1066,6 +1218,17 @@ const docTemplate = `{
                 }
             }
         },
+        "http.Response-uuid_UUID": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
         "http.ResponseError": {
             "type": "object",
             "properties": {
@@ -1139,6 +1302,32 @@ const docTemplate = `{
                 },
                 "mean_payment": {
                     "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Category": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parent_id": {
+                    "type": "string"
+                },
+                "regular": {
+                    "type": "boolean"
+                },
+                "show_income": {
+                    "type": "boolean"
+                },
+                "show_outcome": {
+                    "type": "boolean"
                 },
                 "user_id": {
                     "type": "string"

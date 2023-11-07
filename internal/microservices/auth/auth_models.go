@@ -11,18 +11,18 @@ type (
 	}
 
 	SignUpInput struct {
-		Login          string `json:"login"`
-		Username       string `json:"username"`
-		PlaintPassword string `json:"password"`
+		Login          string `json:"login" valid:"required"`
+		Username       string `json:"username" valid:"required"`
+		PlaintPassword string `json:"password" valid:"required"`
 	}
 
 	LoginInput struct {
-		Login          string `json:"login"`
-		PlaintPassword string `json:"password"`
+		Login          string `json:"login" valid:"required"`
+		PlaintPassword string `json:"password" valid:"required"`
 	}
 
 	SignResponse struct {
-		ID       uuid.UUID `json:"id"`
-		Username string    `json:"username"`
+		ID       uuid.UUID `json:"id" valid:"required"`
+		Username string    `json:"username" valid:"required"`
 	}
 )
