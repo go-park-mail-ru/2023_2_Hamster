@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -8,22 +9,63 @@ import (
 	"runtime"
 
 	"github.com/sirupsen/logrus"
+	"gopkg.in/natefinch/lumberjack.v2"
+
+	utils "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/context_utils"
 )
 
-var e *logrus.Entry
-
 type Logger struct {
-	*logrus.Entry
+	*logrus.Logger
+	ctx context.Context
 }
 
-func GetLogger() Logger {
-	return Logger{e}
+func NewLogger(ctx context.Context) *Logger {
+	logFolderPath := "logs"
+	l := logrus.New()
+
+	l.SetReportCaller(true)
+
+	l.Formatter = &logrus.JSONFormatter{
+		CallerPrettyfier: func(f *runtime.Frame) (function string, file string) {
+			filename := path.Base(f.File)
+			return fmt.Sprintf("%s()", f.Function), fmt.Sprintf("%s:%d", filename, f.Line)
+		},
+	}
+
+	err := os.MkdirAll(logFolderPath, 0755)
+	if err != nil {
+		panic(err)
+	}
+
+	lumber := &lumberjack.Logger{
+		Filename: logFolderPath + "/server.log",
+		MaxSize:  30,
+		MaxAge:   2,
+		Compress: false,
+	}
+
+	allFile, err := os.OpenFile("logs/all.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		fmt.Println(err.Error())
+		panic(err)
+	}
+
+	l.SetOutput(io.Discard)
+
+	l.SetLevel(logrus.InfoLevel)
+
+	l.AddHook(&writeHook{
+		Writer:    []io.Writer{allFile, lumber, os.Stdout},
+		LogLevels: logrus.AllLevels,
+	})
+
+	return &Logger{
+		Logger: l,
+		ctx:    ctx,
+	}
 }
 
-func (l *Logger) GetLoggerWithFields(k string, v interface{}) Logger {
-	return Logger{l.WithField(k, v)}
-}
-
+// ------------------ Multi Writer ---------------------
 type writeHook struct {
 	Writer    []io.Writer
 	LogLevels []logrus.Level
@@ -35,52 +77,18 @@ func (hook *writeHook) Fire(entry *logrus.Entry) error {
 		return err
 	}
 
+	id := utils.GetReqID(entry.Context)
+	entry.Data["Request"] = id
+
 	for _, w := range hook.Writer {
-		w.Write([]byte(line))
+		_, err := w.Write([]byte(line))
+		if err != nil {
+			return err
+		}
 	}
 	return err
 }
 
 func (hook *writeHook) Levels() []logrus.Level {
 	return hook.LogLevels
-}
-
-func init() {
-	l := logrus.New()
-	l.SetReportCaller(true)
-	l.Formatter = &logrus.TextFormatter{
-		CallerPrettyfier: func(f *runtime.Frame) (function string, file string) {
-			filename := path.Base(f.File)
-			return fmt.Sprintf("%s()", f.Function), fmt.Sprintf("%s:%d", filename, f.Line)
-		},
-		DisableColors: true,
-		FullTimestamp: true,
-	}
-
-	err := os.MkdirAll("logs", 0644)
-	if err != nil {
-		panic(err)
-	}
-
-	allFile, err := os.OpenFile("logs/all.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0640)
-	if err != nil {
-		panic(err)
-	}
-
-	l.SetOutput(io.Discard)
-
-	l.AddHook(&writeHook{
-		Writer:    []io.Writer{allFile, os.Stdout},
-		LogLevels: logrus.AllLevels,
-	})
-
-	l.SetLevel(logrus.TraceLevel)
-
-	e = logrus.NewEntry(l)
-}
-
-func foo(x int) func() int {
-	return func() int {
-		return x * x
-	}
 }

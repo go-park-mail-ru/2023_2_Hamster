@@ -2,9 +2,17 @@ package sessions
 
 import (
 	"context"
+	"errors"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
+)
+
+var (
+	ErrSessionNotFound         = errors.New("session not found")
+	ErrInvalidUUID             = errors.New("uuid parse error")
+	ErrSessionIsAlreadyCreated = errors.New("session already created")
+	ErrInternalServer          = errors.New("internal server error")
 )
 
 type Usecase interface {

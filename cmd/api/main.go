@@ -11,7 +11,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/db/postgresql"
 	redisDB "github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/db/redis"
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/server"
-	logging "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 )
 
 // @title		Hamster API
@@ -33,7 +33,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	log := logging.GetLogger()
+	log := logger.NewLogger(ctx)
 
 	// Postgre Connection
 	db, err := postgresql.InitPostgresDB(ctx)
@@ -47,6 +47,7 @@ func main() {
 		}
 		log.Info("Db closed without errors")
 	}()
+
 	log.Info("Db connection successfully")
 
 	// redis-cli init
@@ -66,9 +67,10 @@ func main() {
 	if pingErr != nil {
 		log.Errorf("Failed to ping Redis server: %v", pingErr)
 	}
+
 	log.Info("Redis connection successfully")
 
-	router := app.Init(db, redisCli, &log)
+	router := app.Init(db, redisCli, log)
 
 	var srv server.Server
 	if err := srv.Init(router); err != nil {

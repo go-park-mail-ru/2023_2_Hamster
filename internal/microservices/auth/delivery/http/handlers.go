@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	contextutils "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/context_utils"
 	response "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth"
@@ -43,7 +44,7 @@ func NewHandler(
 // @Accept 		json
 // @Produce		json
 // @Param			user		body		models.User			true		"user info"
-// @Success		200		{object}	Response[auth.SignResponse]			"User Created"
+// @Success		200		{object}	Response[auth.SignResponse]		"User Created"
 // @Failure		400		{object}	ResponseError					"Incorrect Input"
 // @Failure		429		{object}	ResponseError					"Server error"
 // @Router		/api/auth/signup	[post]
@@ -57,6 +58,8 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
+
+	h.log.WithField("Request_ID", contextutils.GetReqID(r.Context())).Info("My Request :-)")
 
 	id, username, err := h.au.SignUp(r.Context(), signUpUser)
 	if err != nil {

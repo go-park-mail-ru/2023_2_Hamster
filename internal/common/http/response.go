@@ -66,6 +66,5 @@ func SuccessResponse[T any](w http.ResponseWriter, status int, response T) {
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	// w.Header().Set("Content-Length", )
 	w.WriteHeader(status)
 }

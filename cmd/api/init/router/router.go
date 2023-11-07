@@ -2,51 +2,40 @@ package router
 
 import (
 	//auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/pkg/auth/delivery/http"
-	"encoding/json"
+
 	"net/http"
+	"time"
 
 	_ "github.com/go-park-mail-ru/2023_2_Hamster/docs"
 	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/http"
+	category "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/category/delivery/http"
 	transaction "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/transaction/delivery/http"
 	user "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user/delivery/http"
+
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware"
 	"github.com/gorilla/mux"
+
 	httpSwagger "github.com/swaggo/http-swagger"
 )
-
-func HelloHandler(w http.ResponseWriter, r *http.Request) {
-	response := struct {
-		Status string
-		Body   interface{}
-	}{
-		Status: "200",
-		Body:   "Pong",
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-
-	err := json.NewEncoder(w).Encode(response)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
 
 // Initialize router and describes all app's endpoints
 func InitRouter(auth *auth.Handler,
 	user *user.Handler,
 	transaction *transaction.Handler,
 	authMid *middleware.AuthMiddleware,
-	/*logMid *middleware.LogMiddleware*/) *mux.Router {
+	category *category.Handler,
+	logMid *middleware.LoggingMiddleware,
+	recoveryMid *middleware.RecoveryMiddleware) *mux.Router {
+
 	r := mux.NewRouter()
 	r.Use(middleware.RequestID)
-	// r.Use(logMid.LoggerMiddleware)
-	r.Use(middleware.Logger)
-	// r.Use(mid.Panic())
+	r.Use(logMid.LoggingMiddleware)
+	r.Use(recoveryMid.Recoverer)
+	r.Use(middleware.Timeout(5 * time.Second))
+	r.Use(middleware.Heartbeat("ping"))
 
 	http.Handle("/", r)
 
-	r.Path("/ping").HandlerFunc(HelloHandler)
 	r.PathPrefix("/swagger/").Handler(httpSwagger.Handler(
 		httpSwagger.DeepLinking(true),
 		httpSwagger.DocExpansion("none"),
@@ -59,7 +48,7 @@ func InitRouter(auth *auth.Handler,
 		authRouter.Methods("POST").Path("/signin").HandlerFunc(auth.Login)
 		authRouter.Methods("POST").Path("/signup").HandlerFunc(auth.SignUp)
 		authRouter.Methods("POST").Path("/checkAuth").HandlerFunc(auth.HealthCheck)
-		authRouter.Methods("GET").Path("/check-unique-login/{login}").HandlerFunc(auth.CheckLoginUnique)
+		authRouter.Methods("GET").Path("/loginCheck/{login}").HandlerFunc(auth.CheckLoginUnique)
 		authRouter.Methods("POST").Path("/logout").HandlerFunc(auth.LogOut)
 	}
 
@@ -87,12 +76,12 @@ func InitRouter(auth *auth.Handler,
 		transactionRouter.Methods("DELETE").Path("/{transaction_id}/delete").HandlerFunc(transaction.Delete)
 	}
 
-	// categoryRouter := apiRouter.PathPrefix("/category").Subrouter()
-	// {
-	// 	categoryRouter.Methods("GET").Path("/all").HandlerFunc(category.GetFeed)
-	// 	categoryRouter.Methods("PUT").Path("/{categoryID}/update").HandlerFunc(category.Update)
-	// 	categoryRouter.Methods("POST").Path("/create").HandlerFunc(category.Create)
-	// 	categoryRouter.Methods("DELETE").Path("/delete").HandlerFunc(category.Delete)
-	// }
+	categoryRouter := apiRouter.PathPrefix("/tag").Subrouter()
+	{
+		categoryRouter.Methods("POST").Path("/create").HandlerFunc(category.CreateTag)
+		categoryRouter.Methods("GET").Path("/all").HandlerFunc(category.GetTags)
+		categoryRouter.Methods("PUT").Path("/{tagID}/update").HandlerFunc(category.UpdateTag)
+		categoryRouter.Methods("DELETE").Path("/delete").HandlerFunc(category.DeleteTag)
+	}
 	return r
 }

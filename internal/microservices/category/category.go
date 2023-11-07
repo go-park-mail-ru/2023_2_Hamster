@@ -8,17 +8,20 @@ import (
 )
 
 type Usecase interface {
-	CreateCategory(ctx context.Context, category models.Category) (uuid.UUID, error)
-	UpdateCategory(ctx context.Context, category *models.Category) error
-	DeleteCategory(ctx context.Context, categoryID uuid.UUID) error
+	CreateTag(ctx context.Context, tag TagInput) (uuid.UUID, error)
+	UpdateTag(ctx context.Context, tag *models.Category) error
+	DeleteTag(ctx context.Context, tagId uuid.UUID, userId uuid.UUID) error
 
-	GetFeed(ctx context.Context, categoryID uuid.UUID) ([]models.Category, error)
+	GetTags(ctx context.Context, userId uuid.UUID) ([]models.Category, error)
 }
 
 type Repository interface {
-	CreateCategory(ctx context.Context, category models.Category) (uuid.UUID, error)
-	UpdateCategory(ctx context.Context, transaction *models.Category) error
-	DeleteCategory(ctx context.Context, categoryID uuid.UUID) error
+	CreateTag(ctx context.Context, category models.Category) (uuid.UUID, error)
+	UpdateTag(ctx context.Context, tag *models.Category) error
+	DeleteTag(ctx context.Context, tagId uuid.UUID) error
 
-	GetFeed(ctx context.Context, userID uuid.UUID) ([]models.Category, error)
+	GetTags(ctx context.Context, userId uuid.UUID) ([]models.Category, error)
+
+	CheckNameUniq(ctx context.Context, userId uuid.UUID, parentId uuid.UUID, name string) (bool, error)
+	CheckExist(ctx context.Context, userId uuid.UUID, tagId uuid.UUID) (bool, error)
 }

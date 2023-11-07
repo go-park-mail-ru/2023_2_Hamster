@@ -1,0 +1,101 @@
+time="2023-11-05T00:28:40+03:00" level=info msg="Db connection successfully" func="main.main()" file="main.go:50"
+time="2023-11-05T00:28:40+03:00" level=error msg="Failed to ping Redis server: dial tcp 0.0.0.0:6379: connect: connection refused" func="main.main()" file="main.go:67"
+time="2023-11-05T00:28:40+03:00" level=info msg="Redis connection successfully" func="main.main()" file="main.go:69"
+time="2023-11-05T00:28:40+03:00" level=info msg="server launcher at 127.0.0.1:8080" func="main.main()" file="main.go:83"
+time="2023-11-05T00:28:52+03:00" level=info msg="hi pong" func="github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/router.HelloHandler()" file="router.go:31"
+time="2023-11-05T00:28:53+03:00" level=info msg="hi pong" func="github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/router.HelloHandler()" file="router.go:31"
+time="2023-11-05T00:28:54+03:00" level=info msg="hi pong" func="github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/router.HelloHandler()" file="router.go:31"
+time="2023-11-05T00:28:55+03:00" level=info msg="hi pong" func="github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/router.HelloHandler()" file="router.go:31"
+time="2023-11-05T00:28:55+03:00" level=info msg="hi pong" func="github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/router.HelloHandler()" file="router.go:31"
+time="2023-11-05T00:28:55+03:00" level=info msg="hi pong" func="github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/router.HelloHandler()" file="router.go:31"
+time="2023-11-05T00:28:56+03:00" level=info msg="hi pong" func="github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/router.HelloHandler()" file="router.go:31"
+time="2023-11-05T00:28:56+03:00" level=info msg="hi pong" func="github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/router.HelloHandler()" file="router.go:31"
+time="2023-11-05T00:29:31+03:00" level=info msg="Server exiting" func="main.main()" file="main.go:94"
+time="2023-11-05T00:29:31+03:00" level=info msg="Redis closed without errors" func="main.main.func2()" file="main.go:62"
+time="2023-11-05T00:29:31+03:00" level=info msg="Db closed without errors" func="main.main.func1()" file="main.go:48"
+{"file":"main.go:50","func":"main.main()","level":"info","msg":"Db connection successfully","time":"2023-11-05T00:29:33+03:00"}
+{"file":"main.go:67","func":"main.main()","level":"error","msg":"Failed to ping Redis server: dial tcp 0.0.0.0:6379: connect: connection refused","time":"2023-11-05T00:29:33+03:00"}
+{"file":"main.go:69","func":"main.main()","level":"info","msg":"Redis connection successfully","time":"2023-11-05T00:29:33+03:00"}
+{"file":"main.go:83","func":"main.main()","level":"info","msg":"server launcher at 127.0.0.1:8080","time":"2023-11-05T00:29:33+03:00"}
+{"file":"main.go:94","func":"main.main()","level":"info","msg":"Server exiting","time":"2023-11-05T00:30:37+03:00"}
+{"file":"main.go:62","func":"main.main.func2()","level":"info","msg":"Redis closed without errors","time":"2023-11-05T00:30:37+03:00"}
+{"file":"main.go:48","func":"main.main.func1()","level":"info","msg":"Db closed without errors","time":"2023-11-05T00:30:37+03:00"}
+{"file":"main.go:51","func":"main.main()","level":"info","msg":"Db connection successfully","time":"2023-11-05T00:48:03+03:00"}
+{"file":"main.go:68","func":"main.main()","level":"error","msg":"Failed to ping Redis server: dial tcp 0.0.0.0:6379: connect: connection refused","time":"2023-11-05T00:48:03+03:00"}
+{"file":"main.go:71","func":"main.main()","level":"info","msg":"Redis connection successfully","time":"2023-11-05T00:48:03+03:00"}
+{"file":"main.go:85","func":"main.main()","level":"info","msg":"server launcher at 127.0.0.1:8080","time":"2023-11-05T00:48:03+03:00"}
+{"file":"mylog.go:15","func":"github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware.LoggerMiddleware.func1()","level":"info","msg":"Started handling requestrequestIDlinuxMate/5Cpot7y5xs-000001methodGETpath/pingremote_addr127.0.0.1:37286","time":"2023-11-05T00:48:14+03:00"}
+{"file":"mylog.go:22","func":"github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware.LoggerMiddleware.func1()","level":"info","msg":"Completed handling requeststatusmap[Content-Type:[application/json]]duration265.606µs","time":"2023-11-05T00:48:14+03:00"}
+{"file":"main.go:96","func":"main.main()","level":"info","msg":"Server exiting","time":"2023-11-05T00:53:36+03:00"}
+{"file":"main.go:63","func":"main.main.func2()","level":"info","msg":"Redis closed without errors","time":"2023-11-05T00:53:36+03:00"}
+{"file":"main.go:48","func":"main.main.func1()","level":"info","msg":"Db closed without errors","time":"2023-11-05T00:53:36+03:00"}
+{"file":"main.go:51","func":"main.main()","level":"info","msg":"Db connection successfully","time":"2023-11-05T00:53:39+03:00"}
+{"file":"main.go:68","func":"main.main()","level":"error","msg":"Failed to ping Redis server: dial tcp 0.0.0.0:6379: connect: connection refused","time":"2023-11-05T00:53:39+03:00"}
+{"file":"main.go:71","func":"main.main()","level":"info","msg":"Redis connection successfully","time":"2023-11-05T00:53:39+03:00"}
+{"file":"main.go:85","func":"main.main()","level":"info","msg":"server launcher at 127.0.0.1:8080","time":"2023-11-05T00:53:39+03:00"}
+{"file":"mylog.go:26","func":"github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware.LoggerMiddleware.func1()","level":"info","msg":"Started handling requestrequestIDlinuxMate/SmGIUPhgjJ-000001methodGETpath/pingremote_addr127.0.0.1:33896","time":"2023-11-05T00:53:45+03:00"}
+{"file":"mylog.go:33","func":"github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware.LoggerMiddleware.func1()","level":"info","msg":"Completed handling requeststatusmap[Content-Type:[application/json]]duration207.428µs","time":"2023-11-05T00:53:45+03:00"}
+{"file":"main.go:96","func":"main.main()","level":"info","msg":"Server exiting","time":"2023-11-05T00:54:44+03:00"}
+{"file":"main.go:63","func":"main.main.func2()","level":"info","msg":"Redis closed without errors","time":"2023-11-05T00:54:44+03:00"}
+{"file":"main.go:48","func":"main.main.func1()","level":"info","msg":"Db closed without errors","time":"2023-11-05T00:54:44+03:00"}
+time="2023-11-05T00:54:46+03:00" level="info" msg="Db connection successfully" func="main.main()" file="main.go:51"
+time="2023-11-05T00:54:46+03:00" level="error" msg="Failed to ping Redis server: dial tcp 0.0.0.0:6379: connect: connection refused" func="main.main()" file="main.go:68"
+time="2023-11-05T00:54:46+03:00" level="info" msg="Redis connection successfully" func="main.main()" file="main.go:71"
+time="2023-11-05T00:54:46+03:00" level="info" msg="server launcher at 127.0.0.1:8080" func="main.main()" file="main.go:85"
+time="2023-11-05T00:54:59+03:00" level="info" msg="Started handling requestrequestIDlinuxMate/Evhlmsqq8u-000001methodGETpath/pingremote_addr127.0.0.1:54670" func="github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware.LoggerMiddleware.func1()" file="mylog.go:26"
+time="2023-11-05T00:54:59+03:00" level="info" msg="Completed handling requeststatusmap[Content-Type:[application/json]]duration237.669µs" func="github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware.LoggerMiddleware.func1()" file="mylog.go:33"
+time="2023-11-05T00:56:05+03:00" level="info" msg="Server exiting" func="main.main()" file="main.go:96"
+time="2023-11-05T00:56:05+03:00" level="info" msg="Redis closed without errors" func="main.main.func2()" file="main.go:63"
+time="2023-11-05T00:56:05+03:00" level="info" msg="Db closed without errors" func="main.main.func1()" file="main.go:48"
+time="2023-11-05T00:56:07+03:00" level="info" msg="Db connection successfully" func="main.main()" file="main.go:51"
+time="2023-11-05T00:56:07+03:00" level="error" msg="Failed to ping Redis server: dial tcp 0.0.0.0:6379: connect: connection refused" func="main.main()" file="main.go:68"
+time="2023-11-05T00:56:07+03:00" level="info" msg="Redis connection successfully" func="main.main()" file="main.go:71"
+time="2023-11-05T00:56:07+03:00" level="info" msg="server launcher at 127.0.0.1:8080" func="main.main()" file="main.go:85"
+time="2023-11-05T00:56:13+03:00" level="info" msg="Completed handling requeststatusmap[Content-Type:[application/json]]duration57.619µs" func="github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware.LoggerMiddleware.func1()" file="mylog.go:33"
+time="2023-11-05T00:57:58+03:00" level="info" msg="Server exiting" func="main.main()" file="main.go:96"
+time="2023-11-05T00:57:58+03:00" level="info" msg="Redis closed without errors" func="main.main.func2()" file="main.go:63"
+time="2023-11-05T00:57:58+03:00" level="info" msg="Db closed without errors" func="main.main.func1()" file="main.go:48"
+time="2023-11-05T00:58:00+03:00" level="info" msg="Db connection successfully" func="main.main()" file="main.go:51"
+time="2023-11-05T00:58:00+03:00" level="error" msg="Failed to ping Redis server: dial tcp 0.0.0.0:6379: connect: connection refused" func="main.main()" file="main.go:68"
+time="2023-11-05T00:58:00+03:00" level="info" msg="Redis connection successfully" func="main.main()" file="main.go:71"
+time="2023-11-05T00:58:00+03:00" level="info" msg="server launcher at 127.0.0.1:8080" func="main.main()" file="main.go:85"
+time="2023-11-05T00:58:04+03:00" level="info" msg="Request processedmethodGETurl/pingduration72.775µs" func="github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware.LoggerMiddleware.func1()" file="mylog.go:33"
+time="2023-11-05T00:58:14+03:00" level="info" msg="Server exiting" func="main.main()" file="main.go:96"
+time="2023-11-05T00:58:14+03:00" level="info" msg="Redis closed without errors" func="main.main.func2()" file="main.go:63"
+time="2023-11-05T00:58:14+03:00" level="info" msg="Db closed without errors" func="main.main.func1()" file="main.go:48"
+time="2023-11-05T01:16:34+03:00" level="info" msg="Db connection successfully" func="main.main()" file="main.go:51"
+time="2023-11-05T01:16:34+03:00" level="error" msg="Failed to ping Redis server: dial tcp 0.0.0.0:6379: connect: connection refused" func="main.main()" file="main.go:68"
+time="2023-11-05T01:16:34+03:00" level="info" msg="Redis connection successfully" func="main.main()" file="main.go:71"
+time="2023-11-05T01:16:34+03:00" level="info" msg="server launcher at 127.0.0.1:8080" func="main.main()" file="main.go:85"
+time="2023-11-05T01:16:39+03:00" level="info" msg="start proceding" func="github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware.LoggerMiddleware.func1()" file="mylog.go:44"
+time="2023-11-05T01:16:39+03:00" level="info" msg="Request processedmethodGETurl/pingduration211.69µs" func="github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware.LoggerMiddleware.func1()" file="mylog.go:55"
+time="2023-11-05T01:17:38+03:00" level="info" msg="Server exiting" func="main.main()" file="main.go:96"
+time="2023-11-05T01:17:38+03:00" level="info" msg="Redis closed without errors" func="main.main.func2()" file="main.go:63"
+time="2023-11-05T01:17:38+03:00" level="info" msg="Db closed without errors" func="main.main.func1()" file="main.go:48"
+time="2023-11-05T01:17:39+03:00" level="info" msg="Db connection successfully" func="main.main()" file="main.go:51"
+time="2023-11-05T01:17:40+03:00" level="error" msg="Failed to ping Redis server: dial tcp 0.0.0.0:6379: connect: connection refused" func="main.main()" file="main.go:68"
+time="2023-11-05T01:17:40+03:00" level="info" msg="Redis connection successfully" func="main.main()" file="main.go:71"
+time="2023-11-05T01:17:40+03:00" level="info" msg="server launcher at 127.0.0.1:8080" func="main.main()" file="main.go:85"
+time="2023-11-05T01:17:41+03:00" level="info" msg="start proceding" func="github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware.LoggerMiddleware.func1()" file="mylog.go:44"
+time="2023-11-05T01:17:41+03:00" level="info" msg="{{\"Status\":\"200\",\"Body\":\"Pong\"}}" func="github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware.LoggerMiddleware.func1()" file="mylog.go:50"
+time="2023-11-05T01:17:41+03:00" level="info" msg="Request processedmethodGETurl/pingduration230.198µs" func="github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware.LoggerMiddleware.func1()" file="mylog.go:55"
+time="2023-11-05T01:18:45+03:00" level="info" msg="Server exiting" func="main.main()" file="main.go:96"
+time="2023-11-05T01:18:45+03:00" level="info" msg="Redis closed without errors" func="main.main.func2()" file="main.go:63"
+time="2023-11-05T01:18:45+03:00" level="info" msg="Db closed without errors" func="main.main.func1()" file="main.go:48"
+time="2023-11-05T01:18:47+03:00" level="info" msg="Db connection successfully" func="main.main" file="/home/hiiiiiiiiiii/workflow/Hamster/backend/2023_2_Hamster/cmd/api/main.go:51"
+time="2023-11-05T01:18:47+03:00" level="error" msg="Failed to ping Redis server: dial tcp 0.0.0.0:6379: connect: connection refused" func="main.main" file="/home/hiiiiiiiiiii/workflow/Hamster/backend/2023_2_Hamster/cmd/api/main.go:68"
+time="2023-11-05T01:18:47+03:00" level="info" msg="Redis connection successfully" func="main.main" file="/home/hiiiiiiiiiii/workflow/Hamster/backend/2023_2_Hamster/cmd/api/main.go:71"
+time="2023-11-05T01:18:47+03:00" level="info" msg="server launcher at 127.0.0.1:8080" func="main.main" file="/home/hiiiiiiiiiii/workflow/Hamster/backend/2023_2_Hamster/cmd/api/main.go:85"
+time="2023-11-05T01:18:54+03:00" level="info" msg="Server exiting" func="main.main" file="/home/hiiiiiiiiiii/workflow/Hamster/backend/2023_2_Hamster/cmd/api/main.go:96"
+time="2023-11-05T01:18:54+03:00" level="info" msg="Redis closed without errors" func="main.main.func2" file="/home/hiiiiiiiiiii/workflow/Hamster/backend/2023_2_Hamster/cmd/api/main.go:63"
+time="2023-11-05T01:18:54+03:00" level="info" msg="Db closed without errors" func="main.main.func1" file="/home/hiiiiiiiiiii/workflow/Hamster/backend/2023_2_Hamster/cmd/api/main.go:48"
+time="2023-11-05T01:19:13+03:00" level="info" msg="Db connection successfully"
+time="2023-11-05T01:19:13+03:00" level="error" msg="Failed to ping Redis server: dial tcp 0.0.0.0:6379: connect: connection refused"
+time="2023-11-05T01:19:13+03:00" level="info" msg="Redis connection successfully"
+time="2023-11-05T01:19:13+03:00" level="info" msg="server launcher at 127.0.0.1:8080"
+time="2023-11-05T01:19:22+03:00" level="info" msg="start proceding"
+time="2023-11-05T01:19:22+03:00" level="info" msg="{{\"Status\":\"200\",\"Body\":\"Pong\"}}"
+time="2023-11-05T01:19:22+03:00" level="info" msg="Request processedmethodGETurl/pingduration1.210213ms"
+time="2023-11-05T01:30:18+03:00" level="info" msg="Server exiting"
+time="2023-11-05T01:30:18+03:00" level="info" msg="Redis closed without errors"
+time="2023-11-05T01:30:18+03:00" level="info" msg="Db closed without errors"

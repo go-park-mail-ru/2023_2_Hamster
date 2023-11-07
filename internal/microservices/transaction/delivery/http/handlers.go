@@ -35,12 +35,12 @@ func NewHandler(uu transaction.Usecase, l logger.Logger) *Handler {
 // @Tags			Transaction
 // @Description	Get User all transaction
 // @Produce		json
-// @Param       request query       QueryListOptions false      "Query Params"
-// @Success		200		{object}	Response[MasTransaction]	"Show transaction"
+// @Param       	request query       QueryListOptions false      	"Query Params"
+// @Success		200		{object}	Response[MasTransaction]		"Show transaction"
 // @Success		204		{object}	Response[string]	     	"Show actual accounts"
 // @Failure		400		{object}	ResponseError				"Client error"
-// @Failure     401    	{object}  	ResponseError  				"Unauthorized user"
-// @Failure     403    	{object}  	ResponseError  				"Forbidden user"
+// @Failure     	401    	{object}  ResponseError  			"Unauthorized user"
+// @Failure     	403    	{object}  ResponseError  			"Forbidden user"
 // @Failure		500		{object}	ResponseError				"Server error"
 // @Router		/api/transaction/feed [get]
 func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {

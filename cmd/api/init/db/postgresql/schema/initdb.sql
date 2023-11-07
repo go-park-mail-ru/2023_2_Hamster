@@ -18,21 +18,15 @@ CREATE TABLE Accounts (
 );
 
 CREATE TABLE IF NOT EXISTS category (
-    id            UUID          DEFAULT uuid_generate_v4()   PRIMARY KEY,
-    user_id       UUID          REFERENCES Users(user_id)    CONSTRAINT fk_user_category  NOT NULL,
-    "name"        VARCHAR(30)   UNIQUE                                                    NOT NULL,
-    is_income     BOOLEAN
+    id              UUID          DEFAULT uuid_generate_v4()   PRIMARY KEY,
+    user_id         UUID          REFERENCES Users(id)    CONSTRAINT fk_user_category  NOT NULL,
+    parent_tag      UUID          REFERENCES category(id),
+    "name"          VARCHAR(30)                                                             NOT NULL,
+    show_income     BOOLEAN,
+    show_outcome    BOOLEAN,
+    regular         BOOLEAN                                                                 NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS primary_sub_category (
-    category_id     UUID REFERENCES Category(id)     NOT NULL,
-    sub_category_id UUID REFERENCES sub_category(id) NOT NULL
-)
-
-CREATE TABLE IF NOT EXISTS sub_category (
-    id          UUID        DEFAULT uuid_generate_v4() PRIMARY KEY,
-    "name"      VARCHAR(30) UNIQUE                     NOT NULL
-);
 
 CREATE TABLE Transaction (
 	id           UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -75,3 +69,29 @@ VALUES ((SELECT id FROM Users limit 1), 'ЖКХ');
 
 INSERT INTO "category"(user_id, name)
 VALUES ((SELECT id FROM Users limit 1), 'Стипендия');
+
+CREATE OR REPLACE FUNCTION add_default_categoies()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO category (user_id, parent_tag, "name", show_income, show_outcome, regular)
+    VALUES  (NEW.id, NULL, 'Дети',                    false, true,  false),
+            (NEW.id, NULL, 'Забота о себе',           false, true,  false),
+            (NEW.id, NULL, 'Зарплата',                true,  false, true),
+            (NEW.id, NULL, 'Здровье и фитнес',        false, true,  false),
+            (NEW.id, NULL, 'Кафе и рестораны',        false, true,  false),
+            (NEW.id, NULL, 'Машина',                  false, true,  false),
+            (NEW.id, NULL, 'Образование',             false, true,  false),
+            (NEW.id, NULL, 'Отдых и развлечения',     false, true,  false),
+            (NEW.id, NULL, 'Подарки',                 false, true,  false),
+            (NEW.id, NULL, 'Покупки: одежа, техника', false, true,  false),
+            (NEW.id, NULL, 'Проезд',                  false, true,  false),
+            (NEW.id, NULL, 'Продукты',                false, true,  false),
+            (NEW.id, NULL, 'Подписки',                false, true,  true);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER after_user_created
+    AFTER INSERT ON users
+    FOR EACH ROW
+EXECUTE FUNCTION add_default_categoies();
