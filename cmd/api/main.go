@@ -33,7 +33,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	log := logger.InitLogger()
+	log := logger.NewLogger(ctx)
 
 	// Postgre Connection
 	db, err := postgresql.InitPostgresDB(ctx)
@@ -46,6 +46,7 @@ func main() {
 
 		log.Info("Db closed without errors")
 	}()
+
 	log.Info("Db connection successfully")
 
 	// redis-cli init
@@ -65,6 +66,7 @@ func main() {
 	if pingErr != nil {
 		log.Errorf("Failed to ping Redis server: %v", pingErr)
 	}
+
 	log.Info("Redis connection successfully")
 
 	router := app.Init(db, redisCli, log)

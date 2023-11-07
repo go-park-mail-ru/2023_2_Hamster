@@ -182,7 +182,7 @@ func TestGetFeed(t *testing.T) {
 			ctl := gomock.NewController(t)
 			defer ctl.Finish()
 			pageSize, page := 1, 5
-			logger := *logger.InitLogger()
+			logger := *logger.NewLogger(context.TODO())
 			repo := NewRepository(mock, logger)
 
 			escapedQuery := regexp.QuoteMeta(transactionGetFeed)
@@ -252,7 +252,7 @@ func TestInsertTransaction(t *testing.T) {
 			ctl := gomock.NewController(t)
 			defer ctl.Finish()
 
-			logger := *logger.InitLogger()
+			logger := *logger.NewLogger(context.TODO())
 			repo := NewRepository(mock, logger)
 
 			escapedQuery := regexp.QuoteMeta(transactionCreate)
@@ -310,7 +310,7 @@ func TestUpdateAccountBalance(t *testing.T) {
 			ctl := gomock.NewController(t)
 			defer ctl.Finish()
 
-			logger := *logger.InitLogger()
+			logger := *logger.NewLogger(context.TODO())
 			repo := NewRepository(mock, logger)
 
 			escapedQuery := regexp.QuoteMeta(transactionUpdateAccount)
@@ -359,7 +359,7 @@ func TestUpdateAccountBalances(t *testing.T) {
 			ctl := gomock.NewController(t)
 			defer ctl.Finish()
 
-			logger := *logger.InitLogger()
+			logger := *logger.NewLogger(context.TODO())
 			repo := NewRepository(mock, logger)
 
 			escapedQuery := regexp.QuoteMeta(transactionUpdateAccount)
@@ -413,7 +413,7 @@ func TestInsertCategories(t *testing.T) {
 			ctl := gomock.NewController(t)
 			defer ctl.Finish()
 
-			logger := *logger.InitLogger()
+			logger := *logger.NewLogger(context.TODO())
 			repo := NewRepository(mock, logger)
 
 			escapedQuery := regexp.QuoteMeta(transactionCreateCategory)
@@ -465,7 +465,7 @@ func TestUpdateTransactionInfo(t *testing.T) {
 			ctl := gomock.NewController(t)
 			defer ctl.Finish()
 
-			logger := *logger.InitLogger()
+			logger := *logger.NewLogger(context.TODO())
 			repo := NewRepository(mock, logger)
 
 			escapedQuery := regexp.QuoteMeta(transactionUpdate)
@@ -527,7 +527,7 @@ func TestDeleteExistingCategoryAssociations(t *testing.T) {
 			ctl := gomock.NewController(t)
 			defer ctl.Finish()
 
-			logger := *logger.InitLogger()
+			logger := *logger.NewLogger(context.TODO())
 			repo := NewRepository(mock, logger)
 
 			escapedQuery := regexp.QuoteMeta(transactionDeleteCategory)
@@ -578,7 +578,7 @@ func TestDeleteAccountBalance(t *testing.T) {
 			ctl := gomock.NewController(t)
 			defer ctl.Finish()
 
-			logger := *logger.InitLogger()
+			logger := *logger.NewLogger(context.TODO())
 			repo := NewRepository(mock, logger)
 
 			escapedQuery := regexp.QuoteMeta(transactionUpdateAccount)
@@ -644,7 +644,7 @@ func TestCheckForbidden(t *testing.T) {
 			ctl := gomock.NewController(t)
 			defer ctl.Finish()
 
-			logger := *logger.InitLogger()
+			logger := *logger.NewLogger(context.TODO())
 			repo := NewRepository(mock, logger)
 
 			escapedQuery := regexp.QuoteMeta(TransactionGetUserByID)

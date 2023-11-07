@@ -2,16 +2,12 @@ package redis
 
 import (
 	"context"
-	"errors"
+
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
-)
-
-var (
-	ErrSessionNotFound     = errors.New("session not found")
-	ErrIncompatibleVersion = errors.New("incompatible version of argon2")
 )
 
 type SessionRep struct {
@@ -28,12 +24,12 @@ func (r *SessionRep) GetSessionByCookie(ctx context.Context, cookie string) (mod
 	var session models.Session
 	result, err := r.db.Get(context.TODO(), cookie).Result()
 	if err == redis.Nil {
-		return models.Session{}, ErrSessionNotFound
+		return models.Session{}, sessions.ErrSessionNotFound
 	}
 
 	session.UserId, err = uuid.Parse(result)
 	if err != nil {
-		return models.Session{}, err
+		return models.Session{}, sessions.ErrInvalidUUID
 	}
 
 	session.Cookie = cookie
@@ -49,7 +45,7 @@ func (r *SessionRep) CreateSession(ctx context.Context, session models.Session) 
 func (r *SessionRep) DeleteSession(ctx context.Context, cookie string) error {
 	err := r.db.Del(context.TODO(), cookie).Err()
 	if err == redis.Nil {
-		return ErrSessionNotFound
+		return sessions.ErrSessionNotFound
 	}
 
 	return err

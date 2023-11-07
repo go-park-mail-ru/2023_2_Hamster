@@ -56,7 +56,7 @@ func TestCreateUser(t *testing.T) {
 			ctl := gomock.NewController(t)
 			defer ctl.Finish()
 
-			logger := *logger.InitLogger()
+			logger := *logger.NewLogger(context.TODO())
 			repo := NewRepository(mock, logger)
 
 			escapedQuery := regexp.QuoteMeta(UserCreate)
@@ -121,7 +121,7 @@ func TestGetByID(t *testing.T) {
 			ctl := gomock.NewController(t)
 			defer ctl.Finish()
 
-			logger := *logger.InitLogger()
+			logger := *logger.NewLogger(context.TODO())
 			repo := NewRepository(mock, logger)
 
 			escapedQuery := regexp.QuoteMeta(UserIDGetByID)
@@ -194,7 +194,7 @@ func TestGetUserByLogin(t *testing.T) {
 			ctl := gomock.NewController(t)
 			defer ctl.Finish()
 
-			logger := *logger.InitLogger()
+			logger := *logger.NewLogger(context.TODO())
 			repo := NewRepository(mock, logger)
 
 			escapedQuery := regexp.QuoteMeta(UserGetByUserName)
@@ -266,7 +266,7 @@ func TestGetUserBalance(t *testing.T) {
 			ctl := gomock.NewController(t)
 			defer ctl.Finish()
 
-			logger := *logger.InitLogger()
+			logger := *logger.NewLogger(context.TODO())
 			repo := NewRepository(mock, logger)
 
 			escapedQuery := regexp.QuoteMeta(AccountBalance)
@@ -338,7 +338,7 @@ func TestGetPlannedBudget(t *testing.T) {
 			ctl := gomock.NewController(t)
 			defer ctl.Finish()
 
-			logger := *logger.InitLogger()
+			logger := *logger.NewLogger(context.TODO())
 			repo := NewRepository(mock, logger)
 
 			escapedQuery := regexp.QuoteMeta(UserGetPlannedBudget)
@@ -411,7 +411,7 @@ func TestGetCurrentBudget(t *testing.T) {
 			ctl := gomock.NewController(t)
 			defer ctl.Finish()
 
-			logger := *logger.InitLogger()
+			logger := *logger.NewLogger(context.TODO())
 			repo := NewRepository(mock, logger)
 
 			escapedQuery := regexp.QuoteMeta(`SELECT SUM(outcome) AS total_sum
@@ -511,7 +511,7 @@ func TestGetAccounts(t *testing.T) {
 			ctl := gomock.NewController(t)
 			defer ctl.Finish()
 
-			logger := *logger.InitLogger()
+			logger := *logger.NewLogger(context.TODO())
 			repo := NewRepository(mock, logger)
 
 			escapedQuery := regexp.QuoteMeta(AccountGet)
@@ -576,7 +576,7 @@ func TestGetAccounts(t *testing.T) {
 // 			ctl := gomock.NewController(t)
 // 			defer ctl.Finish()
 
-// 			logger := *logger.InitLogger()
+// 			logger := *logger.NewLogger(context.TODO())
 // 			repo := NewRepository(mock, logger)
 
 // 			escapedQuery := regexp.QuoteMeta(UserCheck)
@@ -638,7 +638,7 @@ func TestUpdateUser(t *testing.T) {
 			ctl := gomock.NewController(t)
 			defer ctl.Finish()
 
-			logger := *logger.InitLogger()
+			logger := *logger.NewLogger(context.TODO())
 			repo := NewRepository(mock, logger)
 
 			escapedQuery := regexp.QuoteMeta(UserUpdate)
@@ -694,7 +694,7 @@ func TestUpdatePhoto(t *testing.T) {
 			mock, _ := pgxmock.NewPool()
 			ctl := gomock.NewController(t)
 			defer ctl.Finish()
-			logger := *logger.InitLogger()
+			logger := *logger.NewLogger(context.TODO())
 			repo := NewRepository(mock, logger)
 
 			escapedQuery := regexp.QuoteMeta(UserUpdatePhoto)

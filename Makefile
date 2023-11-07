@@ -1,5 +1,4 @@
 include .env
-# include .golandcli.yml
 export
 
 .PHONY: run run-in build clean db app down doc test lint

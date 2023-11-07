@@ -47,7 +47,7 @@ func TestUsecase_GetUserBalance(t *testing.T) {
 			mockRepo := mock.NewMockRepository(ctrl)
 			tc.mockRepoFn(mockRepo)
 
-			mockUsecase := NewUsecase(mockRepo, logger.Logger{})
+			mockUsecase := NewUsecase(mockRepo, *logger.NewLogger(context.TODO()))
 
 			userID := uuid.New()
 
@@ -94,7 +94,7 @@ func TestUsecase_GetPlannedBudget(t *testing.T) {
 			mockRepo := mock.NewMockRepository(ctrl)
 			tc.mockRepoFn(mockRepo)
 
-			mockUsecase := NewUsecase(mockRepo, logger.Logger{})
+			mockUsecase := NewUsecase(mockRepo, *logger.NewLogger(context.TODO()))
 
 			userID := uuid.New()
 
@@ -147,7 +147,7 @@ func TestUsecase_GetAccounts(t *testing.T) {
 			mockRepo := mock.NewMockRepository(ctrl)
 			tc.mockRepoFn(mockRepo)
 
-			mockUsecase := NewUsecase(mockRepo, logger.Logger{})
+			mockUsecase := NewUsecase(mockRepo, *logger.NewLogger(context.TODO()))
 
 			userID := uuid.New()
 
@@ -204,7 +204,7 @@ func TestUsecase_GetCurrentBudget(t *testing.T) {
 			mockRepo := mock.NewMockRepository(ctrl)
 			tc.mockRepoFn(mockRepo)
 
-			mockUsecase := NewUsecase(mockRepo, logger.Logger{})
+			mockUsecase := NewUsecase(mockRepo, *logger.NewLogger(context.TODO()))
 
 			userID := uuid.New()
 
@@ -264,7 +264,7 @@ func TestUsecase_GetCurrentBudget(t *testing.T) {
 // 			mockRepo := mock.NewMockRepository(ctrl)
 // 			tc.mockRepoFn(mockRepo)
 
-// 			mockUsecase := NewUsecase(mockRepo, logger.Logger{})
+//			mockUsecase := NewUsecase(mockRepo, *logger.NewLogger(context.TODO()))
 
 // 			userID := uuid.New()
 
@@ -349,7 +349,7 @@ func TestUsecase_GetFeed(t *testing.T) {
 			mockRepo := mock.NewMockRepository(ctrl)
 			tc.mockRepoFn(mockRepo)
 
-			mockUsecase := NewUsecase(mockRepo, logger.Logger{})
+			mockUsecase := NewUsecase(mockRepo, *logger.NewLogger(context.TODO()))
 
 			_, err := mockUsecase.GetFeed(context.Background(), testUserID)
 
@@ -391,7 +391,7 @@ func TestUsecase_UpdateUser(t *testing.T) {
 			mockRepo := mock.NewMockRepository(ctrl)
 			tc.mockRepoFn(mockRepo)
 
-			mockUsecase := NewUsecase(mockRepo, logger.Logger{})
+			mockUsecase := NewUsecase(mockRepo, *logger.NewLogger(context.TODO()))
 
 			user := &models.User{}
 
@@ -434,7 +434,7 @@ func TestUsecase_UpdatePhoto(t *testing.T) {
 			mockRepo := mock.NewMockRepository(ctrl)
 			tc.mockRepoFn(mockRepo)
 
-			mockUsecase := NewUsecase(mockRepo, logger.Logger{})
+			mockUsecase := NewUsecase(mockRepo, *logger.NewLogger(context.TODO()))
 
 			userID := uuid.New()
 

@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/hasher"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions"
 	"github.com/google/uuid"
@@ -12,13 +11,11 @@ import (
 
 type Usecase struct {
 	sessionRepo sessions.Repository
-	logger      logger.Logger
 }
 
-func NewSessionUsecase(sessionRepo sessions.Repository, logger logger.Logger) *Usecase {
+func NewSessionUsecase(sessionRepo sessions.Repository) *Usecase {
 	return &Usecase{
 		sessionRepo: sessionRepo,
-		logger:      logger,
 	}
 }
 func (u *Usecase) GetSessionByCookie(ctx context.Context, cookie string) (models.Session, error) {
@@ -31,7 +28,6 @@ func (u *Usecase) CreateSessionById(ctx context.Context, userID uuid.UUID) (mode
 		UserId: userID,
 		Cookie: hasher.GenerateSession(uuid.New().String()),
 	}
-	u.logger.Info("Creted session", session)
 	err := u.sessionRepo.CreateSession(ctx, session)
 	return session, err
 }

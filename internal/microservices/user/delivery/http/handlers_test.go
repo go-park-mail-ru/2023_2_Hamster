@@ -101,7 +101,7 @@ func TestHandler_GetUserBalance(t *testing.T) {
 			mockUsecase := mocks.NewMockUsecase(ctrl)
 			tt.mockUsecaseFn(mockUsecase)
 
-			mockHandler := NewHandler(mockUsecase, *logger.InitLogger())
+			mockHandler := NewHandler(mockUsecase, *logger.NewLogger(context.TODO()))
 
 			url := "/api/user/" + user.ID.String() + "/balance"
 			req := httptest.NewRequest("GET", url, nil)
@@ -195,7 +195,7 @@ func TestHandler_GetPlannedBudget(t *testing.T) {
 			mockUsecase := mocks.NewMockUsecase(ctrl)
 			tt.mockUsecaseFn(mockUsecase)
 
-			mockHandler := NewHandler(mockUsecase, *logger.InitLogger())
+			mockHandler := NewHandler(mockUsecase, *logger.NewLogger(context.TODO()))
 
 			url := "/api/user/" + user.ID.String() + "/planned-budget"
 			req := httptest.NewRequest("GET", url, nil)
@@ -274,7 +274,7 @@ func TestHandler_GetCurrentBudget(t *testing.T) {
 			mockUsecase := mocks.NewMockUsecase(ctrl)
 			tt.mockUsecaseFn(mockUsecase)
 
-			mockHandler := NewHandler(mockUsecase, *logger.InitLogger())
+			mockHandler := NewHandler(mockUsecase, *logger.NewLogger(context.TODO()))
 
 			url := "/api/user/" + tt.userID + "/current_budget"
 			req := httptest.NewRequest("GET", url, nil)
@@ -365,7 +365,7 @@ func TestHandler_GetAccounts(t *testing.T) {
 			mockUsecase := mocks.NewMockUsecase(ctrl)
 			tt.mockUsecaseFn(mockUsecase)
 
-			mockHandler := NewHandler(mockUsecase, *logger.InitLogger())
+			mockHandler := NewHandler(mockUsecase, *logger.NewLogger(context.TODO()))
 
 			url := "/api/user/" + tt.userID + "/accounts"
 			req := httptest.NewRequest("GET", url, nil)
@@ -459,7 +459,7 @@ func TestHandler_GetFeed(t *testing.T) {
 			mockUsecase := mocks.NewMockUsecase(ctrl)
 			tt.mockUsecaseFn(mockUsecase)
 
-			mockHandler := NewHandler(mockUsecase, *logger.InitLogger())
+			mockHandler := NewHandler(mockUsecase, *logger.NewLogger(context.TODO()))
 
 			url := "/api/user/" + tt.userID + "/accounts"
 			req := httptest.NewRequest("GET", url, nil)
@@ -514,7 +514,7 @@ func TestHandler_GetUser(t *testing.T) {
 
 			mockUsecase := mocks.NewMockUsecase(ctrl)
 
-			mockHandler := NewHandler(mockUsecase, *logger.InitLogger())
+			mockHandler := NewHandler(mockUsecase, *logger.NewLogger(context.TODO()))
 
 			url := "/api/user/" + tt.userID + "/accounts"
 			req := httptest.NewRequest("GET", url, nil)
@@ -628,7 +628,7 @@ func TestHandler_Update(t *testing.T) {
 			mockUsecase := mocks.NewMockUsecase(ctrl)
 			tt.mockUsecaseFn(mockUsecase)
 
-			mockHandler := NewHandler(mockUsecase, *logger.InitLogger())
+			mockHandler := NewHandler(mockUsecase, *logger.NewLogger(context.TODO()))
 
 			url := "/api/user/update"
 			req := httptest.NewRequest("PUT", url, tt.requestBody)
@@ -1035,7 +1035,7 @@ func TestUserHandler_UpdateProfilePhoto(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 
-			mockHandler := NewHandler(mockUsecase, *logger.InitLogger())
+			mockHandler := NewHandler(mockUsecase, *logger.NewLogger(context.TODO()))
 
 			w := httptest.NewRecorder()
 			r := test.mock()
