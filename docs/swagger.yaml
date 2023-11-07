@@ -29,6 +29,21 @@ definitions:
       user_id:
         type: string
     type: object
+  category.TagUpdateInput:
+    properties:
+      name:
+        type: string
+      parent_id:
+        type: string
+      regular:
+        type: boolean
+      show_income:
+        type: boolean
+      show_outcome:
+        type: boolean
+      user_id:
+        type: string
+    type: object
   http.CreateTransaction:
     properties:
       account_income:
@@ -357,40 +372,6 @@ info:
   title: Hamster API
   version: 1.0.1
 paths:
-  /api/addTag:
-    post:
-      consumes:
-      - application/json
-      description: Creates tag
-      parameters:
-      - description: tag info
-        in: body
-        name: tag
-        required: true
-        schema:
-          $ref: '#/definitions/category.TagInput'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: tag with id creted
-          schema:
-            $ref: '#/definitions/http.Response-uuid_UUID'
-        "400":
-          description: Incorrect Input
-          schema:
-            $ref: '#/definitions/http.ResponseError'
-        "401":
-          description: auth error relogin
-          schema:
-            $ref: '#/definitions/http.ResponseError'
-        "429":
-          description: Server error
-          schema:
-            $ref: '#/definitions/http.ResponseError'
-      summary: Create Tag
-      tags:
-      - Category
   /api/auth/checkAuth:
     post:
       consumes:
@@ -523,18 +504,113 @@ paths:
       summary: Get csrf token
       tags:
       - Csrf
-  /api/getTags:
-    post:
+  /api/tag/{tagId}/update:
+    put:
       consumes:
       - application/json
-      description: Get all tags for user
+      description: Update Tag
       parameters:
       - description: tag info
         in: body
         name: tag
         required: true
         schema:
-          $ref: '#/definitions/models.Category'
+          $ref: '#/definitions/category.TagUpdateInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: tag to update
+          schema:
+            $ref: '#/definitions/http.Response-models_Category'
+        "400":
+          description: Incorrect Input
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: auth error relogin
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "429":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Update Tag
+      tags:
+      - Category
+  /api/tag/all:
+    get:
+      consumes:
+      - application/json
+      description: Get all tags for user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: tag slice
+          schema:
+            $ref: '#/definitions/http.Response-array_models_Category'
+        "400":
+          description: Incorrect Input
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: auth error relogin
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "429":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Get Tags
+      tags:
+      - Category
+  /api/tag/create:
+    post:
+      consumes:
+      - application/json
+      description: Creates tag
+      parameters:
+      - description: tag info
+        in: body
+        name: tag
+        required: true
+        schema:
+          $ref: '#/definitions/category.TagInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: tag with id creted
+          schema:
+            $ref: '#/definitions/http.Response-uuid_UUID'
+        "400":
+          description: Incorrect Input
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: auth error relogin
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "429":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Create Tag
+      tags:
+      - Category
+  /api/tag/delete:
+    delete:
+      consumes:
+      - application/json
+      description: delete tag
+      parameters:
+      - description: tag id
+        in: body
+        name: tag
+        required: true
+        schema:
+          type: string
       produces:
       - application/json
       responses:
@@ -554,7 +630,7 @@ paths:
           description: Server error
           schema:
             $ref: '#/definitions/http.ResponseError'
-      summary: Update Tag
+      summary: Delete Tag
       tags:
       - Category
   /api/transaction/{transaction_id}/delete:

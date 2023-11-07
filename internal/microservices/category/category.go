@@ -9,7 +9,7 @@ import (
 
 type Usecase interface {
 	CreateTag(ctx context.Context, tag TagInput) (uuid.UUID, error)
-	UpdateTag(ctx context.Context, tag *models.Category) error
+	UpdateTag(ctx context.Context, tag *TagUpdateInput) error
 	DeleteTag(ctx context.Context, tagId uuid.UUID, userId uuid.UUID) error
 
 	GetTags(ctx context.Context, userId uuid.UUID) ([]models.Category, error)
