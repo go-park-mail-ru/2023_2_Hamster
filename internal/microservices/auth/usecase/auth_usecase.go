@@ -39,7 +39,7 @@ func (u *Usecase) SignUp(ctx context.Context, input auth.SignUpInput) (uuid.UUID
 		return uuid.Nil, "", fmt.Errorf("[usecase] error checking login uniqueness: %w", err)
 	}
 
-	if !ok {
+	if ok {
 		u.logger.Error("Login already exist ", input.Login)
 		return uuid.Nil, "", fmt.Errorf("[usecase] username already exist")
 	}
