@@ -29,21 +29,6 @@ definitions:
       user_id:
         type: string
     type: object
-  category.TagUpdateInput:
-    properties:
-      name:
-        type: string
-      parent_id:
-        type: string
-      regular:
-        type: boolean
-      show_income:
-        type: boolean
-      show_outcome:
-        type: boolean
-      user_id:
-        type: string
-    type: object
   http.CreateTransaction:
     properties:
       account_income:
@@ -515,7 +500,7 @@ paths:
         name: tag
         required: true
         schema:
-          $ref: '#/definitions/category.TagUpdateInput'
+          $ref: '#/definitions/models.Category'
       produces:
       - application/json
       responses:

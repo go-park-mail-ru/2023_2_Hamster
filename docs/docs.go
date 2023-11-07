@@ -385,7 +385,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/category.TagUpdateInput"
+                            "$ref": "#/definitions/models.Category"
                         }
                     }
                 ],
@@ -1061,29 +1061,6 @@ const docTemplate = `{
             }
         },
         "category.TagInput": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "parent_id": {
-                    "type": "string"
-                },
-                "regular": {
-                    "type": "boolean"
-                },
-                "show_income": {
-                    "type": "boolean"
-                },
-                "show_outcome": {
-                    "type": "boolean"
-                },
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "category.TagUpdateInput": {
             "type": "object",
             "properties": {
                 "name": {

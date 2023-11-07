@@ -8,6 +8,7 @@ import (
 	response "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/category"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
 )
 
@@ -104,7 +105,7 @@ func (h *Handler) GetTags(w http.ResponseWriter, r *http.Request) {
 // @Description	Update Tag
 // @Accept 		json
 // @Produce		json
-// @Param			tag		body		category.TagUpdateInput		true		"tag info"
+// @Param			tag		body		models.Category		true		"tag info"
 // @Success		200		{object}	Response[models.Category]		"tag to update"
 // @Failure		400		{object}	ResponseError					"Incorrect Input"
 // @Failure		401		{object}	ResponseError					"auth error relogin"
@@ -120,7 +121,7 @@ func (h *Handler) UpdateTag(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var tag category.TagUpdateInput
+	var tag models.Category
 
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&tag); err != nil {
