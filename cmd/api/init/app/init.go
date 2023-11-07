@@ -41,7 +41,7 @@ func Init(db *pgxpool.Pool, redis *redis.Client, log *logger.Logger) *mux.Router
 	transactionRep := transactionRep.NewRepository(db, *log)
 	categoryRep := categoryRep.NewRepository(db, *log)
 
-	authUsecase := authUsecase.NewUsecase(authRep, userRep, *log)
+	authUsecase := authUsecase.NewUsecase(authRep, *log)
 	sessionUsecase := sessionUsecase.NewSessionUsecase(sessionRep)
 	userUsecase := userUsecase.NewUsecase(userRep, *log)
 	transactionUsecase := transactionUsecase.NewUsecase(transactionRep, *log)

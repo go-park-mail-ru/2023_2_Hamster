@@ -22,6 +22,6 @@ type Repository interface {
 
 	// Validation
 	// CheckCorrectPassword(ctx context.Context, password string) error
-	CheckExistUsername(ctx context.Context, username string) error
+	// CheckExistUsername(ctx context.Context, username string) error
 	CheckLoginUnique(ctx context.Context, login string) (bool, error)
 }
