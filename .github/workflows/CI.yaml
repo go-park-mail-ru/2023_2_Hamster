@@ -27,7 +27,8 @@ jobs:
 
       - name: Create test folder
         run: |
-          mkdir /images && sudo chmod -R 777 /images
+          sudo mkdir /images  
+          sudo chmod -R 777 /images
       
       - name: Run Unit tests
         run: |
