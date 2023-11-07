@@ -30,6 +30,7 @@ func (r *AuthRep) CheckLoginUnique(ctx context.Context, login string) (bool, err
 	if err != nil {
 		return false, fmt.Errorf("[repo] failed login unique check %w", err)
 	}
+	fmt.Println("---->>> ", count)
 
 	return count == 0, nil
 }
