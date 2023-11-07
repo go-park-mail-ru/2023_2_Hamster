@@ -1,6 +1,7 @@
 package hasher
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -10,6 +11,7 @@ func TestPasswordHashingAndVerification(t *testing.T) {
 	// Test case 1: Valid password hashing and verification
 	password := "securePassword123"
 	hash, err := GeneratePasswordHash(password)
+	fmt.Println(hash)
 	if err != nil {
 		t.Fatalf("Error generating password hash: %v", err)
 	}
@@ -54,7 +56,7 @@ func TestDecodeHash(t *testing.T) {
 	// Test the decodeHash function
 
 	// Test case 1: Valid encoded hash
-	validEncodedHash := "$argon2id$v=19$m=65536,t=1,p=4$eC3CjhrJ/VE5zHEtz0aN+A==$TgXyI5tIykDHLu+f9dIEh3XJLWiyrIVvTlBVz9+w/m0="
+	validEncodedHash := "$argon2id$v=19$m=65536,t=1,p=4$vZCUJbj5S9vH2WXjMet1LQ$sGYTyjW23Q5XmifAsqHxlzNxyP2GRKJ791quc/5nYHg"
 	p, salt, hash, err := decodeHash(validEncodedHash)
 	if err != nil {
 		t.Fatalf("Error decoding valid hash: %v", err)

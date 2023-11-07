@@ -90,8 +90,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"gopkg.in/natefinch/lumberjack.v2"
-
-	utils "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/context_utils"
 )
 
 type Logger struct {
@@ -124,18 +122,20 @@ func NewLogger(ctx context.Context) *Logger {
 		Compress: false,
 	}
 
-	allFile, err := os.OpenFile("logs/all.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-	if err != nil {
-		fmt.Println(err.Error())
-		panic(err)
-	}
+	/*
+		allFile, err := os.OpenFile("logs/all.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+		if err != nil {
+			fmt.Println(err.Error())
+			panic(err)
+		}
+	*/
 
 	l.SetOutput(io.Discard)
 
 	l.SetLevel(logrus.InfoLevel)
 
 	l.AddHook(&writeHook{
-		Writer:    []io.Writer{allFile, lumber, os.Stdout},
+		Writer:    []io.Writer{lumber, os.Stdout},
 		LogLevels: logrus.AllLevels,
 	})
 
@@ -156,9 +156,6 @@ func (hook *writeHook) Fire(entry *logrus.Entry) error {
 	if err != nil {
 		return err
 	}
-
-	id := utils.GetReqID(entry.Context)
-	entry.Data["Request"] = id
 
 	for _, w := range hook.Writer {
 		_, err := w.Write([]byte(line))
