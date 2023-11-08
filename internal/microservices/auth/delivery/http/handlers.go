@@ -58,6 +58,11 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	if err := signUpUser.CheckValid(); err != nil {
+		response.ErrorResponse(w, http.StatusBadRequest, err, response.InvalidBodyRequest, h.log)
+		return
+	}
+
 	h.log.WithField("Request_ID", contextutils.GetReqID(r.Context())).Info("My Request :-)")
 
 	id, username, err := h.au.SignUp(r.Context(), signUpUser)

@@ -33,8 +33,8 @@ type CreateTransaction struct {
 	Income           float64     `json:"income" valid:"-"`
 	Outcome          float64     `json:"outcome" valid:"-"`
 	Date             time.Time   `json:"date" valid:"required"`
-	Payer            string      `json:"payer" valid:"maxstringlength(20)"`
-	Description      string      `json:"description" valid:""`
+	Payer            string      `json:"payer," valid:"maxstringlength(20)"`
+	Description      string      `json:"description,omitempty" valid:""`
 	Categories       []uuid.UUID `json:"categories" valid:"-"`
 }
 
