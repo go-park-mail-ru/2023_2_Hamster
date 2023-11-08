@@ -80,7 +80,7 @@ func (u *Usecase) CheckLoginUnique(ctx context.Context, login string) (bool, err
 	isUnique, err := u.authRepo.CheckLoginUnique(ctx, login)
 
 	if err != nil {
-		return false, fmt.Errorf("[usecase] can`t login unique check")
+		return false, fmt.Errorf("[usecase] can't login unique check")
 	}
 
 	return isUnique, nil

@@ -14,6 +14,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/pashagolub/pgxmock"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_CheckLoginUniq(t *testing.T) {
@@ -140,6 +141,64 @@ func TestGetUserByLogin(t *testing.T) {
 
 			if err := mock.ExpectationsWereMet(); err != nil {
 				t.Errorf("There were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
+
+func TestCreateUser(t *testing.T) {
+	tests := []struct {
+		name       string
+		user       models.User
+		errRows    error
+		returnRows uuid.UUID
+		expected   uuid.UUID
+		err        error
+	}{
+		{
+			name: "ValidUser",
+			user: models.User{
+				Login:    "testuser",
+				Username: "Test User",
+				Password: "password",
+			},
+			returnRows: uuid.New(),
+			err:        nil,
+		},
+		{
+			name: "InvalidUser",
+			user: models.User{
+				Login:    "",
+				Username: "",
+				Password: "",
+			},
+			errRows:    errors.New("Invalid user data"),
+			returnRows: uuid.Nil,
+			err:        errors.New("error request Invalid user data"),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mock, _ := pgxmock.NewPool()
+			ctl := gomock.NewController(t)
+			defer ctl.Finish()
+
+			logger := *logger.NewLogger(context.TODO())
+			repo := NewRepository(mock, logger)
+
+			escapedQuery := regexp.QuoteMeta(UserCreate)
+
+			mock.ExpectQuery(escapedQuery).
+				WithArgs(test.user.Login, test.user.Username, test.user.Password).
+				WillReturnError(test.errRows).
+				WillReturnRows(pgxmock.NewRows([]string{"id"}).AddRow(test.returnRows))
+
+			userID, err := repo.CreateUser(context.Background(), test.user)
+			assert.Equal(t, test.returnRows, userID)
+
+			if (test.err == nil && err != nil) || (test.err != nil && err == nil) || (test.err != nil && err != nil && test.err.Error() != err.Error()) {
+				t.Errorf("Expected error: %v, but got: %v", test.err, err)
 			}
 		})
 	}
