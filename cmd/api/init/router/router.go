@@ -89,6 +89,8 @@ func InitRouter(auth *auth.Handler,
 	}
 
 	categoryRouter := apiRouter.PathPrefix("/tag").Subrouter()
+	categoryRouter.Use(authMid.Authentication)
+	categoryRouter.Use(csrfMid.CheckCSRF)
 	{
 		categoryRouter.Methods("POST").Path("/create").HandlerFunc(category.CreateTag)
 		categoryRouter.Methods("GET").Path("/all").HandlerFunc(category.GetTags)
