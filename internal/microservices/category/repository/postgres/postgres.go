@@ -114,7 +114,7 @@ func (r *Repository) GetTags(ctx context.Context, userID uuid.UUID) ([]models.Ca
 
 	rows, err := r.db.Query(ctx, CategoeyAll, userID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[repo] Error no tags found: %v", err)
 	}
 
 	for rows.Next() {
