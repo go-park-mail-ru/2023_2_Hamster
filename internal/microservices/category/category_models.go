@@ -21,3 +21,7 @@ type (
 		Regular     bool      `json:"regular" valid:"-"`
 	}
 )
+
+type CategoryCreateResponse struct {
+	CategoryID uuid.UUID `json:"category_id"`
+}
