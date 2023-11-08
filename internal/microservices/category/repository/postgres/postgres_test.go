@@ -257,10 +257,10 @@ func Test_GetTags(t *testing.T) {
 		{
 			name:        "RowsError",
 			userID:      uuid.New(),
-			rows:        pgxmock.NewRows([]string{}),
-			rowsError:   errors.New("some database error"),
+			rows:        pgxmock.NewRows([]string{}).RowError(0, errors.New("SOME ERROR")),
+			rowsError:   nil,
 			expected:    nil,
-			expectedErr: fmt.Errorf("[repo] Error no tags found: %v", errors.New("some database error")),
+			expectedErr: fmt.Errorf("[repo] Error rows error: %v", errors.New("SOME ERROR")),
 		},
 	}
 
@@ -285,6 +285,148 @@ func Test_GetTags(t *testing.T) {
 
 			if !reflect.DeepEqual(tc.expected, result) {
 				t.Errorf("Expected tags: %v, but got: %v", tc.expected, result)
+			}
+
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("There were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
+
+func Test_CheckNameUniq(t *testing.T) {
+	testCases := []struct {
+		name        string
+		userID      uuid.UUID
+		parentID    uuid.UUID
+		nameToCheck string
+		rowExists   bool
+		rowError    error
+		expected    bool
+		expectedErr error
+	}{
+		{
+			name:        "SuccessUniq",
+			userID:      uuid.New(),
+			parentID:    uuid.New(),
+			nameToCheck: "NewTagName",
+			rowExists:   false,
+			rowError:    nil,
+			expected:    true,
+			expectedErr: nil,
+		},
+		{
+			name:        "NotUniq",
+			userID:      uuid.New(),
+			parentID:    uuid.New(),
+			nameToCheck: "ExistingTagName",
+			rowExists:   true,
+			rowError:    nil,
+			expected:    false,
+			expectedErr: nil,
+		},
+		{
+			name:        "RowsError",
+			userID:      uuid.New(),
+			parentID:    uuid.New(),
+			nameToCheck: "TestName",
+			rowExists:   false,
+			rowError:    errors.New("some database error"),
+			expected:    false,
+			expectedErr: fmt.Errorf("[repo] Error: %v", errors.New("some database error")),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			mock, _ := pgxmock.NewPool()
+
+			logger := *logger.NewLogger(context.TODO())
+			repo := NewRepository(mock, logger)
+
+			escapedQuery := regexp.QuoteMeta(CategoryNameCheck)
+			mock.ExpectQuery(escapedQuery).
+				WithArgs(tc.userID, tc.parentID, tc.nameToCheck).
+				WillReturnRows(pgxmock.NewRows([]string{"exists"}).AddRow(tc.rowExists)).
+				WillReturnError(tc.rowError)
+
+			result, err := repo.CheckNameUniq(context.Background(), tc.userID, tc.parentID, tc.nameToCheck)
+
+			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
+				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
+			}
+
+			if result != tc.expected {
+				t.Errorf("Expected result: %v, but got: %v", tc.expected, result)
+			}
+
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("There were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
+
+func Test_CheckExist(t *testing.T) {
+	testCases := []struct {
+		name        string
+		userID      uuid.UUID
+		tagID       uuid.UUID
+		rowExists   bool
+		rowError    error
+		expected    bool
+		expectedErr error
+	}{
+		{
+			name:        "SuccessExist",
+			userID:      uuid.New(),
+			tagID:       uuid.New(),
+			rowExists:   true,
+			rowError:    nil,
+			expected:    true,
+			expectedErr: nil,
+		},
+		{
+			name:        "NotExist",
+			userID:      uuid.New(),
+			tagID:       uuid.New(),
+			rowExists:   false,
+			rowError:    nil,
+			expected:    true,
+			expectedErr: nil,
+		},
+		{
+			name:        "RowsError",
+			userID:      uuid.New(),
+			tagID:       uuid.New(),
+			rowExists:   true,
+			rowError:    errors.New("some database error"),
+			expected:    false,
+			expectedErr: fmt.Errorf("[repo] Error: %v", errors.New("some database error")),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			mock, _ := pgxmock.NewPool()
+
+			logger := *logger.NewLogger(context.TODO())
+			repo := NewRepository(mock, logger)
+
+			escapedQuery := regexp.QuoteMeta(CategoryExistCheck)
+			mock.ExpectQuery(escapedQuery).
+				WithArgs(tc.userID, tc.tagID).
+				WillReturnRows(pgxmock.NewRows([]string{"exists"}).AddRow(tc.rowExists)).
+				WillReturnError(tc.rowError)
+
+			result, err := repo.CheckExist(context.Background(), tc.userID, tc.tagID)
+
+			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
+				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
+			}
+
+			if result != tc.expected {
+				t.Errorf("Expected result: %v, but got: %v", tc.expected, result)
 			}
 
 			if err := mock.ExpectationsWereMet(); err != nil {

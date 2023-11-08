@@ -135,7 +135,7 @@ func (r *Repository) GetTags(ctx context.Context, userID uuid.UUID) ([]models.Ca
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[repo] Error rows error: %v", err)
 	}
 
 	if len(categories) == 0 {
