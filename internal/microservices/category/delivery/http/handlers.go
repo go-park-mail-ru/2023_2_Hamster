@@ -30,7 +30,7 @@ func NewHandler(cu category.Usecase, log logger.Logger) *Handler {
 // @Accept 		json
 // @Produce		json
 // @Param			tag		body		category.TagInput		true		"tag info"
-// @Success		200		{object}	Response[uuid.UUID]				"tag with id creted"
+// @Success		200		{object}	Response[category.CategoryCreateResponse]				"tag with id creted"
 // @Failure		400		{object}	ResponseError					"Incorrect Input"
 // @Failure		401		{object}	ResponseError					"auth error relogin"
 // @Failure		429		{object}	ResponseError					"Server error"
@@ -65,7 +65,8 @@ func (h *Handler) CreateTag(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response.SuccessResponse(w, http.StatusOK, id)
+	categoryResponse := category.CategoryCreateResponse{CategoryID: id}
+	response.SuccessResponse(w, http.StatusOK, categoryResponse)
 }
 
 // @Summary		Get Tags

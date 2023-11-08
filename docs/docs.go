@@ -289,7 +289,7 @@ const docTemplate = `{
                     "200": {
                         "description": "tag with id creted",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-uuid_UUID"
+                            "$ref": "#/definitions/http.Response-category_CategoryCreateResponse"
                         }
                     },
                     "400": {
@@ -1060,6 +1060,14 @@ const docTemplate = `{
                 }
             }
         },
+        "category.CategoryCreateResponse": {
+            "type": "object",
+            "properties": {
+                "category_id": {
+                    "type": "string"
+                }
+            }
+        },
         "category.TagInput": {
             "type": "object",
             "properties": {
@@ -1162,6 +1170,17 @@ const docTemplate = `{
             "properties": {
                 "body": {
                     "type": "boolean"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "http.Response-category_CategoryCreateResponse": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/category.CategoryCreateResponse"
                 },
                 "status": {
                     "type": "integer"
@@ -1305,17 +1324,6 @@ const docTemplate = `{
             "properties": {
                 "body": {
                     "$ref": "#/definitions/transfer_models.UserTransfer"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "http.Response-uuid_UUID": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "type": "string"
                 },
                 "status": {
                     "type": "integer"
