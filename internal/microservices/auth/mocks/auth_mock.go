@@ -9,6 +9,7 @@ import (
 	reflect "reflect"
 
 	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth"
+	models "github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	gomock "github.com/golang/mock/gomock"
 	uuid "github.com/google/uuid"
 )
@@ -34,6 +35,21 @@ func NewMockUsecase(ctrl *gomock.Controller) *MockUsecase {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockUsecase) EXPECT() *MockUsecaseMockRecorder {
 	return m.recorder
+}
+
+// CheckLoginUnique mocks base method.
+func (m *MockUsecase) CheckLoginUnique(ctx context.Context, login string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckLoginUnique", ctx, login)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CheckLoginUnique indicates an expected call of CheckLoginUnique.
+func (mr *MockUsecaseMockRecorder) CheckLoginUnique(ctx, login interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckLoginUnique", reflect.TypeOf((*MockUsecase)(nil).CheckLoginUnique), ctx, login)
 }
 
 // Login mocks base method.
@@ -91,20 +107,6 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
 }
 
-// CheckCorrectPassword mocks base method.
-func (m *MockRepository) CheckCorrectPassword(ctx context.Context, password string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CheckCorrectPassword", ctx, password)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// CheckCorrectPassword indicates an expected call of CheckCorrectPassword.
-func (mr *MockRepositoryMockRecorder) CheckCorrectPassword(ctx, password interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckCorrectPassword", reflect.TypeOf((*MockRepository)(nil).CheckCorrectPassword), ctx, password)
-}
-
 // CheckExistUsername mocks base method.
 func (m *MockRepository) CheckExistUsername(ctx context.Context, username string) error {
 	m.ctrl.T.Helper()
@@ -132,4 +134,34 @@ func (m *MockRepository) CheckLoginUnique(ctx context.Context, login string) (bo
 func (mr *MockRepositoryMockRecorder) CheckLoginUnique(ctx, login interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckLoginUnique", reflect.TypeOf((*MockRepository)(nil).CheckLoginUnique), ctx, login)
+}
+
+// CreateUser mocks base method.
+func (m *MockRepository) CreateUser(ctx context.Context, u models.User) (uuid.UUID, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateUser", ctx, u)
+	ret0, _ := ret[0].(uuid.UUID)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateUser indicates an expected call of CreateUser.
+func (mr *MockRepositoryMockRecorder) CreateUser(ctx, u interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockRepository)(nil).CreateUser), ctx, u)
+}
+
+// GetUserByLogin mocks base method.
+func (m *MockRepository) GetUserByLogin(ctx context.Context, login string) (*models.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserByLogin", ctx, login)
+	ret0, _ := ret[0].(*models.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserByLogin indicates an expected call of GetUserByLogin.
+func (mr *MockRepositoryMockRecorder) GetUserByLogin(ctx, login interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByLogin", reflect.TypeOf((*MockRepository)(nil).GetUserByLogin), ctx, login)
 }

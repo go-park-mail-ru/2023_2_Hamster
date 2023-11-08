@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
 )
 
@@ -15,10 +16,12 @@ type Usecase interface {
 
 type Repository interface {
 	// Create User
-	// CreateUser(ctx context.Context, user models.User) (models.User, error)
+	CreateUser(ctx context.Context, u models.User) (uuid.UUID, error)
+
+	GetUserByLogin(ctx context.Context, login string) (*models.User, error)
 
 	// Validation
-	CheckCorrectPassword(ctx context.Context, password string) error
-	CheckExistUsername(ctx context.Context, username string) error
+	// CheckCorrectPassword(ctx context.Context, password string) error
+	// CheckExistUsername(ctx context.Context, username string) error
 	CheckLoginUnique(ctx context.Context, login string) (bool, error)
 }

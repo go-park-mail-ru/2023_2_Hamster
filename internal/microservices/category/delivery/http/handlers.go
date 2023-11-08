@@ -29,12 +29,12 @@ func NewHandler(cu category.Usecase, log logger.Logger) *Handler {
 // @Description	Creates tag
 // @Accept 		json
 // @Produce		json
-// @Param			tag		body		category.Tag			true		"tag info"
-// @Success		200		{object}	Response[id]					"tag with id creted"
+// @Param			tag		body		category.TagInput		true		"tag info"
+// @Success		200		{object}	Response[uuid.UUID]				"tag with id creted"
 // @Failure		400		{object}	ResponseError					"Incorrect Input"
 // @Failure		401		{object}	ResponseError					"auth error relogin"
 // @Failure		429		{object}	ResponseError					"Server error"
-// @Router		/api/addTag	[post]
+// @Router		/api/tag/create	[post]
 func (h *Handler) CreateTag(w http.ResponseWriter, r *http.Request) {
 	user, err := response.GetUserFromRequest(r)
 	if err != nil {
@@ -77,7 +77,7 @@ func (h *Handler) CreateTag(w http.ResponseWriter, r *http.Request) {
 // @Failure		400		{object}	ResponseError					"Incorrect Input"
 // @Failure		401		{object}	ResponseError					"auth error relogin"
 // @Failure		429		{object}	ResponseError					"Server error"
-// @Router		/api/getTags	[post]
+// @Router		/api/tag/all	[get]
 func (h *Handler) GetTags(w http.ResponseWriter, r *http.Request) {
 	user, err := response.GetUserFromRequest(r)
 	if err != nil {
@@ -102,15 +102,15 @@ func (h *Handler) GetTags(w http.ResponseWriter, r *http.Request) {
 
 // @Summary		Update Tag
 // @Tags			Category
-// @Description	Get all tags for user
+// @Description	Update Tag
 // @Accept 		json
 // @Produce		json
 // @Param			tag		body		models.Category		true		"tag info"
-// @Success		200		{object}	Response[models.Category]		"tag slice"
+// @Success		200		{object}	Response[models.Category]		"tag to update"
 // @Failure		400		{object}	ResponseError					"Incorrect Input"
 // @Failure		401		{object}	ResponseError					"auth error relogin"
 // @Failure		429		{object}	ResponseError					"Server error"
-// @Router		/api/getTags	[post]
+// @Router		/api/tag/{tagId}/update	[put]
 func (h *Handler) UpdateTag(w http.ResponseWriter, r *http.Request) {
 	user, err := response.GetUserFromRequest(r)
 	if err != nil {
@@ -146,6 +146,17 @@ func (h *Handler) UpdateTag(w http.ResponseWriter, r *http.Request) {
 	response.SuccessResponse(w, http.StatusOK, tag)
 }
 
+// @Summary		Delete Tag
+// @Tags			Category
+// @Description	delete tag
+// @Accept 		json
+// @Produce		json
+// @Param			tag		body		string				true		"tag id"
+// @Success		200		{object}	Response[models.Category]		"tag slice"
+// @Failure		400		{object}	ResponseError					"Incorrect Input"
+// @Failure		401		{object}	ResponseError					"auth error relogin"
+// @Failure		429		{object}	ResponseError					"Server error"
+// @Router		/api/tag/delete	[delete]
 func (h *Handler) DeleteTag(w http.ResponseWriter, r *http.Request) {
 	user, err := response.GetUserFromRequest(r)
 	if err != nil {

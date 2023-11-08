@@ -26,12 +26,6 @@ type ParamsHash struct {
 	keyLength   uint32
 }
 
-func Hash(pwd string, salt []byte) string { // Legacy
-	hash := sha256.New()
-	hash.Write(append([]byte(pwd), salt...))
-	return hex.EncodeToString(hash.Sum(nil))
-}
-
 func GenerateSession(seed string) string {
 	hash := sha256.New()
 	hash.Write([]byte(seed))
@@ -128,3 +122,5 @@ func decodeHash(encodedHash string) (p *ParamsHash, salt, hash []byte, err error
 
 	return p, salt, hash, nil
 }
+
+// testPassword

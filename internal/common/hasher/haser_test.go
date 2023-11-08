@@ -7,7 +7,8 @@ import (
 
 func TestPasswordHashingAndVerification(t *testing.T) {
 	// Test GeneratePasswordHash and VerfiyPassword functions
-
+	s, _ := GeneratePasswordHash("testPassword")
+	fmt.Println("------>>> ", s)
 	// Test case 1: Valid password hashing and verification
 	password := "securePassword123"
 	hash, err := GeneratePasswordHash(password)
