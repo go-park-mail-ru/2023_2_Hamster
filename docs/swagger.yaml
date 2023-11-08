@@ -14,6 +14,11 @@ definitions:
       username:
         type: string
     type: object
+  category.CategoryCreateResponse:
+    properties:
+      category_id:
+        type: string
+    type: object
   category.TagInput:
     properties:
       name:
@@ -81,6 +86,13 @@ definitions:
     properties:
       body:
         type: boolean
+      status:
+        type: integer
+    type: object
+  http.Response-category_CategoryCreateResponse:
+    properties:
+      body:
+        $ref: '#/definitions/category.CategoryCreateResponse'
       status:
         type: integer
     type: object
@@ -172,13 +184,6 @@ definitions:
     properties:
       body:
         $ref: '#/definitions/transfer_models.UserTransfer'
-      status:
-        type: integer
-    type: object
-  http.Response-uuid_UUID:
-    properties:
-      body:
-        type: string
       status:
         type: integer
     type: object
@@ -568,7 +573,7 @@ paths:
         "200":
           description: tag with id creted
           schema:
-            $ref: '#/definitions/http.Response-uuid_UUID'
+            $ref: '#/definitions/http.Response-category_CategoryCreateResponse'
         "400":
           description: Incorrect Input
           schema:

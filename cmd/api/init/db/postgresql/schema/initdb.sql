@@ -45,30 +45,6 @@ CREATE TABLE TransactionCategory (
     category_id UUID REFERENCES Category(id),
     PRIMARY KEY (transaction_id, category_id)
 );
---=============================================================================
-
-ALTER TABLE Users
-ALTER COLUMN planned_budget SET DEFAULT 0.0;
-
---=============================================================================
-
-INSERT INTO "users"(login, username, password_hash, planned_budget)
-VALUES ('kossmatof','komarov', '$argon2id$v=19$m=65536,t=1,p=4$m8qhM3XLae+RCTGirBFEww$Znu5RBnxlam2xRoVtwBzbdSrN4/sRCm1IMOVX4N2uxw', 10000);
-
-INSERT INTO "users"(login, username, password_hash, planned_budget)
-VALUES ('test','test1', '$argon2id$v=19$m=65536,t=1,p=4$m8qhM3XLae+RCTGirBFEww$Znu5RBnxlam2xRoVtwBzbdSrN4/sRCm1IMOVX4N2uxw', 10000);
-
-INSERT INTO "accounts"(user_id, balance, mean_payment)
-VALUES ((SELECT id FROM Users limit 1), 1000, 'Кошелек');
-
-INSERT INTO "accounts"(user_id, balance, mean_payment)
-VALUES ((SELECT id FROM Users limit 1), 1000, 'Наличка');
-
-INSERT INTO "category"(user_id, name)
-VALUES ((SELECT id FROM Users limit 1), 'ЖКХ');
-
-INSERT INTO "category"(user_id, name)
-VALUES ((SELECT id FROM Users limit 1), 'Стипендия');
 
 CREATE OR REPLACE FUNCTION add_default_categoies()
 RETURNS TRIGGER AS $$
@@ -95,3 +71,22 @@ CREATE OR REPLACE TRIGGER after_user_created
     AFTER INSERT ON users
     FOR EACH ROW
 EXECUTE FUNCTION add_default_categoies();
+--=============================================================================
+
+ALTER TABLE Users
+ALTER COLUMN planned_budget SET DEFAULT 0.0;
+
+--=============================================================================
+
+INSERT INTO "users"(login, username, password_hash, planned_budget)
+VALUES ('kossmatof','komarov', '$argon2id$v=19$m=65536,t=1,p=4$m8qhM3XLae+RCTGirBFEww$Znu5RBnxlam2xRoVtwBzbdSrN4/sRCm1IMOVX4N2uxw', 10000);
+
+INSERT INTO "users"(login, username, password_hash, planned_budget)
+VALUES ('test','test1', '$argon2id$v=19$m=65536,t=1,p=4$m8qhM3XLae+RCTGirBFEww$Znu5RBnxlam2xRoVtwBzbdSrN4/sRCm1IMOVX4N2uxw', 10000);
+
+INSERT INTO "accounts"(user_id, balance, mean_payment)
+VALUES ((SELECT id FROM Users limit 1), 1000, 'Кошелек');
+
+INSERT INTO "accounts"(user_id, balance, mean_payment)
+VALUES ((SELECT id FROM Users limit 1), 1000, 'Наличка');
+

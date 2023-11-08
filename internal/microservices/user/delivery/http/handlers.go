@@ -94,8 +94,8 @@ func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) { // ?
 // @Produce		json
 // @Success		200		{object} 	Response[transfer_models.BudgetPlannedResponse]	"Show planned budget"
 // @Failure		400		{object}	ResponseError			"Client error"
-// @Failure     401    	{object}  	ResponseError  		"Unauthorized user"
-// @Failure     403    	{object}  	ResponseError  		"Forbidden user"
+// @Failure     401    	{object}  	ResponseError  			"Unauthorized user"
+// @Failure     403    	{object}  	ResponseError  			"Forbidden user"
 // @Failure		500		{object}	ResponseError			"Server error"
 // @Router		/api/user/plannedBudget [get]
 func (h *Handler) GetPlannedBudget(w http.ResponseWriter, r *http.Request) {
