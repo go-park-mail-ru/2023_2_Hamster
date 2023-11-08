@@ -3,23 +3,44 @@ package models
 import (
 	"time"
 
-	valid "github.com/asaskevich/govalidator"
 	"github.com/google/uuid"
 )
 
 type Transaction struct {
-	ID          uuid.UUID `json:"id" valid:"-"`
-	UserID      uint      `json:"user_id" valid:"-"`
-	CategoryID  uint      `json:"category_id" valid:"-"`
-	AccountID   uint      `json:"account_id" valid:"-"`
-	Total       float64   `json:"total" valid:"required,greaterzero"`
-	IsIncome    bool      `json:"is_income" valid:"required"`
-	Date        time.Time `json:"date" valid:"isdate"`
-	Payer       string    `json:"payer" valid:"payer"`
-	Description string    `json:"description" valid:"-"`
+	ID               uuid.UUID   `json:"id" valid:"-"`
+	UserID           uuid.UUID   `json:"user_id" valid:"-"`
+	AccountIncomeID  uuid.UUID   `json:"account_income" valid:"-"`
+	AccountOutcomeID uuid.UUID   `json:"account_outcome" valid:"-"`
+	Income           float64     `json:"income" valid:"required"`
+	Outcome          float64     `json:"outcome" valid:"required"`
+	Date             time.Time   `json:"date" valid:"isdate"`
+	Payer            string      `json:"payer" valid:"payer"`
+	Description      string      `json:"description" valid:"-"`
+	Categories       []uuid.UUID `json:"categories" valid:"-"`
 }
 
-func (t *Transaction) TransactionValidate() error {
-	_, err := valid.ValidateStruct(t)
-	return err
+type TransactionTransfer struct {
+	ID               uuid.UUID   `json:"id" valid:"-"`
+	AccountIncomeID  uuid.UUID   `json:"account_income" valid:"-"`
+	AccountOutcomeID uuid.UUID   `json:"account_outcome" valid:"-"`
+	Income           float64     `json:"income" valid:"required"`
+	Outcome          float64     `json:"outcome" valid:"required"`
+	Date             time.Time   `json:"date" valid:"isdate"`
+	Payer            string      `json:"payer" valid:"payer"`
+	Description      string      `json:"description" valid:"-"`
+	Categories       []uuid.UUID `json:"categories" valid:"-"`
+}
+
+func InitTransactionTransfer(transaction Transaction) TransactionTransfer {
+	return TransactionTransfer{
+		ID:               transaction.ID,
+		AccountIncomeID:  transaction.AccountIncomeID,
+		AccountOutcomeID: transaction.AccountOutcomeID,
+		Income:           transaction.Income,
+		Outcome:          transaction.Outcome,
+		Date:             transaction.Date,
+		Payer:            transaction.Payer,
+		Description:      transaction.Description,
+		Categories:       transaction.Categories,
+	}
 }

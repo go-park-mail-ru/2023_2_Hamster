@@ -1,43 +1,230 @@
 basePath: /user/{userID}/account/feed
 definitions:
-  http.Error:
+  auth.LoginInput:
     properties:
-      message:
+      login:
         type: string
-    type: object
-  http.Response:
-    properties:
-      body: {}
-    type: object
-  http.account:
-    properties:
-      account:
-        items:
-          $ref: '#/definitions/models.Accounts'
-        type: array
-    type: object
-  http.budgetActualResponse:
-    properties:
-      actual_balance:
-        type: number
-    type: object
-  http.budgetPlannedResponse:
-    properties:
-      planned_balance:
-        type: number
-    type: object
-  http.signInput:
-    properties:
       password:
         type: string
-      username:
-        type: string
     type: object
-  http.signUpResponse:
+  auth.SignResponse:
     properties:
       id:
         type: string
       username:
+        type: string
+    type: object
+  category.CategoryCreateResponse:
+    properties:
+      category_id:
+        type: string
+    type: object
+  category.TagInput:
+    properties:
+      name:
+        type: string
+      parent_id:
+        type: string
+      regular:
+        type: boolean
+      show_income:
+        type: boolean
+      show_outcome:
+        type: boolean
+      user_id:
+        type: string
+    type: object
+  http.CreateTransaction:
+    properties:
+      account_income:
+        type: string
+      account_outcome:
+        type: string
+      categories:
+        items:
+          type: string
+        type: array
+      date:
+        type: string
+      description:
+        type: string
+      income:
+        type: number
+      outcome:
+        type: number
+      payer:
+        type: string
+    type: object
+  http.MasTransaction:
+    properties:
+      is_all:
+        type: boolean
+      transactions:
+        items:
+          $ref: '#/definitions/models.TransactionTransfer'
+        type: array
+    type: object
+  http.NilBody:
+    type: object
+  http.Response-array_models_Category:
+    properties:
+      body:
+        items:
+          $ref: '#/definitions/models.Category'
+        type: array
+      status:
+        type: integer
+    type: object
+  http.Response-auth_SignResponse:
+    properties:
+      body:
+        $ref: '#/definitions/auth.SignResponse'
+      status:
+        type: integer
+    type: object
+  http.Response-bool:
+    properties:
+      body:
+        type: boolean
+      status:
+        type: integer
+    type: object
+  http.Response-category_CategoryCreateResponse:
+    properties:
+      body:
+        $ref: '#/definitions/category.CategoryCreateResponse'
+      status:
+        type: integer
+    type: object
+  http.Response-http_MasTransaction:
+    properties:
+      body:
+        $ref: '#/definitions/http.MasTransaction'
+      status:
+        type: integer
+    type: object
+  http.Response-http_NilBody:
+    properties:
+      body:
+        $ref: '#/definitions/http.NilBody'
+      status:
+        type: integer
+    type: object
+  http.Response-http_TransactionCreateResponse:
+    properties:
+      body:
+        $ref: '#/definitions/http.TransactionCreateResponse'
+      status:
+        type: integer
+    type: object
+  http.Response-http_getCSRFResponce:
+    properties:
+      body:
+        $ref: '#/definitions/http.getCSRFResponce'
+      status:
+        type: integer
+    type: object
+  http.Response-models_Category:
+    properties:
+      body:
+        $ref: '#/definitions/models.Category'
+      status:
+        type: integer
+    type: object
+  http.Response-string:
+    properties:
+      body:
+        type: string
+      status:
+        type: integer
+    type: object
+  http.Response-transfer_models_Account:
+    properties:
+      body:
+        $ref: '#/definitions/transfer_models.Account'
+      status:
+        type: integer
+    type: object
+  http.Response-transfer_models_BalanceResponse:
+    properties:
+      body:
+        $ref: '#/definitions/transfer_models.BalanceResponse'
+      status:
+        type: integer
+    type: object
+  http.Response-transfer_models_BudgetActualResponse:
+    properties:
+      body:
+        $ref: '#/definitions/transfer_models.BudgetActualResponse'
+      status:
+        type: integer
+    type: object
+  http.Response-transfer_models_BudgetPlannedResponse:
+    properties:
+      body:
+        $ref: '#/definitions/transfer_models.BudgetPlannedResponse'
+      status:
+        type: integer
+    type: object
+  http.Response-transfer_models_PhotoUpdate:
+    properties:
+      body:
+        $ref: '#/definitions/transfer_models.PhotoUpdate'
+      status:
+        type: integer
+    type: object
+  http.Response-transfer_models_UserFeed:
+    properties:
+      body:
+        $ref: '#/definitions/transfer_models.UserFeed'
+      status:
+        type: integer
+    type: object
+  http.Response-transfer_models_UserTransfer:
+    properties:
+      body:
+        $ref: '#/definitions/transfer_models.UserTransfer'
+      status:
+        type: integer
+    type: object
+  http.ResponseError:
+    properties:
+      message:
+        type: string
+      status:
+        type: integer
+    type: object
+  http.TransactionCreateResponse:
+    properties:
+      transaction_id:
+        type: string
+    type: object
+  http.UpdTransaction:
+    properties:
+      account_income:
+        type: string
+      account_outcome:
+        type: string
+      categories:
+        items:
+          type: string
+        type: array
+      date:
+        type: string
+      description:
+        type: string
+      income:
+        type: number
+      outcome:
+        type: number
+      payer:
+        type: string
+      transaction_id:
+        type: string
+    type: object
+  http.getCSRFResponce:
+    properties:
+      csrf:
         type: string
     type: object
   models.Accounts:
@@ -51,30 +238,181 @@ definitions:
       user_id:
         type: string
     type: object
+  models.Category:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      parent_id:
+        type: string
+      regular:
+        type: boolean
+      show_income:
+        type: boolean
+      show_outcome:
+        type: boolean
+      user_id:
+        type: string
+    type: object
+  models.TransactionTransfer:
+    properties:
+      account_income:
+        type: string
+      account_outcome:
+        type: string
+      categories:
+        items:
+          type: string
+        type: array
+      date:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      income:
+        type: number
+      outcome:
+        type: number
+      payer:
+        type: string
+    type: object
   models.User:
     properties:
       avatar_url:
         type: string
       id:
         type: string
+      login:
+        type: string
       password:
         type: string
       planned_budget:
         type: number
-      salt:
+      username:
         type: string
+    type: object
+  transfer_models.Account:
+    properties:
+      accounts:
+        items:
+          $ref: '#/definitions/models.Accounts'
+        type: array
+    type: object
+  transfer_models.BalanceResponse:
+    properties:
+      balance:
+        type: number
+    type: object
+  transfer_models.BudgetActualResponse:
+    properties:
+      actual_budget:
+        type: number
+    type: object
+  transfer_models.BudgetPlannedResponse:
+    properties:
+      planned_budget:
+        type: number
+    type: object
+  transfer_models.PhotoUpdate:
+    properties:
+      path:
+        type: string
+    type: object
+  transfer_models.UserFeed:
+    properties:
+      accounts:
+        items:
+          $ref: '#/definitions/models.Accounts'
+        type: array
+      actual_budget:
+        type: number
+      balance:
+        type: number
+      planned_budget:
+        type: number
+    type: object
+  transfer_models.UserTransfer:
+    properties:
+      avatar_url:
+        type: string
+      id:
+        type: string
+      login:
+        type: string
+      planned_budget:
+        type: number
+      username:
+        type: string
+    type: object
+  transfer_models.UserUdate:
+    properties:
+      planned_budget:
+        type: number
       username:
         type: string
     type: object
 host: localhost:8090
 info:
   contact:
-    email: dimka.komarov@bk.ru
+    email: grigorikovalenko@gmail.com
     name: Hamster API Support
   description: Server API for Hamster Money Service Application
   title: Hamster API
   version: 1.0.1
 paths:
+  /api/auth/checkAuth:
+    post:
+      consumes:
+      - application/json
+      description: Validate auth
+      parameters:
+      - description: user info
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User status
+          schema:
+            $ref: '#/definitions/http.Response-auth_SignResponse'
+        "400":
+          description: Invalid cookie
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: 'Server error: cookie read fail'
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Validate Auth
+      tags:
+      - Auth
+  /api/auth/checkLogin/{login}:
+    get:
+      description: Get bool parametrs about unique login
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Show user
+          schema:
+            $ref: '#/definitions/http.Response-bool'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Get unique login info
+      tags:
+      - Auth
   /api/auth/signin:
     post:
       consumes:
@@ -86,22 +424,22 @@ paths:
         name: userInput
         required: true
         schema:
-          $ref: '#/definitions/http.signInput'
+          $ref: '#/definitions/auth.LoginInput'
       produces:
       - application/json
       responses:
-        "200":
+        "202":
           description: User logedin
           schema:
-            $ref: '#/definitions/http.signUpResponse'
+            $ref: '#/definitions/http.Response-auth_SignResponse'
         "400":
           description: Incorrect Input
           schema:
-            $ref: '#/definitions/http.Error'
-        "500":
+            $ref: '#/definitions/http.ResponseError'
+        "429":
           description: Server error
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
       summary: Sign In
       tags:
       - Auth
@@ -120,52 +458,347 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
+        "202":
           description: User Created
           schema:
-            $ref: '#/definitions/http.signUpResponse'
+            $ref: '#/definitions/http.Response-auth_SignResponse'
         "400":
           description: Incorrect Input
           schema:
-            $ref: '#/definitions/http.Error'
-        "500":
+            $ref: '#/definitions/http.ResponseError'
+        "429":
           description: Server error
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
       summary: Sign Up
       tags:
       - Auth
-  /api/auth/validateAuth:
-    post:
-      consumes:
-      - application/json
-      description: Validate auth
-      parameters:
-      - description: user info
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/models.User'
+  /api/csrf/:
+    get:
+      description: Get csrf token
       produces:
       - application/json
       responses:
         "200":
-          description: User status
+          description: Csrf Token
           schema:
-            $ref: '#/definitions/http.Error'
-        "400":
-          description: Invalid cookie
+            $ref: '#/definitions/http.Response-http_getCSRFResponce'
+        "401":
+          description: Unauthorized user
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
         "500":
-          description: 'Server error: cookie read fail'
+          description: Server error
           schema:
-            $ref: '#/definitions/http.Error'
-      summary: Validate Auth
+            $ref: '#/definitions/http.ResponseError'
+      summary: Get csrf token
       tags:
-      - Auth
-  /api/user/{userID}/accounts/all:
+      - Csrf
+  /api/tag/{tagId}/update:
+    put:
+      consumes:
+      - application/json
+      description: Update Tag
+      parameters:
+      - description: tag info
+        in: body
+        name: tag
+        required: true
+        schema:
+          $ref: '#/definitions/models.Category'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: tag to update
+          schema:
+            $ref: '#/definitions/http.Response-models_Category'
+        "400":
+          description: Incorrect Input
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: auth error relogin
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "429":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Update Tag
+      tags:
+      - Category
+  /api/tag/all:
+    get:
+      consumes:
+      - application/json
+      description: Get all tags for user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: tag slice
+          schema:
+            $ref: '#/definitions/http.Response-array_models_Category'
+        "400":
+          description: Incorrect Input
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: auth error relogin
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "429":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Get Tags
+      tags:
+      - Category
+  /api/tag/create:
+    post:
+      consumes:
+      - application/json
+      description: Creates tag
+      parameters:
+      - description: tag info
+        in: body
+        name: tag
+        required: true
+        schema:
+          $ref: '#/definitions/category.TagInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: tag with id creted
+          schema:
+            $ref: '#/definitions/http.Response-category_CategoryCreateResponse'
+        "400":
+          description: Incorrect Input
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: auth error relogin
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "429":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Create Tag
+      tags:
+      - Category
+  /api/tag/delete:
+    delete:
+      consumes:
+      - application/json
+      description: delete tag
+      parameters:
+      - description: tag id
+        in: body
+        name: tag
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: tag slice
+          schema:
+            $ref: '#/definitions/http.Response-models_Category'
+        "400":
+          description: Incorrect Input
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: auth error relogin
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "429":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Delete Tag
+      tags:
+      - Category
+  /api/transaction/{transaction_id}/delete:
+    delete:
+      description: Delete transaction with chosen ID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Transaction deleted
+          schema:
+            $ref: '#/definitions/http.Response-http_NilBody'
+        "400":
+          description: Transaction error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: User unathorized
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: User hasn't rights
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Delete Transaction
+      tags:
+      - Transaction
+  /api/transaction/create:
+    post:
+      description: Create transaction
+      parameters:
+      - description: Input transactin create
+        in: body
+        name: transaction
+        required: true
+        schema:
+          $ref: '#/definitions/http.CreateTransaction'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Create transaction
+          schema:
+            $ref: '#/definitions/http.Response-http_TransactionCreateResponse'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Create transaction
+      tags:
+      - Transaction
+  /api/transaction/feed:
+    get:
+      description: Get User all transaction
+      parameters:
+      - example: 1
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      - example: 10
+        in: query
+        maximum: 20
+        minimum: 1
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Show transaction
+          schema:
+            $ref: '#/definitions/http.Response-http_MasTransaction'
+        "204":
+          description: Show actual accounts
+          schema:
+            $ref: '#/definitions/http.Response-string'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Get all transaction
+      tags:
+      - Transaction
+  /api/transaction/update:
+    put:
+      description: Put transaction
+      parameters:
+      - description: Input transactin update
+        in: body
+        name: transaction
+        required: true
+        schema:
+          $ref: '#/definitions/http.UpdTransaction'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Update transaction
+          schema:
+            $ref: '#/definitions/http.Response-http_NilBody'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: PUT Update
+      tags:
+      - Transaction
+  /api/user/:
+    get:
+      description: Get user with chosen ID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Show user
+          schema:
+            $ref: '#/definitions/http.Response-transfer_models_UserTransfer'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Get User
+      tags:
+      - User
+  /api/user/accounts/all:
     get:
       description: Get User accounts
       produces:
@@ -174,19 +807,31 @@ paths:
         "200":
           description: Show actual accounts
           schema:
-            $ref: '#/definitions/http.account'
+            $ref: '#/definitions/http.Response-transfer_models_Account'
+        "204":
+          description: Show actual accounts
+          schema:
+            $ref: '#/definitions/http.Response-string'
         "400":
           description: Client error
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
         "500":
           description: Server error
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
       summary: Get User Accounts
       tags:
       - User
-  /api/user/{userID}/actualBudget:
+  /api/user/actualBudget:
     get:
       description: Get User actual budget
       produces:
@@ -195,19 +840,27 @@ paths:
         "200":
           description: Show actual budget
           schema:
-            $ref: '#/definitions/http.budgetActualResponse'
+            $ref: '#/definitions/http.Response-transfer_models_BudgetActualResponse'
         "400":
           description: Client error
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
         "500":
           description: Server error
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
       summary: Get Actual Budget
       tags:
       - User
-  /api/user/{userID}/balance:
+  /api/user/balance:
     get:
       description: Get User balance
       produces:
@@ -216,19 +869,56 @@ paths:
         "200":
           description: Show balance
           schema:
-            $ref: '#/definitions/http.Response'
+            $ref: '#/definitions/http.Response-transfer_models_BalanceResponse'
         "400":
           description: Client error
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
         "500":
           description: Server error
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
       summary: Get Balance
       tags:
       - User
-  /api/user/{userID}/plannedBudget:
+  /api/user/feed:
+    get:
+      description: Get Feed user info
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Show actual accounts
+          schema:
+            $ref: '#/definitions/http.Response-transfer_models_UserFeed'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Get Feed
+      tags:
+      - User
+  /api/user/plannedBudget:
     get:
       description: Get User planned budget
       produces:
@@ -237,16 +927,109 @@ paths:
         "200":
           description: Show planned budget
           schema:
-            $ref: '#/definitions/http.budgetPlannedResponse'
+            $ref: '#/definitions/http.Response-transfer_models_BudgetPlannedResponse'
         "400":
           description: Client error
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
         "500":
           description: Server error
           schema:
-            $ref: '#/definitions/http.Error'
+            $ref: '#/definitions/http.ResponseError'
       summary: Get Planned Budget
+      tags:
+      - User
+  /api/user/update:
+    put:
+      consumes:
+      - application/json
+      description: Update user info
+      parameters:
+      - description: user info update
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/transfer_models.UserUdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Update user info
+          schema:
+            $ref: '#/definitions/http.Response-http_NilBody'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: PUT Update
+      tags:
+      - User
+  /api/user/updatePhoto:
+    put:
+      consumes:
+      - multipart/form-data
+      description: Update user photo
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: string
+      - description: New photo to upload
+        in: formData
+        name: upload
+        required: true
+        type: file
+      - description: Path to old photo
+        in: formData
+        name: path
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Photo updated successfully
+          schema:
+            $ref: '#/definitions/http.Response-transfer_models_PhotoUpdate'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: PUT Update Photo
       tags:
       - User
 swagger: "2.0"

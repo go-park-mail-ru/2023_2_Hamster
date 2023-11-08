@@ -8,9 +8,10 @@ import (
 	"time"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/app"
+	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/db/postgresql"
+	redisDB "github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/db/redis"
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/server"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/postgresql"
 )
 
 // @title		Hamster API
@@ -19,6 +20,7 @@ import (
 
 // @contact.name   Hamster API Support
 // @contact.email  dimka.komarov@bk.ru
+// @contact.email  grigorikovalenko@gmail.com
 
 // @host		localhost:8090
 // @BasePath	/user/{userID}/account/feed
@@ -28,42 +30,64 @@ import (
 // @name				Authorization
 
 func main() {
-	log := logger.CreateCustomLogger()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	db, err := postgresql.InitPostgresDB()
+	log := logger.NewLogger(ctx)
+
+	// Postgre Connection
+	db, err := postgresql.InitPostgresDB(ctx)
 	if err != nil {
 		log.Errorf("Error Initializing PostgreSQL database: %v", err)
 		return
 	}
 	defer func() {
-		if err := db.Close(); err != nil {
-			log.Errorf("Error Closing database connection: %v", err)
-		}
+		db.Close()
+
 		log.Info("Db closed without errors")
 	}()
+
 	log.Info("Db connection successfully")
 
-	router := app.Init(db, log)
+	// redis-cli init
+	redisCli, err := redisDB.InitRedisCli(ctx)
+	if err != nil {
+		log.Errorf("Error Initializing Redis-cli: %v", err)
+		return
+	}
+	defer func() {
+		if err := redisCli.Close(); err != nil {
+			log.Errorf("Error Closing Redis connection: %v", err)
+		}
+		log.Info("Redis closed without errors")
+	}()
+
+	_, pingErr := redisCli.Ping(context.Background()).Result()
+	if pingErr != nil {
+		log.Errorf("Failed to ping Redis server: %v", pingErr)
+	}
+
+	log.Info("Redis connection successfully")
+
+	router := app.Init(db, redisCli, log)
+
 	var srv server.Server
+	if err := srv.Init(router); err != nil {
+		log.Fatalf("error while launching server: %v", err)
+	}
+
 	go func() {
-		if err := srv.Run(router); err != nil {
+		if err := srv.Run(); err != nil {
 			log.Fatalf("can't launch server: %v", err)
 		}
 	}()
 	log.Infof("server launcher at %s:%s", os.Getenv("SERVER_HOST"), os.Getenv("SERVER_PORT"))
 
-	// Create a channel to listen for OS signals
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 
-	// Block until we receive a signal
 	<-stop
 
-	// Create a context with a timeout for server shutdown
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	// Attempt to gracefully shutdown the server
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatalf("Server forced to shutdown: %v", err)
 	}

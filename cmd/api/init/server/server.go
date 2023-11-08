@@ -5,8 +5,15 @@ import (
 	"errors"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
+)
+
+const (
+	maxHeaderBytes = 1 << 20
+	readTimeout    = 10 * time.Second
+	writeTimeout   = 10 * time.Second
 )
 
 type Server struct {
@@ -38,7 +45,7 @@ func initServerConfigFromEnv() (cfgServer, error) {
 	return cfg, nil
 }
 
-func (s *Server) Run(handler http.Handler) error {
+func (s *Server) Init(handler http.Handler) error {
 	cfgSer, err := initServerConfigFromEnv()
 	if err != nil {
 		return err
@@ -46,14 +53,20 @@ func (s *Server) Run(handler http.Handler) error {
 
 	addr := cfgSer.ServerHost + ":" + cfgSer.ServerPort
 	s.httpServer = &http.Server{
-		Addr:    addr,
-		Handler: handler,
+		Addr:           addr,
+		Handler:        handler,
+		MaxHeaderBytes: maxHeaderBytes,
+		ReadTimeout:    readTimeout,
+		WriteTimeout:   writeTimeout,
 	}
 
-	if s.httpServer.ListenAndServe(); err != nil {
+	return nil
+}
+
+func (s *Server) Run() error {
+	if err := s.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		return err
 	}
-
 	return nil
 }
 
