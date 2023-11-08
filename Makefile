@@ -34,7 +34,8 @@ doc: ## Generate API documentation using swag
 	swag init -g cmd/api/main.go
 
 test: ## Run tests
-	# Add your test command here
+	go test ./...;
+	find . -type d -name "logs" -exec rm -r {} \;
 
 lint: ## Run linters
 	golangci-lint run
