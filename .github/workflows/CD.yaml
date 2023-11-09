@@ -32,6 +32,11 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
 
+      - name: Create test folder
+        run: |
+          sudo mkdir /images  
+          sudo chmod -R 777 /images
+
       - name: Test with the Go CLI
         run: go test ./...
 
