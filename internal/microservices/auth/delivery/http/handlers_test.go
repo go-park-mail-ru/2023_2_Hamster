@@ -33,7 +33,7 @@ func TestHandler_SignUp(t *testing.T) {
 	}{
 		{
 			name:         "Successful SignUp",
-			requestBody:  strings.NewReader(`{"username": "testuser", "password": "testpassword"}`),
+			requestBody:  strings.NewReader(`{"login": "testlogin", "username": "testuser", "password": "testpassword"}`),
 			expectedCode: http.StatusOK,
 			expectedBody: fmt.Sprintf(`{"status":202,"body":{"id":"%s","username":"testuser"}}`, strUserId),
 			mockAU: func(mockAU *mocks.MockUsecase) {
@@ -45,7 +45,7 @@ func TestHandler_SignUp(t *testing.T) {
 		},
 		{
 			name:         "Corrupted request body",
-			requestBody:  strings.NewReader(`{"username": "testuser", "password": "testpassword`),
+			requestBody:  strings.NewReader(`{"login": "testlogin","username": "testuser", "password": "testpassword`),
 			expectedCode: http.StatusBadRequest,
 			expectedBody: `{"status":400,"message":"Corrupted request body can't unmarshal"}`,
 			mockAU: func(mockAU *mocks.MockUsecase) {
@@ -57,7 +57,7 @@ func TestHandler_SignUp(t *testing.T) {
 		},
 		{
 			name:         "Error during SignUp",
-			requestBody:  strings.NewReader(`{"username": "testuser", "password": "testpassword"}`),
+			requestBody:  strings.NewReader(`{"login": "testlogin","username": "testuser", "password": "testpassword"}`),
 			expectedCode: http.StatusTooManyRequests,
 			expectedBody: `{"status":429,"message":"Can't Sign Up user"}`,
 			mockAU: func(mockAU *mocks.MockUsecase) {

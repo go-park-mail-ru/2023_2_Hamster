@@ -17,9 +17,9 @@ type (
 	}
 
 	SignUpInput struct {
-		Login          string `json:"login" valid:"required,min=4,max=20"`
-		Username       string `json:"username" valid:"required,min=4,max=20"`
-		PlaintPassword string `json:"password" valid:"required,min=4,max=20"`
+		Login          string `json:"login" valid:"required"`
+		Username       string `json:"username" valid:"required"`
+		PlaintPassword string `json:"password" valid:"required"`
 	}
 
 	LoginInput struct {
@@ -48,6 +48,5 @@ func (si *SignUpInput) CheckValid() error {
 	si.PlaintPassword = html.EscapeString(si.PlaintPassword)
 
 	_, err := valid.ValidateStruct(*si)
-
 	return err
 }
