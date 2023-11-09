@@ -93,7 +93,8 @@ jobs:
           envs: REGISTRY, IMAGE_NAME, CONTAINER_NAME, GITHUB_SHA, FOLDER_COMPOSE
           script: |
             sudo bash
-            cd $(echo $FOLDER_COMPOSE)
+            cd production
+            ls
             touch testfile.txt
 
       - name: Deploy docker-compose via SSH action
