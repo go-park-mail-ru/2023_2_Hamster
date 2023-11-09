@@ -11,7 +11,7 @@ FROM scratch AS run
 
 WORKDIR /docker-HammyWallet/
 
-COPY --from=builder /github.com/go-park-mail-ru/2023_2_Hamster/.server .
+COPY --from=build /github.com/go-park-mail-ru/2023_2_Hamster/.server .
 
 EXPOSE 80 433
 
