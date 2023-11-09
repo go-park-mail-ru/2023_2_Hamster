@@ -94,7 +94,7 @@ jobs:
           script: |
             sudo bash
             cd production
-            ls
+            ls -l
             touch testfile.txt
 
       - name: Deploy docker-compose via SSH action
