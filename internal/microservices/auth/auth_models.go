@@ -1,6 +1,12 @@
 package auth
 
-import "github.com/google/uuid"
+import (
+	"html"
+
+	valid "github.com/asaskevich/govalidator"
+
+	"github.com/google/uuid"
+)
 
 // Models for auth Request-Response handling
 
@@ -11,14 +17,14 @@ type (
 	}
 
 	SignUpInput struct {
-		Login          string `json:"login" valid:"required"`
-		Username       string `json:"username" valid:"required"`
-		PlaintPassword string `json:"password" valid:"required"`
+		Login          string `json:"login" valid:"required,min=4,max=20"`
+		Username       string `json:"username" valid:"required,min=4,max=20"`
+		PlaintPassword string `json:"password" valid:"required,min=4,max=20"`
 	}
 
 	LoginInput struct {
-		Login          string `json:"login" valid:"required"`
-		PlaintPassword string `json:"password" valid:"required"`
+		Login          string `json:"login" valid:"required,min=4,max=20"`
+		PlaintPassword string `json:"password" valid:"required,min=4,max=20"`
 	}
 
 	SignResponse struct {
@@ -26,3 +32,22 @@ type (
 		Username string    `json:"username" valid:"required"`
 	}
 )
+
+func (li *LoginInput) CheckValid() error {
+	li.Login = html.EscapeString(li.Login)
+	li.PlaintPassword = html.EscapeString(li.PlaintPassword)
+
+	_, err := valid.ValidateStruct(*li)
+
+	return err
+}
+
+func (si *SignUpInput) CheckValid() error {
+	si.Login = html.EscapeString(si.Login)
+	si.Username = html.EscapeString(si.Username)
+	si.PlaintPassword = html.EscapeString(si.PlaintPassword)
+
+	_, err := valid.ValidateStruct(*si)
+
+	return err
+}
