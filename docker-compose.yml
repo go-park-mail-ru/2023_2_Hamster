@@ -70,7 +70,8 @@ services:
   
 
   hammywallet-api:
-    container_name: hammywallet-api
+    container_name: ${CONTAINER_NAME}
+    image: ${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA_SHORT}
     env_file:
       - .env
     build:

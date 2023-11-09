@@ -3,8 +3,8 @@ name: CD
 env:
   REGISTRY: "codemaster482"
   IMAGE_NAME: "hammywallet"
-  CONTAINER_NAME: "HammyWallet-API"
-  FOLDER_COMPOSE: "backend/2023_2_Hamster"
+  CONTAINER_NAME: "hammywallet-api"
+  FOLDER_COMPOSE: "production"
 
 on:
   push:
@@ -82,12 +82,6 @@ jobs:
     needs: push_to_dockerhub
 
     steps:
-      - name: Debugging
-        run: |
-          ls -l docker-compose.yml
-          ls -l cmd/api/init/db/postgresql/schema/initdb.sql
-          tar -zcvf /tmp/debug.tar.gz docker-compose.yml cmd/api/init/db/postgresql/schema/initdb.sql
-      
       - name: Deploy docker-compose via SSH action
         uses: appleboy/scp-action@v0.1.4
         with:
