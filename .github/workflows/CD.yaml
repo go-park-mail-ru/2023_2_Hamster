@@ -90,7 +90,7 @@ jobs:
           username: ${{ secrets.DEPLOY_USERNAME }}
           key: ${{ secrets.SSHKEY }}
           rm: true
-          source: docker-compose.yaml, build/sql/create.sql # ?????
+          source: docker-compose.yml, cmd/api/init/db/postgresql/schema/initdb.sql # ?????
           target: ~/${{ env.FOLDER_COMPOSE }}
 
       - name: Get docker form dockerhub via SSH action
