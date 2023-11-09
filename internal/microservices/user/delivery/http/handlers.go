@@ -21,10 +21,10 @@ type Handler struct {
 	logger      logger.Logger
 }
 
-const (
-	userIdUrlParam    = "userID"
-	userloginUrlParam = "login"
-)
+// const (
+// 	userIdUrlParam    = "userID"
+// 	userloginUrlParam = "login"
+// )
 
 func NewHandler(uu user.Usecase, l logger.Logger) *Handler {
 	return &Handler{

@@ -119,7 +119,11 @@ func (r *transactionRep) CreateTransaction(ctx context.Context, transaction *mod
 	if err != nil {
 		return uuid.Nil, fmt.Errorf("failed to start transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		if err := tx.Rollback(ctx); err != nil {
+			r.logger.Fatal("Rollback transaction Error: %w", err)
+		}
+	}()
 
 	id, err := r.insertTransaction(ctx, tx, transaction)
 	if err != nil {
@@ -193,7 +197,11 @@ func (r *transactionRep) UpdateTransaction(ctx context.Context, transaction *mod
 	if err != nil {
 		return fmt.Errorf("[repo] failed to start transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		if err := tx.Rollback(ctx); err != nil {
+			r.logger.Fatal("Rollback transaction Error: %w", err)
+		}
+	}()
 
 	existingIncome, existingOutcome, existingAccountIncomeID, existingAccountOutcomeID, err := r.getTransactionInfo(ctx, tx, transaction.ID)
 	if err != nil {
@@ -283,7 +291,11 @@ func (r *transactionRep) DeleteTransaction(ctx context.Context, transactionID uu
 	if err != nil {
 		return fmt.Errorf("[repo] failed to start transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		if err := tx.Rollback(ctx); err != nil {
+			r.logger.Fatal("Rollback transaction Error: %w", err)
+		}
+	}()
 
 	existingIncome, existingOutcome, existingAccountIncomeID, existingAccountOutcomeID, err := r.getTransactionInfo(ctx, tx, transactionID)
 	if err != nil {
