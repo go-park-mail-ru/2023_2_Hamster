@@ -33,7 +33,7 @@ app
 *.idea
 *.bin
 *.tmp
-.env
+#env
 
 # Logs
 logs
