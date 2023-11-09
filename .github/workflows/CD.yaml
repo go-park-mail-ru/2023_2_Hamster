@@ -85,6 +85,7 @@ jobs:
       - name: Deploy docker-compose via SSH action
         uses: appleboy/scp-action@v0.1.4
         with:
+          debug: true
           host: ${{ secrets.DEPLOY_HOST }}
           port: ${{ secrets.DEPLOY_PORT }}
           username: ${{ secrets.DEPLOY_USERNAME }}
@@ -96,6 +97,7 @@ jobs:
       - name: Get docker form dockerhub via SSH action
         uses: appleboy/ssh-action@v1.0.0
         with:
+          debug: true
           host: ${{ secrets.DEPLOY_HOST }}
           port: ${{ secrets.DEPLOY_PORT }}
           username: ${{ secrets.DEPLOY_USERNAME }}
