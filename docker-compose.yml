@@ -7,7 +7,7 @@ networks:
 services:
 
   server:
-    container_name: ${SERVER_NAME}
+    container_name: ${SERVER_NAME_PROD}
     build:
       context: .
       dockerfile: ./build/Dockerfile
@@ -28,7 +28,7 @@ services:
     restart: on-failure
     env_file:
       - .env
-    command: 
+    command:
       - "postgres"
       - "-c"
       - "max_connections=5"
@@ -58,10 +58,12 @@ services:
       - "pg_stat_statements.max=10000"
       - "-c"
       - "pg_stat_statements.track=all"
+    ports:
+      - "5436:5432"
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME_PROD}
+      POSTGRES_USER: ${DB_USER_PROD}
+      POSTGRES_PASSWORD: ${DB_PASSWORD_PROD}
     volumes:
       - ./cmd/api/init/db/postgresql/schema/:/docker-entrypoint-initdb.d/
     healthcheck:
@@ -74,7 +76,7 @@ services:
       - app-network
 
   redis:
-    container_name: "HammyWallet_redis"
+    container_name: ${REDIS_CONTAINER_NAME}
     image: redis:latest
     restart: on-failure
     networks:

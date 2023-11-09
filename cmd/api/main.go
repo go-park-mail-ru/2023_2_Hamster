@@ -22,11 +22,11 @@ import (
 // @contact.email  dimka.komarov@bk.ru
 // @contact.email  grigorikovalenko@gmail.com
 
-// @host		localhost:8090
+// @host		localhost:8080
 // @BasePath	/user/{userID}/account/feed
 
 // @securityDefinitions	AuthKey
-// @in					header
+// @in				header
 // @name				Authorization
 
 func main() {
