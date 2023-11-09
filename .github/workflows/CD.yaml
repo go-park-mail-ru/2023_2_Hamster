@@ -82,6 +82,36 @@ jobs:
     needs: push_to_dockerhub
 
     steps:
+      - name: Get docker form dockerhub via SSH action
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          debug: true
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          username: ${{ secrets.DEPLOY_USERNAME }}
+          key: ${{ secrets.SSHKEY }}
+          envs: REGISTRY, IMAGE_NAME, CONTAINER_NAME, GITHUB_SHA, FOLDER_COMPOSE
+          script: |
+            sudo bash
+            cd $(echo $FOLDER_COMPOSE)
+
+            cat <<EOF>.env
+
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_USER=${{ secrets.POSTGRES_USER }}
+            DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+
+            DB_HOST=${{ secrets.DB_HOST }}
+            DB_PORT=${{ secrets.DB_PORT }}
+            
+
+            SECRET=${{ secrets.SECRET }}
+
+            IMAGE_NAME=${{ env.IMAGE_NAME }}
+            REGISTRY=${{ env.REGISTRY }}
+            CONTAINER_NAME=${{ env.CONTAINER_NAME }}
+            EOF
+
       - name: Deploy docker-compose via SSH action
         uses: appleboy/scp-action@v0.1.4
         with:
@@ -91,7 +121,7 @@ jobs:
           username: ${{ secrets.DEPLOY_USERNAME }}
           key: ${{ secrets.SSHKEY }}
           rm: true
-          source: docker-compose.yml, cmd/api/init/db/postgresql/schema/initdb.sql # ?????
+          source: "docker-compose.yml, cmd/api/init/db/postgresql/schema/initdb.sql"
           target: ~/${{ env.FOLDER_COMPOSE }}
 
       - name: Get docker form dockerhub via SSH action
