@@ -5,6 +5,12 @@ networks:
     driver: bridge
 
 services:
+  app:
+        image: busybox:latest
+        command: sh -c 'echo "Hello ${DB_USER}!"'
+        env_file:
+            - .env
+  
   hammy-postgres:
     container_name: hammy-postgres
     image: postgres:latest
@@ -66,7 +72,7 @@ services:
     networks:
       - app-network
     ports:
-      - "6379:6379"
+      - "9001:6379"
   
 
   hammywallet-api:
@@ -79,7 +85,7 @@ services:
       #dockerfile: ./build/Dockerfile
     restart: on-failure
     ports:
-      - "8080:8080"
+      - "9000:8080"
     depends_on:
       - hammy-postgres
       - hammy-redis
