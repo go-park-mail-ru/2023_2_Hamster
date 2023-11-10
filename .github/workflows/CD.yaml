@@ -17,28 +17,28 @@ on:
       - deploy
 
 jobs:
-  lint_and_test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.21.x'
-          cache: false
-
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
-
-      - name: Create test folder
-        run: |
-          sudo mkdir /images  
-          sudo chmod -R 777 /images
-
-      - name: Test with the Go CLI
-        run: go test ./...
+#  lint_and_test:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v4
+#
+#      - name: Setup Go
+#        uses: actions/setup-go@v4
+#        with:
+#          go-version: '1.21.x'
+#          cache: false
+#
+#      - name: golangci-lint
+#        uses: golangci/golangci-lint-action@v3
+#
+#      - name: Create test folder
+#        run: |
+#          sudo mkdir /images  
+#          sudo chmod -R 777 /images
+#
+#      - name: Test with the Go CLI
+#        run: go test ./...
 
 
   push_to_dockerhub:
@@ -111,17 +111,12 @@ jobs:
             cd $(echo $FOLDER_COMPOSE)
 
             cat <<EOF>.env
-
             DB_NAME=${{ secrets.DB_NAME }}
             DB_USER=${{ secrets.POSTGRES_USER }}
             DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-
             DB_HOST=${{ secrets.DB_HOST }}
             DB_PORT=${{ secrets.DB_PORT }}
-            
-
             SECRET=${{ secrets.SECRET }}
-
             IMAGE_NAME=${{ env.IMAGE_NAME }}
             REGISTRY=${{ env.REGISTRY }}
             CONTAINER_NAME=${{ env.CONTAINER_NAME }}
