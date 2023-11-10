@@ -94,7 +94,7 @@ jobs:
           script: |
             sudo bash
             cd backend/2023_2_Hamster
-            ls -l
+            ls -la
 
       - name: Deploy docker-compose via SSH action
         uses: appleboy/scp-action@v0.1.4
