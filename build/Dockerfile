@@ -1,17 +1,17 @@
-FROM golang:1.21.0-alpine AS build
+FROM golang:1.21.0-alpine AS builder
 
 COPY . /github.com/go-park-mail-ru/2023_2_Hamster/
 WORKDIR /github.com/go-park-mail-ru/2023_2_Hamster/
 
 RUN go mod download
 RUN go clean --modcache
-RUN go build -mod=readonly -o ./.server ./cmd/api/main.go
+RUN go build -mod=readonly -o server ./cmd/api/main.go
 
 FROM scratch AS run
 
-WORKDIR /docker-HammyWallet/
+WORKDIR /docker-hammywallet/
 
-COPY --from=build /github.com/go-park-mail-ru/2023_2_Hamster/.server .
+COPY --from=builder /github.com/go-park-mail-ru/2023_2_Hamster/server .
 
 EXPOSE 80 433
 
