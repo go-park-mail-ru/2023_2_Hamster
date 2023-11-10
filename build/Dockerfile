@@ -7,14 +7,12 @@ RUN go mod download
 RUN go clean --modcache
 RUN go build -mod=readonly -o server ./cmd/api/main.go
 
-FROM scratch AS run
+FROM golang:latest AS run
 
 WORKDIR /docker-hammywallet/
 
 COPY . .
 COPY --from=builder /github.com/go-park-mail-ru/2023_2_Hamster/server .
-
-RUN apk add --no-cache bash
 
 EXPOSE 80 433
 
