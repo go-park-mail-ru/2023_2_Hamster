@@ -4,7 +4,7 @@ env:
   REGISTRY: "codemaster482"
   IMAGE_NAME: "hammywallet"
   CONTAINER_NAME: "hammywallet-api"
-  FOLDER_COMPOSE: "backend/2023_2_Hamster"
+  FOLDER_COMPOSE: "production"
 
 on:
   push:
