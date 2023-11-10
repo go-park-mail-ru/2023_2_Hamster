@@ -107,6 +107,7 @@ jobs:
           rm: true #Yula
           source: ~/${{ env.FOLDER_COMPOSE }}/docker-compose.yml
           target: ~/${{ env.FOLDER_COMPOSE }}
+          run: ls -al .
 
       - name: Get docker form dockerhub via SSH action
         uses: appleboy/ssh-action@v1.0.0
