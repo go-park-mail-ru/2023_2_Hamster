@@ -109,6 +109,11 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	if err := loginUser.CheckValid(); err != nil {
+		response.ErrorResponse(w, http.StatusBadRequest, err, response.InvalidBodyRequest, h.log)
+		return
+	}
+
 	id, login, err := h.au.Login(r.Context(), loginUser.Login, loginUser.PlaintPassword)
 	if err != nil {
 		h.log.Errorf("Error in login: %v", err)
