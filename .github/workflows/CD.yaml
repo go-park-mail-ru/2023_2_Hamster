@@ -104,7 +104,7 @@ jobs:
           port: ${{ secrets.DEPLOY_PORT }}
           username: ${{ secrets.DEPLOY_USERNAME }}
           key: ${{ secrets.SSHKEY }}
-          rm: true
+          rm: true #Yula
           source: docker-compose.yml
           target: ~/backend/2023_2_Hamster
 
