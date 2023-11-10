@@ -144,7 +144,7 @@ jobs:
 
             echo "GITHUB_SHA_SHORT=`echo $GITHUB_SHA | head -c8`" >> .env
 
-            echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+            echo ${{ secrets.DOCKERHUB_TOKEN }} | sudo docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
 
             sudo docker pull $REGISTRY/$IMAGE_NAME:latest
 
