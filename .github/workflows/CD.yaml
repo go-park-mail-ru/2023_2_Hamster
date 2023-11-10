@@ -4,7 +4,7 @@ env:
   REGISTRY: "codemaster482"
   IMAGE_NAME: "hammywallet"
   CONTAINER_NAME: "hammywallet-api"
-  FOLDER_COMPOSE: "production"
+  FOLDER_COMPOSE: "backend/2023_2_Hamster"
 
 on:
   push:
@@ -105,8 +105,8 @@ jobs:
           username: ${{ secrets.DEPLOY_USERNAME }}
           key: ${{ secrets.SSHKEY }}
           rm: true #Yula
-          source: ~/backend/2023_2_Hamster/docker-compose.yml
-          target: ~/backend/2023_2_Hamster
+          source: ~/${{FOLDER_COMPOSE}}/docker-compose.yml
+          target: ~/${{FOLDER_COMPOSE}}
 
       - name: Get docker form dockerhub via SSH action
         uses: appleboy/ssh-action@v1.0.0
