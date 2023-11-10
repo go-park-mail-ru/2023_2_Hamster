@@ -93,9 +93,8 @@ jobs:
           envs: REGISTRY, IMAGE_NAME, CONTAINER_NAME, GITHUB_SHA, FOLDER_COMPOSE
           script: |
             sudo bash
-            cd production
+            cd backend/2023_2_Hamster
             ls -l
-            touch testfile.txt
 
       - name: Deploy docker-compose via SSH action
         uses: appleboy/scp-action@v0.1.4
