@@ -21,7 +21,7 @@ type PostgresConfig struct {
 
 func initPostgresConfigFromEnv() (PostgresConfig, error) {
 	var cfg = PostgresConfig{}
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Load(".env"); err != nil {
 		return cfg, err
 	}
 

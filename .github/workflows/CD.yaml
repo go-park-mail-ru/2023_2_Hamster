@@ -120,6 +120,8 @@ jobs:
             IMAGE_NAME=${{ env.IMAGE_NAME }}
             REGISTRY=${{ env.REGISTRY }}
             CONTAINER_NAME=${{ env.CONTAINER_NAME }}
+            REDIS_HOST=${{ secrets.REDIS_HOST }}
+            REDIS_PORT=${{ secrets.REDIS_PORT }}
             EOF
 
             echo "GITHUB_SHA_SHORT=`echo $GITHUB_SHA | head -c8`" >> .env
