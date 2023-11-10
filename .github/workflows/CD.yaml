@@ -109,7 +109,7 @@ jobs:
           username: ${{ secrets.DEPLOY_USERNAME }}
           key: ${{ secrets.SSHKEY }}
           rm: true #Yula
-          source: docker-compose.yml
+          source: docker-compose.yml, build/schema/initdb.sql
           target: ~/${{ env.FOLDER_COMPOSE }}
 
       - name: Get docker form dockerhub via SSH action
