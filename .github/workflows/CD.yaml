@@ -97,7 +97,7 @@ jobs:
             ls -la
 
       - name: Deploy docker-compose via SSH action
-        uses: appleboy/scp-action@v0.1.4
+        uses: appleboy/scp-action@master
         with:
           debug: true
           host: ${{ secrets.DEPLOY_HOST }}
@@ -105,7 +105,7 @@ jobs:
           username: ${{ secrets.DEPLOY_USERNAME }}
           key: ${{ secrets.SSHKEY }}
           rm: true #Yula
-          source: docker-compose.yml
+          source: ~/backend/2023_2_Hamster/docker-compose.yml
           target: ~/backend/2023_2_Hamster
 
       - name: Get docker form dockerhub via SSH action
