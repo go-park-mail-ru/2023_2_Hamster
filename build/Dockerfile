@@ -13,7 +13,6 @@ WORKDIR /docker-hammywallet/
 
 COPY . .
 COPY --from=builder /github.com/go-park-mail-ru/2023_2_Hamster/server .
-COPY --from=builder /github.com/go-park-mail-ru/2023_2_Hamster/.env .
 
 EXPOSE 80 433
 
