@@ -80,8 +80,8 @@ services:
     image: ${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA_SHORT}
     env_file:
       - .env
-    build:
-      context: .
+    #build:
+     # context: .
       #dockerfile: ./build/Dockerfile
     restart: on-failure
     ports:
