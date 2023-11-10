@@ -109,7 +109,7 @@ jobs:
           username: ${{ secrets.DEPLOY_USERNAME }}
           key: ${{ secrets.SSHKEY }}
           rm: true #Yula
-          source: ../2023_2_Hamster/docker-compose.yml
+          source: docker-compose.yml
           target: ~/${{ env.FOLDER_COMPOSE }}
 
       - name: Get docker form dockerhub via SSH action
