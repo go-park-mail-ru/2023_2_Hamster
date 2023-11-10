@@ -82,6 +82,9 @@ jobs:
     needs: push_to_dockerhub
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - name: Get docker form dockerhub via SSH action
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -95,12 +98,6 @@ jobs:
             sudo bash
             cd backend/2023_2_Hamster
             ls -la
-      
-      - name: Where am i 
-        run: |
-          sudo apt-get install tree
-          cd ../../
-          tree -a
           
 #ls -al ../2023_2_Hamster/
       - name: Deploy docker-compose via SSH action
