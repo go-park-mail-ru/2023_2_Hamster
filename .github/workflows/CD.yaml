@@ -99,7 +99,7 @@ jobs:
       - name: Where am i 
         run: |
           sudo apt-get install tree
-          cd /
+          cd ../../../
           tree -a
           
 #ls -al ../2023_2_Hamster/
