@@ -105,8 +105,8 @@ jobs:
           username: ${{ secrets.DEPLOY_USERNAME }}
           key: ${{ secrets.SSHKEY }}
           rm: true
-          source: "docker-compose.yml, cmd/api/init/db/postgresql/schema/initdb.sql"
-          target: ~/${{ env.FOLDER_COMPOSE }}
+          source: docker-compose.yml
+          target: ~/backend/2023_2_Hamster
 
       - name: Get docker form dockerhub via SSH action
         uses: appleboy/ssh-action@v1.0.0
