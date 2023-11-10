@@ -105,8 +105,8 @@ jobs:
           username: ${{ secrets.DEPLOY_USERNAME }}
           key: ${{ secrets.SSHKEY }}
           rm: true #Yula
-          source: ~/${{FOLDER_COMPOSE}}/docker-compose.yml
-          target: ~/${{FOLDER_COMPOSE}}
+          source: ~/${{ env.FOLDER_COMPOSE }}/docker-compose.yml
+          target: ~/${{ env.FOLDER_COMPOSE }}
 
       - name: Get docker form dockerhub via SSH action
         uses: appleboy/ssh-action@v1.0.0
