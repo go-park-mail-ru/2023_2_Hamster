@@ -98,7 +98,7 @@ jobs:
       
       - name: Where am i 
         run: |
-          ls -al ../
+          ls -al ../2023_2_Hamster/
 
       - name: Deploy docker-compose via SSH action
         uses: appleboy/scp-action@master
