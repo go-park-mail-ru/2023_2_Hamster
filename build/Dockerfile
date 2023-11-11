@@ -11,7 +11,6 @@ FROM golang:latest AS run
 
 WORKDIR /docker-hammywallet/
 
-COPY . .
 COPY --from=builder /github.com/go-park-mail-ru/2023_2_Hamster/server .
 
 EXPOSE 80 433
