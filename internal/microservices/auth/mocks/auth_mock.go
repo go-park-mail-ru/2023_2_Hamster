@@ -52,6 +52,21 @@ func (mr *MockUsecaseMockRecorder) CheckLoginUnique(ctx, login interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckLoginUnique", reflect.TypeOf((*MockUsecase)(nil).CheckLoginUnique), ctx, login)
 }
 
+// GetByID mocks base method.
+func (m *MockUsecase) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByID", ctx, userID)
+	ret0, _ := ret[0].(*models.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByID indicates an expected call of GetByID.
+func (mr *MockUsecaseMockRecorder) GetByID(ctx, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockUsecase)(nil).GetByID), ctx, userID)
+}
+
 // Login mocks base method.
 func (m *MockUsecase) Login(ctx context.Context, login, plainPassword string) (uuid.UUID, string, error) {
 	m.ctrl.T.Helper()
@@ -107,20 +122,6 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
 }
 
-// CheckExistUsername mocks base method.
-func (m *MockRepository) CheckExistUsername(ctx context.Context, username string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CheckExistUsername", ctx, username)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// CheckExistUsername indicates an expected call of CheckExistUsername.
-func (mr *MockRepositoryMockRecorder) CheckExistUsername(ctx, username interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckExistUsername", reflect.TypeOf((*MockRepository)(nil).CheckExistUsername), ctx, username)
-}
-
 // CheckLoginUnique mocks base method.
 func (m *MockRepository) CheckLoginUnique(ctx context.Context, login string) (bool, error) {
 	m.ctrl.T.Helper()
@@ -149,6 +150,21 @@ func (m *MockRepository) CreateUser(ctx context.Context, u models.User) (uuid.UU
 func (mr *MockRepositoryMockRecorder) CreateUser(ctx, u interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockRepository)(nil).CreateUser), ctx, u)
+}
+
+// GetByID mocks base method.
+func (m *MockRepository) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByID", ctx, userID)
+	ret0, _ := ret[0].(*models.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByID indicates an expected call of GetByID.
+func (mr *MockRepositoryMockRecorder) GetByID(ctx, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockRepository)(nil).GetByID), ctx, userID)
 }
 
 // GetUserByLogin mocks base method.

@@ -162,7 +162,19 @@ func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response.SuccessResponse(w, http.StatusOK, session)
+	user, err := h.au.GetByID(r.Context(), session.UserId)
+	if err != nil {
+		h.log.Errorf("Auth check error: %v", err)
+		response.ErrorResponse(w, http.StatusUnauthorized, err, "Can't get you username", h.log)
+		return
+	}
+
+	resp := auth.SignResponse{
+		ID:       session.UserId,
+		Username: user.Username,
+	}
+
+	response.SuccessResponse(w, http.StatusOK, resp)
 }
 
 // @Summary		Validate Auth

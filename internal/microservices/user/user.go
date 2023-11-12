@@ -10,7 +10,6 @@ import (
 
 // Bussiness logic methods to work with user
 type Usecase interface {
-	// GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error)
 	// ChangeInfo(user *models.User) error
 	GetUserBalance(ctx context.Context, userID uuid.UUID) (float64, error)
 	GetPlannedBudget(ctx context.Context, userID uuid.UUID) (float64, error)

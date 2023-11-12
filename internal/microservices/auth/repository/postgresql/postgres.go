@@ -16,6 +16,7 @@ const (
 	UserCheckLoginUnique = `SELECT COUNT(*) FROM users WHERE login = $1;`
 	UserGetByUserName    = `SELECT id, login, username, password_hash, planned_budget, avatar_url From users WHERE (login=$1);`
 	UserCreate           = `INSERT INTO users (login, username, password_hash) VALUES ($1, $2, $3) RETURNING id;`
+	UserIDGetByID        = `SELECT id, login, username, password_hash, planned_budget, avatar_url FROM users WHERE id = $1;`
 )
 
 type AuthRep struct {
@@ -65,6 +66,17 @@ func (r *AuthRep) CreateUser(ctx context.Context, u models.User) (uuid.UUID, err
 	return id, nil
 }
 
-//func (r *AuthRep) CheckExistUsername(ctx context.Context, username string) error {
-//	return nil
-//}
+func (r *AuthRep) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
+	row := r.db.QueryRow(ctx, UserIDGetByID, userID)
+	var u models.User
+
+	err := row.Scan(&u.ID, &u.Login, &u.Username, &u.Password, &u.PlannedBudget, &u.AvatarURL)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, fmt.Errorf("[repo] %w: %v", &models.NoSuchUserError{UserID: userID}, err)
+	} else if err != nil {
+		return nil,
+			fmt.Errorf("failed request db %s, %w", UserIDGetByID, err)
+
+	}
+	return &u, nil
+}
