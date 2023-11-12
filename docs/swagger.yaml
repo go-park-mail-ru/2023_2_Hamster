@@ -353,11 +353,12 @@ definitions:
       username:
         type: string
     type: object
-host: localhost:8090
+host: localhost:8080
 info:
   contact:
     email: grigorikovalenko@gmail.com
     name: Hamster API Support
+    url: https://t.me/CodeMaster482
   description: Server API for Hamster Money Service Application
   title: Hamster API
   version: 1.0.1

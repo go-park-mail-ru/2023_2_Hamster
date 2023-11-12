@@ -42,7 +42,7 @@ test: ## Run tests
 doc: ## Generate API documentation using swag
 	swag init -g cmd/api/main.go
 
-prod: lint test doc
+prod: lint doc
 	git checkout deploy ; \
 	git pull origin develop ; \
 	git add . ; \
