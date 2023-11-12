@@ -36,7 +36,7 @@ server
 #env
 
 # Logs
-api-logs
+logs
 *.log
 
 # Static
