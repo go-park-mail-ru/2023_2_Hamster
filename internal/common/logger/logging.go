@@ -115,11 +115,6 @@ func NewLogger(ctx context.Context) *Logger {
 		panic(err)
 	}
 
-	err = os.Chmod(logFolderPath, 0644)
-	if err != nil {
-		panic(err)
-	}
-
 	lumber := &lumberjack.Logger{
 		Filename: logFolderPath + "/server.log",
 		MaxSize:  30,
