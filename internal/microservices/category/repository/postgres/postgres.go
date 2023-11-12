@@ -30,9 +30,9 @@ const (
 						WHERE "name" = $1 AND parent_id = $2
 					);`
 
-	CategoryExistCheck = `SELECT EXIST (
+	CategoryExistCheck = `SELECT EXISTS (
 						SELECT "name" FROM category 
-						WHERE user_id = $1 AND parent_id = $2
+						WHERE user_id = $1 AND id = $2
 					);`
 )
 
