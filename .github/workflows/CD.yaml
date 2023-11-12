@@ -117,7 +117,7 @@ jobs:
             DB_HOST=${{ secrets.DB_HOST }}
             DB_PORT=${{ secrets.DB_PORT }}
             DB_SSLMODE=disable
-            SERVER_HOST=${{ secrets.DEPLOY_HOST }}
+            SERVER_HOST=0.0.0.0
             SERVER_PORT=8080
             SECRET=${{ secrets.SECRET }}
             IMAGE_NAME=${{ env.IMAGE_NAME }}
