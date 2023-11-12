@@ -67,7 +67,7 @@ func (r *Repository) CreateTag(ctx context.Context, tag models.Category) (uuid.U
 }
 
 func (r *Repository) UpdateTag(ctx context.Context, tag *models.Category) error {
-	var exists bool
+	/*var exists bool
 
 	row := r.db.QueryRow(ctx, CategoryGet, tag.ID)
 	err := row.Scan(&exists)
@@ -75,9 +75,9 @@ func (r *Repository) UpdateTag(ctx context.Context, tag *models.Category) error 
 		return fmt.Errorf("[repo] Error tag doesn't exist: %w", err)
 	} else if err != nil {
 		return fmt.Errorf("[repo] failed request db %s, %w", CategoryGet, err)
-	}
+	} */
 
-	_, err = r.db.Exec(ctx, CategoryUpdate,
+	_, err := r.db.Exec(ctx, CategoryUpdate,
 		tag.ParentID,
 		tag.Name,
 		tag.ShowIncome,
