@@ -92,7 +92,7 @@ func (r *Repository) UpdateTag(ctx context.Context, tag *models.Category) error 
 }
 
 func (r *Repository) DeleteTag(ctx context.Context, tagId uuid.UUID) error {
-	var exists bool
+	/*var exists bool
 
 	row := r.db.QueryRow(ctx, CategoryGet, tagId)
 	err := row.Scan(&exists)
@@ -101,8 +101,9 @@ func (r *Repository) DeleteTag(ctx context.Context, tagId uuid.UUID) error {
 	} else if err != nil {
 		return fmt.Errorf("[repo] failed request db %s, %w", CategoryGet, err)
 	}
+	*/
 
-	_, err = r.db.Exec(ctx, CategoryDelete, tagId)
+	_, err := r.db.Exec(ctx, CategoryDelete, tagId)
 	if err != nil {
 		return fmt.Errorf("[repo] failed to delete category %s, %w", CategoryDelete, err)
 	}
