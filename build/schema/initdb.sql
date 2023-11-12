@@ -46,8 +46,13 @@ CREATE TABLE TransactionCategory (
     PRIMARY KEY (transaction_id, category_id)
 );
 
-CREATE OR REPLACE FUNCTION add_default_categoies()
+CREATE OR REPLACE FUNCTION add_default_categories_accounts_transactions()
 RETURNS TRIGGER AS $$
+DECLARE
+    categoryID UUID;
+    transaction_idI UUID;
+    transaction_idO UUID;
+    accountID UUID;
 BEGIN
     INSERT INTO category (user_id, parent_tag, "name", show_income, show_outcome, regular)
     VALUES  (NEW.id, NULL, 'Дети',                    false, true,  false),
@@ -61,16 +66,37 @@ BEGIN
             (NEW.id, NULL, 'Подарки',                 false, true,  false),
             (NEW.id, NULL, 'Покупки: одежа, техника', false, true,  false),
             (NEW.id, NULL, 'Проезд',                  false, true,  false),
-            (NEW.id, NULL, 'Продукты',                false, true,  false),
-            (NEW.id, NULL, 'Подписки',                false, true,  true);
+            (NEW.id, NULL, 'Подписки',                false, true,  true),
+            (NEW.id, NULL, 'Продукты',                false, true, false);
+    
+    SELECT id INTO categoryID FROM category WHERE name = 'Продукты' AND user_id = NEW.id;
+
+    INSERT INTO accounts(user_id, balance, mean_payment)
+    VALUES (NEW.id, 0, 'Карта');
+           
+    INSERT INTO accounts(user_id, balance, mean_payment)
+    VALUES (NEW.id, 0, 'Наличка') RETURNING id INTO accountID;
+
+    INSERT INTO transaction(user_id, account_income, account_outcome, income, outcome, payer, description)
+    VALUES (NEW.id, accountID,
+                    accountID, 100, 0, 'Пятерочка', 'Пошел в магазин за вкусняшками') RETURNING id INTO transaction_idI;
+
+    INSERT INTO transaction(user_id, account_income, account_outcome, income, outcome, payer, description)
+    VALUES (NEW.id, accountID,
+                    accountID, 0, 100, 'Пятерочка', 'Вернули деньги оплата не прошла') RETURNING id INTO transaction_idO;
+            
+    INSERT INTO TransactionCategory(transaction_id, category_id)
+    VALUES (transaction_idI, categoryID),
+            (transaction_idO, categoryID);
+
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE TRIGGER after_user_created
+CREATE TRIGGER after_user_created
     AFTER INSERT ON users
     FOR EACH ROW
-EXECUTE FUNCTION add_default_categoies();
+    EXECUTE FUNCTION add_default_categories_accounts_transactions();
 --=============================================================================
 
 ALTER TABLE Users
@@ -85,8 +111,8 @@ INSERT INTO "users"(login, username, password_hash, planned_budget)
 VALUES ('test','test1', '$argon2id$v=19$m=65536,t=1,p=4$m8qhM3XLae+RCTGirBFEww$Znu5RBnxlam2xRoVtwBzbdSrN4/sRCm1IMOVX4N2uxw', 10000);
 
 INSERT INTO "accounts"(user_id, balance, mean_payment)
-VALUES ((SELECT id FROM Users limit 1), 1000, 'Кошелек');
+VALUES ((SELECT id FROM Users limit 1), 0, 'Кошелек');
 
 INSERT INTO "accounts"(user_id, balance, mean_payment)
-VALUES ((SELECT id FROM Users limit 1), 1000, 'Наличка');
+VALUES ((SELECT id FROM Users limit 1), 0, 'Наличка');
 
