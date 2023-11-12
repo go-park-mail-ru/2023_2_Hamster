@@ -137,4 +137,4 @@ jobs:
             sudo docker-compose down
             sudo docker-compose up -d
             sudo sleep 7
-            sudo chmod 0644 api-logs/server.log
+            sudo chown -R ubuntu:ubuntu api-logs/server.log
