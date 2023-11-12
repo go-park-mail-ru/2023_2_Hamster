@@ -187,7 +187,11 @@ func TestHandler_Login(t *testing.T) {
 				name:          "Successful Health Check",
 				requestCookie: &http.Cookie{Name: "session_id", Value: sessionCookie},
 				expectedCode:  http.StatusOK,
+<<<<<<< HEAD
 				expectedBody:  fmt.Sprintf(`{"status":200,"body":{"user_id":"%s","cookie":"%s"}}`, strUserID, sessionCookie),
+=======
+				expectedBody:  fmt.Sprintf(`{"status":200,"body":{"id":"%s","username":"%s"}}`, strUserID, sessionCookie),
+>>>>>>> 493d329e5b644d4e30dec179c1f48f05106223bb
 				mockSU: func(mockSU *mocksSession.MockUsecase) {
 					mockSU.EXPECT().GetSessionByCookie(gomock.Any(), sessionCookie).Return(models.Session{UserId: userID, Cookie: sessionCookie}, nil)
 				},

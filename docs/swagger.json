@@ -5,11 +5,12 @@
         "title": "Hamster API",
         "contact": {
             "name": "Hamster API Support",
+            "url": "https://t.me/CodeMaster482",
             "email": "grigorikovalenko@gmail.com"
         },
         "version": "1.0.1"
     },
-    "host": "localhost:8090",
+    "host": "localhost:8080",
     "basePath": "/user/{userID}/account/feed",
     "paths": {
         "/api/auth/checkAuth": {

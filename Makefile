@@ -42,9 +42,18 @@ test: ## Run tests
 doc: ## Generate API documentation using swag
 	swag init -g cmd/api/main.go
 
+<<<<<<< HEAD
 prod: ##push prod
+=======
+prod: lint doc
+>>>>>>> 493d329e5b644d4e30dec179c1f48f05106223bb
 	git checkout deploy ; \
 	git pull origin develop ; \
 	git add . ; \
 	git commit -m "deploy" ; \
+<<<<<<< HEAD
 	git push
+=======
+	git push ; \
+	git checkout develop
+>>>>>>> 493d329e5b644d4e30dec179c1f48f05106223bb

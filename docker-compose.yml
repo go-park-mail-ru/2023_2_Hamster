@@ -76,7 +76,7 @@ services:
       - .env
     restart: always
     ports:
-      - "http://hammywallet.ru:8080:8080"
+      - "8080:8080"
     volumes:
       - ./.env:/docker-hammywallet/.env
       - api-logs:/docker-hammywallet/logs
