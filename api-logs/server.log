@@ -1,1 +1,0 @@
-{"file":"main.go:42","func":"main.main()","level":"error","msg":"Error Initializing PostgreSQL database: failed to connect to `host=127.0.0.1 user=hamster database=HammyWallets`: dial error (dial tcp 127.0.0.1:5436: connect: connection refused)","time":"2023-11-13T00:09:42+03:00"}
