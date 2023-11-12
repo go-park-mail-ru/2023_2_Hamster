@@ -9,7 +9,6 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/category"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
-	"github.com/google/uuid"
 )
 
 type Handler struct {
@@ -168,7 +167,7 @@ func (h *Handler) DeleteTag(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var tagId string
+	var tagId category.TagDeleteInput
 
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&tagId); err != nil {
@@ -180,16 +179,7 @@ func (h *Handler) DeleteTag(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	tagUuid, err := uuid.Parse(tagId)
-	if err != nil {
-		h.log.WithField(
-			"Request-Id", contextutils.GetReqID(r.Context()),
-		).Errorf("[handler] uuid format Error: %v", err)
-		response.ErrorResponse(w, http.StatusBadRequest, err, "Corupted data uuid format mismatch", h.log)
-		return
-	}
-
-	if err := h.cu.DeleteTag(r.Context(), tagUuid, user.ID); err != nil {
+	if err := h.cu.DeleteTag(r.Context(), tagId.ID, user.ID); err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Errorf("[handler] Delete Error: %v", err)
@@ -197,5 +187,5 @@ func (h *Handler) DeleteTag(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response.SuccessResponse(w, http.StatusBadRequest, tagId)
+	response.SuccessResponse(w, http.StatusOK, tagId)
 }

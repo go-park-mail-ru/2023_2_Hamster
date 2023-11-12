@@ -26,7 +26,7 @@ func NewHandler(tu csrf.Usecase, l logger.Logger) *Handler {
 // @Description	Get csrf token
 // @Produce		json
 // @Success		200		{object}	Response[getCSRFResponce]	"Csrf Token"
-// @Failure     401    	{object}  	ResponseError  				"Unauthorized user"
+// @Failure     	401    	{object}  	ResponseError  				"Unauthorized user"
 // @Failure		500		{object}	ResponseError				"Server error"
 // @Router		/api/csrf/ [get]
 func (h *Handler) GetCSRF(w http.ResponseWriter, r *http.Request) {

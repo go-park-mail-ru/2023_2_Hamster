@@ -19,7 +19,7 @@ CREATE TABLE Accounts (
 
 CREATE TABLE IF NOT EXISTS category (
     id              UUID          DEFAULT uuid_generate_v4()   PRIMARY KEY,
-    user_id         UUID          REFERENCES Users(id)    CONSTRAINT fk_user_category  NOT NULL,
+    user_id         UUID          REFERENCES Users(id)    CONSTRAINT fk_user_category       NOT NULL,
     parent_tag      UUID          REFERENCES category(id),
     "name"          VARCHAR(30)                                                             NOT NULL,
     show_income     BOOLEAN,

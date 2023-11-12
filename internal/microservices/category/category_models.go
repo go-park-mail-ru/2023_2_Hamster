@@ -20,6 +20,10 @@ type (
 		ShowOutcome bool      `json:"show_outcome" valid:"-"`
 		Regular     bool      `json:"regular" valid:"-"`
 	}
+
+	TagDeleteInput struct {
+		ID uuid.UUID `json:"id" valid:"-"`
+	}
 )
 
 type CategoryCreateResponse struct {

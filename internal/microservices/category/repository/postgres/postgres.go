@@ -25,9 +25,9 @@ const (
 
 	CategoeyAll = `SELECT * FROM category WHERE user_id = $1;`
 
-	CategoryNameCheck = `SELECT EXIST (
+	CategoryNameCheck = `SELECT EXISTS (
 						SELECT "name" FROM category 
-						WHERE "name" = $1 AND parent_id = $2
+						WHERE user_id = $1 AND parent_tag = $2 AND "name"=$3
 					);`
 
 	CategoryExistCheck = `SELECT EXISTS (
@@ -76,30 +76,14 @@ func (r *Repository) UpdateTag(ctx context.Context, tag *models.Category) error 
 	} else if err != nil {
 		return fmt.Errorf("[repo] failed request db %s, %w", CategoryGet, err)
 	} */
-	tx, err := r.db.Begin(ctx)
-	if err != nil {
-		return fmt.Errorf("[repo] failed to start transaction: %w", err)
-	}
-	defer func() {
-		if err := tx.Rollback(ctx); err != nil {
-			r.log.Fatal("Rollback transaction Error: %w", err)
-		}
-	}()
 
-	_, err = r.db.Exec(ctx, CategoryDelete,
-		tag.ID,
-	)
-	if err != nil {
-		return fmt.Errorf("[repo] failed to delete for update category info: %s, %w", CategoryUpdate, err)
-	}
-
-	_, err = r.db.Exec(ctx, CategoryCreate,
-		tag.UserID,
+	_, err := r.db.Exec(ctx, CategoryUpdate,
 		tag.ParentID,
 		tag.Name,
 		tag.ShowIncome,
 		tag.ShowOutcome,
 		tag.Regular,
+		tag.ID,
 	)
 	if err != nil {
 		return fmt.Errorf("[repo] failed to update category info: %s, %w", CategoryUpdate, err)
