@@ -36,7 +36,8 @@ server
 #env
 
 # Logs
-logs
+api-logs
+*.log
 
 # Static
 img2
