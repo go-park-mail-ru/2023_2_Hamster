@@ -60,7 +60,7 @@ services:
 
 
   hammy-redis:
-    container_name: hammy-redis
+    container_name: hammy-redis #host
     image: redis:latest
     restart: on-failure
     networks:
