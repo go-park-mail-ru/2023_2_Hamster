@@ -40,7 +40,6 @@ func main() {
 	db, err := postgresql.InitPostgresDB(ctx)
 	if err != nil {
 		log.Errorf("Error Initializing PostgreSQL database: %v", err)
-		time.Sleep(time.Minute * 15)
 		return
 	}
 	defer func() {
