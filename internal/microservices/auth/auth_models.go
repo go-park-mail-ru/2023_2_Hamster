@@ -17,14 +17,20 @@ type (
 	}
 
 	SignUpInput struct {
+<<<<<<< HEAD
 		Login          string `json:"login" valid:"required"`
 		Username       string `json:"username" valid:"required"`
 		PlaintPassword string `json:"password" valid:"required"`
+=======
+		Login          string `json:"login" valid:"required,length(4|20)"`
+		Username       string `json:"username" valid:"required,length(4|20)"`
+		PlaintPassword string `json:"password" valid:"required,length(4|20)"`
+>>>>>>> 38c1dd57b6824b55c62cb88bfd840d87c75fa3d9
 	}
 
 	LoginInput struct {
-		Login          string `json:"login" valid:"required,min=4,max=20"`
-		PlaintPassword string `json:"password" valid:"required,min=4,max=20"`
+		Login          string `json:"login" valid:"required,length(4|20)"`
+		PlaintPassword string `json:"password" valid:"required,length(4|20)"`
 	}
 
 	SignResponse struct {

@@ -66,7 +66,7 @@ func InitRouter(auth *auth.Handler,
 	userRouter.Use(csrfMid.CheckCSRF)
 	{
 		userRouter.Methods("PUT").Path("/updatePhoto").HandlerFunc(user.UpdatePhoto)
-		userRouter.Path("/update").Methods("PUT").HandlerFunc(user.Update)
+		userRouter.Methods("PUT").Path("/update").HandlerFunc(user.Update)
 
 		// userRouter.Methods("GET").Path("/balance").HandlerFunc(user.GetUserBalance)
 		// userRouter.Methods("GET").Path("/plannedBudget").HandlerFunc(user.GetPlannedBudget)
