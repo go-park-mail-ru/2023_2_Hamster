@@ -5,6 +5,7 @@ import (
 )
 
 // models users
+// model
 type User struct {
 	ID            uuid.UUID `json:"id"`
 	Login         string    `json:"login"`
