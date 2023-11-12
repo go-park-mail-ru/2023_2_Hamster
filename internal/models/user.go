@@ -4,7 +4,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// models user
+// models users
 type User struct {
 	ID            uuid.UUID `json:"id"`
 	Login         string    `json:"login"`
