@@ -93,13 +93,13 @@ func (r *Repository) UpdateTag(ctx context.Context, tag *models.Category) error 
 		return fmt.Errorf("[repo] failed to delete for update category info: %s, %w", CategoryUpdate, err)
 	}
 
-	_, err = r.db.Exec(ctx, CategoryUpdate,
+	_, err = r.db.Exec(ctx, CategoryCreate,
+		tag.UserID,
 		tag.ParentID,
 		tag.Name,
 		tag.ShowIncome,
 		tag.ShowOutcome,
 		tag.Regular,
-		tag.ID,
 	)
 	if err != nil {
 		return fmt.Errorf("[repo] failed to update category info: %s, %w", CategoryUpdate, err)
