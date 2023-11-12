@@ -79,7 +79,10 @@ services:
       - "8080:8080"
     volumes:
       - ./.env:/docker-hammywallet/.env
-      - api-logs:/docker-hammywallet/logs
+      - ./api-logs:/docker-hammywallet/logs
+      - type: bind
+        source: /home/ubuntu/frontend/images
+        target: /images
     depends_on:
       - hammy-postgres
       - hammy-redis
