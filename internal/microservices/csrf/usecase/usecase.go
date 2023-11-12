@@ -13,7 +13,7 @@ import (
 
 var tokenSecret = os.Getenv("SECRET")
 
-const csrfTokenTTL = 30 * time.Minute
+const csrfTokenTTL = time.Minute //30 * time.Minute
 const jwtParsingMaxTime = 3 * time.Second
 
 type Usecase struct {
