@@ -76,8 +76,24 @@ func (r *Repository) UpdateTag(ctx context.Context, tag *models.Category) error 
 	} else if err != nil {
 		return fmt.Errorf("[repo] failed request db %s, %w", CategoryGet, err)
 	} */
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("[repo] failed to start transaction: %w", err)
+	}
+	defer func() {
+		if err := tx.Rollback(ctx); err != nil {
+			r.log.Fatal("Rollback transaction Error: %w", err)
+		}
+	}()
 
-	_, err := r.db.Exec(ctx, CategoryUpdate,
+	_, err = r.db.Exec(ctx, CategoryDelete,
+		tag.ID,
+	)
+	if err != nil {
+		return fmt.Errorf("[repo] failed to delete for update category info: %s, %w", CategoryUpdate, err)
+	}
+
+	_, err = r.db.Exec(ctx, CategoryUpdate,
 		tag.ParentID,
 		tag.Name,
 		tag.ShowIncome,
