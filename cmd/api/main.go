@@ -30,10 +30,6 @@ import (
 // @name				Authorization
 
 func main() {
-	// for {
-	// 	fmt.Print("1")
-	// }
-
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -43,6 +39,7 @@ func main() {
 	db, err := postgresql.InitPostgresDB(ctx)
 	if err != nil {
 		log.Errorf("Error Initializing PostgreSQL database: %v", err)
+		time.Sleep(time.Minute * 15)
 		return
 	}
 	defer func() {
