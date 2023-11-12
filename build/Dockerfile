@@ -14,6 +14,6 @@ WORKDIR /docker-hammywallet/
 
 COPY --from=builder /github.com/go-park-mail-ru/2023_2_Hamster/server .
 
-EXPOSE 80 433
+EXPOSE 80 433 8080
 
 ENTRYPOINT ["./server"]
