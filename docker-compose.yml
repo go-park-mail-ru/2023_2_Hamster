@@ -66,7 +66,7 @@ services:
     networks:
       - hamster-net
     ports:
-      - "9001:6379"
+      - "${REDIS_PORT}:6379"
   
 
   hammywallet-api:
@@ -76,10 +76,10 @@ services:
       - .env
     restart: always
     ports:
-      - "9000:8080"
+      - "8080:8080"
     volumes:
       - ./.env:/docker-hammywallet/.env
-      - api-logs:/var/lib/zuzu/logs
+      - api-logs:/docker-hammywallet/logs
     depends_on:
       - hammy-postgres
       - hammy-redis
