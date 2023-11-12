@@ -86,7 +86,7 @@ func (u *Usecase) CheckLoginUnique(ctx context.Context, login string) (bool, err
 	return isUnique, nil
 }
 
-func (u *Usecase) GetUser(ctx context.Context, userID uuid.UUID) (*models.User, error) { // need test
+func (u *Usecase) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
 	user, err := u.authRepo.GetByID(ctx, userID)
 	if err != nil {
 		return user, fmt.Errorf("[usecase] can't get user from repository %w", err)
