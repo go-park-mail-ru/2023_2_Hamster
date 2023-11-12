@@ -98,7 +98,7 @@ type Logger struct {
 }
 
 func NewLogger(ctx context.Context) *Logger {
-	logFolderPath := "logs"
+	logFolderPath := "api-logs"
 	l := logrus.New()
 
 	l.SetReportCaller(true)
