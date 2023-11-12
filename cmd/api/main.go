@@ -21,13 +21,14 @@ import (
 // @contact.name   Hamster API Support
 // @contact.email  dimka.komarov@bk.ru
 // @contact.email  grigorikovalenko@gmail.com
+// @contact.url    https://t.me/CodeMaster482
 
 // @host		localhost:8080
 // @BasePath	/user/{userID}/account/feed
 
 // @securityDefinitions	AuthKey
 // @in				header
-// @name				Authorization
+// @name				session_id
 
 func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

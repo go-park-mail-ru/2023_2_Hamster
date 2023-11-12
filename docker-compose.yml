@@ -1,16 +1,10 @@
 version: '3.8'
 
 networks:
-  app-network:
+  hamster-net:
     driver: bridge
 
 services:
-  app:
-        image: busybox:latest
-        command: sh -c 'echo "Hello ${DB_USER}!"'
-        env_file:
-            - .env
-  
   hammy-postgres:
     container_name: hammy-postgres
     image: postgres:latest
@@ -62,7 +56,7 @@ services:
       retries: 5
       start_period: 10s
     networks:
-      - app-network
+      - hamster-net
 
 
   hammy-redis:
@@ -70,7 +64,7 @@ services:
     image: redis:latest
     restart: on-failure
     networks:
-      - app-network
+      - hamster-net
     ports:
       - "9001:6379"
   
@@ -80,11 +74,17 @@ services:
     image: ${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA_SHORT}
     env_file:
       - .env
-    restart: on-failure
+    restart: always
     ports:
       - "9000:8080"
+    volumes:
+      - ./.env:/docker-hammywallet/.env
+      - api-logs:/var/lib/zuzu/logs
     depends_on:
       - hammy-postgres
       - hammy-redis
     networks:
-      - app-network
+      - hamster-net
+
+volumes:
+  api-logs:

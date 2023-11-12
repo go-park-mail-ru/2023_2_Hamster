@@ -24,7 +24,7 @@ vendor/
 # Go workspace file
 go.work
 
-app
+server
 
 *.out.tmp
 *.html

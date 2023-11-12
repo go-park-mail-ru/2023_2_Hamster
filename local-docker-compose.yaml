@@ -1,10 +1,11 @@
   
 services:  
   db:
+    container_name: hammy-db
     image: postgres:latest
     restart: always
     networks:
-      - app-network
+      - hammy-network
     env_file:
       - .env
     environment:
@@ -18,13 +19,14 @@ services:
       - ./build/schema/:/docker-entrypoint-initdb.d/
  
   redis:
+    container_name: hammy-redis
     image: redis:latest
     networks:
-      - app-network
+      - hammy-network
     restart: on-failure
     ports:
       - "6379:6379"
   
 networks:
-  app-network:
+  hammy-network:
     driver: bridge
