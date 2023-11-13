@@ -10,6 +10,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v4"
 )
 
 const (
@@ -19,7 +20,7 @@ const (
 				      VALUES ($1, $2, $3, $4, $5, $6)
 				      RETURNING id;`
 
-	CategoryUpdate = `UPDATE category SET parent_tag=$1, "name"=$2, show_income=$3, show_outcome=$4, regular=$5 WHERE id=$6;`
+	CategoryUpdate = `UPDATE category SET parent_tag=CAST($1 AS UUID), "name"=$2, show_income=$3, show_outcome=$4, regular=$5 WHERE id=CAST($6 AS UUID);`
 
 	CategoryDelete = "DELETE FROM category WHERE id = $1;"
 
@@ -49,14 +50,26 @@ func NewRepository(db postgresql.DbConn, log logger.Logger) *Repository {
 }
 
 func (r *Repository) CreateTag(ctx context.Context, tag models.Category) (uuid.UUID, error) {
-	row := r.db.QueryRow(ctx, CategoryCreate,
-		tag.UserID,
-		tag.ParentID,
-		tag.Name,
-		tag.ShowIncome,
-		tag.ShowOutcome,
-		tag.Regular,
-	)
+	var row pgx.Row
+	if tag.ParentID == uuid.Nil {
+		row = r.db.QueryRow(ctx, CategoryCreate,
+			tag.UserID,
+			nil,
+			tag.Name,
+			tag.ShowIncome,
+			tag.ShowOutcome,
+			tag.Regular,
+		)
+	} else {
+		row = r.db.QueryRow(ctx, CategoryCreate,
+			tag.UserID,
+			tag.ParentID,
+			tag.Name,
+			tag.ShowIncome,
+			tag.ShowOutcome,
+			tag.Regular,
+		)
+	}
 	var id uuid.UUID
 
 	err := row.Scan(&id)
@@ -76,15 +89,27 @@ func (r *Repository) UpdateTag(ctx context.Context, tag *models.Category) error 
 	} else if err != nil {
 		return fmt.Errorf("[repo] failed request db %s, %w", CategoryGet, err)
 	} */
+	var err error
+	if tag.ParentID == uuid.Nil {
+		_, err = r.db.Exec(ctx, CategoryUpdate,
+			nil,
+			tag.Name,
+			tag.ShowIncome,
+			tag.ShowOutcome,
+			tag.Regular,
+			tag.ID,
+		)
+	} else {
+		_, err = r.db.Exec(ctx, CategoryUpdate,
+			tag.ParentID,
+			tag.Name,
+			tag.ShowIncome,
+			tag.ShowOutcome,
+			tag.Regular,
+			tag.ID,
+		)
+	}
 
-	_, err := r.db.Exec(ctx, CategoryUpdate,
-		tag.ParentID,
-		tag.Name,
-		tag.ShowIncome,
-		tag.ShowOutcome,
-		tag.Regular,
-		tag.ID,
-	)
 	if err != nil {
 		return fmt.Errorf("[repo] failed to update category info: %s, %w", CategoryUpdate, err)
 	}
