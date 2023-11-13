@@ -90,6 +90,7 @@ func (r *Repository) UpdateTag(ctx context.Context, tag *models.Category) error 
 	} else if err != nil {
 		return fmt.Errorf("[repo] failed request db %s, %w", CategoryGet, err)
 	} */
+
 	var err error
 	if tag.ParentID == uuid.Nil {
 		_, err = r.db.Exec(ctx, CategoryUpdate,
