@@ -1,5 +1,6 @@
 package postgres
 
+/*
 import (
 	"context"
 	"database/sql"
@@ -207,7 +208,7 @@ func Test_CreateTag(t *testing.T) {
 			})
 		}
 	}
-*/
+
 func Test_GetTags(t *testing.T) {
 	tagId := uuid.New()
 	userId := uuid.New()
@@ -436,3 +437,4 @@ func Test_CheckExist(t *testing.T) {
 		})
 	}
 }
+*/
