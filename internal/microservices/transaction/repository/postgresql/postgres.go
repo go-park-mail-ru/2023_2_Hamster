@@ -121,7 +121,10 @@ func (r *transactionRep) CreateTransaction(ctx context.Context, transaction *mod
 	}
 	defer func() {
 		if err := tx.Rollback(ctx); err != nil {
-			r.logger.Fatal("Rollback transaction Error: %w", err)
+			if err = tx.Rollback(ctx); err != nil {
+				r.logger.Fatal("Rollback transaction Error: %w", err)
+			}
+
 		}
 	}()
 
@@ -197,9 +200,13 @@ func (r *transactionRep) UpdateTransaction(ctx context.Context, transaction *mod
 	if err != nil {
 		return fmt.Errorf("[repo] failed to start transaction: %w", err)
 	}
+
 	defer func() {
 		if err := tx.Rollback(ctx); err != nil {
-			r.logger.Fatal("Rollback transaction Error: %w", err)
+			if err = tx.Rollback(ctx); err != nil {
+				r.logger.Fatal("Rollback transaction Error: %w", err)
+			}
+
 		}
 	}()
 
@@ -291,9 +298,13 @@ func (r *transactionRep) DeleteTransaction(ctx context.Context, transactionID uu
 	if err != nil {
 		return fmt.Errorf("[repo] failed to start transaction: %w", err)
 	}
+
 	defer func() {
-		if err != nil {
-			tx.Rollback(ctx)
+		if err := tx.Rollback(ctx); err != nil {
+			if err = tx.Rollback(ctx); err != nil {
+				r.logger.Fatal("Rollback transaction Error: %w", err)
+			}
+
 		}
 	}()
 
