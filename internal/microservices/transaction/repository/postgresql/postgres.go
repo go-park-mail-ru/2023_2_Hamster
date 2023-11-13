@@ -292,8 +292,8 @@ func (r *transactionRep) DeleteTransaction(ctx context.Context, transactionID uu
 		return fmt.Errorf("[repo] failed to start transaction: %w", err)
 	}
 	defer func() {
-		if err := tx.Rollback(ctx); err != nil {
-			r.logger.Fatal("Rollback transaction Error: %w", err)
+		if err != nil {
+			tx.Rollback(ctx)
 		}
 	}()
 

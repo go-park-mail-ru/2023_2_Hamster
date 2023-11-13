@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/jackc/pgx/v4"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/db/postgresql"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
@@ -49,14 +50,26 @@ func NewRepository(db postgresql.DbConn, log logger.Logger) *Repository {
 }
 
 func (r *Repository) CreateTag(ctx context.Context, tag models.Category) (uuid.UUID, error) {
-	row := r.db.QueryRow(ctx, CategoryCreate,
-		tag.UserID,
-		tag.ParentID,
-		tag.Name,
-		tag.ShowIncome,
-		tag.ShowOutcome,
-		tag.Regular,
-	)
+	var row pgx.Row
+	if tag.ParentID == uuid.Nil {
+		row = r.db.QueryRow(ctx, CategoryCreate,
+			tag.UserID,
+			nil,
+			tag.Name,
+			tag.ShowIncome,
+			tag.ShowOutcome,
+			tag.Regular,
+		)
+	} else {
+		row = r.db.QueryRow(ctx, CategoryCreate,
+			tag.UserID,
+			tag.ParentID,
+			tag.Name,
+			tag.ShowIncome,
+			tag.ShowOutcome,
+			tag.Regular,
+		)
+	}
 	var id uuid.UUID
 
 	err := row.Scan(&id)
