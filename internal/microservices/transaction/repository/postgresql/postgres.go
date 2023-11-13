@@ -182,9 +182,13 @@ func (r *transactionRep) updateAccountBalance(ctx context.Context, tx pgx.Tx, ac
 	return err
 }
 
-func (r *transactionRep) insertCategories(ctx context.Context, tx pgx.Tx, transactionID uuid.UUID, categoryIDs []uuid.UUID) error {
+func (r *transactionRep) insertCategories(ctx context.Context, tx pgx.Tx, transactionID uuid.UUID, categoryIDs []uuid.UUID) (err error) {
 	for _, categoryID := range categoryIDs {
-		_, err := tx.Exec(ctx, transactionCreateCategory, transactionID, categoryID)
+		if categoryID == uuid.Nil {
+			_, err = tx.Exec(ctx, transactionCreateCategory, transactionID, nil)
+		} else {
+			_, err = tx.Exec(ctx, transactionCreateCategory, transactionID, categoryID)
+		}
 		if err != nil {
 			return fmt.Errorf("[repo] failed to insert category association: %w", err)
 		}
