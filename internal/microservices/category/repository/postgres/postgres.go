@@ -6,11 +6,12 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/jackc/pgx/v4"
+
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/db/postgresql"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
 )
 
 const (
@@ -89,6 +90,7 @@ func (r *Repository) UpdateTag(ctx context.Context, tag *models.Category) error 
 	} else if err != nil {
 		return fmt.Errorf("[repo] failed request db %s, %w", CategoryGet, err)
 	} */
+
 	var err error
 	if tag.ParentID == uuid.Nil {
 		_, err = r.db.Exec(ctx, CategoryUpdate,
