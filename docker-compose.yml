@@ -121,7 +121,7 @@ services:
       - type: bind
         source: /home/ubuntu/grafana_metrics
         target: /var/lib/grafana
-      - ./metrics/grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./metrics/grafana/:/etc/grafana/
     networks:
     - hamster-net
 volumes:
