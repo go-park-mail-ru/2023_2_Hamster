@@ -114,7 +114,7 @@ services:
     image: grafana/grafana-oss:9.4.3
     user: '0'
     ports:
-      - "3000:3000"
+      - "3001:3000"
     volumes:
       - type: bind
         source: /home/ubuntu/grafana_metrics
