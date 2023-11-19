@@ -94,7 +94,7 @@ jobs:
           username: ${{ secrets.DEPLOY_USERNAME }}
           key: ${{ secrets.SSHKEY }}
           rm: true
-          source: docker-compose.yml, build/schema/initdb.sql
+          source: docker-compose.yml, build/schema/initdb.sql, metrics/prometheus/prometheus.yaml
           target: ~/${{ env.FOLDER_COMPOSE }}
 
       - name: Get docker form dockerhub via SSH action
