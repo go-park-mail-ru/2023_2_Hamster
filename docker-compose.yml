@@ -93,9 +93,11 @@ services:
     container_name: prometheus
     image: prom/prometheus:latest
     volumes:
-      - ./metrics/prometheus:/etc/prometheus
+      - ./metrics/prometheus/:/etc/prometheus/
     ports:
       - "9090:9090"
+    networks:
+      - hamster-net
 
   nodeexporter:
     container_name: node_exporter
@@ -119,6 +121,7 @@ services:
       - type: bind
         source: /home/ubuntu/grafana_metrics
         target: /var/lib/grafana
-
+    networks:
+    - hamster-net
 volumes:
   api-logs:
