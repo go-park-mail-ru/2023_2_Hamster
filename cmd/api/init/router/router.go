@@ -7,6 +7,7 @@ import (
 	"time"
 
 	_ "github.com/go-park-mail-ru/2023_2_Hamster/docs"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/http"
 	category "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/category/delivery/http"
@@ -37,6 +38,7 @@ func InitRouter(auth *auth.Handler,
 	r.Use(recoveryMid.Recoverer)
 	r.Use(middleware.Timeout(5 * time.Second))
 	r.Use(middleware.Heartbeat("ping"))
+	r.Use(middleware.Metrics())
 
 	http.Handle("/", r)
 
@@ -45,6 +47,8 @@ func InitRouter(auth *auth.Handler,
 		httpSwagger.DocExpansion("none"),
 		httpSwagger.DomID("swagger-ui"),
 	)).Methods(http.MethodGet)
+
+	r.PathPrefix("/metrics").Handler(promhttp.Handler())
 
 	apiRouter := r.PathPrefix("/api").Subrouter()
 
