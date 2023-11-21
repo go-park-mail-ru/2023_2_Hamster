@@ -32,16 +32,16 @@ func NewHandler(uu transaction.Usecase, l logger.Logger) *Handler {
 }
 
 // @Summary		Get all transaction
-// @Tags			Transaction
+// @Tags		Transaction
 // @Description	Get User all transaction
 // @Produce		json
-// @Param       	request query       QueryListOptions false      	"Query Params"
-// @Success		200		{object}	Response[MasTransaction]		"Show transaction"
-// @Success		204		{object}	Response[string]	     	"Show actual accounts"
-// @Failure		400		{object}	ResponseError				"Client error"
-// @Failure     	401    	{object}  ResponseError  			"Unauthorized user"
-// @Failure     	403    	{object}  ResponseError  			"Forbidden user"
-// @Failure		500		{object}	ResponseError				"Server error"
+// @Param       request query       QueryListOptions false   "Query Params"
+// @Success		200		{object}	Response[MasTransaction] "Show transaction"
+// @Success		204		{object}	Response[string]	     "Show actual accounts"
+// @Failure		400		{object}	ResponseError			 "Client error"
+// @Failure     401    	{object}    ResponseError  			 "Unauthorized user"
+// @Failure     403    	{object}    ResponseError  			 "Forbidden user"
+// @Failure		500		{object}	ResponseError			 "Server error"
 // @Router		/api/transaction/feed [get]
 func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 	user, err := commonHttp.GetUserFromRequest(r)
@@ -50,12 +50,12 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page, pageSize, err := commonHttp.GetQueryParam(r)
+	query, err := commonHttp.GetQueryParam(r)
 	if err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
 		return
 	}
-	dataFeed, isAll, err := h.transactionService.GetFeed(r.Context(), user.ID, page, pageSize)
+	dataFeed, err := h.transactionService.GetFeed(r.Context(), user.ID, query)
 
 	var errNoSuchTransaction *models.NoSuchTransactionError
 	if errors.As(err, &errNoSuchTransaction) {
@@ -74,7 +74,7 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 		dataResponse = append(dataResponse, models.InitTransactionTransfer(transaction))
 	}
 
-	response := MasTransaction{Transactions: dataResponse, IsAll: isAll}
+	response := MasTransaction{Transactions: dataResponse}
 	commonHttp.SuccessResponse(w, http.StatusOK, response)
 
 }

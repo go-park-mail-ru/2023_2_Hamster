@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/db/postgresql"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
@@ -48,14 +49,55 @@ func NewRepository(db postgresql.DbConn, l logger.Logger) *transactionRep {
 	}
 }
 
-func (r *transactionRep) GetFeed(ctx context.Context, user_id uuid.UUID, page int, pageSize int) ([]models.Transaction, bool, error) {
+func (r *transactionRep) GetFeed(ctx context.Context, user_id uuid.UUID, queryGet *models.QueryListOptions) ([]models.Transaction, error) {
 	var transactions []models.Transaction
-	offset := (page - 1) * pageSize
+	count := 1
+	//rows, err := r.db.Query(ctx, transactionGetFeed, user_id, pageSize, offset)
+	var queryParamsSlice []interface{}
 
-	rows, err := r.db.Query(ctx, transactionGetFeed, user_id, pageSize, offset)
-	if err != nil {
-		return nil, false, fmt.Errorf("[repo] %v", err)
+	query := `SELECT id, user_id, account_income, account_outcome, income, outcome, date, payer, description 
+	FROM transaction 
+	WHERE user_id = $1`
+	queryParamsSlice = append(queryParamsSlice, user_id.String())
+
+	if queryGet.Account != uuid.Nil {
+		count++
+		query += " AND (account_income = $" + strconv.Itoa(count) + " OR account_outcome = $" + strconv.Itoa(count) + ")"
+		queryParamsSlice = append(queryParamsSlice, queryGet.Account.String())
 	}
+
+	if queryGet.Category != uuid.Nil {
+		count++
+		query += " AND id IN (SELECT transaction_id FROM TransactionCategory WHERE category_id = $" + strconv.Itoa(count) + ")"
+		queryParamsSlice = append(queryParamsSlice, queryGet.Category.String())
+	}
+
+	if queryGet.Income && queryGet.Outcome {
+		query += " AND income > 0 AND outcome > 0"
+	}
+
+	if !queryGet.Income && queryGet.Outcome {
+		query += " AND outcome > 0 AND income = 0"
+	}
+
+	if queryGet.Income && !queryGet.Outcome {
+		query += " AND income > 0 AND outcome = 0"
+	}
+
+	if !queryGet.Date.IsZero() {
+		queryYear, queryMonth, _ := queryGet.Date.Date()
+		count++
+		query += " AND EXTRACT(YEAR FROM date) = $" + strconv.Itoa(count) + " AND EXTRACT(MONTH FROM date) = $" + strconv.Itoa(count+1) + ""
+		queryParamsSlice = append(queryParamsSlice, strconv.Itoa(queryYear))
+		queryParamsSlice = append(queryParamsSlice, strconv.Itoa(int(queryMonth)))
+	}
+
+	query += ";"
+	rows, err := r.db.Query(ctx, query, queryParamsSlice...)
+	if err != nil {
+		return nil, fmt.Errorf("[repo] %v", err)
+	}
+
 	for rows.Next() {
 		var transaction models.Transaction
 		if err := rows.Scan(
@@ -69,11 +111,11 @@ func (r *transactionRep) GetFeed(ctx context.Context, user_id uuid.UUID, page in
 			&transaction.Payer,
 			&transaction.Description,
 		); err != nil {
-			return nil, false, fmt.Errorf("[repo] %w", err)
+			return nil, fmt.Errorf("[repo] %w", err)
 		}
 		categories, err := r.getCategoriesForTransaction(ctx, transaction.ID)
 		if err != nil {
-			return nil, false, fmt.Errorf("[repo] %w", err)
+			return nil, fmt.Errorf("[repo] %w", err)
 		}
 		transaction.Categories = categories
 
@@ -81,14 +123,14 @@ func (r *transactionRep) GetFeed(ctx context.Context, user_id uuid.UUID, page in
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, false, fmt.Errorf("[repo] %w", err)
+		return nil, fmt.Errorf("[repo] %w", err)
 	}
 
 	if len(transactions) == 0 {
-		return nil, false, fmt.Errorf("[repo] %w: %v", &models.NoSuchTransactionError{UserID: user_id}, err)
+		return nil, fmt.Errorf("[repo] %w: %v", &models.NoSuchTransactionError{UserID: user_id}, err)
 	}
 
-	return transactions, len(transactions) < pageSize, nil
+	return transactions, nil
 }
 
 func (r *transactionRep) getCategoriesForTransaction(ctx context.Context, transactionID uuid.UUID) ([]uuid.UUID, error) {

@@ -98,7 +98,7 @@ type Logger struct {
 }
 
 func NewLogger(ctx context.Context) *Logger {
-	logFolderPath := "logs"
+	//logFolderPath := "logs"
 	l := logrus.New()
 
 	l.SetReportCaller(true)
@@ -110,13 +110,13 @@ func NewLogger(ctx context.Context) *Logger {
 		},
 	}
 
-	err := os.MkdirAll(logFolderPath, 0755)
-	if err != nil {
-		panic(err)
-	}
+	//err := os.MkdirAll(logFolderPath, 0755)
+	//if err != nil {
+	//	panic(err)
+	//}
 
 	lumber := &lumberjack.Logger{
-		Filename: logFolderPath + "/server.log",
+		//	Filename: logFolderPath + "/server.log",
 		MaxSize:  30,
 		MaxAge:   2,
 		Compress: false,

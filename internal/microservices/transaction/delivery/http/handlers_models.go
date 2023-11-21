@@ -68,11 +68,6 @@ func (cr *UpdTransaction) CheckValid() error {
 	return err
 }
 
-type QueryListOptions struct {
-	Page     int `json:"page" minimum:"1" validate:"optional" example:"1"`
-	PageSize int `json:"page_size" minimum:"1" maximum:"20" validate:"optional" example:"10"`
-}
-
 func (cr *CreateTransaction) ToTransaction(user *models.User) *models.Transaction {
 	return &models.Transaction{
 		UserID:           user.ID,
