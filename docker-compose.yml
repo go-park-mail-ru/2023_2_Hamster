@@ -95,20 +95,21 @@ services:
     volumes:
       - ./metrics/prometheus/:/etc/prometheus/
     ports:
-      - "9090:9090"
+      - "8090:9090"
     networks:
       - hamster-net
 
   nodeexporter:
     container_name: node_exporter
     image: prom/node-exporter
+    user: "0"
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/rootfs:ro
     restart: unless-stopped
     ports:
-      - "9100:9100"
+      - "8100:9100"
     networks:
       - hamster-net
 
