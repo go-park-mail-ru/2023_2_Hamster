@@ -12,12 +12,6 @@ import (
 	redisDB "github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/db/redis"
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/server"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
-	"github.com/prometheus/client_golang/prometheus"
-)
-
-var (
-	reg         = prometheus.NewRegistry()
-	grpcMetrics = grpcPrometheus.NewServerMetrics()
 )
 
 // @title		Hamster API

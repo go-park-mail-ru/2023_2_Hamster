@@ -60,7 +60,7 @@ services:
 
 
   hammy-redis:
-    container_name: hammy-redis #host
+    container_name: hammy-redis
     image: redis:latest
     restart: on-failure
     networks:
@@ -71,7 +71,7 @@ services:
 
   hammywallet-api:
     container_name: ${CONTAINER_NAME}
-    image:  ${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA_SHORT} #codemaster482/hammywallet:latest
+    image:  ${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA_SHORT}
     env_file:
       - .env
     restart: always
