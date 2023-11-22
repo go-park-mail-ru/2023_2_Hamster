@@ -5,9 +5,12 @@ import (
 	"net/http"
 	"time"
 
-	response "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth"
+
+	contextutils "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/context_utils"
+	response "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
+
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions"
 )
@@ -42,49 +45,59 @@ func NewHandler(
 // @Accept 		json
 // @Produce		json
 // @Param			user		body		models.User			true		"user info"
-// @Success		202		{object}	Response[auth.SignResponse]		"User Created"
+// @Success		201		{object}	Response[auth.SignResponse]		"User Created"
 // @Failure		400		{object}	ResponseError					"Incorrect Input"
 // @Failure		429		{object}	ResponseError					"Server error"
 // @Router		/api/auth/signup	[post]
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	var signUpUser auth.SignUpInput
 
+	// Unmarshal r.Body
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&signUpUser); err != nil {
-		h.log.Error(err.Error())
+		h.log.WithField(
+			"Request-Id", contextutils.GetReqID(r.Context()),
+		).Error(err.Error())
 		response.ErrorResponse(w, http.StatusBadRequest, err, "Corrupted request body can't unmarshal", h.log)
 		return
 	}
 	defer r.Body.Close()
 
+	// Sanitaize
 	if err := signUpUser.CheckValid(); err != nil {
 		response.ErrorResponse(w, http.StatusBadRequest, err, response.InvalidBodyRequest, h.log)
 		return
 	}
 
-	// h.log.WithField("Request_ID", contextutils.GetReqID(r.Context())).Info("My Request :-)")
-
-	id, username, err := h.au.SignUp(r.Context(), signUpUser)
+	// Creating user
+	id, login, username, err := h.au.SignUp(r.Context(), signUpUser)
 	if err != nil {
-		h.log.Errorf("Error in sign up: %v", err)
+		h.log.WithField(
+			"Request-Id", contextutils.GetReqID(r.Context()),
+		).Errorf("Error in sign up: %v", err)
 		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't Sign Up user", h.log)
 		return
 	}
 
+	// Creating session for new user
 	session, err := h.su.CreateSessionById(r.Context(), id)
 	if err != nil {
-		h.log.Errorf("Error in sign up session creation: %v", err)
+		h.log.WithField(
+			"Request-Id", contextutils.GetReqID(r.Context()),
+		).Errorf("Error in sign up session creation: %v", err)
 		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't Sign Up user", h.log)
 		return
 	}
 
+	// Output
 	regUser := auth.SignResponse{
 		ID:       session.UserId,
+		Login:    login,
 		Username: username,
 	}
 
 	http.SetCookie(w, response.InitCookie("session_id", session.Cookie, time.Now().Add(7*24*time.Hour), "/api"))
-	response.SuccessResponse(w, http.StatusAccepted, regUser)
+	response.SuccessResponse(w, http.StatusCreated, regUser)
 }
 
 // @Summary		Sign In
@@ -100,40 +113,54 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	var loginUser auth.LoginInput
 
+	// Decode request Body
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&loginUser); err != nil {
-		h.log.Error(err.Error())
+		h.log.WithField(
+			"Request-Id", contextutils.GetReqID(r.Context()),
+		).Error(err.Error())
 		response.ErrorResponse(w, http.StatusBadRequest, err, "Corrupted request body can't unmarshal", h.log)
 		return
 	}
 	defer r.Body.Close()
 
+	// Sanitaize Input
 	if err := loginUser.CheckValid(); err != nil {
 		response.ErrorResponse(w, http.StatusBadRequest, err, response.InvalidBodyRequest, h.log)
 		return
 	}
 
-	id, login, err := h.au.Login(r.Context(), loginUser.Login, loginUser.PlaintPassword)
+	// Login user
+	id, login, username, err := h.au.Login(r.Context(), loginUser.Login, loginUser.PlaintPassword)
 	if err != nil {
-		h.log.Errorf("Error in login: %v", err)
+		h.log.WithField(
+			"Request-Id", contextutils.GetReqID(r.Context()),
+		).Errorf("Error in login: %v", err)
 		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't Login user", h.log)
 		return
 	}
 
+	// Registrate session in redis
 	session, err := h.su.CreateSessionById(r.Context(), id)
 	if err != nil {
-		h.log.Errorf("Error in login: %v", err)
+		h.log.WithField(
+			"Request-Id", contextutils.GetReqID(r.Context()),
+		).Errorf("Error in login: %v", err)
 		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't Login user", h.log)
 		return
 	}
 
+	// Create Response
 	regUser := auth.SignResponse{
 		ID:       id,
-		Username: login,
+		Login:    login,
+		Username: username,
 	}
 
+	// Set Cookie
 	http.SetCookie(w, response.InitCookie("session_id", session.Cookie, time.Now().Add(7*24*time.Hour), "/api"))
-	response.SuccessResponse[auth.SignResponse](w, http.StatusAccepted, regUser)
+	// Send http Response
+	response.SuccessResponse(w, http.StatusAccepted, regUser)
 }
 
 // @Summary		Validate Auth
@@ -148,32 +175,43 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 // @Failure		500		{object}	ResponseError				"Server error: cookie read fail"
 // @Router		/api/auth/checkAuth	[post]
 func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
+	// Get cookie from request
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
-		h.log.Errorf("Auth check error: %v", err)
+		h.log.WithField(
+			"Request-Id", contextutils.GetReqID(r.Context()),
+		).Errorf("Auth check error: %v", err)
 		response.ErrorResponse(w, http.StatusForbidden, err, "No cookie provided", h.log)
 		return
 	}
 
+	// Find session in redis
 	session, err := h.su.GetSessionByCookie(r.Context(), cookie.Value)
 	if err != nil {
-		h.log.Errorf("Auth check error: %v", err)
+		h.log.WithField(
+			"Request-Id", contextutils.GetReqID(r.Context()),
+		).Errorf("Auth check error: %v", err)
 		response.ErrorResponse(w, http.StatusUnauthorized, err, "Session doesn't exist login", h.log)
 		return
 	}
 
+	// Get User by its Id
 	user, err := h.au.GetByID(r.Context(), session.UserId)
 	if err != nil {
-		h.log.Errorf("Auth check error: %v", err)
+		h.log.WithField(
+			"Request-Id", contextutils.GetReqID(r.Context()),
+		).Errorf("Auth check error: %v", err)
 		response.ErrorResponse(w, http.StatusUnauthorized, err, "Can't get you username", h.log)
 		return
 	}
 
+	// Create Response
 	resp := auth.SignResponse{
 		ID:       session.UserId,
 		Username: user.Username,
 	}
 
+	// Send Response
 	response.SuccessResponse(w, http.StatusOK, resp)
 }
 
@@ -188,21 +226,29 @@ func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 // @Failure		500		{object}	ResponseError				"Server error: cookie read fail"
 // @Router		/api/auth/checkAuth	[post]
 func (h *Handler) LogOut(w http.ResponseWriter, r *http.Request) {
+	// Get Cookie from request
 	session, err := r.Cookie("session_id")
 	if err != nil {
-		h.log.Errorf("Log out error: %v", err)
+		h.log.WithField(
+			"Request-Id", contextutils.GetReqID(r.Context()),
+		).Errorf("Log out error: %v", err)
 		response.ErrorResponse(w, http.StatusBadRequest, err, "No cookie provided", h.log)
 		return
 	}
 
+	// Delete key Values pair in redis
 	err = h.su.DeleteSessionByCookie(r.Context(), session.Name)
 	if err != nil {
-		h.log.Errorf("Error session delete: %v", err)
+		h.log.WithField(
+			"Request-Id", contextutils.GetReqID(r.Context()),
+		).Errorf("Error session delete: %v", err)
 		response.ErrorResponse(w, http.StatusInternalServerError, err, "Can't delete session", h.log)
 		return
 	}
 
+	// Set Http cookie
 	http.SetCookie(w, response.InitCookie("session_id", "", time.Now().AddDate(0, 0, -1), "/api"))
+	// Send response
 	response.SuccessResponse(w, http.StatusOK, response.NilBody{})
 }
 
@@ -210,17 +256,33 @@ func (h *Handler) LogOut(w http.ResponseWriter, r *http.Request) {
 // @Tags			Auth
 // @Description	Get bool parametrs about unique login
 // @Produce		json
-// @Success		200		{object}	Response[bool] "Show user"
-// @Failure		400		{object}	ResponseError	"Client error"
-// @Failure		500		{object}	ResponseError	"Server error"
-// @Router		/api/auth/checkLogin/{login} [get]
+// @Success		200		{object}		Response[bool] 	"Show user"
+// @Failure		400		{object}		ResponseError		"Client error"
+// @Failure		500		{object}		ResponseError		"Server error"
+// @Router		/api/auth/checkLogin/ [post]
 func (h *Handler) CheckLoginUnique(w http.ResponseWriter, r *http.Request) {
-	userLogin := response.GetloginFromRequest(userloginUrlParam, r)
-	isUnique, err := h.au.CheckLoginUnique(r.Context(), userLogin)
+	var userLogin auth.UniqCheckInput
 
-	if err != nil {
-		response.ErrorResponse(w, http.StatusInternalServerError, err, "Can't get unique info login", h.log)
+	// Decode request Body
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&userLogin); err != nil {
+		h.log.WithField(
+			"Request-Id", contextutils.GetReqID(r.Context()),
+		).Error(err.Error())
+		response.ErrorResponse(w, http.StatusBadRequest, err, "Corrupted request body can't unmarshal", h.log)
 		return
 	}
-	response.SuccessResponse(w, http.StatusOK, isUnique)
+	defer r.Body.Close()
+
+	// request login
+	isUnique, err := h.au.CheckLoginUnique(r.Context(), userLogin.Login)
+	if err != nil {
+		h.log.WithField(
+			"Request-Id", contextutils.GetReqID(r.Context()),
+		).Errorf("DB interal error")
+		response.ErrorResponse(w, http.StatusInternalServerError, err, "Can't query DB", h.log)
+		return
+	}
+
+	response.SuccessResponse(w, http.StatusOK, !isUnique)
 }

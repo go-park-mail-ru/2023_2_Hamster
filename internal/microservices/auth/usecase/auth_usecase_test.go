@@ -21,6 +21,7 @@ func TestUsecase_SignUp(t *testing.T) {
 	testCases := []struct {
 		name             string
 		expectedUserID   uuid.UUID
+		expectedLogin    string
 		expectedUsername string
 		expectedErr      error
 		mockRepoFn       func(*mock.MockRepository)
@@ -28,18 +29,11 @@ func TestUsecase_SignUp(t *testing.T) {
 		{
 			name:             "Successful SignUp",
 			expectedUserID:   userIdTest,
+			expectedLogin:    "testLogin",
 			expectedUsername: "testUser",
 			expectedErr:      nil,
 			mockRepoFn: func(mockRepositry *mock.MockRepository) {
 				mockRepositry.EXPECT().CheckLoginUnique(gomock.Any(), gomock.Any()).Return(true, nil)
-
-				// user := models.User{
-				// 	ID:       userIdTest,
-				// 	Login:    "testLogin",
-				// 	Password: "hashedPassword",
-				// 	Username: "testUser",
-				// }
-
 				mockRepositry.EXPECT().CreateUser(gomock.Any(), gomock.Any()).Return(userIdTest, nil)
 			},
 		},
@@ -83,8 +77,9 @@ func TestUsecase_SignUp(t *testing.T) {
 				PlaintPassword: "testPassword",
 			}
 
-			userID, username, err := mockUsecase.SignUp(context.Background(), input)
+			userID, login, username, err := mockUsecase.SignUp(context.Background(), input)
 			assert.Equal(t, tc.expectedUserID, userID)
+			assert.Equal(t, tc.expectedLogin, login)
 			assert.Equal(t, tc.expectedUsername, username)
 			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
 				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
@@ -98,6 +93,7 @@ func TestUsecase_Login(t *testing.T) {
 	testCases := []struct {
 		name             string
 		expectedUserID   uuid.UUID
+		expectedLogin    string
 		expectedUsername string
 		expectedErr      error
 		mockRepoFn       func(*mock.MockRepository)
@@ -105,6 +101,7 @@ func TestUsecase_Login(t *testing.T) {
 		{
 			name:             "Successful Login",
 			expectedUserID:   userIdTest,
+			expectedLogin:    "testLogin",
 			expectedUsername: "testUser",
 			expectedErr:      nil,
 			mockRepoFn: func(mockRepositry *mock.MockRepository) {
@@ -151,8 +148,9 @@ func TestUsecase_Login(t *testing.T) {
 
 			mockUsecase := NewUsecase(mockRepo, *logger.NewLogger(context.TODO()))
 
-			userID, username, err := mockUsecase.Login(context.Background(), "testLogin", "testPassword")
+			userID, login, username, err := mockUsecase.Login(context.Background(), "testLogin", "testPassword")
 			assert.Equal(t, tc.expectedUserID, userID)
+			assert.Equal(t, tc.expectedLogin, login)
 			assert.Equal(t, tc.expectedUsername, username)
 			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
 				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)

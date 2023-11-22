@@ -57,7 +57,7 @@ func InitRouter(auth *auth.Handler,
 		authRouter.Methods("POST").Path("/signin").HandlerFunc(auth.Login)
 		authRouter.Methods("POST").Path("/signup").HandlerFunc(auth.SignUp)
 		authRouter.Methods("POST").Path("/checkAuth").HandlerFunc(auth.HealthCheck)
-		authRouter.Methods("GET").Path("/loginCheck/{login}").HandlerFunc(auth.CheckLoginUnique)
+		authRouter.Methods("POST").Path("/loginCheck").HandlerFunc(auth.CheckLoginUnique)
 		authRouter.Methods("POST").Path("/logout").HandlerFunc(auth.LogOut)
 	}
 

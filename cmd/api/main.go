@@ -96,3 +96,9 @@ func main() {
 
 	log.Info("Server exiting")
 }
+
+// internal/microservices/delivery/grpc/{server, clent}
+// proto/*proto
+//
+// cmd/apiGateway/main.go
+// cmd/api/main.go

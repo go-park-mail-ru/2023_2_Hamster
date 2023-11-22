@@ -1,0 +1,34 @@
+syntax = "proto3"
+
+option go_package = "internal/microservices/auth/delivery/grpc/generated"
+
+message SignUpInput {
+     string Login = 1;          
+     string Username = 2;       
+     string PlaintPassword = 3; 
+};
+
+message LoginInput {
+     string Login = 1;          
+     string PlaintPassword = 2;  
+};
+
+message SignResponse {
+     uuid.UUID ID = 1;       
+     string Login = 2;       
+     string Username = 3;    
+};
+
+message UniqCheckInput {
+     string Login = 1;
+};
+
+message UniqCheckInput {
+     string Login = 1;
+};
+
+service AuthService {
+     rpc SignUp(SignUpInput) returns (SignResponse) {}
+     rpc Login(LoginInput) returns (SignResponse) {}
+     rpc CheckLoginUnique(UniqCheckInput) returns () {}
+}
