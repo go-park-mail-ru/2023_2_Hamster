@@ -64,13 +64,13 @@ func TestUsecase_GetFeed(t *testing.T) {
 func TestUsecase_GetCount(t *testing.T) {
 	testCases := []struct {
 		name                string
-		expectedTransaction []models.Transaction
+		expectedTransaction int
 		expectedErr         error
 		mockRepoFn          func(*mock.MockRepository)
 	}{
 		{
 			name:                "Successful TestUsecase_GetCount",
-			expectedTransaction: []models.Transaction{},
+			expectedTransaction: 1,
 			expectedErr:         nil,
 			mockRepoFn: func(mockRepositry *mock.MockRepository) {
 				mockRepositry.EXPECT().GetCount(gomock.Any(), gomock.Any()).Return(1, nil)
@@ -78,8 +78,8 @@ func TestUsecase_GetCount(t *testing.T) {
 		},
 		{
 			name:                "Error in TestUsecase_GetCount",
-			expectedTransaction: []models.Transaction{},
-			expectedErr:         fmt.Errorf("[usecase] can't get transactions from repository some error"),
+			expectedTransaction: 1,
+			expectedErr:         fmt.Errorf("[usecase] can't get count transactions from repository some error"),
 			mockRepoFn: func(mockRepositry *mock.MockRepository) {
 				mockRepositry.EXPECT().GetCount(gomock.Any(), gomock.Any()).Return(1, errors.New("some error"))
 			},
