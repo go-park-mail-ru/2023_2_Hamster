@@ -12,9 +12,14 @@ CREATE TABLE Users
 
 CREATE TABLE Accounts (
     id            UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    user_id       UUID REFERENCES Users(id),
     balance numeric(10, 2),
     mean_payment TEXT
+);
+
+CREATE TABLE UserAccount (
+    user_id    UUID REFERENCES Users(id),
+    account_id UUID REFERENCES Accounts(id),
+    PRIMARY KEY (user_id, account_id)
 );
 
 CREATE TABLE IF NOT EXISTS category (

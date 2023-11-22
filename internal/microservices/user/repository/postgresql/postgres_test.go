@@ -455,20 +455,18 @@ func TestGetAccounts(t *testing.T) {
 	}{
 		{
 			name: "ValidAccounts",
-			rows: pgxmock.NewRows([]string{"id", "user_id", "balance", "mean_payment"}).
-				AddRow(userID, userID, 100.0, "Кошелек").
-				AddRow(userID, userID, 200.0, "Наличка"),
+			rows: pgxmock.NewRows([]string{"id", "balance", "mean_payment"}).
+				AddRow(userID, 100.0, "Кошелек").
+				AddRow(userID, 200.0, "Наличка"),
 			err: nil,
 			expected: []models.Accounts{
 				{
 					ID:          userID,
-					UserID:      userID,
 					Balance:     100.0,
 					MeanPayment: "Кошелек",
 				},
 				{
 					ID:          userID,
-					UserID:      userID,
 					Balance:     200.0,
 					MeanPayment: "Наличка",
 				},
@@ -476,29 +474,29 @@ func TestGetAccounts(t *testing.T) {
 		},
 		{
 			name: "ValidAccounts",
-			rows: pgxmock.NewRows([]string{"id", "user_id", "balance", "mean_payment"}).
-				AddRow("fff", userID, 100.0, "Кошелек").
-				AddRow(userID, userID, 200.0, "Наличка"),
+			rows: pgxmock.NewRows([]string{"id", "balance", "mean_payment"}).
+				AddRow("fff", 100.0, "Кошелек").
+				AddRow(userID, 200.0, "Наличка"),
 			err:      fmt.Errorf("[repo] Scanning value error for column 'id': Scan: invalid UUID length: 3"),
 			expected: nil,
 		},
 		{
 			name:     "NoAccountsFound",
-			rows:     pgxmock.NewRows([]string{"id", "user_id", "balance", "mean_payment"}),
+			rows:     pgxmock.NewRows([]string{"id", "balance", "mean_payment"}),
 			rowsErr:  nil,
 			err:      fmt.Errorf("[repo] No Such Accounts from user: %s doesn't exist: <nil>", userID.String()),
 			expected: nil,
 		},
 		{
 			name:     "Rows error",
-			rows:     pgxmock.NewRows([]string{"id", "user_id", "balance", "mean_payment"}).RowError(0, errors.New("err")),
+			rows:     pgxmock.NewRows([]string{"id", "balance", "mean_payment"}).RowError(0, errors.New("err")),
 			rowsErr:  nil,
 			err:      fmt.Errorf("[repo] %w", errors.New("err")),
 			expected: nil,
 		},
 		{
 			name:     "DatabaseError",
-			rows:     pgxmock.NewRows([]string{"id", "user_id", "balance", "mean_payment"}),
+			rows:     pgxmock.NewRows([]string{"id", "balance", "mean_payment"}),
 			rowsErr:  errors.New("database error"),
 			err:      fmt.Errorf("[repo] %w", errors.New("database error")),
 			expected: nil,
