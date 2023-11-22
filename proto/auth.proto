@@ -1,34 +1,58 @@
-syntax = "proto3"
+syntax = "proto3";
 
-option go_package = "internal/microservices/auth/delivery/grpc/generated"
+package auth;
+
+import "google/protobuf/empty.proto";
+
+message Session {
+  string id = 1;
+  string cookie = 2;
+}
 
 message SignUpInput {
-     string Login = 1;          
-     string Username = 2;       
-     string PlaintPassword = 3; 
-};
+  string login = 1;
+  string username = 2;
+  string password = 3;
+}
 
 message LoginInput {
-     string Login = 1;          
-     string PlaintPassword = 2;  
-};
+  string login = 1;
+  string password = 2;
+}
 
 message SignResponse {
-     uuid.UUID ID = 1;       
-     string Login = 2;       
-     string Username = 3;    
-};
+  string id = 1;
+  string login = 2;
+  string username = 3;
+}
 
 message UniqCheckInput {
-     string Login = 1;
-};
+  string login = 1;
+}
 
-message UniqCheckInput {
-     string Login = 1;
-};
+message Response {
+  int32 status = 1;
+  any body = 2;
+}
+
+message ResponseError {
+  int32 status = 1;
+  string error_message = 2;
+}
 
 service AuthService {
-     rpc SignUp(SignUpInput) returns (SignResponse) {}
-     rpc Login(LoginInput) returns (SignResponse) {}
-     rpc CheckLoginUnique(UniqCheckInput) returns () {}
+  rpc SignUp (SignUpInput) returns (Response<SignResponse>);
+  rpc Login (LoginInput) returns (Response<SignResponse>);
+  rpc HealthCheck (google.protobuf.Empty) returns (Response<SignResponse>);
+  rpc LogOut (google.protobuf.Empty) returns (google.protobuf.Empty);
+  rpc CheckLoginUnique (UniqCheckInput) returns (ResponseError);
+}
+
+
+service AuthService {
+  rpc SignUp (SignUpInput) returns (ApiResponse);
+  rpc Login (LoginInput) returns (ApiResponse);
+  rpc HealthCheck (google.protobuf.Empty) returns (ApiResponse);
+  rpc LogOut (google.protobuf.Empty) returns (google.protobuf.Empty);
+  rpc CheckLoginUnique (UniqCheckInput) returns (ApiResponse);
 }
