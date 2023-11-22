@@ -65,20 +65,34 @@ func (mr *MockUsecaseMockRecorder) DeleteTransaction(ctx, transactionID, userID 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteTransaction", reflect.TypeOf((*MockUsecase)(nil).DeleteTransaction), ctx, transactionID, userID)
 }
 
-// GetFeed mocks base method.
-func (m *MockUsecase) GetFeed(ctx context.Context, userID uuid.UUID, page, pageSize int) ([]models.Transaction, bool, error) {
+// GetCount mocks base method.
+func (m *MockUsecase) GetCount(ctx context.Context, userID uuid.UUID) (int, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetFeed", ctx, userID, page, pageSize)
+	ret := m.ctrl.Call(m, "GetCount", ctx, userID)
+	ret0, _ := ret[0].(int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCount indicates an expected call of GetCount.
+func (mr *MockUsecaseMockRecorder) GetCount(ctx, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCount", reflect.TypeOf((*MockUsecase)(nil).GetCount), ctx, userID)
+}
+
+// GetFeed mocks base method.
+func (m *MockUsecase) GetFeed(ctx context.Context, userID uuid.UUID, query *models.QueryListOptions) ([]models.Transaction, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFeed", ctx, userID, query)
 	ret0, _ := ret[0].([]models.Transaction)
-	ret1, _ := ret[1].(bool)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // GetFeed indicates an expected call of GetFeed.
-func (mr *MockUsecaseMockRecorder) GetFeed(ctx, userID, page, pageSize interface{}) *gomock.Call {
+func (mr *MockUsecaseMockRecorder) GetFeed(ctx, userID, query interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFeed", reflect.TypeOf((*MockUsecase)(nil).GetFeed), ctx, userID, page, pageSize)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFeed", reflect.TypeOf((*MockUsecase)(nil).GetFeed), ctx, userID, query)
 }
 
 // UpdateTransaction mocks base method.
@@ -116,20 +130,6 @@ func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
-}
-
-// Check mocks base method.
-func (m *MockRepository) Check(ctx context.Context, transactionID uuid.UUID) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Check", ctx, transactionID)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Check indicates an expected call of Check.
-func (mr *MockRepositoryMockRecorder) Check(ctx, transactionID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Check", reflect.TypeOf((*MockRepository)(nil).Check), ctx, transactionID)
 }
 
 // CheckForbidden mocks base method.
@@ -176,20 +176,34 @@ func (mr *MockRepositoryMockRecorder) DeleteTransaction(ctx, transactionID, user
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteTransaction", reflect.TypeOf((*MockRepository)(nil).DeleteTransaction), ctx, transactionID, userID)
 }
 
-// GetFeed mocks base method.
-func (m *MockRepository) GetFeed(ctx context.Context, userID uuid.UUID, page, pageSize int) ([]models.Transaction, bool, error) {
+// GetCount mocks base method.
+func (m *MockRepository) GetCount(ctx context.Context, userID uuid.UUID) (int, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetFeed", ctx, userID, page, pageSize)
+	ret := m.ctrl.Call(m, "GetCount", ctx, userID)
+	ret0, _ := ret[0].(int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCount indicates an expected call of GetCount.
+func (mr *MockRepositoryMockRecorder) GetCount(ctx, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCount", reflect.TypeOf((*MockRepository)(nil).GetCount), ctx, userID)
+}
+
+// GetFeed mocks base method.
+func (m *MockRepository) GetFeed(ctx context.Context, userID uuid.UUID, query *models.QueryListOptions) ([]models.Transaction, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFeed", ctx, userID, query)
 	ret0, _ := ret[0].([]models.Transaction)
-	ret1, _ := ret[1].(bool)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // GetFeed indicates an expected call of GetFeed.
-func (mr *MockRepositoryMockRecorder) GetFeed(ctx, userID, page, pageSize interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) GetFeed(ctx, userID, query interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFeed", reflect.TypeOf((*MockRepository)(nil).GetFeed), ctx, userID, page, pageSize)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFeed", reflect.TypeOf((*MockRepository)(nil).GetFeed), ctx, userID, query)
 }
 
 // UpdateTransaction mocks base method.

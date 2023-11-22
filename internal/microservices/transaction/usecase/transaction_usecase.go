@@ -32,6 +32,14 @@ func (t *Usecase) GetFeed(ctx context.Context, userID uuid.UUID, query *models.Q
 	return transaction, nil
 }
 
+func (t *Usecase) GetCount(ctx context.Context, userID uuid.UUID) (int, error) {
+	transactionCount, err := t.transactionRepo.GetCount(ctx, userID)
+	if err != nil {
+		return transactionCount, fmt.Errorf("[usecase] can't get count transactions from repository %w", err)
+	}
+	return transactionCount, nil
+}
+
 func (t *Usecase) CreateTransaction(ctx context.Context, transaction *models.Transaction) (uuid.UUID, error) {
 	transactionID, err := t.transactionRepo.CreateTransaction(ctx, transaction)
 

@@ -17,14 +17,8 @@ import (
 const (
 	transactionCreate  = "INSERT INTO transaction (user_id, account_income, account_outcome, income, outcome, date, payer, description) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;"
 	transactionGetFeed = `SELECT id, user_id, account_income, account_outcome, income, outcome, date, payer, description 
-						FROM (
-							SELECT id, user_id, account_income, account_outcome, income, outcome, date, payer, description 
 							FROM transaction 
-							WHERE user_id = $1
-							LIMIT $2 
-							OFFSET $3
-						) AS subquery
-						ORDER BY date DESC;`
+							WHERE user_id = $1`
 
 	transactionUpdate         = "UPDATE transaction set account_income=$2, account_outcome=$3, income=$4, outcome=$5, date=$6, payer=$7, description=$8 WHERE id = $1;"
 	transactionGet            = "SELECT income, outcome, account_income, account_outcome FROM transaction WHERE id = $1;"
@@ -35,6 +29,7 @@ const (
 	transactionDeleteCategory = "DELETE FROM transactionCategory WHERE transaction_id = $1;"
 	transactionUpdateAccount  = "UPDATE accounts SET balance = balance - $1 WHERE id = $2;"
 	transactionCheck          = "SELECT EXISTS( SELECT id FROM transaction WHERE id = $1);"
+	transactionCount          = "SELECT COUNT(*) FROM transaction WHERE user_id = $1;"
 )
 
 type transactionRep struct {
@@ -49,15 +44,23 @@ func NewRepository(db postgresql.DbConn, l logger.Logger) *transactionRep {
 	}
 }
 
+func (r *transactionRep) GetCount(ctx context.Context, user_id uuid.UUID) (int, error) {
+	var count int
+	err := r.db.QueryRow(ctx, transactionCount, user_id).Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("[repo] %w", err)
+	}
+
+	return count, nil
+}
+
 func (r *transactionRep) GetFeed(ctx context.Context, user_id uuid.UUID, queryGet *models.QueryListOptions) ([]models.Transaction, error) {
 	var transactions []models.Transaction
 	count := 1
 	//rows, err := r.db.Query(ctx, transactionGetFeed, user_id, pageSize, offset)
 	var queryParamsSlice []interface{}
 
-	query := `SELECT id, user_id, account_income, account_outcome, income, outcome, date, payer, description 
-	FROM transaction 
-	WHERE user_id = $1`
+	query := transactionGetFeed
 	queryParamsSlice = append(queryParamsSlice, user_id.String())
 
 	if queryGet.Account != uuid.Nil {
@@ -92,7 +95,7 @@ func (r *transactionRep) GetFeed(ctx context.Context, user_id uuid.UUID, queryGe
 		queryParamsSlice = append(queryParamsSlice, strconv.Itoa(int(queryMonth)))
 	}
 
-	query += ";"
+	query += " ORDER BY date DESC;"
 	rows, err := r.db.Query(ctx, query, queryParamsSlice...)
 	if err != nil {
 		return nil, fmt.Errorf("[repo] %v", err)

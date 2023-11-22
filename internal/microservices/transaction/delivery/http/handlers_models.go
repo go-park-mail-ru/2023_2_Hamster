@@ -22,9 +22,12 @@ type TransactionCreateResponse struct {
 	TransactionID uuid.UUID `json:"transaction_id"`
 }
 
+type TransactionCount struct {
+	Count int `json:"count"`
+}
+
 type MasTransaction struct {
 	Transactions []models.TransactionTransfer `json:"transactions"`
-	IsAll        bool                         `json:"is_all"`
 }
 
 type CreateTransaction struct {

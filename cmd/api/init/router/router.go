@@ -86,6 +86,7 @@ func InitRouter(auth *auth.Handler,
 	transactionRouter.Use(csrfMid.CheckCSRF)
 	{
 		transactionRouter.Methods("GET").Path("/feed").HandlerFunc(transaction.GetFeed)
+		transactionRouter.Methods("GET").Path("/count").HandlerFunc(transaction.GetCount)
 		// 	transactionRouter.Methods("GET").Path("/{transaction_id}/").HandlerFunc(transaction.Get)
 		transactionRouter.Methods("PUT").Path("/update").HandlerFunc(transaction.Update)
 		transactionRouter.Methods("POST").Path("/create").HandlerFunc(transaction.Create)

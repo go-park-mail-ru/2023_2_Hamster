@@ -31,6 +31,35 @@ func NewHandler(uu transaction.Usecase, l logger.Logger) *Handler {
 	}
 }
 
+// @Summary		Get count transaction
+// @Tags		Transaction
+// @Description	Get User count transaction
+// @Produce		json
+// @Success		200		{object}	Response[TransactionCount] "Show transaction count"
+// @Failure		400		{object}	ResponseError			 "Client error"
+// @Failure     401    	{object}    ResponseError  			 "Unauthorized user"
+// @Failure     403    	{object}    ResponseError  			 "Forbidden user"
+// @Failure		500		{object}	ResponseError			 "Server error"
+// @Router		/api/transaction/count [get]
+func (h *Handler) GetCount(w http.ResponseWriter, r *http.Request) {
+	user, err := commonHttp.GetUserFromRequest(r)
+	if err != nil && errors.Is(err, commonHttp.ErrUnauthorized) {
+		commonHttp.ErrorResponse(w, http.StatusUnauthorized, err, commonHttp.ErrUnauthorized.Error(), h.logger)
+		return
+	}
+
+	transactionCount, err := h.transactionService.GetCount(r.Context(), user.ID)
+
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, "can't get count transaction info", h.logger)
+		return
+	}
+
+	response := TransactionCount{Count: transactionCount}
+	commonHttp.SuccessResponse(w, http.StatusOK, response)
+
+}
+
 // @Summary		Get all transaction
 // @Tags		Transaction
 // @Description	Get User all transaction
