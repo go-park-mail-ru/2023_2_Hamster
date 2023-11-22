@@ -64,7 +64,7 @@ func (h *Handler) GetCount(w http.ResponseWriter, r *http.Request) {
 // @Tags		Transaction
 // @Description	Get User all transaction
 // @Produce		json
-// @Param       request query       QueryListOptions false   "Query Params"
+// @Param       request query       models.QueryListOptions false   "Query Params"
 // @Success		200		{object}	Response[MasTransaction] "Show transaction"
 // @Success		204		{object}	Response[string]	     "Show actual accounts"
 // @Failure		400		{object}	ResponseError			 "Client error"

@@ -418,6 +418,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/transaction/count": {
+            "get": {
+                "description": "Get User count transaction",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Get count transaction",
+                "responses": {
+                    "200": {
+                        "description": "Show transaction count",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-http_TransactionCount"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/transaction/create": {
             "post": {
                 "description": "Create transaction",
@@ -485,18 +529,33 @@ const docTemplate = `{
                 "summary": "Get all transaction",
                 "parameters": [
                     {
-                        "minimum": 1,
-                        "type": "integer",
-                        "example": 1,
-                        "name": "page",
+                        "type": "string",
+                        "example": "uuid",
+                        "name": "account",
                         "in": "query"
                     },
                     {
-                        "maximum": 20,
-                        "minimum": 1,
-                        "type": "integer",
-                        "example": 10,
-                        "name": "page_size",
+                        "type": "string",
+                        "example": "uuid",
+                        "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "2023-11-21T19:30:57+03:00",
+                        "name": "date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "example": true,
+                        "name": "income",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "example": true,
+                        "name": "outcome",
                         "in": "query"
                     }
                 ],
@@ -1127,9 +1186,6 @@ const docTemplate = `{
         "http.MasTransaction": {
             "type": "object",
             "properties": {
-                "is_all": {
-                    "type": "boolean"
-                },
                 "transactions": {
                     "type": "array",
                     "items": {
@@ -1204,6 +1260,17 @@ const docTemplate = `{
             "properties": {
                 "body": {
                     "$ref": "#/definitions/http.NilBody"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "http.Response-http_TransactionCount": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/http.TransactionCount"
                 },
                 "status": {
                     "type": "integer"
@@ -1338,6 +1405,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "http.TransactionCount": {
+            "type": "object",
+            "properties": {
+                "count": {
                     "type": "integer"
                 }
             }

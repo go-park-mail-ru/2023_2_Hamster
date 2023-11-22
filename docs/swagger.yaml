@@ -57,8 +57,6 @@ definitions:
     type: object
   http.MasTransaction:
     properties:
-      is_all:
-        type: boolean
       transactions:
         items:
           $ref: '#/definitions/models.TransactionTransfer'
@@ -107,6 +105,13 @@ definitions:
     properties:
       body:
         $ref: '#/definitions/http.NilBody'
+      status:
+        type: integer
+    type: object
+  http.Response-http_TransactionCount:
+    properties:
+      body:
+        $ref: '#/definitions/http.TransactionCount'
       status:
         type: integer
     type: object
@@ -192,6 +197,11 @@ definitions:
       message:
         type: string
       status:
+        type: integer
+    type: object
+  http.TransactionCount:
+    properties:
+      count:
         type: integer
     type: object
   http.TransactionCreateResponse:
@@ -653,6 +663,35 @@ paths:
       summary: Delete Transaction
       tags:
       - Transaction
+  /api/transaction/count:
+    get:
+      description: Get User count transaction
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Show transaction count
+          schema:
+            $ref: '#/definitions/http.Response-http_TransactionCount'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Get count transaction
+      tags:
+      - Transaction
   /api/transaction/create:
     post:
       description: Create transaction
@@ -693,17 +732,26 @@ paths:
     get:
       description: Get User all transaction
       parameters:
-      - example: 1
+      - example: uuid
         in: query
-        minimum: 1
-        name: page
-        type: integer
-      - example: 10
+        name: account
+        type: string
+      - example: uuid
         in: query
-        maximum: 20
-        minimum: 1
-        name: page_size
-        type: integer
+        name: category
+        type: string
+      - example: "2023-11-21T19:30:57+03:00"
+        in: query
+        name: date
+        type: string
+      - example: true
+        in: query
+        name: income
+        type: boolean
+      - example: true
+        in: query
+        name: outcome
+        type: boolean
       produces:
       - application/json
       responses:
