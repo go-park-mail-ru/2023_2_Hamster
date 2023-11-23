@@ -13,7 +13,9 @@ CREATE TABLE Users
 CREATE TABLE Accounts (
     id            UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     balance numeric(10, 2),
-    mean_payment TEXT
+    accumulation BOOLEAN,
+    balance_enabled BOOLEAN,
+    mean_payment VARCHAR(30)
 );
 
 CREATE TABLE UserAccount (

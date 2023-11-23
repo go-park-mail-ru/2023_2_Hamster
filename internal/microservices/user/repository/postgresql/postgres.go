@@ -25,7 +25,7 @@ const (
 							JOIN UserAccount ua ON a.id = ua.account_id
 							WHERE ua.user_id = $1;` // TODO: move accounts
 
-	AccountGet = `SELECT a.* 
+	AccountGet = `SELECT a.*
 				  FROM Accounts a
 				  JOIN UserAccount ua ON a.id = ua.account_id
 				  WHERE ua.user_id = $1` // TODO: move accounts
@@ -126,6 +126,7 @@ func (r *UserRep) GetCurrentBudget(ctx context.Context, userID uuid.UUID) (float
   					  AND date_part('year', date) = date_part('year', CURRENT_DATE)
 					  AND outcome > 0
 					  AND account_income = account_outcome
+					  AND balance_enabled = true
 					  AND user_id = $1;`, userID).Scan(&currentBudget)
 
 	if err != nil {
@@ -139,7 +140,6 @@ func (r *UserRep) GetCurrentBudget(ctx context.Context, userID uuid.UUID) (float
 }
 
 func (r *UserRep) GetAccounts(ctx context.Context, user_id uuid.UUID) ([]models.Accounts, error) { // need test
-
 	var accounts []models.Accounts
 
 	rows, err := r.db.Query(ctx, AccountGet, user_id)
@@ -153,6 +153,8 @@ func (r *UserRep) GetAccounts(ctx context.Context, user_id uuid.UUID) ([]models.
 		if err := rows.Scan(
 			&account.ID,
 			&account.Balance,
+			&account.Accumulation,
+			&account.BalanceEnabled,
 			&account.MeanPayment,
 		); err != nil {
 			return nil, fmt.Errorf("[repo] %w", err)
