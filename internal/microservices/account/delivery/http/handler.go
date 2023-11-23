@@ -17,6 +17,10 @@ type Handler struct {
 	logger         logger.Logger
 }
 
+const (
+	accountID = "account_id"
+)
+
 func NewHandler(au account.Usecase, l logger.Logger) *Handler {
 	return &Handler{
 		accountService: au,
@@ -29,7 +33,7 @@ func NewHandler(au account.Usecase, l logger.Logger) *Handler {
 // @Description		Create account
 // @Produce			json
 // @Param			account		body		CreateAccount		true		"Input account create"
-// @Success			200		{object}	Response[accountCreateResponse]				"Create account"
+// @Success			200		{object}	Response[AccountCreateResponse]				"Create account"
 // @Failure			400		{object}	ResponseError									"Client error"
 // @Failure     	401    	{object}  	ResponseError  									"Unauthorized user"
 // @Failure     	403    	{object}  	ResponseError  									"Forbidden user"
@@ -54,13 +58,13 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accountID, err := h.accountService.CreateAccount(r.Context(), accountInput.ToAccount())
+	accountID, err := h.accountService.CreateAccount(r.Context(), user.ID, accountInput.ToAccount())
 	if err != nil {
-		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, accountNotCreate, h.logger)
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, AccountNotCreate, h.logger)
 		return
 	}
 
-	accountResponse := accountCreateResponse{accountID: accountID}
+	accountResponse := AccountCreateResponse{AccountID: accountID}
 	commonHttp.SuccessResponse(w, http.StatusOK, accountResponse)
 
 }
@@ -83,22 +87,22 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var updaccountInput Updaccount
+	var updateAccountInput UpdateAccount
 
-	if err := json.NewDecoder(r.Body).Decode(&updaccountInput); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&updateAccountInput); err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidBodyRequest, h.logger)
 		return
 	}
 
-	if err := updaccountInput.CheckValid(); err != nil {
+	if err := updateAccountInput.CheckValid(); err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidBodyRequest, h.logger)
 		return
 	}
 
-	if err := h.accountService.Updateaccount(r.Context(), updaccountInput.Toaccount(user)); err != nil {
-		var errNoSuchaccount *models.NoSuchaccountError
+	if err := h.accountService.UpdateAccount(r.Context(), user.ID, updateAccountInput.ToAccount()); err != nil {
+		var errNoSuchaccount *models.NoSuchAccounts
 		if errors.As(err, &errNoSuchaccount) {
-			commonHttp.ErrorResponse(w, http.StatusBadRequest, err, accountNotSuch, h.logger)
+			commonHttp.ErrorResponse(w, http.StatusBadRequest, err, AccountNotSuch, h.logger)
 			return
 		}
 
@@ -109,7 +113,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if err != nil {
-			commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, accountCreateServerError, h.logger)
+			commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, AccountCreateServerError, h.logger)
 			return
 		}
 	}
@@ -142,12 +146,12 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.accountService.Deleteaccount(r.Context(), accountID, user.ID)
+	err = h.accountService.DeleteAccount(r.Context(), accountID, user.ID)
 
 	if err != nil {
-		var errNoSuchaccount *models.NoSuchaccountError
+		var errNoSuchaccount *models.NoSuchAccounts
 		if errors.As(err, &errNoSuchaccount) {
-			commonHttp.ErrorResponse(w, http.StatusBadRequest, err, accountNotSuch, h.logger)
+			commonHttp.ErrorResponse(w, http.StatusBadRequest, err, AccountNotSuch, h.logger)
 			return
 		}
 
@@ -157,7 +161,7 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if err != nil {
-			commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, accountDeleteServerError, h.logger)
+			commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, AccountCreateServerError, h.logger)
 			return
 		}
 	}
