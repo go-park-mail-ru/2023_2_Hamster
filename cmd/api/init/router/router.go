@@ -9,12 +9,12 @@ import (
 	_ "github.com/go-park-mail-ru/2023_2_Hamster/docs"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
+	account "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account/delivery/http"
 	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/http"
 	category "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/category/delivery/http"
 	csrf "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/csrf/delivery/http"
 	transaction "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/transaction/delivery/http"
 	user "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user/delivery/http"
-
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware"
 	"github.com/gorilla/mux"
 
@@ -27,6 +27,7 @@ func InitRouter(auth *auth.Handler,
 	transaction *transaction.Handler,
 	category *category.Handler,
 	csrf *csrf.Handler,
+	account *account.Handler,
 	logMid *middleware.LoggingMiddleware,
 	recoveryMid *middleware.RecoveryMiddleware,
 	authMid *middleware.AuthMiddleware,
@@ -36,7 +37,7 @@ func InitRouter(auth *auth.Handler,
 	r.Use(middleware.RequestID)
 	r.Use(logMid.LoggingMiddleware)
 	r.Use(recoveryMid.Recoverer)
-	r.Use(middleware.Timeout(5 * time.Second))
+	r.Use(middleware.Timeout(1000000 * time.Second))
 	r.Use(middleware.Heartbeat("ping"))
 	r.Use(middleware.Metrics())
 
@@ -63,6 +64,15 @@ func InitRouter(auth *auth.Handler,
 		authRouter.Methods("POST").Path("/checkAuth").HandlerFunc(auth.HealthCheck)
 		authRouter.Methods("GET").Path("/loginCheck/{login}").HandlerFunc(auth.CheckLoginUnique)
 		authRouter.Methods("POST").Path("/logout").HandlerFunc(auth.LogOut)
+	}
+
+	accountRouter := apiRouter.PathPrefix("/account").Subrouter()
+	accountRouter.Use(authMid.Authentication)
+	accountRouter.Use(csrfMid.CheckCSRF)
+	{
+		accountRouter.Methods("POST").Path("/create").HandlerFunc(account.Create)
+		accountRouter.Methods("PUT").Path("/update").HandlerFunc(account.Update)
+		accountRouter.Methods("DELETE").Path("/{account_id}/delete").HandlerFunc(account.Delete)
 	}
 
 	userRouter := apiRouter.PathPrefix("/user").Subrouter()
@@ -95,7 +105,7 @@ func InitRouter(auth *auth.Handler,
 
 	categoryRouter := apiRouter.PathPrefix("/tag").Subrouter()
 	categoryRouter.Use(authMid.Authentication)
-	// categoryRouter.Use(csrfMid.CheckCSRF)
+	categoryRouter.Use(csrfMid.CheckCSRF)
 	{
 		categoryRouter.Methods("POST").Path("/create").HandlerFunc(category.CreateTag)
 		categoryRouter.Methods("GET").Path("/all").HandlerFunc(category.GetTags)

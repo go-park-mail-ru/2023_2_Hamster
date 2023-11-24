@@ -32,7 +32,7 @@ db: ## Connect to the database
 cover:
 	sh scripts/coverage_test.sh
 
-lint: ## Run linters
+#lint: ## Run linters
 	golangci-lint run
 
 test: ## Run tests

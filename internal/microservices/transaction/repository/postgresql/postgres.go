@@ -378,6 +378,7 @@ func (r *transactionRep) DeleteTransaction(ctx context.Context, transactionID uu
 	if err = tx.Commit(ctx); err != nil {
 		return fmt.Errorf("[repo] failed to commit transaction: %w", err)
 	}
+
 	return nil
 }
 

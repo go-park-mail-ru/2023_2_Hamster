@@ -34,6 +34,22 @@ definitions:
       user_id:
         type: string
     type: object
+  http.AccountCreateResponse:
+    properties:
+      account_id:
+        type: string
+    type: object
+  http.CreateAccount:
+    properties:
+      accumulation:
+        type: boolean
+      balance:
+        type: number
+      balance_enabled:
+        type: boolean
+      mean_payment:
+        type: string
+    type: object
   http.CreateTransaction:
     properties:
       account_income:
@@ -91,6 +107,13 @@ definitions:
     properties:
       body:
         $ref: '#/definitions/category.CategoryCreateResponse'
+      status:
+        type: integer
+    type: object
+  http.Response-http_AccountCreateResponse:
+    properties:
+      body:
+        $ref: '#/definitions/http.AccountCreateResponse'
       status:
         type: integer
     type: object
@@ -232,6 +255,19 @@ definitions:
       transaction_id:
         type: string
     type: object
+  http.UpdateAccount:
+    properties:
+      accumulation:
+        type: boolean
+      balance:
+        type: number
+      balance_enabled:
+        type: boolean
+      id:
+        type: string
+      mean_payment:
+        type: string
+    type: object
   http.getCSRFResponce:
     properties:
       csrf:
@@ -239,13 +275,15 @@ definitions:
     type: object
   models.Accounts:
     properties:
+      accumulation:
+        type: boolean
       balance:
         type: number
+      balance_enabled:
+        type: boolean
       id:
         type: string
       mean_payment:
-        type: string
-      user_id:
         type: string
     type: object
   models.Category:
@@ -373,6 +411,107 @@ info:
   title: Hamster API
   version: 1.0.1
 paths:
+  /api/account/{account_id}/delete:
+    delete:
+      description: Delete account with chosen ID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Account deleted
+          schema:
+            $ref: '#/definitions/http.Response-http_NilBody'
+        "400":
+          description: Account error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: User unathorized
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: User hasn't rights
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Delete Account
+      tags:
+      - Account
+  /api/account/create:
+    post:
+      description: Create account
+      parameters:
+      - description: Input account create
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/http.CreateAccount'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Create account
+          schema:
+            $ref: '#/definitions/http.Response-http_AccountCreateResponse'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Create account
+      tags:
+      - Account
+  /api/account/update:
+    put:
+      description: "Put \taccount"
+      parameters:
+      - description: Input transactin update
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/http.UpdateAccount'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Update account
+          schema:
+            $ref: '#/definitions/http.Response-http_NilBody'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: "PUT \tUpdate"
+      tags:
+      - Account
   /api/auth/checkAuth:
     post:
       consumes:

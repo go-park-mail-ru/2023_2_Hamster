@@ -26,6 +26,10 @@ import (
 	userRep "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user/repository/postgresql"
 	userUsecase "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user/usecase"
 
+	accountDelivery "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account/delivery/http"
+	accountRep "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account/repository/postgresql"
+	accountUsecase "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account/usecase"
+
 	sessionRep "github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions/repository/redis"
 	sessionUsecase "github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions/usecase"
 
@@ -40,6 +44,7 @@ func Init(db *pgxpool.Pool, redis *redis.Client, log *logger.Logger) *mux.Router
 	userRep := userRep.NewRepository(db, *log)
 	transactionRep := transactionRep.NewRepository(db, *log)
 	categoryRep := categoryRep.NewRepository(db, *log)
+	accountRep := accountRep.NewRepository(db, *log)
 
 	authUsecase := authUsecase.NewUsecase(authRep, *log)
 	sessionUsecase := sessionUsecase.NewSessionUsecase(sessionRep)
@@ -47,6 +52,7 @@ func Init(db *pgxpool.Pool, redis *redis.Client, log *logger.Logger) *mux.Router
 	transactionUsecase := transactionUsecase.NewUsecase(transactionRep, *log)
 	categoryUsecase := categoryUsecase.NewUsecase(categoryRep, *log)
 	csrfUsecase := csrfUsecase.NewUsecase(*log)
+	accountUsecase := accountUsecase.NewUsecase(accountRep, *log)
 
 	authMiddlewear := middleware.NewAuthMiddleware(sessionUsecase, userRep, *log)
 	logMiddlewear := middleware.NewLoggingMiddleware(*log)
@@ -58,6 +64,7 @@ func Init(db *pgxpool.Pool, redis *redis.Client, log *logger.Logger) *mux.Router
 	transactionHandler := transactionDelivery.NewHandler(transactionUsecase, *log)
 	categoryHandler := categoryDelivary.NewHandler(categoryUsecase, *log)
 	csrfHandler := csrfDelivery.NewHandler(csrfUsecase, *log)
+	accountHandler := accountDelivery.NewHandler(accountUsecase, *log)
 
 	return router.InitRouter(
 		authHandler,
@@ -65,6 +72,7 @@ func Init(db *pgxpool.Pool, redis *redis.Client, log *logger.Logger) *mux.Router
 		transactionHandler,
 		categoryHandler,
 		csrfHandler,
+		accountHandler,
 		logMiddlewear,
 		recoveryMiddlewear,
 		authMiddlewear,
