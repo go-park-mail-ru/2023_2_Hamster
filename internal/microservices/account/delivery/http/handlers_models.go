@@ -21,9 +21,9 @@ type AccountCreateResponse struct {
 }
 
 type CreateAccount struct {
-	Balance        float64 `json:"balance" valid:"required"`
-	Accumulation   bool    `json:"accumulation" valid:"required"`
-	BalanceEnabled bool    `json:"balance_enabled" valid:"required"`
+	Balance        float64 `json:"balance" valid:"-"`
+	Accumulation   bool    `json:"accumulation" valid:"-"`
+	BalanceEnabled bool    `json:"balance_enabled" valid:"-"`
 	MeanPayment    string  `json:"mean_payment" valid:"required,length(1|30)"`
 }
 

@@ -32,12 +32,12 @@ func NewHandler(au account.Usecase, l logger.Logger) *Handler {
 // @Tags			Account
 // @Description		Create account
 // @Produce			json
-// @Param			account		body	CreateAccount		true					"Input account create"
-// @Success			200		{object}	Response[AccountCreateResponse]				"Create account"
-// @Failure			400		{object}	ResponseError								"Client error"
-// @Failure     	401    	{object}  	ResponseError  								"Unauthorized user"
-// @Failure     	403    	{object}  	ResponseError  								"Forbidden user"
-// @Failure			500		{object}	ResponseError								"Server error"
+// @Param			account		body		CreateAccount		true			"Input account create"
+// @Success			200			{object}	Response[AccountCreateResponse]		"Create account"
+// @Failure			400			{object}	ResponseError						"Client error"
+// @Failure     	401    		{object}  	ResponseError  						"Unauthorized user"
+// @Failure     	403    		{object}  	ResponseError  						"Forbidden user"
+// @Failure			500			{object}	ResponseError						"Server error"
 // @Router		/api/account/create [post]
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	user, err := commonHttp.GetUserFromRequest(r)
@@ -69,9 +69,9 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// @Summary		PUT Update
-// @Tags			Account
-// @Description	Put account
+// @Summary		PUT 	Update
+// @Tags				Account
+// @Description	Put 	account
 // @Produce		json
 // @Param		account	body		UpdateAccount		true		    "Input transactin update"
 // @Success		200		{object}	Response[NilBody]				    "Update account"

@@ -19,6 +19,160 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/account/create": {
+            "post": {
+                "description": "Create account",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Create account",
+                "parameters": [
+                    {
+                        "description": "Input account create",
+                        "name": "account",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/http.CreateAccount"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Create account",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-http_AccountCreateResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/account/update": {
+            "put": {
+                "description": "Put \taccount",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "PUT \tUpdate",
+                "parameters": [
+                    {
+                        "description": "Input transactin update",
+                        "name": "account",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/http.UpdateAccount"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Update account",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-http_NilBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/account/{account_id}/delete": {
+            "delete": {
+                "description": "Delete account with chosen ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Delete Account",
+                "responses": {
+                    "200": {
+                        "description": "Account deleted",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-http_NilBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Account error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "User unathorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "User hasn't rights",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/auth/checkAuth": {
             "post": {
                 "description": "Validate auth",
@@ -1151,6 +1305,31 @@ const docTemplate = `{
                 }
             }
         },
+        "http.AccountCreateResponse": {
+            "type": "object",
+            "properties": {
+                "account_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "http.CreateAccount": {
+            "type": "object",
+            "properties": {
+                "accumulation": {
+                    "type": "boolean"
+                },
+                "balance": {
+                    "type": "number"
+                },
+                "balance_enabled": {
+                    "type": "boolean"
+                },
+                "mean_payment": {
+                    "type": "string"
+                }
+            }
+        },
         "http.CreateTransaction": {
             "type": "object",
             "properties": {
@@ -1238,6 +1417,17 @@ const docTemplate = `{
             "properties": {
                 "body": {
                     "$ref": "#/definitions/category.CategoryCreateResponse"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "http.Response-http_AccountCreateResponse": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/http.AccountCreateResponse"
                 },
                 "status": {
                     "type": "integer"
@@ -1460,6 +1650,26 @@ const docTemplate = `{
                 }
             }
         },
+        "http.UpdateAccount": {
+            "type": "object",
+            "properties": {
+                "accumulation": {
+                    "type": "boolean"
+                },
+                "balance": {
+                    "type": "number"
+                },
+                "balance_enabled": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "mean_payment": {
+                    "type": "string"
+                }
+            }
+        },
         "http.getCSRFResponce": {
             "type": "object",
             "properties": {
@@ -1471,16 +1681,19 @@ const docTemplate = `{
         "models.Accounts": {
             "type": "object",
             "properties": {
+                "accumulation": {
+                    "type": "boolean"
+                },
                 "balance": {
                     "type": "number"
+                },
+                "balance_enabled": {
+                    "type": "boolean"
                 },
                 "id": {
                     "type": "string"
                 },
                 "mean_payment": {
-                    "type": "string"
-                },
-                "user_id": {
                     "type": "string"
                 }
             }
