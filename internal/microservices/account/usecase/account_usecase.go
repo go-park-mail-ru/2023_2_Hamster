@@ -54,7 +54,7 @@ func (a *Usecase) DeleteAccount(ctx context.Context, userID uuid.UUID, accountID
 
 	err = a.accountRepo.DeleteAccount(ctx, userID, accountID)
 	if err != nil {
-		return fmt.Errorf("[usecase] can't create account into repository: %w", err)
+		return fmt.Errorf("[usecase] can't delete account into repository: %w", err)
 	}
 	return nil
 }

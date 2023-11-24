@@ -1,7 +1,6 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TABLE Users
-(
+CREATE TABLE IF NOT EXISTS Users (
     id             UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     username       VARCHAR(20)              NOT NULL,
     login          VARCHAR(20)       UNIQUE NOT NULL,
@@ -10,7 +9,7 @@ CREATE TABLE Users
     avatar_url     UUID
 );
 
-CREATE TABLE Accounts (
+CREATE TABLE IF NOT EXISTS Accounts (
     id            UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     balance numeric(10, 2),
     accumulation BOOLEAN,
@@ -18,7 +17,7 @@ CREATE TABLE Accounts (
     mean_payment VARCHAR(30)
 );
 
-CREATE TABLE UserAccount (
+CREATE TABLE IF NOT EXISTS UserAccount (
     user_id    UUID REFERENCES Users(id),
     account_id UUID REFERENCES Accounts(id),
     PRIMARY KEY (user_id, account_id)
@@ -35,7 +34,7 @@ CREATE TABLE IF NOT EXISTS category (
 );
 
 
-CREATE TABLE Transaction (
+CREATE TABLE IF NOT EXISTS Transaction (
 	id           UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
 	user_id      UUID REFERENCES Users(id),
     account_income UUID REFERENCES Accounts(id),
@@ -47,11 +46,13 @@ CREATE TABLE Transaction (
 	description  VARCHAR(100)
 );
 
-CREATE TABLE TransactionCategory (
+CREATE TABLE IF NOT EXISTS TransactionCategory (
     transaction_id UUID REFERENCES Transaction(id),
     category_id UUID REFERENCES Category(id),
     PRIMARY KEY (transaction_id, category_id)
 );
+
+--========================================================================
 
 CREATE OR REPLACE FUNCTION add_default_categories_accounts_transactions()
 RETURNS TRIGGER AS $$
@@ -59,7 +60,8 @@ DECLARE
     categoryID UUID;
     transaction_idI UUID;
     transaction_idO UUID;
-    accountID UUID;
+    accountCashID UUID;
+    accountCardID UUID;
 BEGIN
     INSERT INTO category (user_id, parent_tag, "name", show_income, show_outcome, regular)
     VALUES  (NEW.id, NULL, 'Дети',                    false, true,  false),
@@ -78,19 +80,25 @@ BEGIN
     
     SELECT id INTO categoryID FROM category WHERE name = 'Продукты' AND user_id = NEW.id;
 
-    INSERT INTO accounts(user_id, balance, mean_payment)
-    VALUES (NEW.id, 0, 'Карта');
+    INSERT INTO accounts(balance, mean_payment, accumulation, balance_enabled)
+    VALUES (0, 'Карта', false, true) RETURNING id INTO accountCardID;
            
-    INSERT INTO accounts(user_id, balance, mean_payment)
-    VALUES (NEW.id, 0, 'Наличка') RETURNING id INTO accountID;
+    INSERT INTO accounts(balance, mean_payment, accumulation, balance_enabled)
+    VALUES (0, 'Наличка', false, true) RETURNING id INTO accountCashID;
+
+    INSERT INTO userAccount(user_id, account_id)
+    VALUES (NEW.id, accountCardID);
+
+    INSERT INTO userAccount(user_id, account_id)
+    VALUES (NEW.id, accountCashID);
 
     INSERT INTO transaction(user_id, account_income, account_outcome, income, outcome, payer, description)
-    VALUES (NEW.id, accountID,
-                    accountID, 100, 0, 'Пятерочка', 'Пошел в магазин за вкусняшками') RETURNING id INTO transaction_idI;
+    VALUES (NEW.id, accountCardID,
+                    accountCardID, 100, 0, 'Пятерочка', 'Пошел в магазин за вкусняшками') RETURNING id INTO transaction_idI;
 
     INSERT INTO transaction(user_id, account_income, account_outcome, income, outcome, payer, description)
-    VALUES (NEW.id, accountID,
-                    accountID, 0, 100, 'Пятерочка', 'Вернули деньги оплата не прошла') RETURNING id INTO transaction_idO;
+    VALUES (NEW.id, accountCardID,
+                    accountCardID, 0, 100, 'Пятерочка', 'Вернули деньги оплата не прошла') RETURNING id INTO transaction_idO;
             
     INSERT INTO TransactionCategory(transaction_id, category_id)
     VALUES (transaction_idI, categoryID),
@@ -113,13 +121,3 @@ ALTER COLUMN planned_budget SET DEFAULT 0.0;
 
 INSERT INTO "users"(login, username, password_hash, planned_budget)
 VALUES ('kossmatof','komarov', '$argon2id$v=19$m=65536,t=1,p=4$m8qhM3XLae+RCTGirBFEww$Znu5RBnxlam2xRoVtwBzbdSrN4/sRCm1IMOVX4N2uxw', 10000);
-
-INSERT INTO "users"(login, username, password_hash, planned_budget)
-VALUES ('test','test1', '$argon2id$v=19$m=65536,t=1,p=4$m8qhM3XLae+RCTGirBFEww$Znu5RBnxlam2xRoVtwBzbdSrN4/sRCm1IMOVX4N2uxw', 10000);
-
-INSERT INTO "accounts"(user_id, balance, mean_payment)
-VALUES ((SELECT id FROM Users limit 1), 0, 'Кошелек');
-
-INSERT INTO "accounts"(user_id, balance, mean_payment)
-VALUES ((SELECT id FROM Users limit 1), 0, 'Наличка');
-

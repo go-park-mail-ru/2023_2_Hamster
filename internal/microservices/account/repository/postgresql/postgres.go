@@ -15,11 +15,13 @@ const (
     						SELECT 1 FROM UserAccount 
     						WHERE account_id = $1 AND user_id = $2);`
 
-	AccountUpdate     = "UPDATE accounts SET balance = $1, accumulation = $2, balance_enabled = $3, mean_payment = $4;"
-	AccountDelete     = "DELETE FROM account WHERE id = $1;"
-	UserAccountDelete = "DELETE FROM userAccount WHERE account_id = $1;"
-	AccountCreate     = "INSERT INTO account (balance, accumulation, balance_enabled, mean_paymment) VALUES ($1, $2, $3, $4);"
-	AccountUserCreate = "INSERT INTO userAccount (user_id, account_id) VALUES ($1, $2);"
+	AccountUpdate             = "UPDATE accounts SET balance = $1, accumulation = $2, balance_enabled = $3, mean_payment = $4 WHERE id = $5;"
+	AccountDelete             = "DELETE FROM accounts WHERE id = $1;"
+	UserAccountDelete         = "DELETE FROM userAccount WHERE account_id = $1;"
+	AccountCreate             = "INSERT INTO accounts (balance, accumulation, balance_enabled, mean_paymment) VALUES ($1, $2, $3, $4) RETURNING id;"
+	AccountUserCreate         = "INSERT INTO userAccount (user_id, account_id) VALUES ($1, $2);"
+	TransactionCategoryDelete = "DELETE FROM TransactionCategory WHERE transaction_id IN (SELECT id FROM Transaction WHERE account_income = $1 OR account_outcome = $1)"
+	AccountTransactionDelete  = "DELETE FROM Transaction WHERE account_income = $1 OR account_outcome = $1"
 )
 
 type AccountRep struct {
@@ -34,9 +36,9 @@ func NewRepository(db postgresql.DbConn, log logger.Logger) *AccountRep {
 	}
 }
 
-func (r *AccountRep) CheckForbidden(ctx context.Context, transactionID uuid.UUID, userID uuid.UUID) error { // need test
+func (r *AccountRep) CheckForbidden(ctx context.Context, accountID uuid.UUID, userID uuid.UUID) error { // need test
 	var result bool
-	row := r.db.QueryRow(ctx, AccountGetUserByID, transactionID, userID)
+	row := r.db.QueryRow(ctx, AccountGetUserByID, accountID, userID)
 
 	err := row.Scan(&result)
 
@@ -79,7 +81,7 @@ func (r *AccountRep) CreateAccount(ctx context.Context, userID uuid.UUID, accoun
 }
 
 func (r *AccountRep) UpdateAccount(ctx context.Context, userID uuid.UUID, account *models.Accounts) error {
-	_, err := r.db.Exec(ctx, AccountUpdate, account.Balance, account.Accumulation, account.BalanceEnabled, account.MeanPayment)
+	_, err := r.db.Exec(ctx, AccountUpdate, account.Balance, account.Accumulation, account.BalanceEnabled, account.MeanPayment, account.ID)
 	if err != nil {
 		return fmt.Errorf("[repo] failed update account %w", err)
 	}
@@ -102,18 +104,28 @@ func (r *AccountRep) DeleteAccount(ctx context.Context, userID uuid.UUID, accoun
 		}
 	}()
 
+	_, err = tx.Exec(ctx, TransactionCategoryDelete, accountID)
+	if err != nil {
+		return fmt.Errorf("[repo] failed to delete from TransactionCategory table: %w", err)
+	}
+
+	_, err = tx.Exec(ctx, AccountTransactionDelete, accountID)
+	if err != nil {
+		return fmt.Errorf("[repo] failed to delete from Transaction table: %w", err)
+	}
+
 	_, err = tx.Exec(ctx, UserAccountDelete, accountID)
 	if err != nil {
 		return fmt.Errorf("[repo] failed to delete from UserAccount table: %w", err)
 	}
 
-	_, err = tx.Exec(ctx, AccountDelete, accountID)
+	_, err = tx.Exec(ctx, AccountDelete, 2)
 	if err != nil {
-		return fmt.Errorf("[repo] failed to delete transaction %s, %w", AccountDelete, err)
+		return fmt.Errorf("[repo] failed to delete account %s, %w", AccountDelete, err)
 	}
 
 	if err = tx.Commit(ctx); err != nil {
-		return fmt.Errorf("[repo] failed to commit transaction: %w", err)
+		return fmt.Errorf("[repo] failed to commit account: %w", err)
 	}
 
 	return nil

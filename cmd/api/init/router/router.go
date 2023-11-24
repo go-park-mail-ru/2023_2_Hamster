@@ -37,7 +37,7 @@ func InitRouter(auth *auth.Handler,
 	r.Use(middleware.RequestID)
 	r.Use(logMid.LoggingMiddleware)
 	r.Use(recoveryMid.Recoverer)
-	r.Use(middleware.Timeout(5 * time.Second))
+	r.Use(middleware.Timeout(1000000 * time.Second))
 	r.Use(middleware.Heartbeat("ping"))
 	r.Use(middleware.Metrics())
 
@@ -72,7 +72,7 @@ func InitRouter(auth *auth.Handler,
 	{
 		accountRouter.Methods("POST").Path("/create").HandlerFunc(account.Create)
 		accountRouter.Methods("PUT").Path("/update").HandlerFunc(account.Update)
-		accountRouter.Methods("DELETE").Path("/delete").HandlerFunc(account.Delete)
+		accountRouter.Methods("DELETE").Path("/{account_id}/delete").HandlerFunc(account.Delete)
 	}
 
 	userRouter := apiRouter.PathPrefix("/user").Subrouter()
@@ -105,7 +105,7 @@ func InitRouter(auth *auth.Handler,
 
 	categoryRouter := apiRouter.PathPrefix("/tag").Subrouter()
 	categoryRouter.Use(authMid.Authentication)
-	// categoryRouter.Use(csrfMid.CheckCSRF)
+	categoryRouter.Use(csrfMid.CheckCSRF)
 	{
 		categoryRouter.Methods("POST").Path("/create").HandlerFunc(category.CreateTag)
 		categoryRouter.Methods("GET").Path("/all").HandlerFunc(category.GetTags)

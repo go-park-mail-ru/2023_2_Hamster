@@ -146,7 +146,7 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.accountService.DeleteAccount(r.Context(), accountID, user.ID)
+	err = h.accountService.DeleteAccount(r.Context(), user.ID, accountID)
 
 	if err != nil {
 		var errNoSuchaccount *models.NoSuchAccounts

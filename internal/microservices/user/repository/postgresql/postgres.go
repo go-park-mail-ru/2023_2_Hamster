@@ -20,10 +20,11 @@ const (
 	UserCheck            = `SELECT EXISTS(SELECT 1 FROM users WHERE id = $1);`
 	UserUpdate           = `UPDATE users SET username = $2, planned_budget = $3, avatar_url = $4 WHERE id = $1;`
 	UserUpdatePhoto      = `UPDATE users SET avatar_url = $2 WHERE id = $1;`
-	AccountBalance       = `SELECT SUM(a.balance) 
+	AccountBalance       = `SELECT SUM(a.balance)
 							FROM Accounts a
 							JOIN UserAccount ua ON a.id = ua.account_id
-							WHERE ua.user_id = $1;` // TODO: move accounts
+							WHERE ua.user_id = $1 
+							AND a.balance_enabled = true;` // TODO: move accounts
 
 	AccountGet = `SELECT a.*
 				  FROM Accounts a
@@ -126,7 +127,6 @@ func (r *UserRep) GetCurrentBudget(ctx context.Context, userID uuid.UUID) (float
   					  AND date_part('year', date) = date_part('year', CURRENT_DATE)
 					  AND outcome > 0
 					  AND account_income = account_outcome
-					  AND balance_enabled = true
 					  AND user_id = $1;`, userID).Scan(&currentBudget)
 
 	if err != nil {
