@@ -29,10 +29,10 @@ type CreateAccount struct {
 
 type UpdateAccount struct {
 	ID             uuid.UUID `json:"id" valid:"required"`
-	Balance        float64   `json:"balance,omitempty" valid:""`
-	Accumulation   bool      `json:"accumulation,omitempty" valid:""`
-	BalanceEnabled bool      `json:"balance_enabled,omitempty" valid:""`
-	MeanPayment    string    `json:"mean_payment,omitempty" valid:""`
+	Balance        float64   `json:"balance" valid:""`
+	Accumulation   bool      `json:"accumulation" valid:""`
+	BalanceEnabled bool      `json:"balance_enabled" valid:""`
+	MeanPayment    string    `json:"mean_payment" valid:""`
 }
 
 func (cr *CreateAccount) ToAccount() *models.Accounts {
