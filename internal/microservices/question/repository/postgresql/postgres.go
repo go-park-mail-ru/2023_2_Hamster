@@ -29,7 +29,7 @@ func (r *QuestionRep) CreateAnswer(ctx context.Context, userID uuid.UUID, a mode
 	return nil
 }
 
-func (r *QuestionRep) CheckUserAnswer(ctx context.Context, userID, questionName string) (bool, error) {
+func (r *QuestionRep) CheckUserAnswer(ctx context.Context, userID uuid.UUID, questionName string) (bool, error) {
 	var exists bool
 	err := r.db.QueryRow(ctx, "SELECT EXISTS(SELECT 1 FROM answer a JOIN question q ON a.question_id = q.id WHERE a.user_id = $1 AND q.name = $2)", userID, questionName).Scan(&exists)
 	if err != nil {
@@ -42,8 +42,8 @@ func (r *QuestionRep) CheckUserAnswer(ctx context.Context, userID, questionName 
 	return exists, nil
 }
 
-func (r *QuestionRep) CalculateAverageRating(ctx context.Context, questionName string) (int, error) {
-	var averageRating sql.NullInt16
+func (r *QuestionRep) CalculateAverageRating(ctx context.Context, questionName string) (float64, error) {
+	var averageRating sql.NullFloat64
 
 	err := r.db.QueryRow(ctx, "SELECT AVG(a.rating) FROM answer a JOIN question q ON a.question_id = q.id WHERE q.name = $1", questionName).Scan(&averageRating)
 	if err != nil {
@@ -54,5 +54,5 @@ func (r *QuestionRep) CalculateAverageRating(ctx context.Context, questionName s
 		return 0.0, nil
 	}
 
-	return int(averageRating.Int16), nil
+	return averageRating.Float64, nil
 }

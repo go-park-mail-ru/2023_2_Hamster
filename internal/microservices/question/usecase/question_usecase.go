@@ -28,7 +28,7 @@ func (uc *Usecase) CreateAnswer(ctx context.Context, userID uuid.UUID, a models.
 	return nil
 }
 
-func (uc *Usecase) CheckUserAnswer(ctx context.Context, userID, questionName string) (bool, error) {
+func (uc *Usecase) CheckUserAnswer(ctx context.Context, userID uuid.UUID, questionName string) (bool, error) {
 	answerBool, err := uc.questionRep.CheckUserAnswer(ctx, userID, questionName)
 	if err != nil {
 		return answerBool, fmt.Errorf("error checkAnswer answer: %w", err)
@@ -36,7 +36,7 @@ func (uc *Usecase) CheckUserAnswer(ctx context.Context, userID, questionName str
 	return answerBool, err
 }
 
-func (uc *Usecase) CalculateAverageRating(ctx context.Context, questionName string) (int, error) {
+func (uc *Usecase) CalculateAverageRating(ctx context.Context, questionName string) (float64, error) {
 	answerInt, err := uc.questionRep.CalculateAverageRating(ctx, questionName)
 	if err != nil {
 		return answerInt, fmt.Errorf("error average rating answer: %w", err)

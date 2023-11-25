@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/db/postgresql"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
+	questionHandler "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/question/delivery/grpc"
 	grpcQuestion "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/question/delivery/grpc/generated"
 	questionRepository "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/question/repository/postgresql"
 	questionUsecase "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/question/usecase"
@@ -18,13 +19,13 @@ import (
 	"google.golang.org/grpc"
 )
 
-const (
-	maxHeaderBytesHTTP = 1 << 20
-	readTimeoutHTTP    = 10 * time.Second
-	writeTimeoutHTTP   = 10 * time.Second
-)
-
 func main() {
+	if err := run(); err != nil {
+		os.Exit(1)
+	}
+}
+
+func run() (err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	log := logger.NewLogger(ctx)
@@ -50,6 +51,8 @@ func main() {
 	questionRepo := questionRepository.NewRepository(pool)
 
 	questionUsecase := questionUsecase.NewUsecase(questionRepo)
+
+	service := questionHandler.NewAuthGRPC(questionUsecase, *log)
 
 	listener, err := net.Listen("tcp", "127.0.0.1:8088")
 	defer func() {
@@ -79,7 +82,7 @@ func main() {
 	// 	}
 	// }()
 
-	grpcQuestion.RegisterQuestionServiceServer(server)
+	grpcQuestion.RegisterQuestionServiceServer(server, service)
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
@@ -100,4 +103,6 @@ func main() {
 		os.Exit(1)
 	}
 	wg.Wait()
+
+	return server.Serve(listener)
 }

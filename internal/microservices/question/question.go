@@ -9,14 +9,14 @@ import (
 
 type Usecase interface {
 	CreateAnswer(ctx context.Context, userID uuid.UUID, a models.Answer) error
-	CheckUserAnswer(ctx context.Context, userID, questionName string) (bool, error)
-	CalculateAverageRating(ctx context.Context, questionName string) (int, error)
+	CheckUserAnswer(ctx context.Context, userID uuid.UUID, questionName string) (bool, error)
+	CalculateAverageRating(ctx context.Context, questionName string) (float64, error)
 }
 
 type Repository interface {
 	CreateAnswer(ctx context.Context, userID uuid.UUID, a models.Answer) error
-	CheckUserAnswer(ctx context.Context, userID, questionName string) (bool, error)
-	CalculateAverageRating(ctx context.Context, questionName string) (int, error)
+	CheckUserAnswer(ctx context.Context, userID uuid.UUID, questionName string) (bool, error)
+	CalculateAverageRating(ctx context.Context, questionName string) (float64, error)
 }
 
 type (
