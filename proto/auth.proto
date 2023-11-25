@@ -1,58 +1,106 @@
 syntax = "proto3";
 
 package auth;
+option go_package = ".";
 
 import "google/protobuf/empty.proto";
 
-message Session {
-  string id = 1;
-  string cookie = 2;
-}
-
-message SignUpInput {
+message SignUpRequest {
   string login = 1;
   string username = 2;
   string password = 3;
-}
+};
 
-message LoginInput {
+message LoginRequest {
   string login = 1;
   string password = 2;
-}
+};
 
-message SignResponse {
+message UniqCheckRequest {
+  string login = 1;
+};
+
+message UserIdRequest {
+  string id = 1;
+};
+
+// ---------------------------------
+// SignUp
+
+message SignUpResponseBody {
   string id = 1;
   string login = 2;
   string username = 3;
+};
+
+message SignUpResponse {
+  string status = 1;
+  SignUpResponseBody body = 2; 
+};
+
+// ---------------------------------
+// LogIn
+
+message LoginResponseBody {
+  string id = 1;
+  string login = 2;
+  string username = 3;
+};
+
+message LoginResponse {
+  string status = 1;
+  LoginResponseBody body = 2;
+};
+
+// ---------------------------------
+// Uniq Check
+
+message UniqCheckResponse {
+  string status = 1;
+  bool body = 2;
+};
+
+// ---------------------------------
+
+message UserResponseBody {
+  string id = 1;
+	string Login = 2;
+	string Username = 3;
 }
 
-message UniqCheckInput {
-  string login = 1;
+message UserResponse {
+  string status = 1;
+  UserResponseBody body = 2;
 }
 
-message Response {
-  int32 status = 1;
-  any body = 2;
-}
+// ---------------------------------
+// HelthCheck
 
-message ResponseError {
-  int32 status = 1;
-  string error_message = 2;
-}
+//message HelthCheckBody {
+//  string id = 1;
+//  string login = 2;
+//  string username = 3;
+//};
+//
+//message HelthCheckResponse {
+//  string status = 1;
+//  HelthCheckBody body = 2;
+//};
+
+// ---------------------------------
+// Logout
+
+//message LogoutResponse {
+//  string status = 1;
+//  google.protobuf.Empty body = 2;
+//};
+
 
 service AuthService {
-  rpc SignUp (SignUpInput) returns (Response<SignResponse>);
-  rpc Login (LoginInput) returns (Response<SignResponse>);
-  rpc HealthCheck (google.protobuf.Empty) returns (Response<SignResponse>);
-  rpc LogOut (google.protobuf.Empty) returns (google.protobuf.Empty);
-  rpc CheckLoginUnique (UniqCheckInput) returns (ResponseError);
-}
-
-
-service AuthService {
-  rpc SignUp (SignUpInput) returns (ApiResponse);
-  rpc Login (LoginInput) returns (ApiResponse);
-  rpc HealthCheck (google.protobuf.Empty) returns (ApiResponse);
-  rpc LogOut (google.protobuf.Empty) returns (google.protobuf.Empty);
-  rpc CheckLoginUnique (UniqCheckInput) returns (ApiResponse);
+  rpc SignUp           (SignUpRequest)           returns (SignUpResponse);
+  rpc Login            (LoginRequest)            returns (LoginResponse);
+  rpc CheckLoginUnique (UniqCheckRequest)        returns (UniqCheckResponse);
+  rpc GetByID          (UserIdRequest)           returns (UserResponse); 
+  // rpc HealthCheck      (google.protobuf.Empty)   returns (HelthCheckResponse);
+  // rpc LogOut           (google.protobuf.Empty)   returns (LogoutResponse);
 }
