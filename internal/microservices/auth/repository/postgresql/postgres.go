@@ -10,6 +10,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx"
 )
 
 const (
@@ -18,6 +19,8 @@ const (
 	UserCreate           = `INSERT INTO users (login, username, password_hash) VALUES ($1, $2, $3) RETURNING id;`
 	UserIDGetByID        = `SELECT id, login, username, password_hash, planned_budget, avatar_url FROM users WHERE id = $1;`
 )
+
+const errorUserExists = "unique_violation"
 
 type AuthRep struct {
 	db     postgresql.DbConn
@@ -47,7 +50,7 @@ func (r *AuthRep) GetUserByLogin(ctx context.Context, login string) (*models.Use
 	err := row.Scan(&u.ID, &u.Login, &u.Username, &u.Password, &u.PlannedBudget, &u.AvatarURL)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		return nil, fmt.Errorf("[repo] nothing found for this request %w", err)
+		return nil, fmt.Errorf("[repo] %w, %v", &models.NoSuchUserError{}, err)
 	} else if err != nil {
 		return nil,
 			fmt.Errorf("[repo] failed request db %w", err)
@@ -60,10 +63,14 @@ func (r *AuthRep) CreateUser(ctx context.Context, u models.User) (uuid.UUID, err
 	var id uuid.UUID
 
 	err := row.Scan(&id)
-	/*if errors.Is(err, sql.ErrNoRows) {
-		return uuid.Nil, fmt.Errorf("error: %w", err) // cant insert not error
-	} else*/if err != nil {
-		return uuid.Nil, fmt.Errorf("error request %w", err) // error db
+	if err != nil {
+		if pqerr, ok := err.(*pgx.PgError); ok {
+			if pqerr.ConstraintName == errorUserExists {
+				return uuid.Nil, fmt.Errorf("(repo) %w: %v", &models.UserAlreadyExistsError{}, err)
+			}
+		}
+
+		return id, fmt.Errorf("(Repo) failed to scan from query: %w", err)
 	}
 	return id, nil
 }

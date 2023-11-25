@@ -6,36 +6,36 @@ import (
 	"time"
 
 	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth"
+	gen "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/grpc/generated"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions"
+	"github.com/google/uuid"
 
 	contextutils "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/context_utils"
 	response "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions"
-)
-
-const (
-	userloginUrlParam = "login"
 )
 
 type Handler struct {
-	au  auth.Usecase
-	uu  user.Usecase
-	su  sessions.Usecase
-	log logger.Logger
+	// uu  user.Usecase
+	// au  auth.Usecase
+	su     sessions.Usecase
+	client gen.AuthServiceClient
+	log    logger.Logger
 }
 
 func NewHandler(
-	au auth.Usecase,
-	uu user.Usecase,
+	// uu user.Usecase,
+	// au auth.Usecase,
 	su sessions.Usecase,
+	cl gen.AuthServiceClient,
 	log logger.Logger) *Handler {
 	return &Handler{
-		au:  au,
-		uu:  uu,
-		su:  su,
-		log: log,
+		// uu:  uu,
+		// au:  au,
+		su:     su,
+		client: cl,
+		log:    log,
 	}
 }
 
@@ -70,7 +70,11 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Creating user
-	id, login, username, err := h.au.SignUp(r.Context(), signUpUser)
+	userMeta, err := h.client.SignUp(r.Context(), &gen.SignUpRequest{
+		Login:    signUpUser.Login,
+		Username: signUpUser.Username,
+		Password: signUpUser.PlaintPassword,
+	})
 	if err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
@@ -78,9 +82,13 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't Sign Up user", h.log)
 		return
 	}
-
+	userId, err := uuid.Parse(userMeta.Body.Id)
+	if err != nil {
+		response.ErrorResponse(w, http.StatusInternalServerError, err, "Can't Sign Up user", h.log)
+		return
+	}
 	// Creating session for new user
-	session, err := h.su.CreateSessionById(r.Context(), id)
+	session, err := h.su.CreateSessionById(r.Context(), userId)
 	if err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
@@ -92,8 +100,8 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	// Output
 	regUser := auth.SignResponse{
 		ID:       session.UserId,
-		Login:    login,
-		Username: username,
+		Login:    userMeta.Body.Login,
+		Username: userMeta.Body.Username,
 	}
 
 	http.SetCookie(w, response.InitCookie("session_id", session.Cookie, time.Now().Add(7*24*time.Hour), "/api"))
@@ -130,8 +138,11 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Login user
-	id, login, username, err := h.au.Login(r.Context(), loginUser.Login, loginUser.PlaintPassword)
+	// Login user loginUser.Login, loginUser.PlaintPassword
+	userMeta, err := h.client.Login(r.Context(), &gen.LoginRequest{
+		Login:    loginUser.Login,
+		Password: loginUser.PlaintPassword,
+	})
 	if err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
@@ -140,8 +151,14 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userId, err := uuid.Parse(userMeta.Body.Id)
+	if err != nil {
+		response.ErrorResponse(w, http.StatusInternalServerError, err, "Can't Login user", h.log)
+		return
+	}
+
 	// Registrate session in redis
-	session, err := h.su.CreateSessionById(r.Context(), id)
+	session, err := h.su.CreateSessionById(r.Context(), userId)
 	if err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
@@ -152,9 +169,9 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	// Create Response
 	regUser := auth.SignResponse{
-		ID:       id,
-		Login:    login,
-		Username: username,
+		ID:       userId,
+		Login:    userMeta.Body.Login,
+		Username: userMeta.Body.Username,
 	}
 
 	// Set Cookie
@@ -195,8 +212,8 @@ func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get User by its Id
-	user, err := h.au.GetByID(r.Context(), session.UserId)
+	// Get User by its Id   session.UserId
+	user, err := h.client.GetByID(r.Context(), &gen.UserIdRequest{Id: session.UserId.String()})
 	if err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
@@ -208,7 +225,8 @@ func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 	// Create Response
 	resp := auth.SignResponse{
 		ID:       session.UserId,
-		Username: user.Username,
+		Login:    user.Body.Login,
+		Username: user.Body.Username,
 	}
 
 	// Send Response
@@ -274,8 +292,8 @@ func (h *Handler) CheckLoginUnique(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	// request login
-	isUnique, err := h.au.CheckLoginUnique(r.Context(), userLogin.Login)
+	// request login userLogin.Login
+	isUnique, err := h.client.CheckLoginUnique(r.Context(), &gen.UniqCheckRequest{Login: userLogin.Login})
 	if err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
@@ -284,5 +302,40 @@ func (h *Handler) CheckLoginUnique(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response.SuccessResponse(w, http.StatusOK, !isUnique)
+	response.SuccessResponse(w, http.StatusOK, isUnique)
+}
+
+// @Summary		Get unique login info
+// @Tags			Auth
+// @Description	Get bool parametrs about unique login
+// @Produce		json
+// @Success		200		{object}		Response[bool] 	"Show user"
+// @Failure		400		{object}		ResponseError		"Client error"
+// @Failure		500		{object}		ResponseError		"Server error"
+// @Router		/api/auth/checkLogin/ [post]
+func (h *Handler) GetByIdHandler(w http.ResponseWriter, r *http.Request) {
+	var userLogin auth.UniqCheckInput
+
+	// Decode request Body
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&userLogin); err != nil {
+		h.log.WithField(
+			"Request-Id", contextutils.GetReqID(r.Context()),
+		).Error(err.Error())
+		response.ErrorResponse(w, http.StatusBadRequest, err, "Corrupted request body can't unmarshal", h.log)
+		return
+	}
+	defer r.Body.Close()
+
+	// request login userLogin.Login
+	isUnique, err := h.client.CheckLoginUnique(r.Context(), &gen.UniqCheckRequest{Login: userLogin.Login})
+	if err != nil {
+		h.log.WithField(
+			"Request-Id", contextutils.GetReqID(r.Context()),
+		).Errorf("DB interal error")
+		response.ErrorResponse(w, http.StatusInternalServerError, err, "Can't query DB", h.log)
+		return
+	}
+
+	response.SuccessResponse(w, http.StatusOK, isUnique)
 }

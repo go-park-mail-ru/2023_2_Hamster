@@ -65,15 +65,16 @@ const (
 	ForbiddenUser         = "user has no rights"
 )
 
-type customErr struct {
-	Err error
-	Msg string
-}
-
-func (e *customErr) Error() string {
-	return e.Msg
-}
-
-func (e *customErr) Unwrap() error {
-	return e.Err
-}
+// type customErr struct {
+// 	Err error
+// 	Msg string
+// }
+//
+// func (e *customErr) Error() string {
+// 	return e.Msg
+// }
+//
+// func (e *customErr) Unwrap() error {
+// 	return e.Err
+// }
+//

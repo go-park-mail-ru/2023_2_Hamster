@@ -37,12 +37,12 @@ func (u *Usecase) SignUp(ctx context.Context, input auth.SignUpInput) (uuid.UUID
 
 	if !ok {
 		u.logger.Error("Login already exist ", input.Login)
-		return uuid.Nil, "", "", fmt.Errorf("[usecase] username already exist") // Error login exist
+		return uuid.Nil, "", "", fmt.Errorf("(repo) %w", &models.UserAlreadyExistsError{}) // Error login exist
 	}
 
 	hash, err := hasher.GeneratePasswordHash(input.PlaintPassword)
 	if err != nil {
-		return uuid.Nil, "", "", fmt.Errorf("[usecase] hash func error: %v", err) // Hash error
+		return uuid.Nil, "", "", fmt.Errorf("[usecase] hash func error: %w", err) // Hash error
 	}
 
 	user.Login = input.Login
@@ -70,7 +70,7 @@ func (u *Usecase) Login(ctx context.Context, login, plainPassword string) (uuid.
 		return uuid.Nil, "", "", fmt.Errorf("[usecase] Password Comparation Error: %w", err)
 	}
 	if !ok {
-		return uuid.Nil, "", "", fmt.Errorf("[usecase] incorrect password")
+		return uuid.Nil, "", "", fmt.Errorf("[usecase] password hash doesn't match the real one: %w", &models.IncorrectPasswordError{UserID: user.ID})
 	}
 
 	return user.ID, user.Login, user.Username, nil
