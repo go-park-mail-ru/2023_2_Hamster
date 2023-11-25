@@ -2,6 +2,7 @@ package category
 
 import "github.com/google/uuid"
 
+// input output models
 type (
 	TagInput struct {
 		UserId      uuid.UUID `json:"user_id"`
@@ -24,8 +25,10 @@ type (
 	TagDeleteInput struct {
 		ID uuid.UUID `json:"id" valid:"-"`
 	}
+
+	CategoryCreateResponse struct {
+		CategoryID uuid.UUID `json:"category_id"`
+	}
 )
 
-type CategoryCreateResponse struct {
-	CategoryID uuid.UUID `json:"category_id"`
-}
+// category errors
