@@ -1,14 +1,14 @@
 syntax = "proto3";
 
 package question;
-option go_package = ".";
+option go_package = "./";
 
 import "google/protobuf/empty.proto";
 
 message AnswerRequest {
   string id = 1;
   string name = 2;
-  int32  rating = 3;
+  double  rating = 3;
 };
 
 message AverageRatingResponse {
@@ -30,7 +30,7 @@ message CheckUserAnswerResponse {
 };
 
 message AverageResponse {
-    int32 average = 1;
+    double average = 1;
 };
 
 service QuestionService {

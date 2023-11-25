@@ -44,8 +44,8 @@ type (
 	*/
 
 	AnswerRequest struct {
-		Name   string `json:"name"`
-		Rating int    `json:"rating"`
+		Name   string  `json:"name"`
+		Rating float64 `json:"rating"`
 	}
 
 	AverageRatingResponse struct {
@@ -61,6 +61,6 @@ type (
 	}
 
 	AverageResponse struct {
-		Average int `json:"avg"`
+		Average float64 `json:"avg"`
 	}
 )
