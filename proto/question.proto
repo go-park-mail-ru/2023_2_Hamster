@@ -1,7 +1,6 @@
 syntax = "proto3";
 
 package question;
-
 option go_package = ".";
 
 import "google/protobuf/empty.proto";
@@ -9,26 +8,26 @@ import "google/protobuf/empty.proto";
 message AnswerRequest {
   string name = 1;
   int32  rating = 2;
-}
+};
 
 message AverageRatingResponse {
   int32 averageRating = 1;
-}
+};
 
 message CheckUserAnswerResponse {
     bool average = 1;
-}
+};
 
 message QuestionNameRequest {
   string questionName = 1;
-}
+};
 
 message AverageResponse {
     int32 average = 1;
-}
+};
 
 service QuestionService {
     rpc CreateAnswer (AnswerRequest) returns (google.protobuf.Empty);
     rpc CheckUserAnswer (CheckUserAnswerResponse) returns (CheckUserAnswerResponse);
     rpc CalculateAverageRating (QuestionNameRequest) returns (AverageResponse);
-}
+};

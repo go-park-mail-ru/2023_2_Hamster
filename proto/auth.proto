@@ -66,12 +66,12 @@ message UserResponseBody {
   string id = 1;
 	string Login = 2;
 	string Username = 3;
-}
+};
 
 message UserResponse {
   string status = 1;
   UserResponseBody body = 2;
-}
+};
 
 // ---------------------------------
 // HelthCheck
