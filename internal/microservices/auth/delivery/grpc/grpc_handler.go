@@ -59,7 +59,7 @@ func (a *authGRPC) SignUp(ctx context.Context, in *proto.SignUpRequest) (*proto.
 	}, nil
 }
 
-func (a *authGRPC) Login(ctx context.Context, in *proto.SignUpRequest) (*proto.LoginResponse, error) {
+func (a *authGRPC) Login(ctx context.Context, in *proto.LoginRequest) (*proto.LoginResponse, error) {
 	id, login, username, err := a.authServices.Login(ctx, in.Login, in.Password)
 	if err != nil {
 		var errNoSuchUser *models.NoSuchUserError

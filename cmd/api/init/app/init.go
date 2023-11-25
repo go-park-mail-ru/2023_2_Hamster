@@ -12,11 +12,8 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/redis/go-redis/v9"
 
-	authHandler "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/http"
-
-	//authDelivery "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/http"
-	authRep "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/repository/postgresql"
-	authUsecase "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/usecase"
+	generatedAuth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/grpc/generated"
+	authDelivery "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/http"
 
 	categoryDelivary "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/category/delivery/http"
 	categoryRep "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/category/repository/postgres"
@@ -43,19 +40,18 @@ import (
 )
 
 func Init(db *pgxpool.Pool, redis *redis.Client, log *logger.Logger) *mux.Router {
-
 	authConn, err := grpc.Dial(
-		"0.0.0.0:8045",
+		"0.0.0.0:8010",
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Error("fail grpc.Dial auth", err)
 		err = fmt.Errorf("error happened in grpc.Dial auth: %w", err)
-
-		return err
+		return nil
 	}
 	defer authConn.Close()
 
-	authRep := authRep.NewRepository(db, *log)
+	authClient := generatedAuth.NewAuthServiceClient(authConn)
+
+	// authRep := authRep.NewRepository(db, *log)
 	sessionRep := sessionRep.NewSessionRepository(redis)
 
 	userRep := userRep.NewRepository(db, *log)
@@ -63,7 +59,7 @@ func Init(db *pgxpool.Pool, redis *redis.Client, log *logger.Logger) *mux.Router
 	categoryRep := categoryRep.NewRepository(db, *log)
 	accountRep := accountRep.NewRepository(db, *log)
 
-	authUsecase := authUsecase.NewUsecase(authRep, *log)
+	// authUsecase := authUsecase.NewUsecase(authRep, *log)
 	sessionUsecase := sessionUsecase.NewSessionUsecase(sessionRep)
 	userUsecase := userUsecase.NewUsecase(userRep, *log)
 	transactionUsecase := transactionUsecase.NewUsecase(transactionRep, *log)
@@ -71,14 +67,13 @@ func Init(db *pgxpool.Pool, redis *redis.Client, log *logger.Logger) *mux.Router
 	csrfUsecase := csrfUsecase.NewUsecase(*log)
 	accountUsecase := accountUsecase.NewUsecase(accountRep, *log)
 
+	authHandler := authDelivery.NewHandler(sessionUsecase, authClient, *log)
+
 	authMiddlewear := middleware.NewAuthMiddleware(sessionUsecase, userRep, *log)
 	logMiddlewear := middleware.NewLoggingMiddleware(*log)
 	recoveryMiddlewear := middleware.NewRecoveryMiddleware(*log)
 	csrfMiddlewear := middleware.NewCSRFMiddleware(csrfUsecase, *log)
 
-	authHandler := authHandler.NewAuthServiceClient(authConn)
-
-	authHandler := authDelivery.NewHandler(authUsecase, userUsecase, sessionUsecase, *log)
 	userHandler := userDelivery.NewHandler(userUsecase, *log)
 	transactionHandler := transactionDelivery.NewHandler(transactionUsecase, *log)
 	categoryHandler := categoryDelivary.NewHandler(categoryUsecase, *log)
