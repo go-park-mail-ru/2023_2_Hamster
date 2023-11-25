@@ -19,8 +19,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type QuestionServiceClient interface {
 	CreateAnswer(ctx context.Context, in *AnswerRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	CheckUserAnswer(ctx context.Context, in *QuestionNameRequest, opts ...grpc.CallOption) (*CheckUserAnswerResponse, error)
-	CalculateAverageRating(ctx context.Context, in *QuestionNameRequest, opts ...grpc.CallOption) (*AverageResponse, error)
+	CheckUserAnswer(ctx context.Context, in *CheckUserAnswerRequest, opts ...grpc.CallOption) (*CheckUserAnswerResponse, error)
+	CalculateAverageRating(ctx context.Context, in *CalculateAverageRatingRequest, opts ...grpc.CallOption) (*AverageResponse, error)
 }
 
 type questionServiceClient struct {
@@ -40,7 +40,7 @@ func (c *questionServiceClient) CreateAnswer(ctx context.Context, in *AnswerRequ
 	return out, nil
 }
 
-func (c *questionServiceClient) CheckUserAnswer(ctx context.Context, in *QuestionNameRequest, opts ...grpc.CallOption) (*CheckUserAnswerResponse, error) {
+func (c *questionServiceClient) CheckUserAnswer(ctx context.Context, in *CheckUserAnswerRequest, opts ...grpc.CallOption) (*CheckUserAnswerResponse, error) {
 	out := new(CheckUserAnswerResponse)
 	err := c.cc.Invoke(ctx, "/question.QuestionService/CheckUserAnswer", in, out, opts...)
 	if err != nil {
@@ -49,7 +49,7 @@ func (c *questionServiceClient) CheckUserAnswer(ctx context.Context, in *Questio
 	return out, nil
 }
 
-func (c *questionServiceClient) CalculateAverageRating(ctx context.Context, in *QuestionNameRequest, opts ...grpc.CallOption) (*AverageResponse, error) {
+func (c *questionServiceClient) CalculateAverageRating(ctx context.Context, in *CalculateAverageRatingRequest, opts ...grpc.CallOption) (*AverageResponse, error) {
 	out := new(AverageResponse)
 	err := c.cc.Invoke(ctx, "/question.QuestionService/CalculateAverageRating", in, out, opts...)
 	if err != nil {
@@ -63,8 +63,8 @@ func (c *questionServiceClient) CalculateAverageRating(ctx context.Context, in *
 // for forward compatibility
 type QuestionServiceServer interface {
 	CreateAnswer(context.Context, *AnswerRequest) (*emptypb.Empty, error)
-	CheckUserAnswer(context.Context, *QuestionNameRequest) (*CheckUserAnswerResponse, error)
-	CalculateAverageRating(context.Context, *QuestionNameRequest) (*AverageResponse, error)
+	CheckUserAnswer(context.Context, *CheckUserAnswerRequest) (*CheckUserAnswerResponse, error)
+	CalculateAverageRating(context.Context, *CalculateAverageRatingRequest) (*AverageResponse, error)
 	mustEmbedUnimplementedQuestionServiceServer()
 }
 
@@ -75,10 +75,10 @@ type UnimplementedQuestionServiceServer struct {
 func (UnimplementedQuestionServiceServer) CreateAnswer(context.Context, *AnswerRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateAnswer not implemented")
 }
-func (UnimplementedQuestionServiceServer) CheckUserAnswer(context.Context, *QuestionNameRequest) (*CheckUserAnswerResponse, error) {
+func (UnimplementedQuestionServiceServer) CheckUserAnswer(context.Context, *CheckUserAnswerRequest) (*CheckUserAnswerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CheckUserAnswer not implemented")
 }
-func (UnimplementedQuestionServiceServer) CalculateAverageRating(context.Context, *QuestionNameRequest) (*AverageResponse, error) {
+func (UnimplementedQuestionServiceServer) CalculateAverageRating(context.Context, *CalculateAverageRatingRequest) (*AverageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CalculateAverageRating not implemented")
 }
 func (UnimplementedQuestionServiceServer) mustEmbedUnimplementedQuestionServiceServer() {}
@@ -113,7 +113,7 @@ func _QuestionService_CreateAnswer_Handler(srv interface{}, ctx context.Context,
 }
 
 func _QuestionService_CheckUserAnswer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QuestionNameRequest)
+	in := new(CheckUserAnswerRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -125,13 +125,13 @@ func _QuestionService_CheckUserAnswer_Handler(srv interface{}, ctx context.Conte
 		FullMethod: "/question.QuestionService/CheckUserAnswer",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QuestionServiceServer).CheckUserAnswer(ctx, req.(*QuestionNameRequest))
+		return srv.(QuestionServiceServer).CheckUserAnswer(ctx, req.(*CheckUserAnswerRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _QuestionService_CalculateAverageRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QuestionNameRequest)
+	in := new(CalculateAverageRatingRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -143,7 +143,7 @@ func _QuestionService_CalculateAverageRating_Handler(srv interface{}, ctx contex
 		FullMethod: "/question.QuestionService/CalculateAverageRating",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QuestionServiceServer).CalculateAverageRating(ctx, req.(*QuestionNameRequest))
+		return srv.(QuestionServiceServer).CalculateAverageRating(ctx, req.(*CalculateAverageRatingRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
