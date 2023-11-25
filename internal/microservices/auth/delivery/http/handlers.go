@@ -314,11 +314,11 @@ func (h *Handler) CheckLoginUnique(w http.ResponseWriter, r *http.Request) {
 // @Failure		500		{object}		ResponseError		"Server error"
 // @Router		/api/auth/checkLogin/ [post]
 func (h *Handler) GetByIdHandler(w http.ResponseWriter, r *http.Request) {
-	var userLogin auth.UniqCheckInput
+	var userId auth.UserIdInput
 
 	// Decode request Body
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&userLogin); err != nil {
+	if err := decoder.Decode(&userId); err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Error(err.Error())
@@ -328,7 +328,7 @@ func (h *Handler) GetByIdHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	// request login userLogin.Login
-	isUnique, err := h.client.CheckLoginUnique(r.Context(), &gen.UniqCheckRequest{Login: userLogin.Login})
+	isUnique, err := h.client.CheckLoginUnique(r.Context(), &gen.UniqCheckRequest{Login: userId.ID.String()})
 	if err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),

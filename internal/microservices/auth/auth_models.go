@@ -16,6 +16,10 @@ type (
 		Cookie string    `json:"cookie"`
 	}
 
+	UserIdInput struct {
+		ID uuid.UUID `json:"user_id"`
+	}
+
 	SignUpInput struct {
 		Login          string `json:"login" valid:"required,length(4|20)"`
 		Username       string `json:"username" valid:"required,length(4|20)"`
