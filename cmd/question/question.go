@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/db/postgresql"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
+	grpcQuestion "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/question/delivery/grpc/generated"
 	questionRepository "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/question/repository/postgresql"
 	questionUsecase "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/question/usecase"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -78,7 +79,7 @@ func main() {
 	// 	}
 	// }()
 
-	questionProto.RegistrationQuestionServer(server, questionGRPS.NewQuestionGRPS(questionUsecase, log))
+	grpcQuestion.RegisterQuestionServiceServer(server)
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)

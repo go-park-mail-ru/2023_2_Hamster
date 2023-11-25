@@ -6,16 +6,23 @@ option go_package = ".";
 import "google/protobuf/empty.proto";
 
 message AnswerRequest {
-  string name = 1;
-  int32  rating = 2;
+  string id = 1;
+  string name = 2;
+  int32  rating = 3;
 };
 
 message AverageRatingResponse {
   int32 averageRating = 1;
 };
 
-message QuestionNameRequest {
-  string questionName = 1;
+message CalculateAverageRatingRequest {
+  string questionName = 2;
+};
+
+
+message CheckUserAnswerRequest {
+  string id = 1;
+  string questionName = 2;
 };
 
 message CheckUserAnswerResponse {
@@ -28,6 +35,6 @@ message AverageResponse {
 
 service QuestionService {
     rpc CreateAnswer (AnswerRequest) returns (google.protobuf.Empty);
-    rpc CheckUserAnswer (QuestionNameRequest) returns (CheckUserAnswerResponse);
-    rpc CalculateAverageRating (QuestionNameRequest) returns (AverageResponse);
+    rpc CheckUserAnswer (CheckUserAnswerRequest) returns (CheckUserAnswerResponse);
+    rpc CalculateAverageRating (CalculateAverageRatingRequest) returns (AverageResponse);
 };
