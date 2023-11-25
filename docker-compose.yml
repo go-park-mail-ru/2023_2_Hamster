@@ -57,6 +57,7 @@ services:
       start_period: 10s
     networks:
       - hamster-net
+
   hammy-question:
     container_name: hammy-question
     image: postgres:latest
@@ -139,6 +140,21 @@ services:
       - hammy-redis
     networks:
       - hamster-net
+
+  question:
+    container_name: question
+    dockerfile: Dockerfile
+    ports:
+    - "8088:8088"
+    volumes:
+    - ./.env:/docker-hammywallet/.env
+    - ./api-logs:/docker-hammywallet/logs
+    depends_on:
+      - hammy-question
+    env_file:
+      - .env
+    restart: always
+
 
   prometheus:
     container_name: prometheus
