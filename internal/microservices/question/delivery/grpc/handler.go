@@ -71,5 +71,5 @@ func (q *questionGRPC) CalculateAverageRating(ctx context.Context, in *proto.Cal
 		return nil, status.Errorf(codes.Internal, "method CreateAnswer not implemented")
 	}
 
-	return &proto.AverageResponse{Average: int32(intQuestion)}, nil
+	return &proto.AverageResponse{Average: intQuestion}, nil
 }

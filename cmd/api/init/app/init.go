@@ -1,14 +1,20 @@
 package app
 
 import (
+	"fmt"
+
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/router"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/redis/go-redis/v9"
 
-	authDelivery "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/http"
+	authHandler "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/http"
+
+	//authDelivery "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/http"
 	authRep "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/repository/postgresql"
 	authUsecase "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/usecase"
 
@@ -38,6 +44,17 @@ import (
 
 func Init(db *pgxpool.Pool, redis *redis.Client, log *logger.Logger) *mux.Router {
 
+	authConn, err := grpc.Dial(
+		"0.0.0.0:8045",
+		grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Error("fail grpc.Dial auth", err)
+		err = fmt.Errorf("error happened in grpc.Dial auth: %w", err)
+
+		return err
+	}
+	defer authConn.Close()
+
 	authRep := authRep.NewRepository(db, *log)
 	sessionRep := sessionRep.NewSessionRepository(redis)
 
@@ -58,6 +75,8 @@ func Init(db *pgxpool.Pool, redis *redis.Client, log *logger.Logger) *mux.Router
 	logMiddlewear := middleware.NewLoggingMiddleware(*log)
 	recoveryMiddlewear := middleware.NewRecoveryMiddleware(*log)
 	csrfMiddlewear := middleware.NewCSRFMiddleware(csrfUsecase, *log)
+
+	authHandler := authHandler.NewAuthServiceClient(authConn)
 
 	authHandler := authDelivery.NewHandler(authUsecase, userUsecase, sessionUsecase, *log)
 	userHandler := userDelivery.NewHandler(userUsecase, *log)
