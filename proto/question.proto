@@ -14,12 +14,12 @@ message AverageRatingResponse {
   int32 averageRating = 1;
 };
 
-message CheckUserAnswerResponse {
-    bool average = 1;
-};
-
 message QuestionNameRequest {
   string questionName = 1;
+};
+
+message CheckUserAnswerResponse {
+    bool average = 1;
 };
 
 message AverageResponse {
@@ -28,6 +28,6 @@ message AverageResponse {
 
 service QuestionService {
     rpc CreateAnswer (AnswerRequest) returns (google.protobuf.Empty);
-    rpc CheckUserAnswer (CheckUserAnswerResponse) returns (CheckUserAnswerResponse);
+    rpc CheckUserAnswer (QuestionNameRequest) returns (CheckUserAnswerResponse);
     rpc CalculateAverageRating (QuestionNameRequest) returns (AverageResponse);
 };
