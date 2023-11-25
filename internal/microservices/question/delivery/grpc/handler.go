@@ -26,7 +26,13 @@ func NewAuthGRPC(questionServices question.Usecase, log logger.Logger) *question
 }
 
 func (q *questionGRPC) CreateAnswer(ctx context.Context, in *proto.AnswerRequest) (*emptypb.Empty, error) {
-	request := question.
+	request := question.AnswerRequest{
+		Name:   in.Name,
+		Rating: int(in.Rating),
+	}
+
+	q.questoinServices.CreateAnswer(ctx, in.userID, request)
+
 	return nil, status.Errorf(codes.Unimplemented, "method CreateAnswer not implemented")
 }
 func (q *questionGRPC) CheckUserAnswer(context.Context, *proto.CheckUserAnswerResponse) (*proto.CheckUserAnswerResponse, error) {
