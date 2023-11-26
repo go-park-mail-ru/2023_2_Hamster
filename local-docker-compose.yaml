@@ -26,36 +26,36 @@ services:
     ports:
       - "6379:6379"
 
-  # prometheus:
-  #   container_name: prometheus
-  #   image: prom/prometheus:latest
-  #   volumes:
-  #     - ./metrics/prometheus:/etc/prometheus
-  #   ports:
-  #     - "9090:9090"
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:latest
+    volumes:
+      - ./metrics/prometheus:/etc/prometheus
+    ports:
+      - "9090:9090"
 
-  # nodeexporter:
-  #   container_name: node_exporter
-  #   image: prom/node-exporter
-  #   volumes:
-  #     - /proc:/host/proc:ro
-  #     - /sys:/host/sys:ro
-  #     - /:/rootfs:ro
-  #   restart: unless-stopped
-  #   ports:
-  #     - "9100:9100"
+  nodeexporter:
+    container_name: node_exporter
+    image: prom/node-exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
 
 
-  # grafana:
-  #   container_name: grafana
-  #   image: grafana/grafana-oss:9.4.3
-  #   user: '0'
-  #   ports:
-  #     - "3000:3000"
-  #   volumes:
-  #     - type: bind
-  #       source: /home/ubuntu/grafana_metrics
-  #       target: /var/lib/grafana
+  grafana:
+    container_name: grafana
+    image: grafana/grafana-oss:9.4.3
+    user: '0'
+    ports:
+      - "3000:3000"
+    volumes:
+      - type: bind
+        source: /home/ubuntu/grafana_metrics
+        target: /var/lib/grafana
 
 
 networks:
