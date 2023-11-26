@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"fmt"
-	"math/rand"
 	"net/http"
 	"regexp"
 	"time"
@@ -131,7 +130,7 @@ func (m *MetricsMiddleware) Register(name string) {
 	m.durationNew = s
 
 	m.errors = errs
-	rand.Seed(time.Now().Unix())
+
 	prometheus.MustRegister(m.metric)
 	prometheus.MustRegister(m.counter)
 	prometheus.MustRegister(m.durations)
