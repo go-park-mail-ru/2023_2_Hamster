@@ -22,8 +22,8 @@ type (
 		Regular     bool      `json:"regular" valid:"-"`
 	}
 
-	CategoryCreateResponse struct {
-		CategoryID uuid.UUID `json:"category_id"`
+	TagDeleteInput struct {
+		ID uuid.UUID `json:"id" valid:"-"`
 	}
 )
 
