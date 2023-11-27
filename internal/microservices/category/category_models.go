@@ -25,6 +25,10 @@ type (
 	TagDeleteInput struct {
 		ID uuid.UUID `json:"id" valid:"-"`
 	}
+
+	CategoryCreateResponse struct {
+		CategoryID uuid.UUID `json:"category_id"`
+	}
 )
 
 // category errors
