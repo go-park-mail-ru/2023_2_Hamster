@@ -39,7 +39,6 @@ func InitRouter(auth *auth.Handler,
 	r.Use(recoveryMid.Recoverer)
 	r.Use(middleware.Timeout(5 * time.Second))
 	r.Use(middleware.Heartbeat("ping"))
-	r.Use(middleware.Metrics())
 
 	http.Handle("/", r)
 
@@ -49,9 +48,12 @@ func InitRouter(auth *auth.Handler,
 		httpSwagger.DomID("swagger-ui"),
 	)).Methods(http.MethodGet)
 
-	r.PathPrefix("/metrics").Handler(promhttp.Handler())
-
 	apiRouter := r.PathPrefix("/api").Subrouter()
+
+	metricsMw := middleware.NewMetricsMiddleware()
+	metricsMw.Register(middleware.ServiceMainName)
+	apiRouter.PathPrefix("/metrics").Handler(promhttp.Handler())
+	apiRouter.Use(metricsMw.LogMetrics)
 
 	csrfRouter := apiRouter.PathPrefix("/csrf").Subrouter()
 	csrfRouter.Use(authMid.Authentication)

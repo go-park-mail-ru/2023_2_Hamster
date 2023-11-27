@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package account;
+option go_package = "internal/microservices/account/delivery/grpc/generated";
+
+import "google/protobuf/empty.proto";
+
+message CreateRequest {
+    string id = 1;
+    string user_id = 2;
+    float balance = 3;
+    bool accumulation = 4;
+    bool balance_enabled = 5;
+    string mean_payment = 6;
+};
+
+message CreateAccountResponse {
+  string account_id = 1;
+  string error_message = 2;
+};
+
+message UpdasteRequest {
+    string id = 1;
+    string user_id = 2;
+    float balance = 3;
+    bool accumulation = 4;
+    bool balance_enabled = 5;
+    string mean_payment = 6;
+};
+
+message DeleteRequest {
+    string account_id = 1;
+    string user_id = 2;
+};
+
+service AccountService {
+    rpc Create(CreateRequest) returns (CreateAccountResponse);
+    rpc Update(UpdasteRequest) returns (google.protobuf.Empty);
+    rpc Delete(DeleteRequest) returns (google.protobuf.Empty);
+};

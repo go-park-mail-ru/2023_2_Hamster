@@ -1,75 +1,172 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"regexp"
-	"strconv"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
+)
+
+const (
+	ServiceMainName    = "main"
+	ServiceAuthName    = "auth"
+	ServiceUserName    = "user"
+	ServiceCreatorName = "creator"
 )
 
 var (
 	UUIDRegExp = regexp.MustCompile(`[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}`)
 )
 
-type ResponseWriterStatusCodeSaver struct {
+const (
+	ServiceName = "ServiceName"
+	FullTime    = "Duration"
+	URL         = "Url"
+	Method      = "Method"
+	StatusCode  = "StatusCode"
+)
+
+type writer struct {
 	http.ResponseWriter
 	statusCode int
 }
 
-func (w *ResponseWriterStatusCodeSaver) WriteHeader(code int) {
+func NewWriter(w http.ResponseWriter) *writer {
+	return &writer{w, http.StatusOK}
+}
+
+func (w *writer) WriteHeader(code int) {
 	w.statusCode = code
 	w.ResponseWriter.WriteHeader(code)
 }
 
-func (w *ResponseWriterStatusCodeSaver) StatusCode() int {
-	if w.statusCode == 0 {
-		return 200
-	}
-	return w.statusCode
+type MetricsMiddleware struct {
+	metric      *prometheus.GaugeVec
+	counter     *prometheus.CounterVec
+	durations   *prometheus.HistogramVec
+	errors      *prometheus.CounterVec
+	durationNew *prometheus.SummaryVec
+	name        string
 }
 
-var responseTimeMetrics = promauto.NewSummaryVec(
-	prometheus.SummaryOpts{
-		Namespace:  "fluire",
-		Subsystem:  "api",
-		Name:       "response_time",
-		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01},
-	},
-	[]string{"method", "route", "code"},
-)
-
-func observeResponseTime(duration time.Duration, method, route, code string) {
-	responseTimeMetrics.WithLabelValues(method, route, code).
-		Observe(float64(duration.Microseconds()))
+func NewMetricsMiddleware() *MetricsMiddleware {
+	return &MetricsMiddleware{}
 }
 
-func Metrics() func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// API route (URL Pattern)
-			bytesUrl := []byte(r.URL.Path)
-			urlWithCuttedUUID := UUIDRegExp.ReplaceAll(bytesUrl, []byte("<uuid>"))
+func (m *MetricsMiddleware) ServerMetricsInterceptor(ctx context.Context,
+	req interface{},
+	info *grpc.UnaryServerInfo,
+	handler grpc.UnaryHandler) (interface{}, error) {
 
-			writerSaver := &ResponseWriterStatusCodeSaver{
-				ResponseWriter: w,
-			}
+	start := time.Now()
+	h, err := handler(ctx, req)
+	tm := time.Since(start)
 
-			start := time.Now()
-			defer func() {
-				// Status code
-				code := writerSaver.StatusCode()
-				codeStr := ""
-				if code != 0 {
-					codeStr = strconv.Itoa(code)
-				}
+	m.metric.With(prometheus.Labels{
+		URL:         "",
+		ServiceName: m.name,
+		StatusCode:  "OK",
+		Method:      info.FullMethod,
+		FullTime:    tm.String(),
+	}).Inc()
 
-				observeResponseTime(time.Since(start), r.Method, string(urlWithCuttedUUID), codeStr)
-			}()
+	m.durations.With(prometheus.Labels{URL: info.FullMethod}).Observe(tm.Seconds())
 
-			next.ServeHTTP(writerSaver, r)
+	m.counter.With(prometheus.Labels{URL: info.FullMethod}).Inc()
+
+	return h, err
+
+}
+
+func (m *MetricsMiddleware) Register(name string) {
+	m.name = name
+	gauge := prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: name,
+			Help: fmt.Sprintf("SLO for service %s", name),
+		},
+		[]string{
+			ServiceName, URL, Method, StatusCode, FullTime,
 		})
-	}
+
+	m.metric = gauge
+
+	counter := prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "hits",
+			Help: "Number of all requests.",
+		}, []string{URL})
+	m.counter = counter
+
+	hist := prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Name:    "durations_stats",
+		Help:    "durations_stats",
+		Buckets: prometheus.LinearBuckets(0, 1, 10),
+	}, []string{URL})
+	m.durations = hist
+
+	errs := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "errors_hits",
+		Help: "Number of all errors.",
+	}, []string{URL})
+
+	s := prometheus.NewSummaryVec(prometheus.SummaryOpts{
+		Namespace: name,
+		Subsystem: name,
+		Name:      name,
+		Objectives: map[float64]float64{
+			0.5:  0.1,
+			0.8:  0.1,
+			0.9:  0.1,
+			0.95: 0.1,
+			0.99: 0.1,
+			1:    0.1}},
+		[]string{URL, StatusCode})
+
+	m.durationNew = s
+
+	m.errors = errs
+
+	prometheus.MustRegister(m.metric)
+	prometheus.MustRegister(m.counter)
+	prometheus.MustRegister(m.durations)
+	prometheus.MustRegister(m.errors)
+	prometheus.MustRegister(m.durationNew)
+}
+
+func (m *MetricsMiddleware) LogMetrics(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		start := time.Now()
+
+		wrapper := NewWriter(w)
+
+		next.ServeHTTP(wrapper, r.WithContext(ctx))
+
+		tm := time.Since(start)
+
+		bytesUrl := []byte(r.URL.Path)
+		urlWithCuttedUUID := UUIDRegExp.ReplaceAll(bytesUrl, []byte("<uuid>"))
+
+		m.metric.With(prometheus.Labels{
+			ServiceName: m.name,
+			URL:         string(urlWithCuttedUUID),
+			Method:      r.Method,
+			StatusCode:  fmt.Sprintf("%d", wrapper.statusCode),
+			FullTime:    tm.String(),
+		}).Inc()
+
+		m.durations.With(prometheus.Labels{URL: string(urlWithCuttedUUID)}).Observe(float64(tm.Milliseconds()))
+
+		m.durationNew.With(prometheus.Labels{URL: string(urlWithCuttedUUID), StatusCode: fmt.Sprintf("%d", wrapper.statusCode)}).Observe(float64(tm.Milliseconds()))
+
+		if wrapper.statusCode != http.StatusOK {
+			m.errors.With(prometheus.Labels{URL: string(urlWithCuttedUUID)}).Inc()
+		}
+		m.counter.With(prometheus.Labels{URL: string(urlWithCuttedUUID)}).Inc()
+	})
 }

@@ -9,22 +9,25 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account"
+	genAccount "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account/delivery/grpc/generated"
+	"github.com/google/uuid"
 )
 
 type Handler struct {
-	accountService account.Usecase
-	logger         logger.Logger
+	client genAccount.AccountServiceClient
+	logger logger.Logger
 }
 
 const (
 	accountID = "account_id"
 )
 
-func NewHandler(au account.Usecase, l logger.Logger) *Handler {
+func NewHandler(
+	client genAccount.AccountServiceClient,
+	log logger.Logger) *Handler {
 	return &Handler{
-		accountService: au,
-		logger:         l,
+		client: client,
+		logger: log,
 	}
 }
 
@@ -58,12 +61,19 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accountID, err := h.accountService.CreateAccount(r.Context(), user.ID, accountInput.ToAccount())
+	account, err := h.client.Create(r.Context(), &genAccount.CreateRequest{
+		UserId:         user.ID.String(),
+		Balance:        float32(accountInput.Balance),
+		Accumulation:   accountInput.Accumulation,
+		BalanceEnabled: accountInput.BalanceEnabled,
+		MeanPayment:    accountInput.MeanPayment,
+	})
 	if err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, AccountNotCreate, h.logger)
 		return
 	}
 
+	accountID, _ := uuid.Parse(account.AccountId)
 	accountResponse := AccountCreateResponse{AccountID: accountID}
 	commonHttp.SuccessResponse(w, http.StatusOK, accountResponse)
 
@@ -99,7 +109,14 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.accountService.UpdateAccount(r.Context(), user.ID, updateAccountInput.ToAccount()); err != nil {
+	if _, err := h.client.Update(r.Context(), &genAccount.UpdasteRequest{
+		Id:             updateAccountInput.ID.String(),
+		UserId:         user.ID.String(),
+		Balance:        float32(updateAccountInput.Balance),
+		Accumulation:   updateAccountInput.Accumulation,
+		BalanceEnabled: updateAccountInput.BalanceEnabled,
+		MeanPayment:    updateAccountInput.MeanPayment,
+	}); err != nil {
 		var errNoSuchaccount *models.NoSuchAccounts
 		if errors.As(err, &errNoSuchaccount) {
 			commonHttp.ErrorResponse(w, http.StatusBadRequest, err, AccountNotSuch, h.logger)
@@ -146,7 +163,10 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.accountService.DeleteAccount(r.Context(), user.ID, accountID)
+	_, err = h.client.Delete(r.Context(), &genAccount.DeleteRequest{
+		AccountId: accountID.String(),
+		UserId:    user.ID.String(),
+	})
 
 	if err != nil {
 		var errNoSuchaccount *models.NoSuchAccounts
@@ -166,5 +186,4 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	commonHttp.SuccessResponse(w, http.StatusOK, commonHttp.NilBody{})
-
 }
