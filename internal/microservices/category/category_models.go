@@ -22,13 +22,8 @@ type (
 		Regular     bool      `json:"regular" valid:"-"`
 	}
 
-<<<<<<< HEAD
-	TagDeleteInput struct {
-		ID uuid.UUID `json:"id" valid:"-"`
-=======
 	CategoryCreateResponse struct {
 		CategoryID uuid.UUID `json:"category_id"`
->>>>>>> 3eec182f5e5b585c01ea07901fb0af5156153490
 	}
 )
 
