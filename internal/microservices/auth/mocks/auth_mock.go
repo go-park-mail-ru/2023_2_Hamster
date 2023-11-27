@@ -68,13 +68,14 @@ func (mr *MockUsecaseMockRecorder) GetByID(ctx, userID interface{}) *gomock.Call
 }
 
 // Login mocks base method.
-func (m *MockUsecase) Login(ctx context.Context, login, plainPassword string) (uuid.UUID, string, error) {
+func (m *MockUsecase) Login(ctx context.Context, login, plainPassword string) (uuid.UUID, string, string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Login", ctx, login, plainPassword)
 	ret0, _ := ret[0].(uuid.UUID)
 	ret1, _ := ret[1].(string)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
+	ret2, _ := ret[2].(string)
+	ret3, _ := ret[3].(error)
+	return ret0, ret1, ret2, ret3
 }
 
 // Login indicates an expected call of Login.
@@ -84,13 +85,14 @@ func (mr *MockUsecaseMockRecorder) Login(ctx, login, plainPassword interface{}) 
 }
 
 // SignUp mocks base method.
-func (m *MockUsecase) SignUp(ctx context.Context, input auth.SignUpInput) (uuid.UUID, string, error) {
+func (m *MockUsecase) SignUp(ctx context.Context, input auth.SignUpInput) (uuid.UUID, string, string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignUp", ctx, input)
 	ret0, _ := ret[0].(uuid.UUID)
 	ret1, _ := ret[1].(string)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
+	ret2, _ := ret[2].(string)
+	ret3, _ := ret[3].(error)
+	return ret0, ret1, ret2, ret3
 }
 
 // SignUp indicates an expected call of SignUp.

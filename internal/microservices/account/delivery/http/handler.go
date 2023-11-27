@@ -7,24 +7,36 @@ import (
 
 	commonHttp "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions"
+
+	gen "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/grpc/generated"
+
+	genAccount "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account/delivery/grpc/generated"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account"
 )
 
 type Handler struct {
-	accountService account.Usecase
-	logger         logger.Logger
+	su     sessions.Usecase
+	auth   gen.AuthServiceClient
+	client genAccount.AccountServiceClient
+	logger logger.Logger
 }
 
 const (
 	accountID = "account_id"
 )
 
-func NewHandler(au account.Usecase, l logger.Logger) *Handler {
+func NewHandler(
+	su sessions.Usecase,
+	auth gen.AuthServiceClient,
+	client genAccount.AccountServiceClient,
+	log logger.Logger) *Handler {
 	return &Handler{
-		accountService: au,
-		logger:         l,
+		su:     su,
+		auth:   auth,
+		client: client,
+		logger: log,
 	}
 }
 

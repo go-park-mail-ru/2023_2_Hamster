@@ -13,7 +13,7 @@ import (
 
 type Usecase struct {
 	authRepo auth.Repository
-	logger   logging.Logger
+	logger   logging.Logger // legacy
 }
 
 func NewUsecase(
@@ -21,28 +21,28 @@ func NewUsecase(
 	log logging.Logger) *Usecase {
 	return &Usecase{
 		authRepo: ar,
-		logger:   log,
+		logger:   log, // legacy
 	}
 }
 
 // SignUpUser creates new User and returns it's id
-func (u *Usecase) SignUp(ctx context.Context, input auth.SignUpInput) (uuid.UUID, string, error) {
+func (u *Usecase) SignUp(ctx context.Context, input auth.SignUpInput) (uuid.UUID, string, string, error) {
 	var user models.User
 
 	ok, err := u.authRepo.CheckLoginUnique(ctx, input.Login)
-	if err != nil {
+	if err != nil { // Db error
 		u.logger.Error("Error checking login uniqueness: ", err)
-		return uuid.Nil, "", fmt.Errorf("[usecase] error checking login uniqueness: %w", err)
+		return uuid.Nil, "", "", fmt.Errorf("[usecase] error checking login uniqueness: %w", err)
 	}
 
 	if !ok {
 		u.logger.Error("Login already exist ", input.Login)
-		return uuid.Nil, "", fmt.Errorf("[usecase] username already exist")
+		return uuid.Nil, "", "", fmt.Errorf("(repo) %w", &models.UserAlreadyExistsError{}) // Error login exist
 	}
 
 	hash, err := hasher.GeneratePasswordHash(input.PlaintPassword)
 	if err != nil {
-		return uuid.Nil, "", fmt.Errorf("[usecase] hash func error: %v", err)
+		return uuid.Nil, "", "", fmt.Errorf("[usecase] hash func error: %w", err) // Hash error
 	}
 
 	user.Login = input.Login
@@ -51,34 +51,33 @@ func (u *Usecase) SignUp(ctx context.Context, input auth.SignUpInput) (uuid.UUID
 
 	userId, err := u.authRepo.CreateUser(ctx, user)
 	if err != nil {
-		return uuid.Nil, "", fmt.Errorf("[usecase] cannot create user: %w", err)
+		return uuid.Nil, "", "", fmt.Errorf("[usecase] cannot create user: %w", err)
 	}
 
 	user.ID = userId
 
-	return userId, user.Username, nil
+	return userId, user.Login, user.Username, nil
 }
 
-func (u *Usecase) Login(ctx context.Context, login, plainPassword string) (uuid.UUID, string, error) {
+func (u *Usecase) Login(ctx context.Context, login, plainPassword string) (uuid.UUID, string, string, error) {
 	user, err := u.authRepo.GetUserByLogin(ctx, login)
 	if err != nil {
-		return uuid.Nil, "", fmt.Errorf("[usecase] can't find user: %w", err)
+		return uuid.Nil, "", "", fmt.Errorf("[usecase] can't find user: %w", err)
 	}
 
 	ok, err := hasher.VerfiyPassword(plainPassword, user.Password)
 	if err != nil {
-		return uuid.Nil, "", fmt.Errorf("[usecase] Password Comparation Error: %w", err)
+		return uuid.Nil, "", "", fmt.Errorf("[usecase] Password Comparation Error: %w", err)
 	}
 	if !ok {
-		return uuid.Nil, "", fmt.Errorf("[usecase] incorrect password")
+		return uuid.Nil, "", "", fmt.Errorf("[usecase] password hash doesn't match the real one: %w", &models.IncorrectPasswordError{UserID: user.ID})
 	}
 
-	return user.ID, user.Username, nil
+	return user.ID, user.Login, user.Username, nil
 }
 
-func (u *Usecase) CheckLoginUnique(ctx context.Context, login string) (bool, error) { // move from auth rep
+func (u *Usecase) CheckLoginUnique(ctx context.Context, login string) (bool, error) {
 	isUnique, err := u.authRepo.CheckLoginUnique(ctx, login)
-
 	if err != nil {
 		return false, fmt.Errorf("[usecase] can't login unique check")
 	}

@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package account;
+option go_package = "internal/microservices/account/delivery/grpc/generated";
+
+message CreateRequest {
+    string id = 1;
+    string user_id = 2;
+    float balance = 3;
+    bool accumulation = 4;
+    bool balance_enabled = 5;
+    string mean_payment = 6;
+};
+
+message CreateAccountResponse {
+  string account_id = 1;
+  string error_message = 2;
+};
+
+message NoSuchAccounts {
+  string user_id = 1;
+};
+
+message ForbiddenUserError {
+};
+
+message OtherError {
+  string details = 1;
+};
+
+enum ErrorCode {
+  OK = 0;
+  NO_SUCH_ACCOUNTS = 1;
+  FORBIDDEN_USER = 2;
+  OTHER_ERROR = 3;
+};
+message ErrorResponse {
+  ErrorCode code = 1;
+  oneof error_details {
+    NoSuchAccounts no_such_accounts = 2;
+    ForbiddenUserError forbidden_user = 3;
+    OtherError other_error = 4;
+  }
+};
+
+message UpdasteRequest {
+    string id = 1;
+    string user_id = 2;
+    float balance = 3;
+    bool accumulation = 4;
+    bool balance_enabled = 5;
+    string mean_payment = 6;
+};
+
+message UpdateResponse {
+  oneof error {
+    NoSuchAccounts no_such_accounts = 1;
+    ForbiddenUserError forbidden_user = 2;
+    OtherError other_error = 3;
+  }
+};
+
+message DeleteRequest {
+    string account_id = 1;
+    string user_id = 2;
+};
+
+message DeleteResponse {
+  oneof error {
+    NoSuchAccounts no_such_accounts = 1;
+    ForbiddenUserError forbidden_user = 2;
+    OtherError other_error = 3;
+  }
+};
+
+service AccountService {
+    rpc Create(CreateRequest) returns (CreateAccountResponse);
+    rpc Update(UpdasteRequest) returns (UpdateResponse);
+    rpc Delete(DeleteRequest) returns (DeleteResponse);
+};

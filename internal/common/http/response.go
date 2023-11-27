@@ -9,7 +9,7 @@ import (
 
 const (
 	InvalidURLParameter = "invalid url parameter"
-	InvalidBodyRequest  = "invalid input body"
+	InvalidBodyRequest  = "invalid input params"
 	ForbiddenUser       = "user has no rights"
 )
 
