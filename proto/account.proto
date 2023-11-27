@@ -3,6 +3,8 @@ syntax = "proto3";
 package account;
 option go_package = "internal/microservices/account/delivery/grpc/generated";
 
+import "google/protobuf/empty.proto";
+
 message CreateRequest {
     string id = 1;
     string user_id = 2;
@@ -26,21 +28,13 @@ message UpdasteRequest {
     string mean_payment = 6;
 };
 
-message UpdateResponse {
-  string error_message = 1;
-};
-
 message DeleteRequest {
     string account_id = 1;
     string user_id = 2;
 };
 
-message DeleteResponse {
-  string error_message = 1;
-};
-
 service AccountService {
     rpc Create(CreateRequest) returns (CreateAccountResponse);
-    rpc Update(UpdasteRequest) returns (UpdateResponse);
-    rpc Delete(DeleteRequest) returns (DeleteResponse);
+    rpc Update(UpdasteRequest) returns (google.protobuf.Empty);
+    rpc Delete(DeleteRequest) returns (google.protobuf.Empty);
 };
