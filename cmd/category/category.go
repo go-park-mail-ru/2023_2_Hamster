@@ -8,12 +8,13 @@ import (
 	"os"
 	"time"
 
+	generatedCategory "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/category/delivery/grpc/generated"
+
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/db/postgresql"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
-	accountHandler "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account/delivery/grpc"
-	generatedAccount "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account/delivery/grpc/generated"
-	accountRep "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account/repository/postgresql"
-	accountUsecase "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account/usecase"
+	categoryHandler "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/category/delivery/grpc"
+	categoryRep "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/category/repository/postgres"
+	categoryUsecase "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/category/usecase"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -43,28 +44,28 @@ func run() (err error) {
 
 	log.Info("Db connection successfully")
 
-	accountRepo := accountRep.NewRepository(db, *log)
+	categoryRepo := categoryRep.NewRepository(db, *log)
 
-	accountUsecase := accountUsecase.NewUsecase(accountRepo, *log)
+	categoryUsecase := categoryUsecase.NewUsecase(categoryRepo, *log)
 
-	service := accountHandler.NewAccountGRPC(accountUsecase, *log)
+	service := categoryHandler.NewCategoryGRPC(categoryUsecase, *log)
 
-	srv, ok := net.Listen("tcp", ":8020")
+	srv, ok := net.Listen("tcp", ":8030")
 	if ok != nil {
 		log.Fatalln("can't listen port", err)
 	}
 
 	metricsMw := middleware.NewMetricsMiddleware()
-	metricsMw.Register(middleware.ServiceAccountName)
+	metricsMw.Register(middleware.ServiceCategoryName)
 
 	server := grpc.NewServer(grpc.UnaryInterceptor(metricsMw.ServerMetricsInterceptor))
 
-	generatedAccount.RegisterAccountServiceServer(server, service)
+	generatedCategory.RegisterCategoryServiceServer(server, service)
 	r := mux.NewRouter().PathPrefix("/api").Subrouter()
 	r.PathPrefix("/metrics").Handler(promhttp.Handler())
 
 	http.Handle("/", r)
-	httpSrv := http.Server{Handler: r, Addr: ":8021"}
+	httpSrv := http.Server{Handler: r, Addr: ":8031"}
 
 	go func() {
 		err := httpSrv.ListenAndServe()

@@ -73,7 +73,7 @@ BEGIN
             (NEW.id, NULL, 'Образование',             false, true,  false),
             (NEW.id, NULL, 'Отдых и развлечения',     false, true,  false),
             (NEW.id, NULL, 'Подарки',                 false, true,  false),
-            (NEW.id, NULL, 'Покупки: одежа, техника', false, true,  false),
+            (NEW.id, NULL, 'Покупки: одежда, техника', false, true,  false),
             (NEW.id, NULL, 'Проезд',                  false, true,  false),
             (NEW.id, NULL, 'Подписки',                false, true,  true),
             (NEW.id, NULL, 'Продукты',                false, true, false);
