@@ -55,7 +55,7 @@ func run() (err error) {
 	}
 
 	metricsMw := middleware.NewMetricsMiddleware()
-	metricsMw.Register(middleware.ServiceCreatorName)
+	metricsMw.Register(middleware.ServiceAuthName)
 
 	server := grpc.NewServer(grpc.UnaryInterceptor(metricsMw.ServerMetricsInterceptor))
 

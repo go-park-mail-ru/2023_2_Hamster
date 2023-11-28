@@ -14,8 +14,7 @@ import (
 const (
 	ServiceMainName    = "main"
 	ServiceAuthName    = "auth"
-	ServiceUserName    = "user"
-	ServiceCreatorName = "creator"
+	ServiceAccountName = "account"
 )
 
 var (

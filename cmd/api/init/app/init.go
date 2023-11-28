@@ -42,10 +42,8 @@ func Init(db *pgxpool.Pool, redis *redis.Client, log *logger.Logger) *mux.Router
 		"127.0.0.1:8010",
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatal("can't connect to auth grpc")
-
+		log.Fatal("can't connect to auth grpc:", err)
 	}
-	defer authConn.Close()
 
 	authClient := generatedAuth.NewAuthServiceClient(authConn)
 
