@@ -1,4 +1,4 @@
-package question
+package main
 
 import (
 	"context"
@@ -11,10 +11,10 @@ import (
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/db/postgresql"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
-	questionHandler "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/grpc"
+	authHandler "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/grpc"
 	grpcAuth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/grpc/generated"
 	authRep "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/repository/postgresql"
-	questionUsecase "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/usecase"
+	authUsecase "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/usecase"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"google.golang.org/grpc"
 )
@@ -42,7 +42,7 @@ func run() (err error) {
 
 	log.Info("Db connection successfully")
 
-	connString := "host=HammyWallet_QUESTION port=5436 user=hamster dbname=HammyWallets password=56748 sslmode=disable"
+	connString := "host=0.0.0.0 port=5436 user=hamster dbname=HammyWallets password=2003 sslmode=disable"
 	pool, err := pgxpool.Connect(ctx, connString)
 	if err != nil {
 		log.Fatal(err)
@@ -50,9 +50,9 @@ func run() (err error) {
 
 	authRepo := authRep.NewRepository(pool, *log)
 
-	questionUsecase := questionUsecase.NewUsecase(authRepo, *log)
+	authUse := authUsecase.NewUsecase(authRepo, *log)
 
-	service := questionHandler.NewAuthGRPC(questionUsecase, *log)
+	service := authHandler.NewAuthGRPC(authUse, *log)
 
 	listener, err := net.Listen("tcp", "127.0.0.1:8088")
 	defer func() {

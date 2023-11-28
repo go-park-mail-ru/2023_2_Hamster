@@ -17,39 +17,25 @@ services:
     volumes:
       - ./build/schema/:/docker-entrypoint-initdb.d/
 
-  hammywallet-api:
-    container_name: ${CONTAINER_NAME}
-    image:  ${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA_SHORT}
-    env_file:
-      - .env
-    restart: always
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./.env:/docker-hammywallet/.env
-      - ./api-logs:/docker-hammywallet/logs
-      - type: bind
-        source: /home/ubuntu/frontend/images
-        target: /images
-    depends_on:
-      - db
-      - redis
-    networks:
-      - hamster-net
-
-  question:
-    container_name: question
-    dockerfile: Dockerfile
-    ports:
-    - "8088:8088"
-    volumes:
-    - ./.env:/docker-hammywallet/.env
-    - ./api-logs:/docker-hammywallet/logs
-    depends_on:
-      - hammy-question
-    env_file:
-      - .env
-    restart: always
+#  hammywallet-api:
+#    container_name: hammywallet-api
+#    image:  codemaster482/hammywallet:latest
+#    env_file:
+#      - .env
+#    restart: always
+#    ports:
+#      - "8080:8080"
+#    volumes:
+#      - ./.env:/docker-hammywallet/.env
+#      - ./api-logs:/docker-hammywallet/logs
+#      - type: bind
+#        source: /home/ubuntu/frontend/images
+#        target: /images
+#    depends_on:
+#      - db
+#      - redis
+#    networks:
+#      - hamster-net
 
   redis:
     container_name: hammy-redis
