@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
-	generatedAuth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/grpc/generated"
 	"net"
 	"net/http"
 	"os"
 	"time"
+
+	generatedAuth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/grpc/generated"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/db/postgresql"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
@@ -27,7 +28,7 @@ func main() {
 }
 
 func run() (err error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5666666*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	log := logger.NewLogger(ctx)
 	db, err := postgresql.InitPostgresDB(ctx)
