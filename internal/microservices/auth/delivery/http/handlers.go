@@ -79,12 +79,12 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Errorf("Error in sign up: %v", err)
-		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't Sign Up user", h.log)
+		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't Sign Upp user", h.log)
 		return
 	}
 	userId, err := uuid.Parse(userMeta.Body.Id)
 	if err != nil {
-		response.ErrorResponse(w, http.StatusInternalServerError, err, "Can't Sign Up user", h.log)
+		response.ErrorResponse(w, http.StatusInternalServerError, err, "Can't Sign Upd user", h.log)
 		return
 	}
 	// Creating session for new user

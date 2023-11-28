@@ -1,8 +1,6 @@
 package app
 
 import (
-	"fmt"
-
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/router"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware"
@@ -41,11 +39,11 @@ import (
 
 func Init(db *pgxpool.Pool, redis *redis.Client, log *logger.Logger) *mux.Router {
 	authConn, err := grpc.Dial(
-		"0.0.0.0:8010",
+		"127.0.0.1:8010",
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		err = fmt.Errorf("error happened in grpc.Dial auth: %w", err)
-		return nil
+		log.Fatal("can't connect to auth grpc")
+
 	}
 	defer authConn.Close()
 

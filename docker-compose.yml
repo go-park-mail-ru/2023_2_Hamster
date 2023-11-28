@@ -58,59 +58,6 @@ services:
     networks:
       - hamster-net
 
-  hammy-question:
-    container_name: hammy-question
-    image: postgres:latest
-    restart: on-failure
-    env_file:
-      - .env
-    command:
-      - "postgres"
-      - "-c"
-      - "max_connections=5"
-      - "-c"
-      - "shared_buffers=100MB"
-      - "-c"
-      - "effective_cache_size=0.5GB"
-      - "-c"
-      - "work_mem=16MB"
-      - "-c"
-      - "maintenance_work_mem=64MB"
-      - "-c"
-      - "random_page_cost=1.1"
-      - "-c"
-      - "temp_file_limit=1GB"
-      - "-c"
-      - "log_min_duration_statement=200ms"
-      - "-c"
-      - "idle_in_transaction_session_timeout=10s"
-      - "-c"
-      - "lock_timeout=1s"
-      - "-c"
-      - "statement_timeout=60s"
-      - "-c"
-      - "shared_preload_libraries=pg_stat_statements"
-      - "-c"
-      - "pg_stat_statements.max=10000"
-      - "-c"
-      - "pg_stat_statements.track=all"
-    ports:
-      - "${DB_PROD_QUESTION}:5432"
-    environment:
-      POSTGRES_DB: ${DB_NAME_QUESTION}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - ./build/question/:/docker-entrypoint-initdb.d/
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    networks:
-      - hamster-net
-
   hammy-redis:
     container_name: hammy-redis
     image: redis:latest
@@ -140,21 +87,6 @@ services:
       - hammy-redis
     networks:
       - hamster-net
-
-  question:
-    container_name: question
-    dockerfile: Dockerfile
-    ports:
-    - "8088:8088"
-    volumes:
-    - ./.env:/docker-hammywallet/.env
-    - ./api-logs:/docker-hammywallet/logs
-    depends_on:
-      - hammy-question
-    env_file:
-      - .env
-    restart: always
-
 
   prometheus:
     container_name: prometheus
