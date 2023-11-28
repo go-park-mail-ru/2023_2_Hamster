@@ -124,7 +124,7 @@ func TestUsecase_Login(t *testing.T) {
 		},
 		{
 			name:           "Incorrect Password",
-			expectedErr:    fmt.Errorf("[usecase] incorrect password"),
+			expectedErr:    fmt.Errorf("[usecase] password hash doesn't match the real one: %w", &models.IncorrectPasswordError{UserID: userIdTest}),
 			expectedUserID: uuid.Nil,
 			mockRepoFn: func(mockRepositry *mock.MockRepository) {
 				user := &models.User{
