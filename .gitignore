@@ -38,6 +38,7 @@ server
 # Logs
 logs
 *.log
+api_logs
 
 # Static
 img2
