@@ -87,12 +87,18 @@ func (r *transactionRep) GetFeed(ctx context.Context, user_id uuid.UUID, queryGe
 		query += " AND income > 0 AND outcome = 0"
 	}
 
-	if !queryGet.Date.IsZero() {
-		queryYear, queryMonth, _ := queryGet.Date.Date()
+	if !queryGet.StartDate.IsZero() || !queryGet.EndDate.IsZero() {
 		count++
-		query += " AND EXTRACT(YEAR FROM date) = $" + strconv.Itoa(count) + " AND EXTRACT(MONTH FROM date) = $" + strconv.Itoa(count+1) + ""
-		queryParamsSlice = append(queryParamsSlice, strconv.Itoa(queryYear))
-		queryParamsSlice = append(queryParamsSlice, strconv.Itoa(int(queryMonth)))
+		if !queryGet.StartDate.IsZero() {
+			query += " AND date >= $" + strconv.Itoa(count)
+			queryParamsSlice = append(queryParamsSlice, queryGet.StartDate)
+		}
+
+		if !queryGet.EndDate.IsZero() {
+			count++
+			query += " AND date <= $" + strconv.Itoa(count)
+			queryParamsSlice = append(queryParamsSlice, queryGet.EndDate)
+		}
 	}
 
 	query += " ORDER BY date DESC;"
