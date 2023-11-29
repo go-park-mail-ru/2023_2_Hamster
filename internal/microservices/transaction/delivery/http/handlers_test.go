@@ -155,18 +155,18 @@ func TestHandler_GetFeed(t *testing.T) {
 			},
 		},
 		{
-			name:         "Invalid Query outcome",
+			name:         "Invalid Query start_date",
 			user:         user,
-			queryParam:   "outcome='trueee'",
+			queryParam:   "start_date='trueee'",
 			expectedCode: http.StatusBadRequest,
 			expectedBody: `{"status":400,"message":"invalid url parameter"}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
 			},
 		},
 		{
-			name:         "Invalid Query outcome",
+			name:         "Invalid Query end_date",
 			user:         user,
-			queryParam:   "date='trueee'",
+			queryParam:   "end_date='trueee'",
 			expectedCode: http.StatusBadRequest,
 			expectedBody: `{"status":400,"message":"invalid url parameter"}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {

@@ -11,6 +11,8 @@ definitions:
     properties:
       id:
         type: string
+      login:
+        type: string
       username:
         type: string
     type: object
@@ -53,8 +55,10 @@ definitions:
   http.CreateTransaction:
     properties:
       account_income:
+        description: ???
         type: string
       account_outcome:
+        description: ???
         type: string
       categories:
         items:
@@ -542,8 +546,8 @@ paths:
       summary: Validate Auth
       tags:
       - Auth
-  /api/auth/checkLogin/{login}:
-    get:
+  /api/auth/checkLogin/:
+    post:
       description: Get bool parametrs about unique login
       produces:
       - application/json
@@ -608,7 +612,7 @@ paths:
       produces:
       - application/json
       responses:
-        "202":
+        "201":
           description: User Created
           schema:
             $ref: '#/definitions/http.Response-auth_SignResponse'
@@ -879,9 +883,9 @@ paths:
         in: query
         name: category
         type: string
-      - example: "2023-11-21T19:30:57+03:00"
+      - example: "2023-12-21T19:30:57+03:00"
         in: query
-        name: date
+        name: end_date
         type: string
       - example: true
         in: query
@@ -891,6 +895,10 @@ paths:
         in: query
         name: outcome
         type: boolean
+      - example: "2023-11-21T19:30:57+03:00"
+        in: query
+        name: start_date
+        type: string
       produces:
       - application/json
       responses:

@@ -219,8 +219,8 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/checkLogin/{login}": {
-            "get": {
+        "/api/auth/checkLogin/": {
+            "post": {
                 "description": "Get bool parametrs about unique login",
                 "produces": [
                     "application/json"
@@ -322,7 +322,7 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "202": {
+                    "201": {
                         "description": "User Created",
                         "schema": {
                             "$ref": "#/definitions/http.Response-auth_SignResponse"
@@ -696,8 +696,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "example": "2023-11-21T19:30:57+03:00",
-                        "name": "date",
+                        "example": "2023-12-21T19:30:57+03:00",
+                        "name": "end_date",
                         "in": "query"
                     },
                     {
@@ -710,6 +710,12 @@ const docTemplate = `{
                         "type": "boolean",
                         "example": true,
                         "name": "outcome",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "2023-11-21T19:30:57+03:00",
+                        "name": "start_date",
                         "in": "query"
                     }
                 ],
@@ -1269,6 +1275,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "login": {
+                    "type": "string"
+                },
                 "username": {
                     "type": "string"
                 }
@@ -1334,9 +1343,11 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "account_income": {
+                    "description": "???",
                     "type": "string"
                 },
                 "account_outcome": {
+                    "description": "???",
                     "type": "string"
                 },
                 "categories": {
