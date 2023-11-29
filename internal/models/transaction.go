@@ -14,7 +14,7 @@ type Transaction struct {
 	Income           float64     `json:"income" valid:"required"`
 	Outcome          float64     `json:"outcome" valid:"required"`
 	Date             time.Time   `json:"date" valid:"isdate"`
-	Payer            string      `json:"payer" valid:"payer"`
+	Payer            string      `json:"payer" valid:"-"`
 	Description      string      `json:"description" valid:"-"`
 	Categories       []uuid.UUID `json:"categories" valid:"-"`
 }
@@ -26,7 +26,7 @@ type TransactionTransfer struct {
 	Income           float64     `json:"income" valid:"required"`
 	Outcome          float64     `json:"outcome" valid:"required"`
 	Date             time.Time   `json:"date" valid:"isdate"`
-	Payer            string      `json:"payer" valid:"payer"`
+	Payer            string      `json:"payer" valid:"-"`
 	Description      string      `json:"description" valid:"-"`
 	Categories       []uuid.UUID `json:"categories" valid:"-"`
 }

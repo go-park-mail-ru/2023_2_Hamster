@@ -89,18 +89,17 @@ func (r *transactionRep) GetFeed(ctx context.Context, user_id uuid.UUID, queryGe
 
 	if !queryGet.StartDate.IsZero() || !queryGet.EndDate.IsZero() {
 		count++
-		if !queryGet.StartDate.IsZero() {
+		if !queryGet.StartDate.IsZero() && !queryGet.EndDate.IsZero() {
+			query += " AND date BETWEEN $" + strconv.Itoa(count) + " AND $" + strconv.Itoa(count+1)
+			queryParamsSlice = append(queryParamsSlice, queryGet.StartDate, queryGet.EndDate)
+		} else if !queryGet.StartDate.IsZero() {
 			query += " AND date >= $" + strconv.Itoa(count)
 			queryParamsSlice = append(queryParamsSlice, queryGet.StartDate)
-		}
-
-		if !queryGet.EndDate.IsZero() {
-			count++
+		} else {
 			query += " AND date <= $" + strconv.Itoa(count)
 			queryParamsSlice = append(queryParamsSlice, queryGet.EndDate)
 		}
 	}
-
 	query += " ORDER BY date DESC;"
 	rows, err := r.db.Query(ctx, query, queryParamsSlice...)
 	if err != nil {

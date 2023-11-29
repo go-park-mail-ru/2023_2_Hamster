@@ -78,6 +78,7 @@ func (cr *CreateTransaction) ToTransaction(user *models.User) *models.Transactio
 		AccountOutcomeID: cr.AccountOutcomeID,
 		Income:           cr.Income,
 		Outcome:          cr.Outcome,
+		Payer:            cr.Payer,
 		Date:             cr.Date,
 		Description:      cr.Description,
 		Categories:       cr.Categories,
