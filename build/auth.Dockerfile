@@ -8,7 +8,7 @@ RUN go mod download
 RUN go clean --modcache
 RUN CGO_ENABLED=0 GOOS=linux go build -mod=readonly -o auth ./cmd/auth/main.go
 
-FROM scratch AS run
+FROM golang:1.21.0-alpine AS run
 
 WORKDIR /docker-hammywallet/
 
