@@ -70,9 +70,11 @@ services:
   auth:
     depends_on:
     - hammy-postgres
-    build:
-      context: .
-      dockerfile: build/auth.Dockerfile
+    container_name: ${AUTH_CONTAINER}
+    image:  ${REGISTRY}/${AUTH_CONTAINER}:${GITHUB_SHA_SHORT}
+    #build:
+    #  context: .
+    #  dockerfile: build/auth.Dockerfile
     ports:
       - "8010:8010"
       - "8011:8011"
@@ -85,9 +87,11 @@ services:
   account:
     depends_on:
     - hammy-postgres
-    build:
-      context: .
-      dockerfile: build/account.Dockerfile
+    container_name: ${ACCOUNT_CONTAINER}
+    image:  ${REGISTRY}/${ACCOUNT_CONTAINER}:${GITHUB_SHA_SHORT}
+    #build:
+    #  context: .
+    #  dockerfile: build/account.Dockerfile
     ports:
       - "8020:8020"
       - "8021:8021"
@@ -100,9 +104,11 @@ services:
   category:
     depends_on:
     - hammy-postgres
-    build:
-      context: .
-      dockerfile: build/category.Dockerfile
+    container_name: ${CATEGORY_CONTAINER}
+    image:  ${REGISTRY}/${CATEGORY_CONTAINER}:${GITHUB_SHA_SHORT}
+    #build:
+    #  context: .
+    #  dockerfile: build/category.Dockerfile
     ports:
       - "8030:8030"
       - "8031:8031"
@@ -113,10 +119,10 @@ services:
       - hamster-net  
 
   hammywallet-api:
-    #container_name: ${CONTAINER_NAME}
-    #image:  ${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA_SHORT}
-    container_name: hammywallet-api
-    image:  codemaster482/hammywallet:latest
+    container_name: ${CONTAINER_NAME}
+    image:  ${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA_SHORT}
+    #container_name: hammywallet-api
+    #image:  codemaster482/hammywallet:latest
     env_file:
       - .env
     restart: always
