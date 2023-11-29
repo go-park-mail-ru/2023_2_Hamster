@@ -43,20 +43,20 @@ func Init(db *pgxpool.Pool, redis *redis.Client, log *logger.Logger) *mux.Router
 		grpc.FailOnNonTempDialError(true),
 	}
 
-	authConn, err := grpc.Dial("127.0.0.1:8010", opts...)
+	authConn, err := grpc.Dial("auth:8010", opts...)
 	if err != nil {
 		log.Fatalf("Connection refused auth: %v\n", err)
 	}
 
 	authClient := generatedAuth.NewAuthServiceClient(authConn)
 
-	accountConn, err := grpc.Dial("127.0.0.1:8020", opts...)
+	accountConn, err := grpc.Dial("account:8020", opts...)
 
 	if err != nil {
 		log.Fatalf("Connection refused account %v\n", err)
 	}
 
-	categoryConn, err := grpc.Dial("127.0.0.1:8030", opts...)
+	categoryConn, err := grpc.Dial("category:8030", opts...)
 
 	if err != nil {
 		log.Fatalf("Connection refused category %v\n", err)
