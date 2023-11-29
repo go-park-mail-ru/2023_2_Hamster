@@ -13,14 +13,14 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	accountID = "account_id"
+)
+
 type Handler struct {
 	client genAccount.AccountServiceClient
 	logger logger.Logger
 }
-
-const (
-	accountID = "account_id"
-)
 
 func NewHandler(
 	client genAccount.AccountServiceClient,

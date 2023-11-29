@@ -13,10 +13,9 @@ import (
 	generatedAccount "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account/delivery/grpc/generated"
 	generatedAuth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/grpc/generated"
 	authDelivery "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/http"
+	generatedCategory "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/category/delivery/grpc/generated"
 
 	categoryDelivary "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/category/delivery/http"
-	categoryRep "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/category/repository/postgres"
-	categoryUsecase "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/category/usecase"
 
 	csrfDelivery "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/csrf/delivery/http"
 	csrfUsecase "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/csrf/usecase"
@@ -38,24 +37,32 @@ import (
 )
 
 func Init(db *pgxpool.Pool, redis *redis.Client, log *logger.Logger) *mux.Router {
-	authConn, err := grpc.Dial(
-		"127.0.0.1:8010",
-		grpc.WithTransportCredentials(insecure.NewCredentials()))
+	opts := []grpc.DialOption{
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
+		grpc.FailOnNonTempDialError(true),
+	}
+
+	authConn, err := grpc.Dial("auth:8010", opts...)
 	if err != nil {
-		log.Fatal("can't connect to auth grpc:", err)
+		log.Fatalf("Connection refused auth: %v\n", err)
 	}
 
 	authClient := generatedAuth.NewAuthServiceClient(authConn)
 
-	// authRep := authRep.NewRepository(db, *log)
-	accountConn, err := grpc.Dial(
-		"127.0.0.1:8030",
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
+	accountConn, err := grpc.Dial("account:8020", opts...)
 
 	if err != nil {
-		log.Fatal("can't connect to account grpc")
+		log.Fatalf("Connection refused account %v\n", err)
 	}
+
+	categoryConn, err := grpc.Dial("category:8030", opts...)
+
+	if err != nil {
+		log.Fatalf("Connection refused category %v\n", err)
+	}
+
+	categortClient := generatedCategory.NewCategoryServiceClient(categoryConn)
 
 	accountClient := generatedAccount.NewAccountServiceClient(accountConn)
 	// authRep := authRep.NewRepository(db, *log)
@@ -63,14 +70,14 @@ func Init(db *pgxpool.Pool, redis *redis.Client, log *logger.Logger) *mux.Router
 
 	userRep := userRep.NewRepository(db, *log)
 	transactionRep := transactionRep.NewRepository(db, *log)
-	categoryRep := categoryRep.NewRepository(db, *log)
+	//categoryRep := categoryRep.NewRepository(db, *log)
 	// accountRep := accountRep.NewRepository(db, *log)
 
 	// authUsecase := authUsecase.NewUsecase(authRep, *log)
 	sessionUsecase := sessionUsecase.NewSessionUsecase(sessionRep)
 	userUsecase := userUsecase.NewUsecase(userRep, *log)
 	transactionUsecase := transactionUsecase.NewUsecase(transactionRep, *log)
-	categoryUsecase := categoryUsecase.NewUsecase(categoryRep, *log)
+	//categoryUsecase := categoryUsecase.NewUsecase(categoryRep, *log)
 	csrfUsecase := csrfUsecase.NewUsecase(*log)
 	// accountUsecase := accountUsecase.NewUsecase(accountRep, *log)
 
@@ -83,7 +90,7 @@ func Init(db *pgxpool.Pool, redis *redis.Client, log *logger.Logger) *mux.Router
 
 	userHandler := userDelivery.NewHandler(userUsecase, *log)
 	transactionHandler := transactionDelivery.NewHandler(transactionUsecase, *log)
-	categoryHandler := categoryDelivary.NewHandler(categoryUsecase, *log)
+	categoryHandler := categoryDelivary.NewHandler(categortClient, *log)
 	csrfHandler := csrfDelivery.NewHandler(csrfUsecase, *log)
 	accountHandler := accountDelivery.NewHandler(accountClient, *log)
 

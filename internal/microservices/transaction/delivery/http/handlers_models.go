@@ -31,8 +31,8 @@ type MasTransaction struct {
 }
 
 type CreateTransaction struct {
-	AccountIncomeID  uuid.UUID   `json:"account_income" valid:"required"`
-	AccountOutcomeID uuid.UUID   `json:"account_outcome" valid:"required"`
+	AccountIncomeID  uuid.UUID   `json:"account_income" valid:"-"`  // ???
+	AccountOutcomeID uuid.UUID   `json:"account_outcome" valid:"-"` // ???
 	Income           float64     `json:"income" valid:"-"`
 	Outcome          float64     `json:"outcome" valid:"-"`
 	Date             time.Time   `json:"date" valid:"required"`

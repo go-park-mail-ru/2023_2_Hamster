@@ -12,9 +12,10 @@ import (
 )
 
 const (
-	ServiceMainName    = "main"
-	ServiceAuthName    = "auth"
-	ServiceAccountName = "account"
+	ServiceMainName     = "main"
+	ServiceAuthName     = "auth"
+	ServiceAccountName  = "account"
+	ServiceCategoryName = "category"
 )
 
 var (

@@ -120,7 +120,7 @@ func (r *AccountRep) DeleteAccount(ctx context.Context, userID uuid.UUID, accoun
 		return fmt.Errorf("[repo] failed to delete from UserAccount table: %w", err)
 	}
 
-	_, err = tx.Exec(ctx, AccountDelete, 2)
+	_, err = tx.Exec(ctx, AccountDelete, accountID)
 	if err != nil {
 		return fmt.Errorf("[repo] failed to delete account %s, %w", AccountDelete, err)
 	}

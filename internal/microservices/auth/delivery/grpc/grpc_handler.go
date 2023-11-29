@@ -106,7 +106,7 @@ func (a *authGRPC) GetByID(ctx context.Context, in *proto.UserIdRequest) (*proto
 	}
 	user, err := a.authServices.GetByID(ctx, userUUID)
 	if err != nil {
-		var errNoSuchUser models.NoSuchUserError
+		var errNoSuchUser *models.NoSuchUserError
 		if errors.As(err, &errNoSuchUser) {
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
