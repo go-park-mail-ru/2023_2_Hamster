@@ -162,7 +162,7 @@ jobs:
             SECRET=${{ secrets.SECRET }}
             IMAGE_NAME=${{ env.IMAGE_NAME }}
             AUTH_CONTAINER=${{ env.AUTH_CONTAINER }}
-            ACCOUNT_CONTAINER${{ env.ACCOUNT_CONTAINER }}
+            ACCOUNT_CONTAINER=${{ env.ACCOUNT_CONTAINER }}
             CATEGORY_CONTAINER=${{ env.CATEGORY_CONTAINER }}
             REGISTRY=${{ env.REGISTRY }}
             CONTAINER_NAME=${{ env.CONTAINER_NAME }}
