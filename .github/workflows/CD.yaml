@@ -5,6 +5,9 @@ env:
   IMAGE_NAME: "hammywallet"
   CONTAINER_NAME: "hammywallet-api"
   FOLDER_COMPOSE: "production"
+  AUTH_CONTAINER: "hammywallet-auth"
+  ACCOUNT_CONTAINER: "hammywallet-account"
+  CATEGORY_CONTAINER: "hammywallet-category"
 
 on:
   push:
@@ -75,6 +78,43 @@ jobs:
               IMAGE_NAME=${{ env.IMAGE_NAME }}
               REGISTRY=${{ env.REGISTRY }}
               GITHUB_SHA_SHORT=${{ env.GITHUB_SHA_SHORT }}
+
+      - name: Build and push auth
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.AUTH_CONTAINER }}:${{ env.GITHUB_SHA_SHORT }}, ${{ env.REGISTRY }}/${{ env.AUTH_CONTAINER }}:latest
+          file: ./build/auth.Dockerfile
+          build-args: |
+              IMAGE_NAME=${{ env.AUTH_CONTAINER }}-web
+              REGISTRY=${{ env.REGISTRY }}
+              GITHUB_SHA_SHORT=${{ env.GITHUB_SHA_SHORT }}
+
+      - name: Build and push account
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.ACCOUNT_CONTAINER }}:${{ env.GITHUB_SHA_SHORT }}, ${{ env.REGISTRY }}/${{ env.ACCOUNT_CONTAINER }}:latest
+          file: ./build/account.Dockerfile
+          build-args: |
+              IMAGE_NAME=${{ env.ACCOUNT_CONTAINER }}
+              REGISTRY=${{ env.REGISTRY }}
+              GITHUB_SHA_SHORT=${{ env.GITHUB_SHA_SHORT }}
+
+      - name: Build and push category
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.CATEGORY_CONTAINER }}:${{ env.GITHUB_SHA_SHORT }}, ${{ env.REGISTRY }}/${{ env.CATEGORY_CONTAINER }}:latest
+          file: ./build/category.Dockerfile
+          build-args: |
+              IMAGE_NAME=${{ env.CATEGORY_CONTAINER }}
+              REGISTRY=${{ env.REGISTRY }}
+              GITHUB_SHA_SHORT=${{ env.GITHUB_SHA_SHORT }}
+
   
 
   remote_deploy:
