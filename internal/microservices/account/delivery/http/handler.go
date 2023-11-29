@@ -83,7 +83,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 // @Tags				Account
 // @Description	Put 	account
 // @Produce		json
-// @Param		account	body		UpdateAccount		true		    "Input transactin update"
+// @Param		account	body		UpdateAccount		 true		    "Input transactin update"
 // @Success		200		{object}	Response[NilBody]				    "Update account"
 // @Failure		400		{object}	ResponseError						"Client error"
 // @Failure     401    	{object}  	ResponseError  						"Unauthorized user"
