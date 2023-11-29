@@ -78,8 +78,8 @@ func GetQueryParam(r *http.Request) (*models.QueryListOptions, error) {
 		}
 	}
 
-	startDateStr := values.Get("startDate")
-	endDateStr := values.Get("endDate")
+	startDateStr := values.Get("start_date")
+	endDateStr := values.Get("end_date")
 
 	if startDateStr != "" {
 		params.StartDate, err = time.Parse(time.RFC3339, startDateStr)
