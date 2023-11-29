@@ -46,7 +46,7 @@ func TestUsecase_SignUp(t *testing.T) {
 		},
 		{
 			name:        "Username Already Exists",
-			expectedErr: fmt.Errorf("[usecase] username already exist"),
+			expectedErr: fmt.Errorf("[usecase] user already exists"),
 			mockRepoFn: func(mockRepositry *mock.MockRepository) {
 				mockRepositry.EXPECT().CheckLoginUnique(gomock.Any(), gomock.Any()).Return(false, nil)
 			},

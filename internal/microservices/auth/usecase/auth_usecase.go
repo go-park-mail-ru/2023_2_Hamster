@@ -37,7 +37,7 @@ func (u *Usecase) SignUp(ctx context.Context, input auth.SignUpInput) (uuid.UUID
 
 	if !ok {
 		u.logger.Error("Login already exist ", input.Login)
-		return uuid.Nil, "", "", fmt.Errorf("(repo) %w", &models.UserAlreadyExistsError{}) // Error login exist
+		return uuid.Nil, "", "", fmt.Errorf("[usecase] %w", &models.UserAlreadyExistsError{}) // Error login exist
 	}
 
 	hash, err := hasher.GeneratePasswordHash(input.PlaintPassword)
