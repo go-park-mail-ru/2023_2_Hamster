@@ -10,6 +10,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx"
 )
 
 const (
@@ -19,15 +20,17 @@ const (
 	UserIDGetByID        = `SELECT id, login, username, password_hash, planned_budget, avatar_url FROM users WHERE id = $1;`
 )
 
+const errorUserExists = "unique_violation"
+
 type AuthRep struct {
 	db     postgresql.DbConn
-	logger logger.Logger
+	logger logger.Logger // legacy
 }
 
-func NewRepository(db postgresql.DbConn, l logger.Logger) *AuthRep {
+func NewRepository(db postgresql.DbConn, log logger.Logger) *AuthRep {
 	return &AuthRep{
 		db:     db,
-		logger: l,
+		logger: log, // legacy
 	}
 }
 
@@ -35,7 +38,7 @@ func (r *AuthRep) CheckLoginUnique(ctx context.Context, login string) (bool, err
 	var count int
 	err := r.db.QueryRow(ctx, UserCheckLoginUnique, login).Scan(&count)
 	if err != nil {
-		return false, fmt.Errorf("[repo] failed login unique check %w", err)
+		return false, fmt.Errorf("[repo] failed login unique check %w", err) // Db err
 	}
 
 	return count == 0, nil
@@ -47,7 +50,7 @@ func (r *AuthRep) GetUserByLogin(ctx context.Context, login string) (*models.Use
 	err := row.Scan(&u.ID, &u.Login, &u.Username, &u.Password, &u.PlannedBudget, &u.AvatarURL)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		return nil, fmt.Errorf("[repo] nothing found for this request %w", err)
+		return nil, fmt.Errorf("[repo] %w, %v", &models.NoSuchUserError{}, err)
 	} else if err != nil {
 		return nil,
 			fmt.Errorf("[repo] failed request db %w", err)
@@ -61,7 +64,13 @@ func (r *AuthRep) CreateUser(ctx context.Context, u models.User) (uuid.UUID, err
 
 	err := row.Scan(&id)
 	if err != nil {
-		return id, fmt.Errorf("error request %w", err)
+		if pqerr, ok := err.(*pgx.PgError); ok {
+			if pqerr.ConstraintName == errorUserExists {
+				return uuid.Nil, fmt.Errorf("(repo) %w: %v", &models.UserAlreadyExistsError{}, err)
+			}
+		}
+
+		return id, fmt.Errorf("(Repo) failed to scan from query: %w", err)
 	}
 	return id, nil
 }
@@ -70,13 +79,18 @@ func (r *AuthRep) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, 
 	row := r.db.QueryRow(ctx, UserIDGetByID, userID)
 	var u models.User
 
-	err := row.Scan(&u.ID, &u.Login, &u.Username, &u.Password, &u.PlannedBudget, &u.AvatarURL)
+	err := row.Scan(
+		&u.ID,
+		&u.Login,
+		&u.Username,
+		&u.Password,
+		&u.PlannedBudget,
+		&u.AvatarURL,
+	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, fmt.Errorf("[repo] %w: %v", &models.NoSuchUserError{UserID: userID}, err)
 	} else if err != nil {
-		return nil,
-			fmt.Errorf("failed request db %s, %w", UserIDGetByID, err)
-
+		return nil, fmt.Errorf("failed request db %s, %w", UserIDGetByID, err)
 	}
 	return &u, nil
 }

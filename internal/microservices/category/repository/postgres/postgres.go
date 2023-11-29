@@ -36,6 +36,8 @@ const (
 						SELECT "name" FROM category 
 						WHERE user_id = $1 AND id = $2
 					);`
+
+	transactionAssociationDelete = "DELETE FROM transactionCategory WHERE category_id = $1;"
 )
 
 type Repository struct {
@@ -51,26 +53,20 @@ func NewRepository(db postgresql.DbConn, log logger.Logger) *Repository {
 }
 
 func (r *Repository) CreateTag(ctx context.Context, tag models.Category) (uuid.UUID, error) {
-	var row pgx.Row
-	if tag.ParentID == uuid.Nil {
-		row = r.db.QueryRow(ctx, CategoryCreate,
-			tag.UserID,
-			nil,
-			tag.Name,
-			tag.ShowIncome,
-			tag.ShowOutcome,
-			tag.Regular,
-		)
-	} else {
-		row = r.db.QueryRow(ctx, CategoryCreate,
-			tag.UserID,
-			tag.ParentID,
-			tag.Name,
-			tag.ShowIncome,
-			tag.ShowOutcome,
-			tag.Regular,
-		)
+	var parentID interface{}
+	if tag.ParentID != uuid.Nil {
+		parentID = tag.ParentID
 	}
+
+	row := r.db.QueryRow(ctx, CategoryCreate,
+		tag.UserID,
+		parentID,
+		tag.Name,
+		tag.ShowIncome,
+		tag.ShowOutcome,
+		tag.Regular,
+	)
+
 	var id uuid.UUID
 
 	err := row.Scan(&id)
@@ -91,26 +87,18 @@ func (r *Repository) UpdateTag(ctx context.Context, tag *models.Category) error 
 		return fmt.Errorf("[repo] failed request db %s, %w", CategoryGet, err)
 	} */
 
-	var err error
-	if tag.ParentID == uuid.Nil {
-		_, err = r.db.Exec(ctx, CategoryUpdate,
-			nil,
-			tag.Name,
-			tag.ShowIncome,
-			tag.ShowOutcome,
-			tag.Regular,
-			tag.ID,
-		)
-	} else {
-		_, err = r.db.Exec(ctx, CategoryUpdate,
-			tag.ParentID,
-			tag.Name,
-			tag.ShowIncome,
-			tag.ShowOutcome,
-			tag.Regular,
-			tag.ID,
-		)
+	var parentID interface{}
+	if tag.ParentID != uuid.Nil {
+		parentID = tag.ParentID
 	}
+	_, err := r.db.Exec(ctx, CategoryUpdate,
+		parentID,
+		tag.Name,
+		tag.ShowIncome,
+		tag.ShowOutcome,
+		tag.Regular,
+		tag.ID,
+	)
 
 	if err != nil {
 		return fmt.Errorf("[repo] failed to update category info: %s, %w", CategoryUpdate, err)
@@ -130,7 +118,24 @@ func (r *Repository) DeleteTag(ctx context.Context, tagId uuid.UUID) error {
 	}
 	*/
 
-	_, err := r.db.Exec(ctx, CategoryDelete, tagId)
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("[repo] failed to start db transaction: %w", err)
+	}
+
+	defer func() {
+		if err != nil {
+			if err = tx.Rollback(ctx); err != nil {
+				r.log.Fatal("Rollback transaction Error: %w", err)
+			}
+		}
+	}()
+
+	if err = r.deleteTransactionAssociations(ctx, tx, tagId); err != nil {
+		return err
+	}
+
+	_, err = r.db.Exec(ctx, CategoryDelete, tagId)
 	if err != nil {
 		return fmt.Errorf("[repo] failed to delete category %s, %w", CategoryDelete, err)
 	}
@@ -196,4 +201,12 @@ func (r *Repository) CheckExist(ctx context.Context, userId uuid.UUID, tagId uui
 		return false, fmt.Errorf("[repo] Error: %v", err)
 	}
 	return true, nil
+}
+
+func (r *Repository) deleteTransactionAssociations(ctx context.Context, tx pgx.Tx, tagID uuid.UUID) error {
+	_, err := tx.Exec(ctx, transactionAssociationDelete, tagID)
+	if err != nil {
+		return fmt.Errorf("[repo] failed to delete existing transaction associations: %w", err)
+	}
+	return nil
 }

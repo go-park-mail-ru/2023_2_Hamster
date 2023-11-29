@@ -31,7 +31,7 @@ import (
 // @name				session_id
 
 func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), 10000000*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	log := logger.NewLogger(ctx)
@@ -95,3 +95,9 @@ func main() {
 
 	log.Info("Server exiting")
 }
+
+// internal/microservices/delivery/grpc/{server, clent}
+// proto/*proto
+//
+// cmd/apiGateway/main.go
+// cmd/api/main.go

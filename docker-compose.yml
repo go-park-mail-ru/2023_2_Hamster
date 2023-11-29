@@ -58,7 +58,6 @@ services:
     networks:
       - hamster-net
 
-
   hammy-redis:
     container_name: hammy-redis
     image: redis:latest
@@ -68,10 +67,55 @@ services:
     ports:
       - "${REDIS_PORT}:6379"
 
+  auth:
+    depends_on:
+    - hammy-postgres
+    build:
+      context: .
+      dockerfile: build/auth.Dockerfile
+    ports:
+      - "8010:8010"
+      - "8011:8011"
+    volumes:
+    - ./.env:/docker-hammywallet/.env
+    - ./api-logs:/docker-hammywallet/logs
+    networks:
+      - hamster-net  
+
+  account:
+    depends_on:
+    - hammy-postgres
+    build:
+      context: .
+      dockerfile: build/account.Dockerfile
+    ports:
+      - "8020:8020"
+      - "8021:8021"
+    volumes:
+    - ./.env:/docker-hammywallet/.env
+    - ./api-logs:/docker-hammywallet/logs
+    networks:
+      - hamster-net  
+
+  category:
+    depends_on:
+    - hammy-postgres
+    build:
+      dockerfile: build/category.Dockerfile
+    ports:
+      - "8030:8030"
+      - "8031:8031"
+    volumes:
+    - ./.env:/docker-hammywallet/.env
+    - ./api-logs:/docker-hammywallet/logs
+    networks:
+      - hamster-net  
 
   hammywallet-api:
     container_name: ${CONTAINER_NAME}
     image:  ${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA_SHORT}
+    # container_name: hammywallet-api
+    # image:  codemaster482/hammywallet:latest
     env_file:
       - .env
     restart: always
@@ -80,16 +124,21 @@ services:
     volumes:
       - ./.env:/docker-hammywallet/.env
       - ./api-logs:/docker-hammywallet/logs
-      - type: bind
-        source: /home/ubuntu/frontend/images
-        target: /images
+      #- type: bind
+      #  source: /home/ubuntu/frontend/images
+      #  target: /images
     depends_on:
       - hammy-postgres
       - hammy-redis
+      - category
+      - account
+      - auth
     networks:
       - hamster-net
 
   prometheus:
+    depends_on:
+      - hammywallet-api
     container_name: prometheus
     image: prom/prometheus:latest
     volumes:

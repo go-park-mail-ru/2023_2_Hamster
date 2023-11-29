@@ -101,7 +101,7 @@ func TestGetUserByLogin(t *testing.T) {
 			name:     "UserNotFound",
 			rows:     pgxmock.NewRows([]string{"id", "login", "username", "password", "planned_budget", "avatar_url"}),
 			rowsErr:  sql.ErrNoRows,
-			err:      fmt.Errorf("[repo] nothing found for this request %w", sql.ErrNoRows),
+			err:      fmt.Errorf("[repo] %w, %v", &models.NoSuchUserError{}, sql.ErrNoRows),
 			expected: nil,
 		},
 		{
@@ -174,7 +174,7 @@ func TestCreateUser(t *testing.T) {
 			},
 			errRows:    errors.New("Invalid user data"),
 			returnRows: uuid.Nil,
-			err:        errors.New("error request Invalid user data"),
+			err:        fmt.Errorf("(Repo) failed to scan from query: %w", errors.New("Invalid user data")), // errors.New("error request Invalid user data"),
 		},
 	}
 

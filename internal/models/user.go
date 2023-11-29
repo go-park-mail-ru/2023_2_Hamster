@@ -1,6 +1,8 @@
 package models
 
 import (
+	"fmt"
+
 	"github.com/google/uuid"
 )
 
@@ -16,3 +18,20 @@ type User struct {
 }
 
 type ContextKeyUserType struct{}
+
+type UserAlreadyExistsError struct{}
+
+func (e *UserAlreadyExistsError) Error() string {
+	return "user already exists"
+}
+
+type IncorrectPasswordError struct {
+	UserID uuid.UUID
+}
+
+func (e *IncorrectPasswordError) Error() string {
+	if e.UserID == uuid.Nil {
+		return "incorrect password for user"
+	}
+	return fmt.Sprintf("incorrect password for user #%d", e.UserID)
+}

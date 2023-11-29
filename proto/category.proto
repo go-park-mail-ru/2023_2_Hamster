@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package category;
+option go_package = "internal/microservices/category/delivery/grpc/generated";
+
+import "google/protobuf/empty.proto";
+
+message CreateTagRequest {
+    string user_id = 1;
+    string parent_id = 2;
+    string name = 3;
+    bool show_income = 4;
+    bool show_outcome = 5;
+    bool regular = 6;
+};
+
+message CreateTagResponse {
+    string tag_id = 1;
+}
+
+message UserIdRequest {
+    string user_id = 1;
+}
+
+message Category {
+  string id = 1;
+  string user_id = 2;
+  string parent_id = 3;
+  string name = 4;
+  bool show_income = 5;
+  bool show_outcome = 6;
+  bool regular = 7;
+}
+
+message GetTagsResponse {
+  repeated Category categories = 1;
+}
+
+message DeleteRequest {
+    string tag_id = 1;
+    string user_id = 2;
+}
+
+service CategoryService {
+    rpc CreateTag(CreateTagRequest) returns (CreateTagResponse);
+    rpc GetTags(UserIdRequest) returns (GetTagsResponse);
+    rpc UpdateTag(Category) returns (Category);
+    rpc DeleteTag(DeleteRequest) returns (google.protobuf.Empty);
+};
+

@@ -8,18 +8,20 @@ import (
 	response "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/category"
+	genCategory "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/category/delivery/grpc/generated"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
+	"github.com/google/uuid"
 )
 
 type Handler struct {
-	cu  category.Usecase
-	log logger.Logger
+	client genCategory.CategoryServiceClient
+	log    logger.Logger
 }
 
-func NewHandler(cu category.Usecase, log logger.Logger) *Handler {
+func NewHandler(client genCategory.CategoryServiceClient, log logger.Logger) *Handler {
 	return &Handler{
-		cu:  cu,
-		log: log,
+		client: client,
+		log:    log,
 	}
 }
 
@@ -55,7 +57,14 @@ func (h *Handler) CreateTag(w http.ResponseWriter, r *http.Request) {
 
 	tag.UserId = user.ID
 
-	id, err := h.cu.CreateTag(r.Context(), tag)
+	id, err := h.client.CreateTag(r.Context(), &genCategory.CreateTagRequest{
+		UserId:      tag.UserId.String(),
+		ParentId:    tag.ParentId.String(),
+		Name:        tag.Name,
+		ShowIncome:  tag.ShowIncome,
+		ShowOutcome: tag.ShowOutcome,
+		Regular:     tag.Regular,
+	})
 	if err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
@@ -63,8 +72,8 @@ func (h *Handler) CreateTag(w http.ResponseWriter, r *http.Request) {
 		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't crate tag", h.log)
 		return
 	}
-
-	categoryResponse := category.CategoryCreateResponse{CategoryID: id}
+	tagID, _ := uuid.Parse(id.TagId)
+	categoryResponse := category.CategoryCreateResponse{CategoryID: tagID}
 	response.SuccessResponse(w, http.StatusOK, categoryResponse)
 }
 
@@ -88,13 +97,32 @@ func (h *Handler) GetTags(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tags, err := h.cu.GetTags(r.Context(), user.ID)
+	gtags, err := h.client.GetTags(r.Context(), &genCategory.UserIdRequest{UserId: user.ID.String()})
 	if err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Errorf("[handler] get tags Error: %v", err)
 		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't get tags", h.log)
 		return
+	}
+
+	tags := make([]models.Category, len(gtags.Categories))
+
+	for i, gtag := range gtags.Categories {
+		id, _ := uuid.Parse(gtag.Id)
+		userID, _ := uuid.Parse(gtag.UserId)
+		parentID, _ := uuid.Parse(gtag.ParentId)
+
+		tag := models.Category{
+			ID:          id,
+			UserID:      userID,
+			ParentID:    parentID,
+			Name:        gtag.Name,
+			ShowIncome:  gtag.ShowIncome,
+			ShowOutcome: gtag.ShowOutcome,
+			Regular:     gtag.Regular,
+		}
+		tags[i] = tag
 	}
 
 	response.SuccessResponse(w, http.StatusOK, tags)
@@ -135,13 +163,35 @@ func (h *Handler) UpdateTag(w http.ResponseWriter, r *http.Request) {
 
 	tag.UserID = user.ID
 
-	if err := h.cu.UpdateTag(r.Context(), &tag); err != nil {
+	upd, err := h.client.UpdateTag(r.Context(), &genCategory.Category{
+		Id:          tag.ID.String(),
+		UserId:      tag.UserID.String(),
+		ParentId:    tag.ParentID.String(),
+		Name:        tag.Name,
+		ShowIncome:  tag.ShowIncome,
+		ShowOutcome: tag.ShowOutcome,
+		Regular:     tag.Regular,
+	})
+
+	if err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Errorf("[handler] Update Error: %v", err)
 		response.ErrorResponse(w, http.StatusBadRequest, err, "Can't Update tag", h.log)
 		return
 	}
+
+	tagID, _ := uuid.Parse(upd.Id)
+	tagUserID, _ := uuid.Parse(upd.UserId)
+	tagParentID, _ := uuid.Parse(upd.ParentId)
+
+	tag.ID = tagID
+	tag.UserID = tagUserID
+	tag.ParentID = tagParentID
+	tag.Name = upd.Name
+	tag.ShowIncome = upd.ShowIncome
+	tag.ShowOutcome = upd.ShowOutcome
+	tag.Regular = upd.Regular
 
 	response.SuccessResponse(w, http.StatusOK, tag)
 }
@@ -179,7 +229,9 @@ func (h *Handler) DeleteTag(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	if err := h.cu.DeleteTag(r.Context(), tagId.ID, user.ID); err != nil {
+	_, err = h.client.DeleteTag(r.Context(), &genCategory.DeleteRequest{TagId: tagId.ID.String(), UserId: user.ID.String()})
+
+	if err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Errorf("[handler] Delete Error: %v", err)

@@ -37,7 +37,7 @@ func InitRouter(auth *auth.Handler,
 	r.Use(middleware.RequestID)
 	r.Use(logMid.LoggingMiddleware)
 	r.Use(recoveryMid.Recoverer)
-	r.Use(middleware.Timeout(1000000 * time.Second))
+	r.Use(middleware.Timeout(5 * time.Second))
 	r.Use(middleware.Heartbeat("ping"))
 
 	http.Handle("/", r)
@@ -64,7 +64,7 @@ func InitRouter(auth *auth.Handler,
 		authRouter.Methods("POST").Path("/signin").HandlerFunc(auth.Login)
 		authRouter.Methods("POST").Path("/signup").HandlerFunc(auth.SignUp)
 		authRouter.Methods("POST").Path("/checkAuth").HandlerFunc(auth.HealthCheck)
-		authRouter.Methods("GET").Path("/loginCheck/{login}").HandlerFunc(auth.CheckLoginUnique)
+		authRouter.Methods("POST").Path("/loginCheck").HandlerFunc(auth.CheckLoginUnique)
 		authRouter.Methods("POST").Path("/logout").HandlerFunc(auth.LogOut)
 	}
 

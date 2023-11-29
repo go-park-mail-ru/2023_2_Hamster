@@ -7,10 +7,13 @@ import (
 	"github.com/google/uuid"
 )
 
+// go:generate mockgen -source=auth.go -destination=mocks/auth_mock.go
+// go:generate protoc --go_out=.  --go-grpc_out=.  --go-grpc_opt=paths=source_relative --go_opt=paths=source_relative auth.proto
+
 type Usecase interface {
 	// Auth
-	SignUp(ctx context.Context, input SignUpInput) (uuid.UUID, string, error)
-	Login(ctx context.Context, login, plainPassword string) (uuid.UUID, string, error)
+	SignUp(ctx context.Context, input SignUpInput) (uuid.UUID, string, string, error)
+	Login(ctx context.Context, login, plainPassword string) (uuid.UUID, string, string, error)
 	CheckLoginUnique(ctx context.Context, login string) (bool, error)
 
 	GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error)

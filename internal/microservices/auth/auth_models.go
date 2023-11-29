@@ -16,6 +16,10 @@ type (
 		Cookie string    `json:"cookie"`
 	}
 
+	UserIdInput struct {
+		ID uuid.UUID `json:"user_id"`
+	}
+
 	SignUpInput struct {
 		Login          string `json:"login" valid:"required,length(4|20)"`
 		Username       string `json:"username" valid:"required,length(4|20)"`
@@ -29,7 +33,12 @@ type (
 
 	SignResponse struct {
 		ID       uuid.UUID `json:"id" valid:"required"`
+		Login    string    `json:"login" valid:"required"`
 		Username string    `json:"username" valid:"required"`
+	}
+
+	UniqCheckInput struct {
+		Login string `json:"login" valid:"required"`
 	}
 )
 
@@ -50,3 +59,26 @@ func (si *SignUpInput) CheckValid() error {
 	_, err := valid.ValidateStruct(*si)
 	return err
 }
+
+// Errors
+
+const (
+	_                     = iota
+	InternalDataBaseError = "internal database error"
+	InvalidBodyRequest    = "invalid input params"
+	ForbiddenUser         = "user has no rights"
+)
+
+// type customErr struct {
+// 	Err error
+// 	Msg string
+// }
+//
+// func (e *customErr) Error() string {
+// 	return e.Msg
+// }
+//
+// func (e *customErr) Unwrap() error {
+// 	return e.Err
+// }
+//
