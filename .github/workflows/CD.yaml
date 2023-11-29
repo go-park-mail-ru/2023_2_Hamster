@@ -1,13 +1,184 @@
 name: CD
 
+env:
+  REGISTRY: "codemaster482"
+  IMAGE_NAME: "hammywallet"
+  CONTAINER_NAME: "hammywallet-api"
+  FOLDER_COMPOSE: "production"
+  AUTH_CONTAINER: "hammywallet-auth"
+  ACCOUNT_CONTAINER: "hammywallet-account"
+  CATEGORY_CONTAINER: "hammywallet-category"
+
 on:
   push:
     branches:
-      - main
       - deploy
   pull_request:
     branches:
-      - main
       - deploy
 
 jobs:
+  lint_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21.x'
+          cache: false
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+
+      - name: Create test folder
+        run: |
+          sudo mkdir /images  
+          sudo chmod -R 777 /images
+
+      - name: Test with the Go CLI
+        run: go test ./...
+
+
+  push_to_dockerhub:
+    runs-on: ubuntu-latest
+    needs: lint_and_test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: DockerHub login
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Set env
+        run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | head -c 8)" >> $GITHUB_ENV
+
+      - name: Build docker and push to dockerhub of CodeMaster
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.GITHUB_SHA_SHORT }}, ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          file: ./build/Dockerfile
+          build-args: |
+              IMAGE_NAME=${{ env.IMAGE_NAME }}
+              REGISTRY=${{ env.REGISTRY }}
+              GITHUB_SHA_SHORT=${{ env.GITHUB_SHA_SHORT }}
+
+      - name: Build and push auth
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.AUTH_CONTAINER }}:${{ env.GITHUB_SHA_SHORT }}, ${{ env.REGISTRY }}/${{ env.AUTH_CONTAINER }}:latest
+          file: ./build/auth.Dockerfile
+          build-args: |
+              IMAGE_NAME=${{ env.AUTH_CONTAINER }}-web
+              REGISTRY=${{ env.REGISTRY }}
+              GITHUB_SHA_SHORT=${{ env.GITHUB_SHA_SHORT }}
+
+      - name: Build and push account
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.ACCOUNT_CONTAINER }}:${{ env.GITHUB_SHA_SHORT }}, ${{ env.REGISTRY }}/${{ env.ACCOUNT_CONTAINER }}:latest
+          file: ./build/account.Dockerfile
+          build-args: |
+              IMAGE_NAME=${{ env.ACCOUNT_CONTAINER }}
+              REGISTRY=${{ env.REGISTRY }}
+              GITHUB_SHA_SHORT=${{ env.GITHUB_SHA_SHORT }}
+
+      - name: Build and push category
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.CATEGORY_CONTAINER }}:${{ env.GITHUB_SHA_SHORT }}, ${{ env.REGISTRY }}/${{ env.CATEGORY_CONTAINER }}:latest
+          file: ./build/category.Dockerfile
+          build-args: |
+              IMAGE_NAME=${{ env.CATEGORY_CONTAINER }}
+              REGISTRY=${{ env.REGISTRY }}
+              GITHUB_SHA_SHORT=${{ env.GITHUB_SHA_SHORT }}
+
+  
+
+  remote_deploy:
+    runs-on: ubuntu-latest
+    needs: push_to_dockerhub
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Deploy docker-compose via SSH action
+        uses: appleboy/scp-action@master
+        with:
+          debug: true
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          username: ${{ secrets.DEPLOY_USERNAME }}
+          key: ${{ secrets.SSHKEY }}
+          rm: true
+          source: docker-compose.yml, build/schema/initdb.sql, metrics/prometheus/prometheus.yml, build/account.Dockerfile, build/auth.Dockerfile, build/category.Dockerfile
+          target: ~/${{ env.FOLDER_COMPOSE }}
+
+      - name: Get docker form dockerhub via SSH action
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          debug: true
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          username: ${{ secrets.DEPLOY_USERNAME }}
+          key: ${{ secrets.SSHKEY }}
+          envs: REGISTRY, IMAGE_NAME, CONTAINER_NAME, GITHUB_SHA, FOLDER_COMPOSE
+          script: |
+            sudo bash
+            cd $(echo $FOLDER_COMPOSE)
+
+            cat <<EOF>.env
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_USER=${{ secrets.POSTGRES_USER }}
+            DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            DB_HOST=${{ secrets.DB_HOST }}
+            DB_PORT=${{ secrets.DB_PORT }}
+            DB_SSLMODE=disable
+            SERVER_HOST=0.0.0.0
+            SERVER_PORT=8080
+            SECRET=${{ secrets.SECRET }}
+            IMAGE_NAME=${{ env.IMAGE_NAME }}
+            AUTH_CONTAINER=${{ env.AUTH_CONTAINER }}
+            ACCOUNT_CONTAINER=${{ env.ACCOUNT_CONTAINER }}
+            CATEGORY_CONTAINER=${{ env.CATEGORY_CONTAINER }}
+            REGISTRY=${{ env.REGISTRY }}
+            CONTAINER_NAME=${{ env.CONTAINER_NAME }}
+            REDIS_HOST=${{ secrets.REDIS_HOST }}
+            REDIS_PORT=${{ secrets.REDIS_PORT }}
+            EOF
+
+            echo "GITHUB_SHA_SHORT=`echo $GITHUB_SHA | head -c8`" >> .env
+
+            echo ${{ secrets.DOCKERHUB_TOKEN }} | sudo docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+            sudo docker pull $REGISTRY/$IMAGE_NAME:latest
+            sudo docker pull $REGISTRY/$AUTH_CONTAINER:latest
+            sudo docker pull $REGISTRY/$ACCOUNT_CONTAINER:latest
+            sudo docker pull $REGISTRY/$CATEGORY_CONTAINER:latest
+
+            sudo docker system prune -f
+            sudo docker-compose down
+            sudo docker-compose up -d
+            sudo sleep 7
+            sudo chown ubuntu:ubuntu api-logs

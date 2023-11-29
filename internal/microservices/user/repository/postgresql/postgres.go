@@ -20,8 +20,16 @@ const (
 	UserCheck            = `SELECT EXISTS(SELECT 1 FROM users WHERE id = $1);`
 	UserUpdate           = `UPDATE users SET username = $2, planned_budget = $3, avatar_url = $4 WHERE id = $1;`
 	UserUpdatePhoto      = `UPDATE users SET avatar_url = $2 WHERE id = $1;`
-	AccountBalance       = "SELECT SUM(balance) FROM accounts WHERE user_id = $1" // TODO: move accounts
-	AccountGet           = `SELECT * FROM accounts WHERE user_id = $1`            // TODO: move accounts
+	AccountBalance       = `SELECT SUM(a.balance)
+							FROM Accounts a
+							JOIN UserAccount ua ON a.id = ua.account_id
+							WHERE ua.user_id = $1 
+							AND a.balance_enabled = true;` // TODO: move accounts
+
+	AccountGet = `SELECT a.*
+				  FROM Accounts a
+				  JOIN UserAccount ua ON a.id = ua.account_id
+				  WHERE ua.user_id = $1` // TODO: move accounts
 )
 
 type UserRep struct {
@@ -132,7 +140,6 @@ func (r *UserRep) GetCurrentBudget(ctx context.Context, userID uuid.UUID) (float
 }
 
 func (r *UserRep) GetAccounts(ctx context.Context, user_id uuid.UUID) ([]models.Accounts, error) { // need test
-
 	var accounts []models.Accounts
 
 	rows, err := r.db.Query(ctx, AccountGet, user_id)
@@ -145,8 +152,9 @@ func (r *UserRep) GetAccounts(ctx context.Context, user_id uuid.UUID) ([]models.
 		var account models.Accounts
 		if err := rows.Scan(
 			&account.ID,
-			&account.UserID,
 			&account.Balance,
+			&account.Accumulation,
+			&account.BalanceEnabled,
 			&account.MeanPayment,
 		); err != nil {
 			return nil, fmt.Errorf("[repo] %w", err)

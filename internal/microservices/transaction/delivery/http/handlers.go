@@ -31,17 +31,46 @@ func NewHandler(uu transaction.Usecase, l logger.Logger) *Handler {
 	}
 }
 
+// @Summary		Get count transaction
+// @Tags		Transaction
+// @Description	Get User count transaction
+// @Produce		json
+// @Success		200		{object}	Response[TransactionCount] "Show transaction count"
+// @Failure		400		{object}	ResponseError			 "Client error"
+// @Failure     401    	{object}    ResponseError  			 "Unauthorized user"
+// @Failure     403    	{object}    ResponseError  			 "Forbidden user"
+// @Failure		500		{object}	ResponseError			 "Server error"
+// @Router		/api/transaction/count [get]
+func (h *Handler) GetCount(w http.ResponseWriter, r *http.Request) {
+	user, err := commonHttp.GetUserFromRequest(r)
+	if err != nil && errors.Is(err, commonHttp.ErrUnauthorized) {
+		commonHttp.ErrorResponse(w, http.StatusUnauthorized, err, commonHttp.ErrUnauthorized.Error(), h.logger)
+		return
+	}
+
+	transactionCount, err := h.transactionService.GetCount(r.Context(), user.ID)
+
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, "can't get count transaction info", h.logger)
+		return
+	}
+
+	response := TransactionCount{Count: transactionCount}
+	commonHttp.SuccessResponse(w, http.StatusOK, response)
+
+}
+
 // @Summary		Get all transaction
-// @Tags			Transaction
+// @Tags		Transaction
 // @Description	Get User all transaction
 // @Produce		json
-// @Param       	request query       QueryListOptions false      	"Query Params"
-// @Success		200		{object}	Response[MasTransaction]		"Show transaction"
-// @Success		204		{object}	Response[string]	     	"Show actual accounts"
-// @Failure		400		{object}	ResponseError				"Client error"
-// @Failure     	401    	{object}  ResponseError  			"Unauthorized user"
-// @Failure     	403    	{object}  ResponseError  			"Forbidden user"
-// @Failure		500		{object}	ResponseError				"Server error"
+// @Param       request query       models.QueryListOptions false   "Query Params"
+// @Success		200		{object}	Response[MasTransaction] "Show transaction"
+// @Success		204		{object}	Response[string]	     "Show actual accounts"
+// @Failure		400		{object}	ResponseError			 "Client error"
+// @Failure     401    	{object}    ResponseError  			 "Unauthorized user"
+// @Failure     403    	{object}    ResponseError  			 "Forbidden user"
+// @Failure		500		{object}	ResponseError			 "Server error"
 // @Router		/api/transaction/feed [get]
 func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 	user, err := commonHttp.GetUserFromRequest(r)
@@ -50,12 +79,12 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page, pageSize, err := commonHttp.GetQueryParam(r)
+	query, err := commonHttp.GetQueryParam(r)
 	if err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
 		return
 	}
-	dataFeed, isAll, err := h.transactionService.GetFeed(r.Context(), user.ID, page, pageSize)
+	dataFeed, err := h.transactionService.GetFeed(r.Context(), user.ID, query)
 
 	var errNoSuchTransaction *models.NoSuchTransactionError
 	if errors.As(err, &errNoSuchTransaction) {
@@ -74,7 +103,7 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 		dataResponse = append(dataResponse, models.InitTransactionTransfer(transaction))
 	}
 
-	response := MasTransaction{Transactions: dataResponse, IsAll: isAll}
+	response := MasTransaction{Transactions: dataResponse}
 	commonHttp.SuccessResponse(w, http.StatusOK, response)
 
 }

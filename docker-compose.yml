@@ -1,34 +1,17 @@
 version: '3.8'
 
 networks:
-  app-network:
+  hamster-net:
     driver: bridge
 
 services:
-
-  server:
-    container_name: ${SERVER_NAME}
-    build:
-      context: .
-      dockerfile: ./build/Dockerfile
-    restart: on-failure
-    networks:
-      - app-network
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
-      - redis
-    env_file:
-      - .env
-
-  postgres:
-    container_name: ${DB_CONTAINER_NAME}
+  hammy-postgres:
+    container_name: hammy-postgres
     image: postgres:latest
     restart: on-failure
     env_file:
       - .env
-    command: 
+    command:
       - "postgres"
       - "-c"
       - "max_connections=5"
@@ -58,12 +41,14 @@ services:
       - "pg_stat_statements.max=10000"
       - "-c"
       - "pg_stat_statements.track=all"
+    ports:
+      - "${DB_PORT}:5432"
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - ./cmd/api/init/db/postgresql/schema/:/docker-entrypoint-initdb.d/
+      - ./build/schema/:/docker-entrypoint-initdb.d/
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 5s
@@ -71,13 +56,130 @@ services:
       retries: 5
       start_period: 10s
     networks:
-      - app-network
+      - hamster-net
 
-  redis:
-    container_name: "HammyWallet_redis"
+  hammy-redis:
+    container_name: hammy-redis
     image: redis:latest
     restart: on-failure
     networks:
-      - app-network
+      - hamster-net
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT}:6379"
+
+  auth:
+    depends_on:
+    - hammy-postgres
+    container_name: ${AUTH_CONTAINER}
+    image:  ${REGISTRY}/${AUTH_CONTAINER}:${GITHUB_SHA_SHORT}
+    #build:
+    #  context: .
+    #  dockerfile: build/auth.Dockerfile
+    ports:
+      - "8010:8010"
+      - "8011:8011"
+    volumes:
+    - ./.env:/docker-hammywallet/.env
+    networks:
+      - hamster-net  
+
+  account:
+    depends_on:
+    - hammy-postgres
+    container_name: ${ACCOUNT_CONTAINER}
+    image:  ${REGISTRY}/${ACCOUNT_CONTAINER}:${GITHUB_SHA_SHORT}
+    #build:
+    #  context: .
+    #  dockerfile: build/account.Dockerfile
+    ports:
+      - "8020:8020"
+      - "8021:8021"
+    volumes:
+    - ./.env:/docker-hammywallet/.env
+    networks:
+      - hamster-net  
+
+  category:
+    depends_on:
+    - hammy-postgres
+    container_name: ${CATEGORY_CONTAINER}
+    image:  ${REGISTRY}/${CATEGORY_CONTAINER}:${GITHUB_SHA_SHORT}
+    #build:
+    #  context: .
+    #  dockerfile: build/category.Dockerfile
+    ports:
+      - "8030:8030"
+      - "8031:8031"
+    volumes:
+    - ./.env:/docker-hammywallet/.env
+    networks:
+      - hamster-net  
+
+  hammywallet-api:
+    container_name: ${CONTAINER_NAME}
+    image:  ${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA_SHORT}
+    #container_name: hammywallet-api
+    #image:  codemaster482/hammywallet:latest
+    env_file:
+      - .env
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./.env:/docker-hammywallet/.env
+      - ./api-logs:/docker-hammywallet/logs
+      - type: bind
+        source: /home/ubuntu/frontend/images
+        target: /images
+    depends_on:
+      - hammy-postgres
+      - hammy-redis
+      - category
+      - account
+      - auth
+    networks:
+      - hamster-net
+
+  prometheus:
+    depends_on:
+      - hammywallet-api
+    container_name: prometheus
+    image: prom/prometheus:latest
+    volumes:
+      - ./metrics/prometheus/:/etc/prometheus/
+    ports:
+      - "8090:9090"
+    networks:
+      - hamster-net
+
+  nodeexporter:
+    container_name: node_exporter
+    image: prom/node-exporter
+    user: "0"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    restart: unless-stopped
+    ports:
+      - "8100:9100"
+    networks:
+      - hamster-net
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana-oss:9.4.3
+    user: '0'
+    environment:
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+      GF_SERVER_ROOT_URL: "https://hammywallet.ru/grafana/"
+    ports:
+      - "8015:3000"
+    volumes:
+      - type: bind
+        source: /home/ubuntu/grafana_metrics
+        target: /var/lib/grafana
+    networks:
+    - hamster-net
+volumes:
+  api-logs:

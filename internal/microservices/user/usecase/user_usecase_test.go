@@ -119,14 +119,14 @@ func TestUsecase_GetAccounts(t *testing.T) {
 		{
 			name: "Successful accounts retrieval",
 			expectedAccounts: []models.Accounts{
-				{ID: uuidTest, UserID: uuidTest, Balance: 100.0, MeanPayment: "Account1"},
-				{ID: uuidTest, UserID: uuidTest, Balance: 200.0, MeanPayment: "Account2"},
+				{ID: uuidTest, Balance: 100.0, MeanPayment: "Account1"},
+				{ID: uuidTest, Balance: 200.0, MeanPayment: "Account2"},
 			},
 			expectedErr: nil,
 			mockRepoFn: func(mockRepository *mock.MockRepository) {
 				mockRepository.EXPECT().GetAccounts(gomock.Any(), gomock.Any()).Return([]models.Accounts{
-					{ID: uuidTest, UserID: uuidTest, Balance: 100.0, MeanPayment: "Account1"},
-					{ID: uuidTest, UserID: uuidTest, Balance: 200.0, MeanPayment: "Account2"}}, nil)
+					{ID: uuidTest, Balance: 100.0, MeanPayment: "Account1"},
+					{ID: uuidTest, Balance: 200.0, MeanPayment: "Account2"}}, nil)
 			},
 		},
 		{

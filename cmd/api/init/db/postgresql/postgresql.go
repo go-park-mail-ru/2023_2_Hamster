@@ -21,8 +21,9 @@ type PostgresConfig struct {
 
 func initPostgresConfigFromEnv() (PostgresConfig, error) {
 	var cfg = PostgresConfig{}
+
 	if err := godotenv.Load(); err != nil {
-		return cfg, err
+		fmt.Println(err.Error())
 	}
 
 	host, existHost := os.LookupEnv("DB_HOST")
@@ -33,7 +34,7 @@ func initPostgresConfigFromEnv() (PostgresConfig, error) {
 	dbsslmode, existSSL := os.LookupEnv("DB_SSLMODE")
 
 	if !existHost || !existUser || !existPass || !existName || !existSSL || !existPort {
-		return cfg, errors.New("existHost or existPort or existUser or existPass or existName is Empty")
+		return cfg, errors.New("host or port or user or pass or name is empty")
 	}
 
 	cfg = PostgresConfig{

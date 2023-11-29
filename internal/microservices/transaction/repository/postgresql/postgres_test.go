@@ -17,6 +17,74 @@ import (
 	"github.com/pashagolub/pgxmock"
 )
 
+func TestGetCount(t *testing.T) {
+	userID := uuid.New()
+	tests := []struct {
+		name       string
+		userID     uuid.UUID
+		returnRows *pgxmock.Rows
+		expected   int
+		errRows    error
+		err        error
+	}{
+		{
+			name:       "ValidCount",
+			userID:     userID,
+			returnRows: pgxmock.NewRows([]string{"count"}).AddRow(5),
+			expected:   5,
+			errRows:    nil,
+			err:        nil,
+		},
+		{
+			name:       "NoRows",
+			userID:     userID,
+			returnRows: pgxmock.NewRows([]string{"count"}),
+			expected:   0,
+			errRows:    sql.ErrNoRows,
+			err:        fmt.Errorf("[repo] sql: no rows in result set"),
+		},
+		{
+			name:       "ErrorRows",
+			userID:     userID,
+			returnRows: pgxmock.NewRows([]string{"count"}),
+			expected:   0,
+			errRows:    errors.New("error getting count"),
+			err:        fmt.Errorf("[repo] error getting count"),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mock, _ := pgxmock.NewPool()
+			ctl := gomock.NewController(t)
+			defer ctl.Finish()
+
+			logger := *logger.NewLogger(context.TODO())
+			repo := NewRepository(mock, logger)
+
+			escapedQuery := regexp.QuoteMeta(transactionCount)
+			mock.ExpectQuery(escapedQuery).
+				WithArgs(test.userID).
+				WillReturnRows(test.returnRows).
+				WillReturnError(test.errRows)
+
+			count, err := repo.GetCount(context.Background(), test.userID)
+
+			if (test.err == nil && err != nil) || (test.err != nil && err == nil) || (test.err != nil && err != nil && test.err.Error() != err.Error()) {
+				t.Errorf("Expected error: %v, but got: %v", test.err, err)
+			}
+
+			if count != test.expected {
+				t.Errorf("Expected count: %d, but got: %d", test.expected, count)
+			}
+
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("There were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
+
 func TestGetFeed(t *testing.T) {
 	userID := uuid.New()
 	transactionID1 := uuid.New()
@@ -181,13 +249,12 @@ func TestGetFeed(t *testing.T) {
 			mock, _ := pgxmock.NewPool()
 			ctl := gomock.NewController(t)
 			defer ctl.Finish()
-			pageSize, page := 1, 5
 			logger := *logger.NewLogger(context.TODO())
 			repo := NewRepository(mock, logger)
 
-			escapedQuery := regexp.QuoteMeta(transactionGetFeed)
+			escapedQuery := regexp.QuoteMeta(transactionGetFeed + " ORDER BY date DESC;")
 			mock.ExpectQuery(escapedQuery).
-				WithArgs(userID, pageSize, (page-1)*pageSize).
+				WithArgs(userID.String()).
 				WillReturnRows(test.rows).
 				WillReturnError(test.rowsErr)
 
@@ -198,14 +265,10 @@ func TestGetFeed(t *testing.T) {
 					WillReturnRows(test.rowsCategory).
 					WillReturnError(test.rowsCategoryErr)
 			}
-			transactions, last, err := repo.GetFeed(context.Background(), userID, page, pageSize)
+			transactions, err := repo.GetFeed(context.Background(), userID, &models.QueryListOptions{})
 
 			if !reflect.DeepEqual(transactions, test.expected) {
 				t.Errorf("Expected transactions: %v, but got: %v", test.expected, transactions)
-			}
-
-			if last != test.expectedLast {
-				t.Errorf("Expected last: %v, but got: %v", test.expectedLast, last)
 			}
 
 			if (test.err == nil && err != nil) || (test.err != nil && err == nil) || (test.err != nil && err != nil && test.err.Error() != err.Error()) {

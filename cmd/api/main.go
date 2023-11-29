@@ -21,13 +21,14 @@ import (
 // @contact.name   Hamster API Support
 // @contact.email  dimka.komarov@bk.ru
 // @contact.email  grigorikovalenko@gmail.com
+// @contact.url    https://t.me/CodeMaster482
 
-// @host		localhost:8090
+// @host		localhost:8080
 // @BasePath	/user/{userID}/account/feed
 
 // @securityDefinitions	AuthKey
-// @in					header
-// @name				Authorization
+// @in				header
+// @name				session_id
 
 func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -94,3 +95,9 @@ func main() {
 
 	log.Info("Server exiting")
 }
+
+// internal/microservices/delivery/grpc/{server, clent}
+// proto/*proto
+//
+// cmd/apiGateway/main.go
+// cmd/api/main.go

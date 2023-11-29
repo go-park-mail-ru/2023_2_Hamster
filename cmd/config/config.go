@@ -22,7 +22,7 @@ type (
 		DbUser   string `yaml:"db_user"`
 		Port     string `yaml:"db_port"`
 		Password string `yaml:"db_password"`
-		SslMode  string `yaml:"sslmode"`
+		SslMode  bool   `yaml:"sslmode"`
 	}
 
 	Redis struct {

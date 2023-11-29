@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
@@ -41,32 +42,60 @@ func GetUserFromRequest(r *http.Request) (*models.User, error) {
 	return user, nil
 }
 
-func GetQueryParam(r *http.Request) (int, int, error) {
+func GetQueryParam(r *http.Request) (*models.QueryListOptions, error) {
 	values := r.URL.Query()
-	var page, perPage int
+	params := &models.QueryListOptions{}
 	var err error
-
-	if pageStr := values.Get("page"); pageStr != "" {
-		page, err = strconv.Atoi(pageStr)
-		if page < 0 {
-			return 0, 0, errors.New("error page < 0")
-		}
+	categoryStr := values.Get("category")
+	if categoryStr != "" {
+		params.Category, err = uuid.Parse(categoryStr)
 		if err != nil {
-			return 0, 0, err
+			return nil, errors.New("invalid category UUID")
 		}
 	}
 
-	if perPageStr := values.Get("page_size"); perPageStr != "" {
-		perPage, err = strconv.Atoi(perPageStr)
-		if perPage < 0 {
-			return 0, 0, errors.New("error page_size < 0")
-		}
+	accountStr := values.Get("account")
+	if accountStr != "" {
+		params.Account, err = uuid.Parse(accountStr)
 		if err != nil {
-			return 0, 0, err
+			return nil, errors.New("invalid account UUID")
 		}
 	}
 
-	return page, perPage, nil
+	incomeStr := values.Get("income")
+	if incomeStr != "" {
+		params.Income, err = strconv.ParseBool(incomeStr)
+		if err != nil {
+			return nil, errors.New("invalid value for income")
+		}
+	}
+
+	outcomeStr := values.Get("outcome")
+	if outcomeStr != "" {
+		params.Outcome, err = strconv.ParseBool(outcomeStr)
+		if err != nil {
+			return nil, errors.New("invalid value for outcome")
+		}
+	}
+
+	startDateStr := values.Get("start_date")
+	endDateStr := values.Get("end_date")
+
+	if startDateStr != "" {
+		params.StartDate, err = time.Parse(time.RFC3339, startDateStr)
+		if err != nil {
+			return nil, errors.New("invalid start date format")
+		}
+	}
+
+	if endDateStr != "" {
+		params.EndDate, err = time.Parse(time.RFC3339, endDateStr)
+		if err != nil {
+			return nil, errors.New("invalid end date format")
+		}
+	}
+
+	return params, nil
 }
 
 func GetIpFromRequest(r *http.Request) (string, error) {

@@ -1,10 +1,10 @@
-  
-services:  
+services:
   db:
+    container_name: hammy-db
     image: postgres:latest
     restart: always
     networks:
-      - app-network
+      - hammy-network
     env_file:
       - .env
     environment:
@@ -15,16 +15,83 @@ services:
     ports:
       - "5436:5432"
     volumes:
-      - ./cmd/api/init/db/postgresql/schema/:/docker-entrypoint-initdb.d/
- 
+      - ./build/schema/:/docker-entrypoint-initdb.d/
+
+#  hammywallet-api:
+#    container_name: ${CONTAINER_NAME}
+#    image:  ${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA_SHORT}
+#    env_file:
+#      - .env
+#    restart: always
+#    ports:
+#      - "8080:8080"
+#    volumes:
+#      - ./.env:/docker-hammywallet/.env
+#      - ./api-logs:/docker-hammywallet/logs
+#      - type: bind
+#        source: /home/ubuntu/frontend/images
+#        target: /images
+#    depends_on:
+#      - db
+#      - redis
+#    networks:
+#      - hamster-net
+#
+#  question:
+#    container_name: question
+#    dockerfile: Dockerfile
+#    ports:
+#    - "8088:8088"
+#    volumes:
+#    - ./.env:/docker-hammywallet/.env
+#    - ./api-logs:/docker-hammywallet/logs
+#    depends_on:
+#      - hammy-question
+#    env_file:
+#      - .env
+#    restart: always
+
   redis:
+    container_name: hammy-redis
     image: redis:latest
     networks:
-      - app-network
+      - hammy-network
     restart: on-failure
     ports:
       - "6379:6379"
-  
+
+#  prometheus:
+#    container_name: prometheus
+#    image: prom/prometheus:latest
+#    volumes:
+#      - ./metrics/prometheus:/etc/prometheus
+#    ports:
+#      - "9090:9090"
+#
+#  nodeexporter:
+#    container_name: node_exporter
+#    image: prom/node-exporter
+#    volumes:
+#      - /proc:/host/proc:ro
+#      - /sys:/host/sys:ro
+#      - /:/rootfs:ro
+#    restart: unless-stopped
+#    ports:
+#      - "9100:9100"
+#
+#
+#  grafana:
+#    container_name: grafana
+#    image: grafana/grafana-oss:9.4.3
+#    user: '0'
+#    ports:
+#      - "3000:3000"
+#    volumes:
+#      - type: bind
+#        source: /home/ubuntu/grafana_metrics
+#        target: /var/lib/grafana
+
+
 networks:
-  app-network:
+  hammy-network:
     driver: bridge

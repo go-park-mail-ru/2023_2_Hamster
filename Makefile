@@ -1,49 +1,51 @@
 include .env
 export
 
-.PHONY: run run-in build clean db app down doc test lint
+.PHONY: all run build clean db app down doc test lint cover
 
-run: ## Start the application in detached mode
-	docker-compose up -d
+all: run
 
-run-debug:
-	docker-compose -f local-docker-compose.yaml up
+run: lint build up
+	./server
 
-run-in: ## Start the application in interactive mode
-	docker-compose up
+build: ## Build Docker images && api
+	docker-compose -f local-docker-compose.yaml build ; \
+	go build -o server ./cmd/api/main.go
 
-build: ## Build Docker images
-	docker-compose build
+up: 
+	docker-compose -f local-docker-compose.yaml up -d ; \
+	sleep 5;
 
-clean: ## Remove unused Docker images
-	docker system prune -af
+down: ## Stop and remove containers, networks, images, and volumes
+	docker-compose -f local-docker-compose.yaml down
+
+clean: down ## Remove unused Docker images
+	docker system prune -af 
 	docker volume prune -af
 	docker system df
 	docker rmi -f $$(docker images -q) || true
+	rm -rf ./server
 
 db: ## Connect to the database
-	docker exec -it 2023_2_hamster-db-1 psql -U $(DB_USER) -d $(DB_NAME)
+	docker exec -it hammy-db psql -U $(DB_USER) -d $(DB_NAME)
 
-app: ## Connect to the application container
-	docker exec -it 2023_2_hamster-server-1 ./app
+cover:
+	sh scripts/coverage_test.sh
 
-down: ## Stop and remove containers, networks, images, and volumes
-	docker-compose down
+#lint: ## Run linters
+	golangci-lint run
+
+test: ## Run tests
+	go test ./...; \
+	find . -type d -name "logs" -exec rm -r {} \;
 
 doc: ## Generate API documentation using swag
 	swag init -g cmd/api/main.go
 
-test: ## Run tests
-	go test ./...;
-	find . -type d -name "logs" -exec rm -r {} \;
-
-lint: ## Run linters
-	golangci-lint run
-
-# New make
-
-# b:
-# 	go build -o app ./cmd/api/main.go
-
-# r: lint b	
-# 	./app
+prod: #lint doc
+	git checkout deploy ; \
+	git pull origin develop ; \
+	git add . ; \
+	git commit -m "deploy" ; \
+	git push ; \
+	git checkout develop

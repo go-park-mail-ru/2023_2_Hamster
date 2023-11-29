@@ -1,0 +1,18 @@
+global:
+  scrape_interval: 15s
+  scrape_timeout: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'metrics'
+    static_configs:
+      - targets: [ 'prometheus:9090' ]
+
+  - job_name: 'metrics_app'
+    metrics_path: /api/metrics
+    static_configs:
+      - targets: [ 'hammywallet-api:8080','auth:8011','account:8021','category:8031' ]
+
+  - job_name: 'metrics_node'
+    static_configs:
+      - targets: [ 'nodeexporter:9100' ]

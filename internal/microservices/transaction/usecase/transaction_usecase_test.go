@@ -26,7 +26,7 @@ func TestUsecase_GetFeed(t *testing.T) {
 			expectedTransaction: []models.Transaction{},
 			expectedErr:         nil,
 			mockRepoFn: func(mockRepositry *mock.MockRepository) {
-				mockRepositry.EXPECT().GetFeed(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return([]models.Transaction{}, true, nil)
+				mockRepositry.EXPECT().GetFeed(gomock.Any(), gomock.Any(), gomock.Any()).Return([]models.Transaction{}, nil)
 			},
 		},
 		{
@@ -34,7 +34,7 @@ func TestUsecase_GetFeed(t *testing.T) {
 			expectedTransaction: []models.Transaction{},
 			expectedErr:         fmt.Errorf("[usecase] can't get transactions from repository some error"),
 			mockRepoFn: func(mockRepositry *mock.MockRepository) {
-				mockRepositry.EXPECT().GetFeed(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return([]models.Transaction{}, true, errors.New("some error"))
+				mockRepositry.EXPECT().GetFeed(gomock.Any(), gomock.Any(), gomock.Any()).Return([]models.Transaction{}, errors.New("some error"))
 			},
 		},
 	}
@@ -51,7 +51,54 @@ func TestUsecase_GetFeed(t *testing.T) {
 
 			userID := uuid.New()
 
-			transaciton, _, err := mockUsecase.GetFeed(context.Background(), userID, 10, 12)
+			transaciton, err := mockUsecase.GetFeed(context.Background(), userID, &models.QueryListOptions{})
+
+			assert.Equal(t, tc.expectedTransaction, transaciton)
+			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
+				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
+			}
+		})
+	}
+}
+
+func TestUsecase_GetCount(t *testing.T) {
+	testCases := []struct {
+		name                string
+		expectedTransaction int
+		expectedErr         error
+		mockRepoFn          func(*mock.MockRepository)
+	}{
+		{
+			name:                "Successful TestUsecase_GetCount",
+			expectedTransaction: 1,
+			expectedErr:         nil,
+			mockRepoFn: func(mockRepositry *mock.MockRepository) {
+				mockRepositry.EXPECT().GetCount(gomock.Any(), gomock.Any()).Return(1, nil)
+			},
+		},
+		{
+			name:                "Error in TestUsecase_GetCount",
+			expectedTransaction: 1,
+			expectedErr:         fmt.Errorf("[usecase] can't get count transactions from repository some error"),
+			mockRepoFn: func(mockRepositry *mock.MockRepository) {
+				mockRepositry.EXPECT().GetCount(gomock.Any(), gomock.Any()).Return(1, errors.New("some error"))
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockRepo := mock.NewMockRepository(ctrl)
+			tc.mockRepoFn(mockRepo)
+
+			mockUsecase := NewUsecase(mockRepo, *logger.NewLogger(context.TODO()))
+
+			userID := uuid.New()
+
+			transaciton, err := mockUsecase.GetCount(context.Background(), userID)
 
 			assert.Equal(t, tc.expectedTransaction, transaciton)
 			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {

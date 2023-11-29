@@ -22,19 +22,22 @@ type TransactionCreateResponse struct {
 	TransactionID uuid.UUID `json:"transaction_id"`
 }
 
+type TransactionCount struct {
+	Count int `json:"count"`
+}
+
 type MasTransaction struct {
 	Transactions []models.TransactionTransfer `json:"transactions"`
-	IsAll        bool                         `json:"is_all"`
 }
 
 type CreateTransaction struct {
-	AccountIncomeID  uuid.UUID   `json:"account_income" valid:"required"`
-	AccountOutcomeID uuid.UUID   `json:"account_outcome" valid:"required"`
+	AccountIncomeID  uuid.UUID   `json:"account_income" valid:"-"`  // ???
+	AccountOutcomeID uuid.UUID   `json:"account_outcome" valid:"-"` // ???
 	Income           float64     `json:"income" valid:"-"`
 	Outcome          float64     `json:"outcome" valid:"-"`
 	Date             time.Time   `json:"date" valid:"required"`
-	Payer            string      `json:"payer" valid:"maxstringlength(20)"`
-	Description      string      `json:"description" valid:""`
+	Payer            string      `json:"payer," valid:"maxstringlength(20)"`
+	Description      string      `json:"description,omitempty" valid:""`
 	Categories       []uuid.UUID `json:"categories" valid:"-"`
 }
 
@@ -66,11 +69,6 @@ func (cr *UpdTransaction) CheckValid() error {
 	_, err := valid.ValidateStruct(*cr)
 
 	return err
-}
-
-type QueryListOptions struct {
-	Page     int `json:"page" minimum:"1" validate:"optional" example:"1"`
-	PageSize int `json:"page_size" minimum:"1" maximum:"20" validate:"optional" example:"10"`
 }
 
 func (cr *CreateTransaction) ToTransaction(user *models.User) *models.Transaction {

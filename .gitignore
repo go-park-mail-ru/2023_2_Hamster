@@ -15,7 +15,7 @@
 *.out
 
 # Dependency directories (remove the comment below to include it)
-# vendor/
+vendor/
 
 # IDE dirictories
 
@@ -24,7 +24,7 @@
 # Go workspace file
 go.work
 
-app
+server
 
 *.out.tmp
 *.html
@@ -33,10 +33,12 @@ app
 *.idea
 *.bin
 *.tmp
-.env
+#env
 
 # Logs
+logs
 *.log
+api_logs
 
 # Static
 img2

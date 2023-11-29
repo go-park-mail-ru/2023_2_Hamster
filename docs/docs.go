@@ -11,6 +11,7 @@ const docTemplate = `{
         "title": "{{.Title}}",
         "contact": {
             "name": "Hamster API Support",
+            "url": "https://t.me/CodeMaster482",
             "email": "grigorikovalenko@gmail.com"
         },
         "version": "{{.Version}}"
@@ -18,6 +19,160 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/account/create": {
+            "post": {
+                "description": "Create account",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Create account",
+                "parameters": [
+                    {
+                        "description": "Input account create",
+                        "name": "account",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/http.CreateAccount"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Create account",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-http_AccountCreateResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/account/update": {
+            "put": {
+                "description": "Put \taccount",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "PUT \tUpdate",
+                "parameters": [
+                    {
+                        "description": "Input transactin update",
+                        "name": "account",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/http.UpdateAccount"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Update account",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-http_NilBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/account/{account_id}/delete": {
+            "delete": {
+                "description": "Delete account with chosen ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Delete Account",
+                "responses": {
+                    "200": {
+                        "description": "Account deleted",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-http_NilBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Account error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "User unathorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "User hasn't rights",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/auth/checkAuth": {
             "post": {
                 "description": "Validate auth",
@@ -64,8 +219,8 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/checkLogin/{login}": {
-            "get": {
+        "/api/auth/checkLogin/": {
+            "post": {
                 "description": "Get bool parametrs about unique login",
                 "produces": [
                     "application/json"
@@ -167,7 +322,7 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "202": {
+                    "201": {
                         "description": "User Created",
                         "schema": {
                             "$ref": "#/definitions/http.Response-auth_SignResponse"
@@ -417,6 +572,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/transaction/count": {
+            "get": {
+                "description": "Get User count transaction",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Get count transaction",
+                "responses": {
+                    "200": {
+                        "description": "Show transaction count",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-http_TransactionCount"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/transaction/create": {
             "post": {
                 "description": "Create transaction",
@@ -484,18 +683,39 @@ const docTemplate = `{
                 "summary": "Get all transaction",
                 "parameters": [
                     {
-                        "minimum": 1,
-                        "type": "integer",
-                        "example": 1,
-                        "name": "page",
+                        "type": "string",
+                        "example": "uuid",
+                        "name": "account",
                         "in": "query"
                     },
                     {
-                        "maximum": 20,
-                        "minimum": 1,
-                        "type": "integer",
-                        "example": 10,
-                        "name": "page_size",
+                        "type": "string",
+                        "example": "uuid",
+                        "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "2023-12-21T19:30:57+03:00",
+                        "name": "end_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "example": true,
+                        "name": "income",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "example": true,
+                        "name": "outcome",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "2023-11-21T19:30:57+03:00",
+                        "name": "start_date",
                         "in": "query"
                     }
                 ],
@@ -1055,6 +1275,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "login": {
+                    "type": "string"
+                },
                 "username": {
                     "type": "string"
                 }
@@ -1091,13 +1314,40 @@ const docTemplate = `{
                 }
             }
         },
+        "http.AccountCreateResponse": {
+            "type": "object",
+            "properties": {
+                "account_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "http.CreateAccount": {
+            "type": "object",
+            "properties": {
+                "accumulation": {
+                    "type": "boolean"
+                },
+                "balance": {
+                    "type": "number"
+                },
+                "balance_enabled": {
+                    "type": "boolean"
+                },
+                "mean_payment": {
+                    "type": "string"
+                }
+            }
+        },
         "http.CreateTransaction": {
             "type": "object",
             "properties": {
                 "account_income": {
+                    "description": "???",
                     "type": "string"
                 },
                 "account_outcome": {
+                    "description": "???",
                     "type": "string"
                 },
                 "categories": {
@@ -1126,9 +1376,6 @@ const docTemplate = `{
         "http.MasTransaction": {
             "type": "object",
             "properties": {
-                "is_all": {
-                    "type": "boolean"
-                },
                 "transactions": {
                     "type": "array",
                     "items": {
@@ -1187,6 +1434,17 @@ const docTemplate = `{
                 }
             }
         },
+        "http.Response-http_AccountCreateResponse": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/http.AccountCreateResponse"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
         "http.Response-http_MasTransaction": {
             "type": "object",
             "properties": {
@@ -1203,6 +1461,17 @@ const docTemplate = `{
             "properties": {
                 "body": {
                     "$ref": "#/definitions/http.NilBody"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "http.Response-http_TransactionCount": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/http.TransactionCount"
                 },
                 "status": {
                     "type": "integer"
@@ -1341,6 +1610,14 @@ const docTemplate = `{
                 }
             }
         },
+        "http.TransactionCount": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                }
+            }
+        },
         "http.TransactionCreateResponse": {
             "type": "object",
             "properties": {
@@ -1384,6 +1661,26 @@ const docTemplate = `{
                 }
             }
         },
+        "http.UpdateAccount": {
+            "type": "object",
+            "properties": {
+                "accumulation": {
+                    "type": "boolean"
+                },
+                "balance": {
+                    "type": "number"
+                },
+                "balance_enabled": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "mean_payment": {
+                    "type": "string"
+                }
+            }
+        },
         "http.getCSRFResponce": {
             "type": "object",
             "properties": {
@@ -1395,16 +1692,19 @@ const docTemplate = `{
         "models.Accounts": {
             "type": "object",
             "properties": {
+                "accumulation": {
+                    "type": "boolean"
+                },
                 "balance": {
                     "type": "number"
+                },
+                "balance_enabled": {
+                    "type": "boolean"
                 },
                 "id": {
                     "type": "string"
                 },
                 "mean_payment": {
-                    "type": "string"
-                },
-                "user_id": {
                     "type": "string"
                 }
             }
@@ -1593,7 +1893,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0.1",
-	Host:             "localhost:8090",
+	Host:             "localhost:8080",
 	BasePath:         "/user/{userID}/account/feed",
 	Schemes:          []string{},
 	Title:            "Hamster API",

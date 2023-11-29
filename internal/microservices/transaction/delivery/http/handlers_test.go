@@ -18,6 +18,75 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestHandler_GetCount(t *testing.T) {
+	uuidTest := uuid.New()
+	user := &models.User{ID: uuidTest}
+	tests := []struct {
+		name          string
+		user          *models.User
+		expectedCode  int
+		expectedBody  string
+		mockUsecaseFn func(*mocks.MockUsecase)
+	}{
+		{
+			name:         "Successful call to Get count",
+			user:         user,
+			expectedCode: http.StatusOK,
+			expectedBody: `{"status":200,"body":{"count":1}}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+				mockUsecase.EXPECT().GetCount(gomock.Any(), gomock.Any()).Return(1, nil)
+			},
+		},
+		{
+			name:         "Unauthorized Request",
+			user:         nil,
+			expectedCode: http.StatusUnauthorized,
+			expectedBody: `{"status":401,"message":"unauthorized"}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+				// No service calls are expected for unauthorized request.
+			},
+		},
+		{
+			name:         "Internal request Error",
+			user:         user,
+			expectedCode: http.StatusBadRequest,
+			expectedBody: `{"status":400,"message":"can't get count transaction info"}`,
+			mockUsecaseFn: func(mockService *mocks.MockUsecase) {
+				internalServerError := errors.New("can't get feed info")
+				mockService.EXPECT().GetCount(gomock.Any(), gomock.Any()).Return(1, internalServerError)
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockService := mocks.NewMockUsecase(ctrl)
+			tt.mockUsecaseFn(mockService)
+
+			mockHandler := NewHandler(mockService, *logger.NewLogger(context.TODO()))
+
+			req := httptest.NewRequest("GET", "/api/user/balance", nil)
+
+			if tt.user != nil {
+				ctx := context.WithValue(req.Context(), models.ContextKeyUserType{}, tt.user)
+				req = req.WithContext(ctx)
+			}
+
+			recorder := httptest.NewRecorder()
+
+			mockHandler.GetCount(recorder, req)
+
+			actual := strings.TrimSpace(recorder.Body.String())
+
+			assert.Equal(t, tt.expectedCode, recorder.Code)
+			assert.Equal(t, tt.expectedBody, actual)
+		})
+	}
+}
+
 func TestHandler_GetFeed(t *testing.T) {
 	uuidTest := uuid.New()
 	user := &models.User{ID: uuidTest}
@@ -34,9 +103,9 @@ func TestHandler_GetFeed(t *testing.T) {
 			user:         user,
 			queryParam:   "page=2&page_size=10",
 			expectedCode: http.StatusOK,
-			expectedBody: `{"status":200,"body":{"transactions":[{"id":"00000000-0000-0000-0000-000000000000","account_income":"00000000-0000-0000-0000-000000000000","account_outcome":"00000000-0000-0000-0000-000000000000","income":0,"outcome":0,"date":"0001-01-01T00:00:00Z","payer":"","description":"","categories":null}],"is_all":true}}`,
+			expectedBody: `{"status":200,"body":{"transactions":[{"id":"00000000-0000-0000-0000-000000000000","account_income":"00000000-0000-0000-0000-000000000000","account_outcome":"00000000-0000-0000-0000-000000000000","income":0,"outcome":0,"date":"0001-01-01T00:00:00Z","payer":"","description":"","categories":null}]}}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
-				mockUsecase.EXPECT().GetFeed(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return([]models.Transaction{{UserID: uuidTest}}, true, nil)
+				mockUsecase.EXPECT().GetFeed(gomock.Any(), gomock.Any(), gomock.Any()).Return([]models.Transaction{{UserID: uuidTest}}, nil)
 			},
 		},
 		{
@@ -50,36 +119,54 @@ func TestHandler_GetFeed(t *testing.T) {
 			},
 		},
 		{
-			name:         "Invalid Query Parameter page_size null",
+			name:         "Invalid Query account",
 			user:         user,
-			queryParam:   "page=10&page_size=''",
+			queryParam:   "account='12'",
 			expectedCode: http.StatusBadRequest,
 			expectedBody: `{"status":400,"message":"invalid url parameter"}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
 			},
 		},
 		{
-			name:         "Invalid Query Parameter page < 0",
+			name:         "Invalid Query category",
 			user:         user,
-			queryParam:   "page=-1&page_size=''",
+			queryParam:   "category='12'",
 			expectedCode: http.StatusBadRequest,
 			expectedBody: `{"status":400,"message":"invalid url parameter"}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
 			},
 		},
 		{
-			name:         "Invalid Query Parameter page null",
+			name:         "Invalid Query income",
 			user:         user,
-			queryParam:   "page=10&page_size=-1",
+			queryParam:   "income='trueee'",
 			expectedCode: http.StatusBadRequest,
 			expectedBody: `{"status":400,"message":"invalid url parameter"}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
 			},
 		},
 		{
-			name:         "Invalid Query Parameter page null",
+			name:         "Invalid Query outcome",
 			user:         user,
-			queryParam:   "page='10'&page_size='0'",
+			queryParam:   "outcome='trueee'",
+			expectedCode: http.StatusBadRequest,
+			expectedBody: `{"status":400,"message":"invalid url parameter"}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+			},
+		},
+		{
+			name:         "Invalid Query start_date",
+			user:         user,
+			queryParam:   "start_date='trueee'",
+			expectedCode: http.StatusBadRequest,
+			expectedBody: `{"status":400,"message":"invalid url parameter"}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+			},
+		},
+		{
+			name:         "Invalid Query end_date",
+			user:         user,
+			queryParam:   "end_date='trueee'",
 			expectedCode: http.StatusBadRequest,
 			expectedBody: `{"status":400,"message":"invalid url parameter"}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
@@ -93,7 +180,7 @@ func TestHandler_GetFeed(t *testing.T) {
 			expectedBody: `{"status":204,"body":""}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
 				errorNoSuchTransaction := models.NoSuchTransactionError{UserID: uuidTest}
-				mockUsecase.EXPECT().GetFeed(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return([]models.Transaction{}, false, &errorNoSuchTransaction)
+				mockUsecase.EXPECT().GetFeed(gomock.Any(), gomock.Any(), gomock.Any()).Return([]models.Transaction{}, &errorNoSuchTransaction)
 			},
 		},
 		{
@@ -103,7 +190,7 @@ func TestHandler_GetFeed(t *testing.T) {
 			expectedBody: `{"status":500,"message":"can't get feed info"}`,
 			mockUsecaseFn: func(mockService *mocks.MockUsecase) {
 				internalServerError := errors.New("can't get feed info")
-				mockService.EXPECT().GetFeed(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return([]models.Transaction{}, true, internalServerError)
+				mockService.EXPECT().GetFeed(gomock.Any(), gomock.Any(), gomock.Any()).Return([]models.Transaction{}, internalServerError)
 			},
 		},
 	}

@@ -31,6 +31,15 @@ type TransactionTransfer struct {
 	Categories       []uuid.UUID `json:"categories" valid:"-"`
 }
 
+type QueryListOptions struct {
+	Category  uuid.UUID `json:"category" validate:"optional" example:"uuid"`
+	Account   uuid.UUID `json:"account" validate:"optional" example:"uuid"`
+	Income    bool      `json:"income" validate:"optional" example:"true"`
+	Outcome   bool      `json:"outcome" validate:"optional" example:"true"`
+	StartDate time.Time `json:"start_date" validate:"optional" example:"2023-11-21T19:30:57+03:00"`
+	EndDate   time.Time `json:"end_date" validate:"optional" example:"2023-12-21T19:30:57+03:00"`
+}
+
 func InitTransactionTransfer(transaction Transaction) TransactionTransfer {
 	return TransactionTransfer{
 		ID:               transaction.ID,

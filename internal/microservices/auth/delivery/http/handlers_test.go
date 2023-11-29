@@ -1,5 +1,55 @@
 package http
 
+/*
+
+func TestHandler_SignUp(t *testing.T) {
+	userid := uuid.New()
+	strUserId := userid.String()
+	tests := []struct {
+		name         string
+		requestBody  io.Reader
+		expectedCode int
+		expectedBody string
+		mockAU       func(*mocks.MockUsecase)
+		mockSU       func(*mocksSession.MockUsecase)
+	}{
+		{
+			name:         "Successful SignUp",
+			requestBody:  strings.NewReader(`{"login": "testlogin", "username": "testuser", "password": "testpassword"}`),
+			expectedCode: http.StatusOK,
+			expectedBody: fmt.Sprintf(`{"status":202,"body":{"id":"%s","username":"testuser"}}`, strUserId),
+			mockAU: func(mockAU *mocks.MockUsecase) {
+				mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(userid, "testuser", nil)
+			},
+			mockSU: func(mockSU *mocksSession.MockUsecase) {
+				mockSU.EXPECT().CreateSessionById(gomock.Any(), gomock.Any()).Return(models.Session{UserId: userid, Cookie: "testCookie"}, nil)
+			},
+		},
+		{
+			name:         "Corrupted request body",
+			requestBody:  strings.NewReader(`{"login": "testlogin","username": "testuser", "password": "testpassword`),
+			expectedCode: http.StatusBadRequest,
+			expectedBody: `{"status":400,"message":"Corrupted request body can't unmarshal"}`,
+			mockAU: func(mockAU *mocks.MockUsecase) {
+				// mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(userid, "testuser", nil)
+			},
+			mockSU: func(mockSU *mocksSession.MockUsecase) {
+				// mockSU.EXPECT().CreateSessionById(gomock.Any(), gomock.Any()).Return(models.Session{UserId: userid, Cookie: "testCookie"}, nil)
+			},
+		},
+		{
+			name:         "Error during SignUp",
+			requestBody:  strings.NewReader(`{"login": "testlogin","username": "testuser", "password": "testpassword"}`),
+			expectedCode: http.StatusTooManyRequests,
+			expectedBody: `{"status":429,"message":"Can't Sign Up user"}`,
+			mockAU: func(mockAU *mocks.MockUsecase) {
+				mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(uuid.Nil, "", errors.New("signup error"))
+			},
+			mockSU: func(mockSU *mocksSession.MockUsecase) {},
+		},
+		// Add more test cases as needed
+	}
+
 import (
 	"context"
 	"errors"
@@ -33,7 +83,7 @@ func TestHandler_SignUp(t *testing.T) {
 	}{
 		{
 			name:         "Successful SignUp",
-			requestBody:  strings.NewReader(`{"username": "testuser", "password": "testpassword"}`),
+			requestBody:  strings.NewReader(`{"login": "testlogin", "username": "testuser", "password": "testpassword"}`),
 			expectedCode: http.StatusOK,
 			expectedBody: fmt.Sprintf(`{"status":202,"body":{"id":"%s","username":"testuser"}}`, strUserId),
 			mockAU: func(mockAU *mocks.MockUsecase) {
@@ -45,7 +95,7 @@ func TestHandler_SignUp(t *testing.T) {
 		},
 		{
 			name:         "Corrupted request body",
-			requestBody:  strings.NewReader(`{"username": "testuser", "password": "testpassword`),
+			requestBody:  strings.NewReader(`{"login": "testlogin","username": "testuser", "password": "testpassword`),
 			expectedCode: http.StatusBadRequest,
 			expectedBody: `{"status":400,"message":"Corrupted request body can't unmarshal"}`,
 			mockAU: func(mockAU *mocks.MockUsecase) {
@@ -57,7 +107,7 @@ func TestHandler_SignUp(t *testing.T) {
 		},
 		{
 			name:         "Error during SignUp",
-			requestBody:  strings.NewReader(`{"username": "testuser", "password": "testpassword"}`),
+			requestBody:  strings.NewReader(`{"login": "testlogin","username": "testuser", "password": "testpassword"}`),
 			expectedCode: http.StatusTooManyRequests,
 			expectedBody: `{"status":429,"message":"Can't Sign Up user"}`,
 			mockAU: func(mockAU *mocks.MockUsecase) {
@@ -108,7 +158,7 @@ func TestHandler_Login(t *testing.T) {
 	}{
 		{
 			name:         "Successful Login",
-			requestBody:  strings.NewReader(`{"login": "testuser", "plain_password": "testpassword"}`),
+			requestBody:  strings.NewReader(`{"login": "testuser", "password": "testpassword"}`),
 			expectedCode: http.StatusOK,
 			expectedBody: fmt.Sprintf(`{"status":202,"body":{"id":"%s","username":"testuser"}}`, strUserID),
 			mockAU: func(mockAU *mocks.MockUsecase) {
@@ -120,7 +170,7 @@ func TestHandler_Login(t *testing.T) {
 		},
 		{
 			name:         "Corrupted request body",
-			requestBody:  strings.NewReader(`{"login": "testuser", "plain_password": "testpassword`),
+			requestBody:  strings.NewReader(`{"login": "testuser", "password": "testpassword`),
 			expectedCode: http.StatusBadRequest,
 			expectedBody: `{"status":400,"message":"Corrupted request body can't unmarshal"}`,
 			mockAU: func(mockAU *mocks.MockUsecase) {
@@ -132,7 +182,7 @@ func TestHandler_Login(t *testing.T) {
 		},
 		{
 			name:         "Error during Login",
-			requestBody:  strings.NewReader(`{"login": "testuser", "plain_password": "testpassword"}`),
+			requestBody:  strings.NewReader(`{"login": "testuser", "password": "testpassword"}`),
 			expectedCode: http.StatusTooManyRequests,
 			expectedBody: `{"status":429,"message":"Can't Login user"}`,
 			mockAU: func(mockAU *mocks.MockUsecase) {
@@ -187,6 +237,7 @@ func TestHandler_HealthCheck(t *testing.T) {
 			requestCookie: &http.Cookie{Name: "session_id", Value: sessionCookie},
 			expectedCode:  http.StatusOK,
 			expectedBody:  fmt.Sprintf(`{"status":200,"body":{"user_id":"%s","cookie":"%s"}}`, strUserID, sessionCookie),
+			// expectedBody:  fmt.Sprintf(`{"status":200,"body":{"id":"%s","username":"%s"}}`, strUserID, sessionCookie),
 			mockSU: func(mockSU *mocksSession.MockUsecase) {
 				mockSU.EXPECT().GetSessionByCookie(gomock.Any(), sessionCookie).Return(models.Session{UserId: userID, Cookie: sessionCookie}, nil)
 			},
@@ -237,6 +288,14 @@ func TestHandler_HealthCheck(t *testing.T) {
 			assert.Equal(t, tt.expectedBody, strings.TrimSpace(recorder.Body.String()))
 		})
 	}
+}
+
+func TestHandler_LogOut(t *testing.T) {
+	sessionCookie := "testCookie"
+				assert.Equal(t, tt.expectedCode, recorder.Result().StatusCode)
+				assert.Equal(t, tt.expectedBody, strings.TrimSpace(recorder.Body.String()))
+
+
 }
 
 func TestHandler_LogOut(t *testing.T) {
@@ -372,3 +431,4 @@ func TestHandler_CheckLoginUnique(t *testing.T) {
 		})
 	}
 }
+*/

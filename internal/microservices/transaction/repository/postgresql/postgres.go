@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/db/postgresql"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
@@ -16,14 +17,8 @@ import (
 const (
 	transactionCreate  = "INSERT INTO transaction (user_id, account_income, account_outcome, income, outcome, date, payer, description) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;"
 	transactionGetFeed = `SELECT id, user_id, account_income, account_outcome, income, outcome, date, payer, description 
-						FROM (
-							SELECT id, user_id, account_income, account_outcome, income, outcome, date, payer, description 
 							FROM transaction 
-							WHERE user_id = $1
-							LIMIT $2 
-							OFFSET $3
-						) AS subquery
-						ORDER BY date DESC;`
+							WHERE user_id = $1`
 
 	transactionUpdate         = "UPDATE transaction set account_income=$2, account_outcome=$3, income=$4, outcome=$5, date=$6, payer=$7, description=$8 WHERE id = $1;"
 	transactionGet            = "SELECT income, outcome, account_income, account_outcome FROM transaction WHERE id = $1;"
@@ -34,6 +29,7 @@ const (
 	transactionDeleteCategory = "DELETE FROM transactionCategory WHERE transaction_id = $1;"
 	transactionUpdateAccount  = "UPDATE accounts SET balance = balance - $1 WHERE id = $2;"
 	transactionCheck          = "SELECT EXISTS( SELECT id FROM transaction WHERE id = $1);"
+	transactionCount          = "SELECT COUNT(*) FROM transaction WHERE user_id = $1;"
 )
 
 type transactionRep struct {
@@ -48,14 +44,69 @@ func NewRepository(db postgresql.DbConn, l logger.Logger) *transactionRep {
 	}
 }
 
-func (r *transactionRep) GetFeed(ctx context.Context, user_id uuid.UUID, page int, pageSize int) ([]models.Transaction, bool, error) {
-	var transactions []models.Transaction
-	offset := (page - 1) * pageSize
-
-	rows, err := r.db.Query(ctx, transactionGetFeed, user_id, pageSize, offset)
+func (r *transactionRep) GetCount(ctx context.Context, user_id uuid.UUID) (int, error) {
+	var count int
+	err := r.db.QueryRow(ctx, transactionCount, user_id).Scan(&count)
 	if err != nil {
-		return nil, false, fmt.Errorf("[repo] %v", err)
+		return 0, fmt.Errorf("[repo] %w", err)
 	}
+
+	return count, nil
+}
+
+func (r *transactionRep) GetFeed(ctx context.Context, user_id uuid.UUID, queryGet *models.QueryListOptions) ([]models.Transaction, error) {
+	var transactions []models.Transaction
+	count := 1
+	//rows, err := r.db.Query(ctx, transactionGetFeed, user_id, pageSize, offset)
+	var queryParamsSlice []interface{}
+
+	query := transactionGetFeed
+	queryParamsSlice = append(queryParamsSlice, user_id.String())
+
+	if queryGet.Account != uuid.Nil {
+		count++
+		query += " AND (account_income = $" + strconv.Itoa(count) + " OR account_outcome = $" + strconv.Itoa(count) + ")"
+		queryParamsSlice = append(queryParamsSlice, queryGet.Account.String())
+	}
+
+	if queryGet.Category != uuid.Nil {
+		count++
+		query += " AND id IN (SELECT transaction_id FROM TransactionCategory WHERE category_id = $" + strconv.Itoa(count) + ")"
+		queryParamsSlice = append(queryParamsSlice, queryGet.Category.String())
+	}
+
+	if queryGet.Income && queryGet.Outcome {
+		query += " AND income > 0 AND outcome > 0"
+	}
+
+	if !queryGet.Income && queryGet.Outcome {
+		query += " AND outcome > 0 AND income = 0"
+	}
+
+	if queryGet.Income && !queryGet.Outcome {
+		query += " AND income > 0 AND outcome = 0"
+	}
+
+	if !queryGet.StartDate.IsZero() || !queryGet.EndDate.IsZero() {
+		count++
+		if !queryGet.StartDate.IsZero() {
+			query += " AND date >= $" + strconv.Itoa(count)
+			queryParamsSlice = append(queryParamsSlice, queryGet.StartDate)
+		}
+
+		if !queryGet.EndDate.IsZero() {
+			count++
+			query += " AND date <= $" + strconv.Itoa(count)
+			queryParamsSlice = append(queryParamsSlice, queryGet.EndDate)
+		}
+	}
+
+	query += " ORDER BY date DESC;"
+	rows, err := r.db.Query(ctx, query, queryParamsSlice...)
+	if err != nil {
+		return nil, fmt.Errorf("[repo] %v", err)
+	}
+
 	for rows.Next() {
 		var transaction models.Transaction
 		if err := rows.Scan(
@@ -69,11 +120,11 @@ func (r *transactionRep) GetFeed(ctx context.Context, user_id uuid.UUID, page in
 			&transaction.Payer,
 			&transaction.Description,
 		); err != nil {
-			return nil, false, fmt.Errorf("[repo] %w", err)
+			return nil, fmt.Errorf("[repo] %w", err)
 		}
 		categories, err := r.getCategoriesForTransaction(ctx, transaction.ID)
 		if err != nil {
-			return nil, false, fmt.Errorf("[repo] %w", err)
+			return nil, fmt.Errorf("[repo] %w", err)
 		}
 		transaction.Categories = categories
 
@@ -81,14 +132,14 @@ func (r *transactionRep) GetFeed(ctx context.Context, user_id uuid.UUID, page in
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, false, fmt.Errorf("[repo] %w", err)
+		return nil, fmt.Errorf("[repo] %w", err)
 	}
 
 	if len(transactions) == 0 {
-		return nil, false, fmt.Errorf("[repo] %w: %v", &models.NoSuchTransactionError{UserID: user_id}, err)
+		return nil, fmt.Errorf("[repo] %w: %v", &models.NoSuchTransactionError{UserID: user_id}, err)
 	}
 
-	return transactions, len(transactions) < pageSize, nil
+	return transactions, nil
 }
 
 func (r *transactionRep) getCategoriesForTransaction(ctx context.Context, transactionID uuid.UUID) ([]uuid.UUID, error) {
@@ -119,7 +170,14 @@ func (r *transactionRep) CreateTransaction(ctx context.Context, transaction *mod
 	if err != nil {
 		return uuid.Nil, fmt.Errorf("failed to start transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		if err != nil {
+			if err = tx.Rollback(ctx); err != nil {
+				r.logger.Fatal("Rollback transaction Error: %w", err)
+			}
+
+		}
+	}()
 
 	id, err := r.insertTransaction(ctx, tx, transaction)
 	if err != nil {
@@ -150,7 +208,8 @@ func (r *transactionRep) insertTransaction(ctx context.Context, tx pgx.Tx, trans
 		transaction.Outcome,
 		transaction.Date,
 		transaction.Payer,
-		transaction.Description)
+		transaction.Description,
+	)
 	var id uuid.UUID
 
 	err := row.Scan(&id)
@@ -178,9 +237,13 @@ func (r *transactionRep) updateAccountBalance(ctx context.Context, tx pgx.Tx, ac
 	return err
 }
 
-func (r *transactionRep) insertCategories(ctx context.Context, tx pgx.Tx, transactionID uuid.UUID, categoryIDs []uuid.UUID) error {
+func (r *transactionRep) insertCategories(ctx context.Context, tx pgx.Tx, transactionID uuid.UUID, categoryIDs []uuid.UUID) (err error) {
 	for _, categoryID := range categoryIDs {
-		_, err := tx.Exec(ctx, transactionCreateCategory, transactionID, categoryID)
+		if categoryID == uuid.Nil {
+			_, err = tx.Exec(ctx, transactionCreateCategory, transactionID, nil)
+		} else {
+			_, err = tx.Exec(ctx, transactionCreateCategory, transactionID, categoryID)
+		}
 		if err != nil {
 			return fmt.Errorf("[repo] failed to insert category association: %w", err)
 		}
@@ -193,7 +256,15 @@ func (r *transactionRep) UpdateTransaction(ctx context.Context, transaction *mod
 	if err != nil {
 		return fmt.Errorf("[repo] failed to start transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+
+	defer func() {
+		if err != nil {
+			if err = tx.Rollback(ctx); err != nil {
+				r.logger.Fatal("Rollback transaction Error: %w", err)
+			}
+
+		}
+	}()
 
 	existingIncome, existingOutcome, existingAccountIncomeID, existingAccountOutcomeID, err := r.getTransactionInfo(ctx, tx, transaction.ID)
 	if err != nil {
@@ -283,7 +354,15 @@ func (r *transactionRep) DeleteTransaction(ctx context.Context, transactionID uu
 	if err != nil {
 		return fmt.Errorf("[repo] failed to start transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+
+	defer func() {
+		if err != nil {
+			if err = tx.Rollback(ctx); err != nil {
+				r.logger.Fatal("Rollback transaction Error: %w", err)
+			}
+
+		}
+	}()
 
 	existingIncome, existingOutcome, existingAccountIncomeID, existingAccountOutcomeID, err := r.getTransactionInfo(ctx, tx, transactionID)
 	if err != nil {
@@ -306,6 +385,7 @@ func (r *transactionRep) DeleteTransaction(ctx context.Context, transactionID uu
 	if err = tx.Commit(ctx); err != nil {
 		return fmt.Errorf("[repo] failed to commit transaction: %w", err)
 	}
+
 	return nil
 }
 

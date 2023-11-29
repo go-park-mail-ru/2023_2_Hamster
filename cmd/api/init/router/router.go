@@ -7,13 +7,14 @@ import (
 	"time"
 
 	_ "github.com/go-park-mail-ru/2023_2_Hamster/docs"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
+	account "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account/delivery/http"
 	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/http"
 	category "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/category/delivery/http"
 	csrf "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/csrf/delivery/http"
 	transaction "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/transaction/delivery/http"
 	user "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user/delivery/http"
-
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware"
 	"github.com/gorilla/mux"
 
@@ -26,6 +27,7 @@ func InitRouter(auth *auth.Handler,
 	transaction *transaction.Handler,
 	category *category.Handler,
 	csrf *csrf.Handler,
+	account *account.Handler,
 	logMid *middleware.LoggingMiddleware,
 	recoveryMid *middleware.RecoveryMiddleware,
 	authMid *middleware.AuthMiddleware,
@@ -36,7 +38,6 @@ func InitRouter(auth *auth.Handler,
 	r.Use(logMid.LoggingMiddleware)
 	r.Use(recoveryMid.Recoverer)
 	r.Use(middleware.Timeout(5 * time.Second))
-	r.Use(middleware.Heartbeat("ping"))
 
 	http.Handle("/", r)
 
@@ -48,6 +49,11 @@ func InitRouter(auth *auth.Handler,
 
 	apiRouter := r.PathPrefix("/api").Subrouter()
 
+	metricsMw := middleware.NewMetricsMiddleware()
+	metricsMw.Register(middleware.ServiceMainName)
+	apiRouter.PathPrefix("/metrics").Handler(promhttp.Handler())
+	apiRouter.Use(metricsMw.LogMetrics)
+
 	csrfRouter := apiRouter.PathPrefix("/csrf").Subrouter()
 	csrfRouter.Use(authMid.Authentication)
 	csrfRouter.Methods("GET").Path("/").HandlerFunc(csrf.GetCSRF)
@@ -57,8 +63,17 @@ func InitRouter(auth *auth.Handler,
 		authRouter.Methods("POST").Path("/signin").HandlerFunc(auth.Login)
 		authRouter.Methods("POST").Path("/signup").HandlerFunc(auth.SignUp)
 		authRouter.Methods("POST").Path("/checkAuth").HandlerFunc(auth.HealthCheck)
-		authRouter.Methods("GET").Path("/loginCheck/{login}").HandlerFunc(auth.CheckLoginUnique)
+		authRouter.Methods("POST").Path("/loginCheck").HandlerFunc(auth.CheckLoginUnique)
 		authRouter.Methods("POST").Path("/logout").HandlerFunc(auth.LogOut)
+	}
+
+	accountRouter := apiRouter.PathPrefix("/account").Subrouter()
+	accountRouter.Use(authMid.Authentication)
+	accountRouter.Use(csrfMid.CheckCSRF)
+	{
+		accountRouter.Methods("POST").Path("/create").HandlerFunc(account.Create)
+		accountRouter.Methods("PUT").Path("/update").HandlerFunc(account.Update)
+		accountRouter.Methods("DELETE").Path("/{account_id}/delete").HandlerFunc(account.Delete)
 	}
 
 	userRouter := apiRouter.PathPrefix("/user").Subrouter()
@@ -66,7 +81,7 @@ func InitRouter(auth *auth.Handler,
 	userRouter.Use(csrfMid.CheckCSRF)
 	{
 		userRouter.Methods("PUT").Path("/updatePhoto").HandlerFunc(user.UpdatePhoto)
-		userRouter.Path("/update").Methods("PUT").HandlerFunc(user.Update)
+		userRouter.Methods("PUT").Path("/update").HandlerFunc(user.Update)
 
 		// userRouter.Methods("GET").Path("/balance").HandlerFunc(user.GetUserBalance)
 		// userRouter.Methods("GET").Path("/plannedBudget").HandlerFunc(user.GetPlannedBudget)
@@ -82,6 +97,7 @@ func InitRouter(auth *auth.Handler,
 	transactionRouter.Use(csrfMid.CheckCSRF)
 	{
 		transactionRouter.Methods("GET").Path("/feed").HandlerFunc(transaction.GetFeed)
+		transactionRouter.Methods("GET").Path("/count").HandlerFunc(transaction.GetCount)
 		// 	transactionRouter.Methods("GET").Path("/{transaction_id}/").HandlerFunc(transaction.Get)
 		transactionRouter.Methods("PUT").Path("/update").HandlerFunc(transaction.Update)
 		transactionRouter.Methods("POST").Path("/create").HandlerFunc(transaction.Create)
