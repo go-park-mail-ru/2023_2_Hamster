@@ -139,6 +139,10 @@ func (r *Repository) DeleteTag(ctx context.Context, tagId uuid.UUID) error {
 	if err != nil {
 		return fmt.Errorf("[repo] failed to delete category %s, %w", CategoryDelete, err)
 	}
+
+	if err = tx.Commit(ctx); err != nil {
+		return fmt.Errorf("[repo] failed to commit db transaction: %w", err)
+	}
 	return nil
 }
 
