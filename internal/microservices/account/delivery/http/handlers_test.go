@@ -14,6 +14,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	"github.com/stretchr/testify/assert"
@@ -181,7 +182,7 @@ func TestHandler_UpdateAccount(t *testing.T) {
 			expectedBody: `{"status":400,"message":"invalid input body"}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockAccountServiceClient) {
 			},
-			requestPayload: `{"id": "ff", "balance": 150, "accumulation": true, "balanceEnabled": true, "meaenPayment": "monthly"}`,
+			requestPayload: `{"idd": "ff", "balance": 150, "accumulation": true, "balanceEnabled": true, "meaenPayment": "monthly"}`,
 		},
 	}
 
@@ -206,6 +207,113 @@ func TestHandler_UpdateAccount(t *testing.T) {
 			recorder := httptest.NewRecorder()
 
 			mockHandler.Update(recorder, req)
+
+			actual := strings.TrimSpace(recorder.Body.String())
+
+			assert.Equal(t, tt.expectedCode, recorder.Code)
+			assert.Equal(t, tt.expectedBody, actual)
+		})
+	}
+}
+
+func TestHandler_DeleteAccount(t *testing.T) {
+	uuidTest := uuid.New()
+	user := &models.User{ID: uuidTest}
+	tests := []struct {
+		name           string
+		user           *models.User
+		expectedCode   int
+		expectedBody   string
+		accountUrl     string
+		mockUsecaseFn  func(*mocks.MockAccountServiceClient)
+		requestPayload string
+	}{
+		{
+			name:         "Successful Account Deletion",
+			user:         user,
+			expectedCode: http.StatusOK,
+			expectedBody: `{"status":200,"body":{}}`,
+			accountUrl:   "account_id",
+			mockUsecaseFn: func(mockUsecase *mocks.MockAccountServiceClient) {
+				mockUsecase.EXPECT().Delete(gomock.Any(), gomock.Any()).Return(&emptypb.Empty{}, nil)
+			},
+			requestPayload: `{"accountID": "` + uuidTest.String() + `"}`,
+		},
+		{
+			name:           "Unauthorized Request",
+			user:           nil,
+			expectedCode:   http.StatusUnauthorized,
+			expectedBody:   `{"status":401,"message":"unauthorized"}`,
+			accountUrl:     "account_id",
+			mockUsecaseFn:  func(mockUsecase *mocks.MockAccountServiceClient) {},
+			requestPayload: `{"accountID": "` + uuidTest.String() + `"}`,
+		},
+		{
+			name:         "Error in Account Deletion - NoSuchAccount",
+			user:         user,
+			expectedCode: http.StatusBadRequest,
+			expectedBody: `{"status":400,"message":"can't such account"}`,
+			accountUrl:   "account_id",
+			mockUsecaseFn: func(mockUsecase *mocks.MockAccountServiceClient) {
+				mockUsecase.EXPECT().Delete(gomock.Any(), gomock.Any()).Return(&emptypb.Empty{}, &models.NoSuchAccounts{})
+			},
+			requestPayload: `{"accountID": "` + uuidTest.String() + `"}`,
+		},
+		{
+			name:         "Error in Account Deletion - ForbiddenUserError",
+			user:         user,
+			expectedCode: http.StatusForbidden,
+			expectedBody: `{"status":403,"message":"user has no rights"}`,
+			accountUrl:   "account_id",
+			mockUsecaseFn: func(mockUsecase *mocks.MockAccountServiceClient) {
+				mockUsecase.EXPECT().Delete(gomock.Any(), gomock.Any()).Return(&emptypb.Empty{}, &models.ForbiddenUserError{})
+			},
+			requestPayload: `{"accountID": "` + uuidTest.String() + `"}`,
+		},
+		{
+			name:         "Error in Account Deletion - Some Errors",
+			user:         user,
+			expectedCode: http.StatusInternalServerError,
+			expectedBody: `{"status":500,"message":"can't get account"}`,
+			accountUrl:   "account_id",
+			mockUsecaseFn: func(mockUsecase *mocks.MockAccountServiceClient) {
+				mockUsecase.EXPECT().Delete(gomock.Any(), gomock.Any()).Return(&emptypb.Empty{}, errors.New("err"))
+			},
+			requestPayload: `{"accountID": "` + uuidTest.String() + `"}`,
+		},
+		{
+			name:         "Error in Account Deletion - Invalid Url Parameter",
+			user:         user,
+			expectedCode: http.StatusBadRequest,
+			expectedBody: `{"status":400,"message":"invalid url parameter"}`,
+			accountUrl:   "account",
+			mockUsecaseFn: func(mockUsecase *mocks.MockAccountServiceClient) {
+			},
+			requestPayload: `{"accountID": "` + uuidTest.String() + `"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockService := mocks.NewMockAccountServiceClient(ctrl)
+			tt.mockUsecaseFn(mockService)
+
+			mockHandler := NewHandler(mockService, *logger.NewLogger(context.TODO()))
+
+			url := "/api/account/delete"
+			req := httptest.NewRequest("GET", url, nil)
+			req = mux.SetURLVars(req, map[string]string{tt.accountUrl: uuidTest.String()})
+
+			if tt.user != nil {
+				ctx := context.WithValue(req.Context(), models.ContextKeyUserType{}, tt.user)
+				req = req.WithContext(ctx)
+			}
+
+			recorder := httptest.NewRecorder()
+			mockHandler.Delete(recorder, req)
 
 			actual := strings.TrimSpace(recorder.Body.String())
 

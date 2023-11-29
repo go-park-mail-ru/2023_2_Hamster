@@ -78,7 +78,6 @@ services:
       - "8011:8011"
     volumes:
     - ./.env:/docker-hammywallet/.env
-    - ./api-logs:/docker-hammywallet/logs
     networks:
       - hamster-net  
 
@@ -93,7 +92,6 @@ services:
       - "8021:8021"
     volumes:
     - ./.env:/docker-hammywallet/.env
-    - ./api-logs:/docker-hammywallet/logs
     networks:
       - hamster-net  
 
@@ -107,7 +105,6 @@ services:
       - "8031:8031"
     volumes:
     - ./.env:/docker-hammywallet/.env
-    - ./api-logs:/docker-hammywallet/logs
     networks:
       - hamster-net  
 
