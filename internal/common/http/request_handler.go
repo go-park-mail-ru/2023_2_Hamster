@@ -78,11 +78,20 @@ func GetQueryParam(r *http.Request) (*models.QueryListOptions, error) {
 		}
 	}
 
-	dateStr := values.Get("date")
-	if dateStr != "" {
-		params.Date, err = time.Parse(time.RFC3339, dateStr)
+	startDateStr := values.Get("startDate")
+	endDateStr := values.Get("endDate")
+
+	if startDateStr != "" {
+		params.StartDate, err = time.Parse(time.RFC3339, startDateStr)
 		if err != nil {
-			return nil, errors.New("invalid date format")
+			return nil, errors.New("invalid start date format")
+		}
+	}
+
+	if endDateStr != "" {
+		params.EndDate, err = time.Parse(time.RFC3339, endDateStr)
+		if err != nil {
+			return nil, errors.New("invalid end date format")
 		}
 	}
 
