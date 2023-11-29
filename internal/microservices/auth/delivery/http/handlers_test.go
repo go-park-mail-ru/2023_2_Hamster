@@ -1,5 +1,6 @@
-/* package http
+package http
 
+/*
 
 func TestHandler_SignUp(t *testing.T) {
 	userid := uuid.New()
@@ -289,13 +290,13 @@ func TestHandler_HealthCheck(t *testing.T) {
 	}
 }
 
-/* func TestHandler_LogOut(t *testing.T) {
+func TestHandler_LogOut(t *testing.T) {
 	sessionCookie := "testCookie"
 				assert.Equal(t, tt.expectedCode, recorder.Result().StatusCode)
 				assert.Equal(t, tt.expectedBody, strings.TrimSpace(recorder.Body.String()))
 
 
-} */
+}
 
 func TestHandler_LogOut(t *testing.T) {
 	sessionCookie := "testCookie"
@@ -430,4 +431,4 @@ func TestHandler_CheckLoginUnique(t *testing.T) {
 		})
 	}
 }
- */
+*/
