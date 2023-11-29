@@ -208,7 +208,8 @@ func (r *transactionRep) insertTransaction(ctx context.Context, tx pgx.Tx, trans
 		transaction.Outcome,
 		transaction.Date,
 		transaction.Payer,
-		transaction.Description)
+		transaction.Description,
+	)
 	var id uuid.UUID
 
 	err := row.Scan(&id)

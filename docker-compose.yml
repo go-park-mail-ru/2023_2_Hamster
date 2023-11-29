@@ -114,9 +114,11 @@ services:
   hammywallet-api:
     # container_name: ${CONTAINER_NAME}
     # image:  ${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA_SHORT}
-    build:
-      context: .
-      dockerfile: build/Dockerfile
+    container_name: hammywallet-api
+    image:  codemaster482/hammywallet:latest
+    #build:
+    #  context: .
+    #  dockerfile: build/Dockerfile
     env_file:
       - .env
     restart: always
@@ -125,9 +127,9 @@ services:
     volumes:
       - ./.env:/docker-hammywallet/.env
       - ./api-logs:/docker-hammywallet/logs
-      - type: bind
-        source: /home/ubuntu/frontend/images
-        target: /images
+      #- type: bind
+      #  source: /home/ubuntu/frontend/images
+      #  target: /images
     depends_on:
       - hammy-postgres
       - hammy-redis
