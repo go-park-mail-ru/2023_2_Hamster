@@ -101,6 +101,7 @@ services:
     depends_on:
     - hammy-postgres
     build:
+      context: .
       dockerfile: build/category.Dockerfile
     ports:
       - "8030:8030"
@@ -124,9 +125,9 @@ services:
     volumes:
       - ./.env:/docker-hammywallet/.env
       - ./api-logs:/docker-hammywallet/logs
-      #- type: bind
-      #  source: /home/ubuntu/frontend/images
-      #  target: /images
+      - type: bind
+        source: /home/ubuntu/frontend/images
+        target: /images
     depends_on:
       - hammy-postgres
       - hammy-redis
