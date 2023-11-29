@@ -5,15 +5,16 @@ env:
   IMAGE_NAME: "hammywallet"
   CONTAINER_NAME: "hammywallet-api"
   FOLDER_COMPOSE: "production"
+  AUTH_CONTAINER: "hammywallet-auth"
+  ACCOUNT_CONTAINER: "hammywallet-account"
+  CATEGORY_CONTAINER: "hammywallet-category"
 
 on:
   push:
     branches:
-      - main
       - deploy
   pull_request:
     branches:
-      - main
       - deploy
 
 jobs:
@@ -75,6 +76,43 @@ jobs:
               IMAGE_NAME=${{ env.IMAGE_NAME }}
               REGISTRY=${{ env.REGISTRY }}
               GITHUB_SHA_SHORT=${{ env.GITHUB_SHA_SHORT }}
+
+      - name: Build and push auth
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.AUTH_CONTAINER }}:${{ env.GITHUB_SHA_SHORT }}, ${{ env.REGISTRY }}/${{ env.AUTH_CONTAINER }}:latest
+          file: ./build/auth.Dockerfile
+          build-args: |
+              IMAGE_NAME=${{ env.AUTH_CONTAINER }}-web
+              REGISTRY=${{ env.REGISTRY }}
+              GITHUB_SHA_SHORT=${{ env.GITHUB_SHA_SHORT }}
+
+      - name: Build and push account
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.ACCOUNT_CONTAINER }}:${{ env.GITHUB_SHA_SHORT }}, ${{ env.REGISTRY }}/${{ env.ACCOUNT_CONTAINER }}:latest
+          file: ./build/account.Dockerfile
+          build-args: |
+              IMAGE_NAME=${{ env.ACCOUNT_CONTAINER }}
+              REGISTRY=${{ env.REGISTRY }}
+              GITHUB_SHA_SHORT=${{ env.GITHUB_SHA_SHORT }}
+
+      - name: Build and push category
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.CATEGORY_CONTAINER }}:${{ env.GITHUB_SHA_SHORT }}, ${{ env.REGISTRY }}/${{ env.CATEGORY_CONTAINER }}:latest
+          file: ./build/category.Dockerfile
+          build-args: |
+              IMAGE_NAME=${{ env.CATEGORY_CONTAINER }}
+              REGISTRY=${{ env.REGISTRY }}
+              GITHUB_SHA_SHORT=${{ env.GITHUB_SHA_SHORT }}
+
   
 
   remote_deploy:
@@ -121,6 +159,9 @@ jobs:
             SERVER_PORT=8080
             SECRET=${{ secrets.SECRET }}
             IMAGE_NAME=${{ env.IMAGE_NAME }}
+            AUTH_CONTAINER=${{ env.AUTH_CONTAINER }}
+            ACCOUNT_CONTAINER=${{ env.ACCOUNT_CONTAINER }}
+            CATEGORY_CONTAINER=${{ env.CATEGORY_CONTAINER }}
             REGISTRY=${{ env.REGISTRY }}
             CONTAINER_NAME=${{ env.CONTAINER_NAME }}
             REDIS_HOST=${{ secrets.REDIS_HOST }}
@@ -132,6 +173,9 @@ jobs:
             echo ${{ secrets.DOCKERHUB_TOKEN }} | sudo docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
 
             sudo docker pull $REGISTRY/$IMAGE_NAME:latest
+            sudo docker pull $REGISTRY/$AUTH_CONTAINER:latest
+            sudo docker pull $REGISTRY/$ACCOUNT_CONTAINER:latest
+            sudo docker pull $REGISTRY/$CATEGORY_CONTAINER:latest
 
             sudo docker system prune -f
             sudo docker-compose down
