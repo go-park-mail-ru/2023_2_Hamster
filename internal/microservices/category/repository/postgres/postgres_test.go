@@ -1,12 +1,9 @@
 package postgres
 
-/*
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
-	"reflect"
 	"regexp"
 	"testing"
 
