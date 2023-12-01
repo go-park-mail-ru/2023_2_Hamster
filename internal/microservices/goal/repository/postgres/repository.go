@@ -69,13 +69,13 @@ func (r *Repository) UpdateGoal(ctx context.Context, goal *models.Goal) error {
 }
 
 func (r *Repository) DeleteGoal(ctx context.Context, goalId uuid.UUID) error {
-
+	return nil
 }
 
 func (r *Repository) GetGoals(ctx context.Context, userId uuid.UUID) ([]models.Goal, error) {
-
+	return nil, nil
 }
 
 func (r *Repository) CheckGoalsState(ctx context.Context, userId uuid.UUID) ([]models.Goal, error) {
-
+	return nil, nil
 }
