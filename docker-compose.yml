@@ -72,6 +72,8 @@ services:
     - hammy-postgres
     container_name: ${AUTH_CONTAINER}
     image:  ${REGISTRY}/${AUTH_CONTAINER}:${GITHUB_SHA_SHORT}
+    #container_name: hammywallet-auth
+    #image:  codemaster482/hammywallet-auth:latest
     #build:
     #  context: .
     #  dockerfile: build/auth.Dockerfile
@@ -88,6 +90,8 @@ services:
     - hammy-postgres
     container_name: ${ACCOUNT_CONTAINER}
     image:  ${REGISTRY}/${ACCOUNT_CONTAINER}:${GITHUB_SHA_SHORT}
+    #container_name: hammywallet-account
+    #image:  codemaster482/hammywallet-account:latest
     #build:
     #  context: .
     #  dockerfile: build/account.Dockerfile
@@ -104,6 +108,8 @@ services:
     - hammy-postgres
     container_name: ${CATEGORY_CONTAINER}
     image:  ${REGISTRY}/${CATEGORY_CONTAINER}:${GITHUB_SHA_SHORT}
+    #container_name: hammywallet-category
+    #image:  codemaster482/hammywallet-category:latest
     #build:
     #  context: .
     #  dockerfile: build/category.Dockerfile

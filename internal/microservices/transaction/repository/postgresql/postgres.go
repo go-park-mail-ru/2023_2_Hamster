@@ -100,6 +100,7 @@ func (r *transactionRep) GetFeed(ctx context.Context, user_id uuid.UUID, queryGe
 			queryParamsSlice = append(queryParamsSlice, queryGet.EndDate)
 		}
 	}
+
 	query += " ORDER BY date DESC;"
 	rows, err := r.db.Query(ctx, query, queryParamsSlice...)
 	if err != nil {
@@ -121,6 +122,7 @@ func (r *transactionRep) GetFeed(ctx context.Context, user_id uuid.UUID, queryGe
 		); err != nil {
 			return nil, fmt.Errorf("[repo] %w", err)
 		}
+
 		categories, err := r.getCategoriesForTransaction(ctx, transaction.ID)
 		if err != nil {
 			return nil, fmt.Errorf("[repo] %w", err)
@@ -209,10 +211,9 @@ func (r *transactionRep) insertTransaction(ctx context.Context, tx pgx.Tx, trans
 		transaction.Payer,
 		transaction.Description,
 	)
-	var id uuid.UUID
 
-	err := row.Scan(&id)
-	if err != nil {
+	var id uuid.UUID
+	if err := row.Scan(&id); err != nil {
 		return id, fmt.Errorf("[repo] failed create transaction: %w", err)
 	}
 
@@ -306,7 +307,8 @@ func (r *transactionRep) updateTransactionInfo(ctx context.Context, tx pgx.Tx, t
 		transaction.Outcome,
 		transaction.Date,
 		transaction.Payer,
-		transaction.Description)
+		transaction.Description,
+	)
 	if err != nil {
 		return fmt.Errorf("[repo] failed to update transaction information: %w", err)
 	}

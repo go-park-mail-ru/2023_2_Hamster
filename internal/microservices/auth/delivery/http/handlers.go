@@ -44,15 +44,16 @@ func NewHandler(
 // @Description	Create Account
 // @Accept 		json
 // @Produce		json
-// @Param			user		body		models.User			true		"user info"
-// @Success		201		{object}	Response[auth.SignResponse]		"User Created"
-// @Failure		400		{object}	ResponseError					"Incorrect Input"
-// @Failure		429		{object}	ResponseError					"Server error"
+// @Param			user		body		models.User				true	"user info"
+// @Success		201		{object}	Response[auth.SignResponse]				"User Created"
+// @Failure		400		{object}	ResponseError							"Incorrect Input"
+// @Failure		409		{object}	ResponseError							"User already exists"
+// @Failure		429		{object}	ResponseError							"Server error"
 // @Router		/api/auth/signup	[post]
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	var signUpUser auth.SignUpInput
 
-	// Unmarshal r.Body
+	// Unmarshal request.Body
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&signUpUser); err != nil {
 		h.log.WithField(
@@ -76,6 +77,11 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		Password: signUpUser.PlaintPassword,
 	})
 	if err != nil {
+		//var errUserAlreadyExists *models.UserAlreadyExistsError
+		//if errors.As(err, &errUserAlreadyExists) {
+		//	response.ErrorResponse(w, http.StatusConflict, err, "User already exists", h.log)
+		//	return
+		//}
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Errorf("Error in sign up: %v", err)

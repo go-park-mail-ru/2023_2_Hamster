@@ -37,7 +37,7 @@ const (
 						WHERE user_id = $1 AND id = $2
 					);`
 
-	transactionAssociationDelete = "DELETE FROM transactionCategory WHERE category_id = $1;"
+	transactionAssociationDelete = "DELETE FROM TransactionCategory WHERE category_id = $1;"
 )
 
 type Repository struct {
