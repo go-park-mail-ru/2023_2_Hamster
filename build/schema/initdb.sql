@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS goal (
     "target"      NUMERIC(10,2)                                                                    NOT NULL,
     "date"        DATE,
     created_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP                                        NOT NULL,
-    updated_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP                                        NOT NULL,
+    updated_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP                                        NOT NULL
 );
 
 --========================================================================
