@@ -121,11 +121,11 @@ BEGIN
 
     INSERT INTO transaction(user_id, account_income, account_outcome, income, outcome, payer, description)
     VALUES (NEW.id, accountCardID,
-                    accountCardID, 0, 100, 'Пятерочка', 'Пошел в магазин за вкусняшками') RETURNING id INTO transaction_idI;
+                    accountCardID, 0, 100, 'Тестовая транзакция1', 'Все хомячьки приветствуют вас, и просят удалить эти транзации)') RETURNING id INTO transaction_idI;
 
     INSERT INTO transaction(user_id, account_income, account_outcome, income, outcome, payer, description)
     VALUES (NEW.id, accountCardID,
-                    accountCardID, 100, 0, 'Пятерочка', 'Вернули деньги оплата не прошла') RETURNING id INTO transaction_idO;
+                    accountCardID, 100, 0, 'Тестовая транзакция2', 'Все хомячьки приветствуют вас, и просят удалить эти транзации)') RETURNING id INTO transaction_idO;
             
     INSERT INTO TransactionCategory(transaction_id, category_id)
     VALUES (transaction_idI, categoryID),
