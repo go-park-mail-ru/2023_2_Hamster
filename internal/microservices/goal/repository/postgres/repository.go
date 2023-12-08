@@ -69,10 +69,16 @@ func (r *Repository) UpdateGoal(ctx context.Context, goal *models.Goal) error {
 }
 
 func (r *Repository) DeleteGoal(ctx context.Context, goalId uuid.UUID) error {
+	_, err := r.db.Exec(ctx, GoalDelete, goalId)
+	if err != nil {
+		return fmt.Errorf("[repo] DeleteGoal: %w", err)
+	}
+
 	return nil
 }
 
 func (r *Repository) GetGoals(ctx context.Context, userId uuid.UUID) ([]models.Goal, error) {
+	_, err := 
 	return nil, nil
 }
 

@@ -230,7 +230,6 @@ func (h *Handler) DeleteTag(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	_, err = h.client.DeleteTag(r.Context(), &genCategory.DeleteRequest{TagId: tagId.ID.String(), UserId: user.ID.String()})
-
 	if err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
