@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS goal (
     "description" TEXT            DEFAULT ''                 CHECK(LENGTH("description") <= 255),
     "target"      NUMERIC(10,2)                                                                    NOT NULL,
     "date"        DATE,
+    "state"       TEXT            DEFAULT ''                 CHECK(LENGTH("state") <= 20),
     created_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP                                        NOT NULL,
     updated_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP                                        NOT NULL,
 );
