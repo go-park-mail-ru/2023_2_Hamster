@@ -53,30 +53,17 @@ CREATE TABLE IF NOT EXISTS TransactionCategory (
     PRIMARY KEY (transaction_id, category_id)
 );
 
-<<<<<<< HEAD
---CREATE TABLE IF NOT EXISTS goal (
---    id            UUID            DEFAULT uuid_generate_v4() PRIMARY KEY,
---    user_id       UUID            REFERENCES "user"(user_id)                                       NOT NULL,
---    "name"        TEXT                                       CHECK(LENGTH("name") <= 50)           NOT NULL,
---    "description" TEXT            DEFAULT ''                 CHECK(LENGTH("description") <= 255),
---    "target"      NUMERIC(10,2)                                                                    NOT NULL,
---    "date"        DATE,
---    created_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP                                        NOT NULL,
---    updated_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP                                        NOT NULL
---);
-=======
-CREATE TABLE IF NOT EXISTS goal (
-    id            UUID            DEFAULT uuid_generate_v4() PRIMARY KEY,
-    user_id       UUID            REFERENCES Users(id)                                             NOT NULL,
-    "name"        TEXT                                       CHECK(LENGTH("name") <= 50)           NOT NULL,
-    "description" TEXT            DEFAULT ''                 CHECK(LENGTH("description") <= 255),
-    "target"      NUMERIC(10,2)                                                                    NOT NULL,
-    "date"        DATE,
-    "state"       TEXT            DEFAULT ''                 CHECK(LENGTH("state") <= 20),
-    created_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP                                        NOT NULL,
-    updated_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP                                        NOT NULL
-);
->>>>>>> 159fe381c65bd448a92e0c9b63cdcaeff611df79
+-- CREATE TABLE IF NOT EXISTS goal (
+--     id            UUID            DEFAULT uuid_generate_v4() PRIMARY KEY,
+--     user_id       UUID            REFERENCES Users(id)                                             NOT NULL,
+--     "name"        TEXT                                       CHECK(LENGTH("name") <= 50)           NOT NULL,
+--     "description" TEXT            DEFAULT ''                 CHECK(LENGTH("description") <= 255),
+--     "target"      NUMERIC(10,2)                                                                    NOT NULL,
+--     "date"        DATE,
+--     "state"       TEXT            DEFAULT ''                 CHECK(LENGTH("state") <= 20),
+--     created_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP                                        NOT NULL,
+--     updated_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP                                        NOT NULL
+-- );
 
 --========================================================================
 
