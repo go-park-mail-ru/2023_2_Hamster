@@ -11,6 +11,7 @@ env:
   AUTH_ADDR: auth:8010
   ACCOUNT_ADDR: account:8020
   CATEGORY_ADDR: category:8030
+  DB_PORT: 5432
 on:
   push:
     branches:
