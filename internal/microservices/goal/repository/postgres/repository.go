@@ -96,7 +96,7 @@ func (r *Repository) GetGoals(ctx context.Context, userId uuid.UUID) ([]models.G
 	// 		&goal.Description,
 	// 		&goal.Target,
 	// 		&goal.Date,
-	// 	); err != nil {
+	// 	 ); err != nil {
 	// 		return nil, err
 	// 	}
 
