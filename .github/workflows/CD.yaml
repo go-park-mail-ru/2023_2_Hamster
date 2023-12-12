@@ -11,9 +11,9 @@ env:
   ACCOUNT_CONTAINER: "hammywallet-account"
   CATEGORY_CONTAINER: "hammywallet-category"
   
-  AUTH_ADDR: auth:8010
-  ACCOUNT_ADDR: account:8020
-  CATEGORY_ADDR: category:8030
+  AUTH_ADDR: "auth:8010"
+  ACCOUNT_ADDR: "account:8020"
+  CATEGORY_ADDR: "category:8030"
   
 on:
   push:
@@ -172,6 +172,9 @@ jobs:
             CONTAINER_NAME=${{ env.CONTAINER_NAME }}
             REDIS_HOST=${{ secrets.REDIS_HOST }}
             REDIS_PORT=${{ secrets.REDIS_PORT }}
+            AUTH_ADDR=${{ env.AUTH_ADDR }}
+            ACCOUNT_ADDR=${{ env.ACCOUNT_ADDR }}
+            CATEGORY_ADDR=${{ env.CATEGORY_ADDR }}
             EOF
 
             echo "GITHUB_SHA_SHORT=`echo $GITHUB_SHA | head -c8`" >> .env
