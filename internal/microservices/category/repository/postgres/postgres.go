@@ -18,7 +18,7 @@ const (
 	CategoryGet = `SELECT user_id, parent_tag, "name", show_income, show_outcome, regular FROM category WHERE id=$1;`
 
 	CategoryCreate = `INSERT INTO category (user_id, parent_tag, "name", show_income, show_outcome, regular)
-				      VALUES ($1, $2, $3, $4, $5, $6, $7)
+				      VALUES ($1, $2, $3, $4, $5, $6)
 				      RETURNING id;`
 
 	CategoryUpdate = `UPDATE category SET parent_tag=CAST($1 AS UUID), "name"=$2, show_income=$3, show_outcome=$4, regular=$5 WHERE id=CAST($6 AS UUID);`
