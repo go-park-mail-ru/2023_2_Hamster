@@ -1,9 +1,12 @@
 package app
 
 import (
+	"os"
+
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/router"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/middleware"
+	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
@@ -37,26 +40,35 @@ import (
 )
 
 func Init(db *pgxpool.Pool, redis *redis.Client, log *logger.Logger) *mux.Router {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Erorr loading .env file %v\n", err)
+	}
+
+	authAddr := os.Getenv("AUTH_ADDR")
+	accountAddr := os.Getenv("ACCOUNT_ADDR")
+	categoryAddr := os.Getenv("CATEGORY_ADDR")
+
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithBlock(),
 		grpc.FailOnNonTempDialError(true),
 	}
 
-	authConn, err := grpc.Dial("auth:8010", opts...)
+	authConn, err := grpc.Dial(authAddr, opts...)
 	if err != nil {
 		log.Fatalf("Connection refused auth: %v\n", err)
 	}
 
 	authClient := generatedAuth.NewAuthServiceClient(authConn)
 
-	accountConn, err := grpc.Dial("account:8020", opts...)
+	accountConn, err := grpc.Dial(accountAddr, opts...)
 
 	if err != nil {
 		log.Fatalf("Connection refused account %v\n", err)
 	}
 
-	categoryConn, err := grpc.Dial("category:8030", opts...)
+	categoryConn, err := grpc.Dial(categoryAddr, opts...)
 
 	if err != nil {
 		log.Fatalf("Connection refused category %v\n", err)

@@ -96,7 +96,7 @@ BEGIN
     VALUES  (NEW.id, NULL, 'Дети',                     false, true,  false),
             (NEW.id, NULL, 'Забота о себе',            false, true,  false),
             (NEW.id, NULL, 'Зарплата',                 true,  false, true),
-            (NEW.id, NULL, 'Здровье и фитнес',         false, true,  false),
+            (NEW.id, NULL, 'Здоровье и фитнес',         false, true,  false),
             (NEW.id, NULL, 'Кафе и рестораны',         false, true,  false),
             (NEW.id, NULL, 'Машина',                   false, true,  false),
             (NEW.id, NULL, 'Образование',              false, true,  false),

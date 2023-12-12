@@ -10,14 +10,14 @@ services:
     image: postgres:latest
     restart: always
     env_file:
-      - .local.env
+      - .env
     environment:
-      POSTGRES_DB: HammyWallets
-      POSTGRES_USER: hamster
-      POSTGRES_PORT: 5436
-      POSTGRES_PASSWORD: 2003
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PORT: ${DB_PORT}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "5436:5432"
+      - "${DB_PORT}:5432"
     volumes:
       - ./build/schema/:/docker-entrypoint-initdb.d/
     healthcheck:
@@ -44,104 +44,104 @@ services:
     networks:
       - hammy-network
 
-  hammywallet-api:
-    #container_name: ${CONTAINER_NAME}
-    #image:  ${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA_SHORT}
-    build: 
-      context: .
-      dockerfile: build/Dockerfile
-    env_file:
-      - .local.env
-    restart: always
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./.env:/docker-hammywallet/.env
-      - ./api-logs:/docker-hammywallet/logs
-      - type: bind
-        source: /images
-        target: /images
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      category:
-        condition: service_started
-      account:
-        condition: service_started
-      auth:
-        condition: service_started
-    networks:
-      - hammy-network
+  # hammywallet-api:
+  #   #container_name: ${CONTAINER_NAME}
+  #   #image:  ${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA_SHORT}
+  #   build: 
+  #     context: .
+  #     dockerfile: build/Dockerfile
+  #   env_file:
+  #     - .local.env
+  #   restart: always
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - ./.env:/docker-hammywallet/.env
+  #     - ./api-logs:/docker-hammywallet/logs
+  #     - type: bind
+  #       source: /images
+  #       target: /images
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #     category:
+  #       condition: service_started
+  #     account:
+  #       condition: service_started
+  #     auth:
+  #       condition: service_started
+  #   networks:
+  #     - hammy-network
   
-  auth:
-    container_name: auth
-    #image:  ${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA_SHORT}
-    build: 
-      context: .
-      dockerfile: build/auth.Dockerfile
-    env_file:
-      - .local.env
-    restart: always
-    ports:
-      - "8010:8010"
-      - "8011:8011"
-    volumes:
-      - ./.env:/docker-hammywallet/.env
-      - ./api-logs:/docker-hammywallet/logs
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - hammy-network
+  # auth:
+  #   container_name: auth
+  #   #image:  ${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA_SHORT}
+  #   build: 
+  #     context: .
+  #     dockerfile: build/auth.Dockerfile
+  #   env_file:
+  #     - .local.env
+  #   restart: always
+  #   ports:
+  #     - "8010:8010"
+  #     - "8011:8011"
+  #   volumes:
+  #     - ./.env:/docker-hammywallet/.env
+  #     - ./api-logs:/docker-hammywallet/logs
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - hammy-network
   
-  account:
-    container_name: account
-    #image:  ${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA_SHORT}
-    build: 
-      context: .
-      dockerfile: build/account.Dockerfile
-    env_file:
-      - .local.env
-    restart: always
-    ports:
-      - "8020:8020"
-      - "8021:8021"
-    volumes:
-      - ./.env:/docker-hammywallet/.env
-      - ./api-logs:/docker-hammywallet/logs
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - hammy-network
-  category:
-    container_name: category
-    #image:  ${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA_SHORT}
-    build: 
-      context: .
-      dockerfile: build/category.Dockerfile
-    env_file:
-      - .local.env
-    restart: always
-    ports:
-      - "8030:8030"
-      - "8031:8031"
-    volumes:
-      - ./.env:/docker-hammywallet/.env
-      - ./api-logs:/docker-hammywallet/logs
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - hammy-network
+  # account:
+  #   container_name: account
+  #   #image:  ${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA_SHORT}
+  #   build: 
+  #     context: .
+  #     dockerfile: build/account.Dockerfile
+  #   env_file:
+  #     - .local.env
+  #   restart: always
+  #   ports:
+  #     - "8020:8020"
+  #     - "8021:8021"
+  #   volumes:
+  #     - ./.env:/docker-hammywallet/.env
+  #     - ./api-logs:/docker-hammywallet/logs
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - hammy-network
+  # category:
+  #   container_name: category
+  #   #image:  ${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA_SHORT}
+  #   build: 
+  #     context: .
+  #     dockerfile: build/category.Dockerfile
+  #   env_file:
+  #     - .local.env
+  #   restart: always
+  #   ports:
+  #     - "8030:8030"
+  #     - "8031:8031"
+  #   volumes:
+  #     - ./.env:/docker-hammywallet/.env
+  #     - ./api-logs:/docker-hammywallet/logs
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - hammy-network
 #
 #  question:
 #    container_name: question
