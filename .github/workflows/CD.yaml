@@ -5,10 +5,12 @@ env:
   IMAGE_NAME: "hammywallet"
   CONTAINER_NAME: "hammywallet-api"
   FOLDER_COMPOSE: "production"
-
+  GITHUB_SHA_SHORT:
+  
   AUTH_CONTAINER: "hammywallet-auth"
   ACCOUNT_CONTAINER: "hammywallet-account"
   CATEGORY_CONTAINER: "hammywallet-category"
+  
   AUTH_ADDR: auth:8010
   ACCOUNT_ADDR: account:8020
   CATEGORY_ADDR: category:8030
