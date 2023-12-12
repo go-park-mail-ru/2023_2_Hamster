@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/db/postgresql"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
@@ -39,110 +38,113 @@ func NewRepository(db postgresql.DbConn, log logger.Logger) *Repository {
 }
 
 func (r *Repository) CreateGoal(ctx context.Context, goal models.Goal) (uuid.UUID, error) {
-	row := r.db.QueryRow(ctx, GoalCreate,
-		goal.UserId,
-		goal.Name,
-		goal.Description,
-		goal.Target,
-		goal.Date,
-	)
+	// row := r.db.QueryRow(ctx, GoalCreate,
+	// 	goal.UserId,
+	// 	goal.Name,
+	// 	goal.Description,
+	// 	goal.Target,
+	// 	goal.Date,
+	// )
 
-	var id uuid.UUID
-	if err := row.Scan(&id); err != nil {
-		return uuid.Nil, err
-	}
+	// var id uuid.UUID
+	// if err := row.Scan(&id); err != nil {
+	// 	return uuid.Nil, err
+	// }
 
-	return id, nil
+	//return id, nil
+	return uuid.Nil, nil
 }
 
 func (r *Repository) UpdateGoal(ctx context.Context, goal *models.Goal) error {
-	_, err := r.db.Exec(ctx, GoalUpdate,
-		goal.Name,
-		goal.Description,
-		goal.Target,
-		goal.Date,
-		goal.ID,
-	)
-	if err != nil {
-		return fmt.Errorf("[repo] UpdateGoal: %w", err)
-	}
+	// _, err := r.db.Exec(ctx, GoalUpdate,
+	// 	goal.Name,
+	// 	goal.Description,
+	// 	goal.Target,
+	// 	goal.Date,
+	// 	goal.ID,
+	// )
+	// if err != nil {
+	// 	return fmt.Errorf("[repo] UpdateGoal: %w", err)
+	// }
 
 	return nil
 }
 
 func (r *Repository) DeleteGoal(ctx context.Context, goalId uuid.UUID) error {
-	_, err := r.db.Exec(ctx, GoalDelete, goalId)
-	if err != nil {
-		return fmt.Errorf("[repo] Delete Goal: %w", err)
-	}
+	// _, err := r.db.Exec(ctx, GoalDelete, goalId)
+	// if err != nil {
+	// 	return fmt.Errorf("[repo] Delete Goal: %w", err)
+	// }
 
 	return nil
 }
 
 func (r *Repository) GetGoals(ctx context.Context, userId uuid.UUID) ([]models.Goal, error) {
-	var goals []models.Goal
+	// var goals []models.Goal
 
-	rows, err := r.db.Query(ctx, GoalAll, userId)
-	if err != nil {
-		return nil, fmt.Errorf("[repo] Error no tags found: %v", err)
-	}
+	// rows, err := r.db.Query(ctx, GoalAll, userId)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("[repo] Error no tags found: %v", err)
+	// }
 
-	for rows.Next() {
-		var goal models.Goal
-		if err := rows.Scan(
-			&goal.ID,
-			&goal.UserId,
-			&goal.Name,
-			&goal.Description,
-			&goal.Target,
-			&goal.Date,
-		); err != nil {
-			return nil, err
-		}
+	// for rows.Next() {
+	// 	var goal models.Goal
+	// 	if err := rows.Scan(
+	// 		&goal.ID,
+	// 		&goal.UserId,
+	// 		&goal.Name,
+	// 		&goal.Description,
+	// 		&goal.Target,
+	// 		&goal.Date,
+	// 	); err != nil {
+	// 		return nil, err
+	// 	}
 
-		goals = append(goals, goal)
-	}
+	// 	goals = append(goals, goal)
+	// }
 
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("[repo] Error rows error: %v", err)
-	}
+	// if err := rows.Err(); err != nil {
+	// 	return nil, fmt.Errorf("[repo] Error rows error: %v", err)
+	// }
 
-	if len(goals) == 0 {
-		return nil, fmt.Errorf("[repo] Error no tags found: %v", err)
-	}
-	return goals, nil
+	// if len(goals) == 0 {
+	// 	return nil, fmt.Errorf("[repo] Error no tags found: %v", err)
+	// }
+	//return goals, nil
+	return nil, nil
 }
 
 func (r *Repository) CheckGoalsState(ctx context.Context, userId uuid.UUID) ([]models.Goal, error) {
-	var goals []models.Goal
+	// var goals []models.Goal
 
-	rows, err := r.db.Query(ctx, GoalAllDone, userId)
-	if err != nil {
-		return nil, fmt.Errorf("[repo] Error no tags found: %v", err)
-	}
+	// rows, err := r.db.Query(ctx, GoalAllDone, userId)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("[repo] Error no tags found: %v", err)
+	// }
 
-	for rows.Next() {
-		var goal models.Goal
-		if err := rows.Scan(
-			&goal.ID,
-			&goal.UserId,
-			&goal.Name,
-			&goal.Description,
-			&goal.Target,
-			&goal.Date,
-		); err != nil {
-			return nil, err
-		}
+	// for rows.Next() {
+	// 	var goal models.Goal
+	// 	if err := rows.Scan(
+	// 		&goal.ID,
+	// 		&goal.UserId,
+	// 		&goal.Name,
+	// 		&goal.Description,
+	// 		&goal.Target,
+	// 		&goal.Date,
+	// 	); err != nil {
+	// 		return nil, err
+	// 	}
 
-		goals = append(goals, goal)
-	}
+	// 	goals = append(goals, goal)
+	// }
 
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("[repo] Error rows error: %v", err)
-	}
+	// if err := rows.Err(); err != nil {
+	// 	return nil, fmt.Errorf("[repo] Error rows error: %v", err)
+	// }
 
-	if len(goals) == 0 {
-		return nil, fmt.Errorf("[repo] Error no tags found: %v", err)
-	}
-	return goals, nil
+	// if len(goals) == 0 {
+	// 	return nil, fmt.Errorf("[repo] Error no tags found: %v", err)
+	// }
+	//return goals, nil
+	return nil, nil
 }
