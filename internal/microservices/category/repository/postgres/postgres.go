@@ -15,9 +15,9 @@ import (
 )
 
 const (
-	CategoryGet = `SELECT user_id, parent_tag,	image_id, "name", show_income, show_outcome, regular FROM category WHERE id=$1;`
+	CategoryGet = `SELECT user_id, parent_tag, "name", show_income, show_outcome, regular FROM category WHERE id=$1;`
 
-	CategoryCreate = `INSERT INTO category (user_id, parent_tag, image_id, "name", show_income, show_outcome, regular)
+	CategoryCreate = `INSERT INTO category (user_id, parent_tag, "name", show_income, show_outcome, regular)
 				      VALUES ($1, $2, $3, $4, $5, $6, $7)
 				      RETURNING id;`
 
@@ -61,7 +61,7 @@ func (r *Repository) CreateTag(ctx context.Context, tag models.Category) (uuid.U
 	row := r.db.QueryRow(ctx, CategoryCreate,
 		tag.UserID,
 		parentID,
-		tag.Image,
+		// tag.Image,
 		tag.Name,
 		tag.ShowIncome,
 		tag.ShowOutcome,
@@ -161,7 +161,7 @@ func (r *Repository) GetTags(ctx context.Context, userID uuid.UUID) ([]models.Ca
 			&tag.ID,
 			&tag.UserID,
 			&tag.ParentID,
-			&tag.Image,
+			// &tag.Image,
 			&tag.Name,
 			&tag.ShowIncome,
 			&tag.ShowOutcome,
