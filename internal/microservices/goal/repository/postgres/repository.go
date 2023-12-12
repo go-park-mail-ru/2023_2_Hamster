@@ -71,16 +71,15 @@ func (r *Repository) UpdateGoal(ctx context.Context, goal *models.Goal) error {
 }
 
 func (r *Repository) DeleteGoal(ctx context.Context, goalId uuid.UUID) error {
-	// _, err := r.db.Exec(ctx, GoalDelete, goalId)
-	// if err != nil {
-	// 	return fmt.Errorf("[repo] Delete Goal: %w", err)
-	// }
-
+	// 	_, err := r.db.Exec(ctx, GoalDelete, goalId)
+	// 	if err != nil {
+	// 		return fmt.Errorf("[repo] Delete Goal: %w", err)
+	// 	}
 	return nil
 }
 
 func (r *Repository) GetGoals(ctx context.Context, userId uuid.UUID) ([]models.Goal, error) {
-	// var goals []models.Goal
+	//var goals []models.Goal
 
 	// rows, err := r.db.Query(ctx, GoalAll, userId)
 	// if err != nil {
@@ -145,6 +144,6 @@ func (r *Repository) CheckGoalsState(ctx context.Context, userId uuid.UUID) ([]m
 	// if len(goals) == 0 {
 	// 	return nil, fmt.Errorf("[repo] Error no tags found: %v", err)
 	// }
-	//return goals, nil
+	// return goals, nil
 	return nil, nil
 }
