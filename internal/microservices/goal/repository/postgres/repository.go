@@ -22,6 +22,8 @@ const (
 	GoalDelete = "DELETE FROM goal WHERE id = $1;"
 
 	GoalAll = `SELECT * FROM goal WHERE user_id = $1;`
+
+	GoalAllDone = `SELECT * FROM goal WHERE user_id = $1 AND WHERE state='done';`
 )
 
 type Repository struct {
@@ -69,13 +71,89 @@ func (r *Repository) UpdateGoal(ctx context.Context, goal *models.Goal) error {
 }
 
 func (r *Repository) DeleteGoal(ctx context.Context, goalId uuid.UUID) error {
+<<<<<<< HEAD
+=======
+	_, err := r.db.Exec(ctx, GoalDelete, goalId)
+	if err != nil {
+		return fmt.Errorf("[repo] Delete Goal: %w", err)
+	}
+
+>>>>>>> 159fe381c65bd448a92e0c9b63cdcaeff611df79
 	return nil
 }
 
 func (r *Repository) GetGoals(ctx context.Context, userId uuid.UUID) ([]models.Goal, error) {
+<<<<<<< HEAD
 	return nil, nil
 }
 
 func (r *Repository) CheckGoalsState(ctx context.Context, userId uuid.UUID) ([]models.Goal, error) {
 	return nil, nil
+=======
+	var goals []models.Goal
+
+	rows, err := r.db.Query(ctx, GoalAll, userId)
+	if err != nil {
+		return nil, fmt.Errorf("[repo] Error no tags found: %v", err)
+	}
+
+	for rows.Next() {
+		var goal models.Goal
+		if err := rows.Scan(
+			&goal.ID,
+			&goal.UserId,
+			&goal.Name,
+			&goal.Description,
+			&goal.Target,
+			&goal.Date,
+		); err != nil {
+			return nil, err
+		}
+
+		goals = append(goals, goal)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("[repo] Error rows error: %v", err)
+	}
+
+	if len(goals) == 0 {
+		return nil, fmt.Errorf("[repo] Error no tags found: %v", err)
+	}
+	return goals, nil
+}
+
+func (r *Repository) CheckGoalsState(ctx context.Context, userId uuid.UUID) ([]models.Goal, error) {
+	var goals []models.Goal
+
+	rows, err := r.db.Query(ctx, GoalAllDone, userId)
+	if err != nil {
+		return nil, fmt.Errorf("[repo] Error no tags found: %v", err)
+	}
+
+	for rows.Next() {
+		var goal models.Goal
+		if err := rows.Scan(
+			&goal.ID,
+			&goal.UserId,
+			&goal.Name,
+			&goal.Description,
+			&goal.Target,
+			&goal.Date,
+		); err != nil {
+			return nil, err
+		}
+
+		goals = append(goals, goal)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("[repo] Error rows error: %v", err)
+	}
+
+	if len(goals) == 0 {
+		return nil, fmt.Errorf("[repo] Error no tags found: %v", err)
+	}
+	return goals, nil
+>>>>>>> 159fe381c65bd448a92e0c9b63cdcaeff611df79
 }

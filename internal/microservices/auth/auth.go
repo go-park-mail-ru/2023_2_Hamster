@@ -16,6 +16,8 @@ type Usecase interface {
 	Login(ctx context.Context, login, plainPassword string) (uuid.UUID, string, string, error)
 	CheckLoginUnique(ctx context.Context, login string) (bool, error)
 
+	ChangePassword(ctx context.Context, input ChangePasswordInput) error
+
 	GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error)
 }
 
@@ -25,6 +27,8 @@ type Repository interface {
 
 	GetUserByLogin(ctx context.Context, login string) (*models.User, error)
 	GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error)
+
+	ChangePassword(ctx context.Context, userID uuid.UUID, newPassword string) error
 
 	// Validation
 	// CheckCorrectPassword(ctx context.Context, password string) error

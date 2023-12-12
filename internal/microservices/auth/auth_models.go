@@ -40,6 +40,12 @@ type (
 	UniqCheckInput struct {
 		Login string `json:"login" valid:"required"`
 	}
+
+	ChangePasswordInput struct {
+		Id          uuid.UUID
+		OldPassword string `json:"old_password" valid:"required,length(4|20)"`
+		NewPassword string `json:"new_password" valid:"required,length(4|20)"`
+	}
 )
 
 func (li *LoginInput) CheckValid() error {
@@ -57,6 +63,19 @@ func (si *SignUpInput) CheckValid() error {
 	si.PlaintPassword = html.EscapeString(si.PlaintPassword)
 
 	_, err := valid.ValidateStruct(*si)
+	return err
+}
+
+func (ui *UniqCheckInput) CheckValid() error {
+	ui.Login = html.EscapeString(ui.Login)
+	_, err := valid.ValidateStruct(*ui)
+	return err
+}
+
+func (ci *ChangePasswordInput) CheckValid() error {
+	ci.OldPassword = html.EscapeString(ci.OldPassword)
+	ci.NewPassword = html.EscapeString(ci.NewPassword)
+	_, err := valid.ValidateStruct(*ci)
 	return err
 }
 

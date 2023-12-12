@@ -37,6 +37,20 @@ func (m *MockUsecase) EXPECT() *MockUsecaseMockRecorder {
 	return m.recorder
 }
 
+// ChangePassword mocks base method.
+func (m *MockUsecase) ChangePassword(ctx context.Context, input auth.ChangePasswordInput) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ChangePassword", ctx, input)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ChangePassword indicates an expected call of ChangePassword.
+func (mr *MockUsecaseMockRecorder) ChangePassword(ctx, input interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangePassword", reflect.TypeOf((*MockUsecase)(nil).ChangePassword), ctx, input)
+}
+
 // CheckLoginUnique mocks base method.
 func (m *MockUsecase) CheckLoginUnique(ctx context.Context, login string) (bool, error) {
 	m.ctrl.T.Helper()
@@ -122,6 +136,20 @@ func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
+}
+
+// ChangePassword mocks base method.
+func (m *MockRepository) ChangePassword(ctx context.Context, userID uuid.UUID, newPassword string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ChangePassword", ctx, userID, newPassword)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ChangePassword indicates an expected call of ChangePassword.
+func (mr *MockRepositoryMockRecorder) ChangePassword(ctx, userID, newPassword interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangePassword", reflect.TypeOf((*MockRepository)(nil).ChangePassword), ctx, userID, newPassword)
 }
 
 // CheckLoginUnique mocks base method.

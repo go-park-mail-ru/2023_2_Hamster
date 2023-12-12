@@ -92,3 +92,28 @@ func (u *Usecase) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, 
 	}
 	return user, nil
 }
+
+func (u *Usecase) ChangePassword(ctx context.Context, input auth.ChangePasswordInput) error {
+	user, err := u.authRepo.GetByID(ctx, input.Id)
+	if err != nil {
+		return fmt.Errorf("[usecase] can't find user: %w", err)
+	}
+
+	ok, err := hasher.VerfiyPassword(input.OldPassword, user.Password)
+	if err != nil {
+		return fmt.Errorf("[usecase] Password Comparation Error: %w", err)
+	}
+	if !ok {
+		return fmt.Errorf("[usecase] password hash doesn't match the real one: %w", &models.IncorrectPasswordError{UserID: user.ID})
+	}
+
+	newpwd, err := hasher.GeneratePasswordHash(input.NewPassword)
+	if err != nil {
+		return fmt.Errorf("[usecase] can't change password intenal err: %w", err)
+	}
+
+	if err := u.authRepo.ChangePassword(ctx, input.Id, newpwd); err != nil {
+		return fmt.Errorf("[usecase] can't change password %w", err)
+	}
+	return nil
+}
