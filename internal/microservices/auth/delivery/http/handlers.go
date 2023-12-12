@@ -2,11 +2,13 @@ package http
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"time"
 
 	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth"
 	gen "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/grpc/generated"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions"
 	"github.com/google/uuid"
 
@@ -77,11 +79,11 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		Password: signUpUser.PlaintPassword,
 	})
 	if err != nil {
-		//var errUserAlreadyExists *models.UserAlreadyExistsError
-		//if errors.As(err, &errUserAlreadyExists) {
-		//	response.ErrorResponse(w, http.StatusConflict, err, "User already exists", h.log)
-		//	return
-		//}
+		var errUserAlreadyExists *models.UserAlreadyExistsError
+		if errors.As(err, &errUserAlreadyExists) {
+			response.ErrorResponse(w, http.StatusConflict, err, "User already exists", h.log)
+			return
+		}
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Errorf("Error in sign up: %v", err)

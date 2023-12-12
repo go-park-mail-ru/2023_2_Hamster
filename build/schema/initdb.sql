@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS category (
     user_id         UUID          REFERENCES Users(id)    CONSTRAINT fk_user_category       NOT NULL,
     parent_tag      UUID          REFERENCES category(id),
     "name"          VARCHAR(30)                                                             NOT NULL,
+    image_id        INT           DEFAULT 0                                                 NOT NULL,
     show_income     BOOLEAN,
     show_outcome    BOOLEAN,
     regular         BOOLEAN                                                                 NOT NULL
@@ -54,14 +55,14 @@ CREATE TABLE IF NOT EXISTS TransactionCategory (
 
 CREATE TABLE IF NOT EXISTS goal (
     id            UUID            DEFAULT uuid_generate_v4() PRIMARY KEY,
-    user_id       UUID            REFERENCES "user"(user_id)                                       NOT NULL,
+    user_id       UUID            REFERENCES Users(id)                                             NOT NULL,
     "name"        TEXT                                       CHECK(LENGTH("name") <= 50)           NOT NULL,
     "description" TEXT            DEFAULT ''                 CHECK(LENGTH("description") <= 255),
     "target"      NUMERIC(10,2)                                                                    NOT NULL,
     "date"        DATE,
     "state"       TEXT            DEFAULT ''                 CHECK(LENGTH("state") <= 20),
     created_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP                                        NOT NULL,
-    updated_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP                                        NOT NULL,
+    updated_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP                                        NOT NULL
 );
 
 --========================================================================
