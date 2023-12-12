@@ -11,9 +11,9 @@ env:
   ACCOUNT_CONTAINER: "hammywallet-account"
   CATEGORY_CONTAINER: "hammywallet-category"
   
-  AUTH_ADDR: auth:8010
-  ACCOUNT_ADDR: account:8020
-  CATEGORY_ADDR: category:8030
+  AUTH_ADDR: "auth:8010"
+  ACCOUNT_ADDR: "account:8020"
+  CATEGORY_ADDR: "category:8030"
   
 on:
   push:
