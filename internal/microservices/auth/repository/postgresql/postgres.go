@@ -18,6 +18,7 @@ const (
 	UserGetByUserName    = `SELECT id, login, username, password_hash, planned_budget, avatar_url From users WHERE (login=$1);`
 	UserCreate           = `INSERT INTO users (login, username, password_hash) VALUES ($1, $2, $3) RETURNING id;`
 	UserIDGetByID        = `SELECT id, login, username, password_hash, planned_budget, avatar_url FROM users WHERE id = $1;`
+	UserChangePassword   = `UPDATE users SET password_hash = $1 WHERE id = $2;`
 )
 
 const errorUserExists = "unique_violation"
@@ -93,4 +94,12 @@ func (r *AuthRep) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, 
 		return nil, fmt.Errorf("failed request db %s, %w", UserIDGetByID, err)
 	}
 	return &u, nil
+}
+
+func (r *AuthRep) ChangePassword(ctx context.Context, userID uuid.UUID, newPassword string) error {
+	_, err := r.db.Exec(ctx, UserChangePassword, newPassword, userID)
+	if err != nil {
+		return fmt.Errorf("[repo] failed to update password: %w", err)
+	}
+	return nil
 }

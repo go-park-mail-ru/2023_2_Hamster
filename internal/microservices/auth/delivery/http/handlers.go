@@ -2,11 +2,13 @@ package http
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"time"
 
 	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth"
 	gen "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/grpc/generated"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions"
 	"github.com/google/uuid"
 
@@ -77,11 +79,11 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		Password: signUpUser.PlaintPassword,
 	})
 	if err != nil {
-		//var errUserAlreadyExists *models.UserAlreadyExistsError
-		//if errors.As(err, &errUserAlreadyExists) {
-		//	response.ErrorResponse(w, http.StatusConflict, err, "User already exists", h.log)
-		//	return
-		//}
+		var errUserAlreadyExists *models.UserAlreadyExistsError
+		if errors.As(err, &errUserAlreadyExists) {
+			response.ErrorResponse(w, http.StatusConflict, err, "User already exists", h.log)
+			return
+		}
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Errorf("Error in sign up: %v", err)
@@ -119,7 +121,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Description	Login account
 // @Accept 		json
 // @Produce		json
-// @Param			userInput		body		auth.LoginInput		true		"username && password"
+// @Param		userInput		body		auth.LoginInput		true		"username && password"
 // @Success		202			{object}	Response[auth.SignResponse]		"User logedin"
 // @Failure		400			{object}	ResponseError					"Incorrect Input"
 // @Failure		429			{object}	ResponseError					"Server error"
@@ -298,6 +300,11 @@ func (h *Handler) CheckLoginUnique(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	if err := userLogin.CheckValid(); err != nil {
+		response.ErrorResponse(w, http.StatusBadRequest, err, response.InvalidBodyRequest, h.log)
+		return
+	}
+
 	// request login userLogin.Login
 	isUnique, err := h.client.CheckLoginUnique(r.Context(), &gen.UniqCheckRequest{Login: userLogin.Login})
 	if err != nil {
@@ -344,4 +351,68 @@ func (h *Handler) GetByIdHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.SuccessResponse(w, http.StatusOK, isUnique)
+}
+
+// @Summary		Change Password
+// @Tags		Auth
+// @Description	Takes old password and newpassword and chnge password
+// @Produce		json
+// @Success		200		{object}		Response[auth.SignResponse] 		"User Info"
+// @Failure		400		{object}		ResponseError						"Client error"
+// @Failure		500		{object}		ResponseError						"Server error"
+// @Router		/api/auth/password [put]
+func (h *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
+	user, err := response.GetUserFromRequest(r)
+	if err != nil {
+		h.log.WithField(
+			"Request-Id", contextutils.GetReqID(r.Context()),
+		).Errorf("[handler] Error: %v", err)
+		response.ErrorResponse(w, http.StatusUnauthorized, err, response.ErrUnauthorized.Error(), h.log)
+		return
+	}
+
+	var changePassword auth.ChangePasswordInput
+
+	// Decode request Body
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&changePassword); err != nil {
+		h.log.WithField(
+			"Request-Id", contextutils.GetReqID(r.Context()),
+		).Error(err.Error())
+		response.ErrorResponse(w, http.StatusBadRequest, err, "Corrupted request body can't unmarshal", h.log)
+		return
+	}
+	defer r.Body.Close()
+
+	// Sanitaize Input
+	if err := changePassword.CheckValid(); err != nil {
+		response.ErrorResponse(w, http.StatusBadRequest, err, response.InvalidBodyRequest, h.log)
+		return
+	}
+
+	changePassword.Id = user.ID
+
+	// Change Password
+	_, err = h.client.ChangePassword(r.Context(), &gen.ChangePasswordRequest{
+		Id:          changePassword.Id.String(),
+		OldPassword: changePassword.OldPassword,
+		NewPassword: changePassword.NewPassword,
+	})
+	if err != nil {
+		h.log.WithField(
+			"Request-Id", contextutils.GetReqID(r.Context()),
+		).Errorf("Error in change password: %v", err)
+		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't Change Password", h.log)
+		return
+	}
+
+	// Create Response
+	regUser := auth.SignResponse{
+		ID:       user.ID,
+		Login:    user.Login,
+		Username: user.Username,
+	}
+
+	// Send Response
+	response.SuccessResponse(w, http.StatusOK, regUser)
 }

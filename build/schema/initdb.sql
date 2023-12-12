@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS category (
     user_id         UUID          REFERENCES Users(id)    CONSTRAINT fk_user_category       NOT NULL,
     parent_tag      UUID          REFERENCES category(id),
     "name"          VARCHAR(30)                                                             NOT NULL,
+    image_id        INT           DEFAULT 0                                                 NOT NULL,
     show_income     BOOLEAN,
     show_outcome    BOOLEAN,
     regular         BOOLEAN                                                                 NOT NULL
@@ -52,16 +53,17 @@ CREATE TABLE IF NOT EXISTS TransactionCategory (
     PRIMARY KEY (transaction_id, category_id)
 );
 
---CREATE TABLE IF NOT EXISTS goal (
---    id            UUID            DEFAULT uuid_generate_v4() PRIMARY KEY,
---    user_id       UUID            REFERENCES "user"(user_id)                                       NOT NULL,
---    "name"        TEXT                                       CHECK(LENGTH("name") <= 50)           NOT NULL,
---    "description" TEXT            DEFAULT ''                 CHECK(LENGTH("description") <= 255),
---    "target"      NUMERIC(10,2)                                                                    NOT NULL,
---    "date"        DATE,
---    created_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP                                        NOT NULL,
---    updated_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP                                        NOT NULL
---);
+-- CREATE TABLE IF NOT EXISTS goal (
+--     id            UUID            DEFAULT uuid_generate_v4() PRIMARY KEY,
+--     user_id       UUID            REFERENCES Users(id)                                             NOT NULL,
+--     "name"        TEXT                                       CHECK(LENGTH("name") <= 50)           NOT NULL,
+--     "description" TEXT            DEFAULT ''                 CHECK(LENGTH("description") <= 255),
+--     "target"      NUMERIC(10,2)                                                                    NOT NULL,
+--     "date"        DATE,
+--     "state"       TEXT            DEFAULT ''                 CHECK(LENGTH("state") <= 20),
+--     created_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP                                        NOT NULL,
+--     updated_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP                                        NOT NULL
+-- );
 
 --========================================================================
 
@@ -94,7 +96,7 @@ BEGIN
     VALUES  (NEW.id, NULL, 'Дети',                     false, true,  false),
             (NEW.id, NULL, 'Забота о себе',            false, true,  false),
             (NEW.id, NULL, 'Зарплата',                 true,  false, true),
-            (NEW.id, NULL, 'Здровье и фитнес',         false, true,  false),
+            (NEW.id, NULL, 'Здоровье и фитнес',         false, true,  false),
             (NEW.id, NULL, 'Кафе и рестораны',         false, true,  false),
             (NEW.id, NULL, 'Машина',                   false, true,  false),
             (NEW.id, NULL, 'Образование',              false, true,  false),
@@ -121,11 +123,11 @@ BEGIN
 
     INSERT INTO transaction(user_id, account_income, account_outcome, income, outcome, payer, description)
     VALUES (NEW.id, accountCardID,
-                    accountCardID, 0, 100, 'Пятерочка', 'Пошел в магазин за вкусняшками') RETURNING id INTO transaction_idI;
+                    accountCardID, 0, 100, 'Тестовая транзакция1', 'Все хомячьки приветствуют вас, и просят удалить эти транзации)') RETURNING id INTO transaction_idI;
 
     INSERT INTO transaction(user_id, account_income, account_outcome, income, outcome, payer, description)
     VALUES (NEW.id, accountCardID,
-                    accountCardID, 100, 0, 'Пятерочка', 'Вернули деньги оплата не прошла') RETURNING id INTO transaction_idO;
+                    accountCardID, 100, 0, 'Тестовая транзакция2', 'Все хомячьки приветствуют вас, и просят удалить эти транзации)') RETURNING id INTO transaction_idO;
             
     INSERT INTO TransactionCategory(transaction_id, category_id)
     VALUES (transaction_idI, categoryID),
