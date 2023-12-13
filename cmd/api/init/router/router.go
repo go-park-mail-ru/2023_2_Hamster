@@ -65,6 +65,7 @@ func InitRouter(auth *auth.Handler,
 		authRouter.Methods("POST").Path("/checkAuth").HandlerFunc(auth.HealthCheck)
 		authRouter.Methods("POST").Path("/loginCheck").HandlerFunc(auth.CheckLoginUnique)
 		authRouter.Methods("POST").Path("/logout").HandlerFunc(auth.LogOut)
+		authRouter.Methods("PUTCH").Path("/password").HandlerFunc(auth.ChangePassword)
 	}
 
 	accountRouter := apiRouter.PathPrefix("/account").Subrouter()
