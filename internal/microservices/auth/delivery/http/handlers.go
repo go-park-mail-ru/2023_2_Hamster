@@ -2,7 +2,6 @@ package http
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"time"
 
@@ -80,8 +79,8 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		Password: signUpUser.PlaintPassword,
 	})
 	if err != nil {
-		errUserAlreadyExists := status.Error(codes.AlreadyExists, "Alredy exist") //*models.UserAlreadyExistsError
-		if errors.As(err, &errUserAlreadyExists) {
+		// errUserAlreadyExists := status.Error(codes.AlreadyExists, "Alredy exist") //*models.UserAlreadyExistsError
+		if status.Code(err) == codes.AlreadyExists {
 			response.ErrorResponse(w, http.StatusConflict, err, "User already exists", h.log)
 			return
 		}

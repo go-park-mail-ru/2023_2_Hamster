@@ -6,8 +6,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/jackc/pgx/v4"
-
 	"github.com/go-park-mail-ru/2023_2_Hamster/cmd/api/init/db/postgresql"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
@@ -37,7 +35,7 @@ const (
 						WHERE user_id = $1 AND id = $2
 					);`
 
-	transactionAssociationDelete = "DELETE FROM TransactionCategory WHERE category_id = $1;"
+	// transactionAssociationDelete = "DELETE FROM TransactionCategory WHERE category_id = $1;"
 )
 
 type Repository struct {
@@ -209,10 +207,11 @@ func (r *Repository) CheckExist(ctx context.Context, userId uuid.UUID, tagId uui
 	return true, nil
 }
 
-func (r *Repository) deleteTransactionAssociations(ctx context.Context, tx pgx.Tx, tagID uuid.UUID) error {
-	_, err := tx.Exec(ctx, transactionAssociationDelete, tagID)
-	if err != nil {
-		return fmt.Errorf("[repo] failed to delete existing transaction associations: %w", err)
-	}
-	return nil
-}
+//
+// func (r *Repository) deleteTransactionAssociations(ctx context.Context, tx pgx.Tx, tagID uuid.UUID) error {
+// 	_, err := tx.Exec(ctx, transactionAssociationDelete, tagID)
+// 	if err != nil {
+// 		return fmt.Errorf("[repo] failed to delete existing transaction associations: %w", err)
+// 	}
+// 	return nil
+// }
