@@ -1,5 +1,14 @@
 basePath: /user/{userID}/account/feed
 definitions:
+  auth.ChangePasswordInput:
+    properties:
+      id:
+        type: string
+      new_password:
+        type: string
+      old_password:
+        type: string
+    type: object
   auth.LoginInput:
     properties:
       login:
@@ -24,6 +33,7 @@ definitions:
   category.TagInput:
     properties:
       name:
+        description: Image       int       `json:"image_id"`
         type: string
       parent_id:
         type: string
@@ -90,6 +100,13 @@ definitions:
         items:
           $ref: '#/definitions/models.Category'
         type: array
+      status:
+        type: integer
+    type: object
+  http.Response-auth_ChangePasswordInput:
+    properties:
+      body:
+        $ref: '#/definitions/auth.ChangePasswordInput'
       status:
         type: integer
     type: object
@@ -295,6 +312,7 @@ definitions:
       id:
         type: string
       name:
+        description: Image       int       `json:"image_id" valid:"-"`
         type: string
       parent_id:
         type: string
@@ -567,6 +585,27 @@ paths:
       summary: Get unique login info
       tags:
       - Auth
+  /api/auth/password:
+    put:
+      description: Takes old password and newpassword and chnge password
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: password Info
+          schema:
+            $ref: '#/definitions/http.Response-auth_ChangePasswordInput'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Change Password
+      tags:
+      - Auth
   /api/auth/signin:
     post:
       consumes:
@@ -618,6 +657,10 @@ paths:
             $ref: '#/definitions/http.Response-auth_SignResponse'
         "400":
           description: Incorrect Input
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "409":
+          description: User already exists
           schema:
             $ref: '#/definitions/http.ResponseError'
         "429":

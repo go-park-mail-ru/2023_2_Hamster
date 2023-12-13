@@ -251,6 +251,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/auth/password": {
+            "put": {
+                "description": "Takes old password and newpassword and chnge password",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Change Password",
+                "responses": {
+                    "200": {
+                        "description": "password Info",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-auth_ChangePasswordInput"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/auth/signin": {
             "post": {
                 "description": "Login account",
@@ -330,6 +362,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Incorrect Input",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "409": {
+                        "description": "User already exists",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
                         }
@@ -1258,6 +1296,20 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "auth.ChangePasswordInput": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "new_password": {
+                    "type": "string"
+                },
+                "old_password": {
+                    "type": "string"
+                }
+            }
+        },
         "auth.LoginInput": {
             "type": "object",
             "properties": {
@@ -1295,6 +1347,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "name": {
+                    "description": "Image       int       ` + "`" + `json:\"image_id\"` + "`" + `",
                     "type": "string"
                 },
                 "parent_id": {
@@ -1395,6 +1448,17 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/models.Category"
                     }
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "http.Response-auth_ChangePasswordInput": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/auth.ChangePasswordInput"
                 },
                 "status": {
                     "type": "integer"
@@ -1716,6 +1780,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
+                    "description": "Image       int       ` + "`" + `json:\"image_id\" valid:\"-\"` + "`" + `",
                     "type": "string"
                 },
                 "parent_id": {

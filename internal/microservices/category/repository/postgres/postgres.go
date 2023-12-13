@@ -132,9 +132,9 @@ func (r *Repository) DeleteTag(ctx context.Context, tagId uuid.UUID) error {
 		}
 	}()
 
-	if err = r.deleteTransactionAssociations(ctx, tx, tagId); err != nil {
-		return err
-	}
+	//if err = r.deleteTransactionAssociations(ctx, tx, tagId); err != nil {
+	//	return err
+	//}
 
 	_, err = r.db.Exec(ctx, CategoryDelete, tagId)
 	if err != nil {

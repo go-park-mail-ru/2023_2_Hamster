@@ -8,9 +8,10 @@ import (
 
 	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth"
 	gen "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/grpc/generated"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions"
 	"github.com/google/uuid"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	contextutils "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/context_utils"
 	response "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
@@ -79,7 +80,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		Password: signUpUser.PlaintPassword,
 	})
 	if err != nil {
-		var errUserAlreadyExists *models.UserAlreadyExistsError
+		errUserAlreadyExists := status.Error(codes.AlreadyExists, "Alredy exist") //*models.UserAlreadyExistsError
 		if errors.As(err, &errUserAlreadyExists) {
 			response.ErrorResponse(w, http.StatusConflict, err, "User already exists", h.log)
 			return
@@ -357,9 +358,9 @@ func (h *Handler) GetByIdHandler(w http.ResponseWriter, r *http.Request) {
 // @Tags		Auth
 // @Description	Takes old password and newpassword and chnge password
 // @Produce		json
-// @Success		200		{object}		Response[auth.SignResponse] 		"User Info"
-// @Failure		400		{object}		ResponseError						"Client error"
-// @Failure		500		{object}		ResponseError						"Server error"
+// @Success		200		{object}		Response[auth.ChangePasswordInput] 		"password Info"
+// @Failure		400		{object}		ResponseError							"Client error"
+// @Failure		500		{object}		ResponseError							"Server error"
 // @Router		/api/auth/password [put]
 func (h *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	user, err := response.GetUserFromRequest(r)

@@ -48,8 +48,8 @@ CREATE TABLE IF NOT EXISTS Transaction (
 );
 
 CREATE TABLE IF NOT EXISTS TransactionCategory (
-    transaction_id UUID REFERENCES Transaction(id),
-    category_id UUID REFERENCES Category(id),
+    transaction_id UUID REFERENCES Transaction(id) ON DELETE CASCADE,
+    category_id UUID REFERENCES Category(id) ON DELETE CASCADE,
     PRIMARY KEY (transaction_id, category_id)
 );
 
