@@ -136,11 +136,3 @@ func (a *authGRPC) ChangePassword(ctx context.Context, in *proto.ChangePasswordR
 
 	return &emptypb.Empty{}, nil
 }
-
-// func (a *authGRPC) HealthCheck(ctx context.Context, in *emptypb.Empty) (*proto.HelthCheckResponse, error) {
-// 	/// a.sessionService.GetSessionByCookie(ctx)
-// 	return nil, status.Errorf(codes.Unimplemented, "method HealthCheck not implemented")
-// }
-// func (a *authGRPC) LogOut(ctx context.Context, in *emptypb.Empty) (*proto.LogoutResponse, error) {
-// 	return nil, status.Errorf(codes.Unimplemented, "method LogOut not implemented")
-// }

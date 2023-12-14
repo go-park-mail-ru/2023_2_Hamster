@@ -2,7 +2,7 @@ basePath: /user/{userID}/account/feed
 definitions:
   auth.ChangePasswordInput:
     properties:
-      id:
+      login:
         type: string
       new_password:
         type: string
@@ -100,13 +100,6 @@ definitions:
         items:
           $ref: '#/definitions/models.Category'
         type: array
-      status:
-        type: integer
-    type: object
-  http.Response-auth_ChangePasswordInput:
-    properties:
-      body:
-        $ref: '#/definitions/auth.ChangePasswordInput'
       status:
         type: integer
     type: object
@@ -585,16 +578,25 @@ paths:
       summary: Get unique login info
       tags:
       - Auth
-  /api/auth/password:
+  /api/auth/password/:
     put:
+      consumes:
+      - application/json
       description: Takes old password and newpassword and chnge password
+      parameters:
+      - description: username && password
+        in: body
+        name: userInput
+        required: true
+        schema:
+          $ref: '#/definitions/auth.ChangePasswordInput'
       produces:
       - application/json
       responses:
         "200":
-          description: password Info
+          description: user Info
           schema:
-            $ref: '#/definitions/http.Response-auth_ChangePasswordInput'
+            $ref: '#/definitions/http.Response-auth_SignResponse'
         "400":
           description: Client error
           schema:
@@ -627,6 +629,14 @@ paths:
             $ref: '#/definitions/http.Response-auth_SignResponse'
         "400":
           description: Incorrect Input
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Incorrect password
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "404":
+          description: User doesn't exist
           schema:
             $ref: '#/definitions/http.ResponseError'
         "429":

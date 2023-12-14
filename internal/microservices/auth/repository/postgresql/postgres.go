@@ -11,6 +11,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx"
+	pg "github.com/jackc/pgx/v4"
 )
 
 const (
@@ -50,11 +51,12 @@ func (r *AuthRep) GetUserByLogin(ctx context.Context, login string) (*models.Use
 	var u models.User
 	err := row.Scan(&u.ID, &u.Login, &u.Username, &u.Password, &u.PlannedBudget, &u.AvatarURL)
 
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, fmt.Errorf("[repo] %w, %v", &models.NoSuchUserError{}, err)
-	} else if err != nil {
-		return nil,
-			fmt.Errorf("[repo] failed request db %w", err)
+	if err != nil {
+		if errors.Is(err, pg.ErrNoRows) {
+			return nil, fmt.Errorf("[repo] %w: %v", &models.NoSuchUserError{}, err)
+		} else {
+			return nil, fmt.Errorf("[repo] failed request db: %w", err)
+		}
 	}
 	return &u, nil
 }
