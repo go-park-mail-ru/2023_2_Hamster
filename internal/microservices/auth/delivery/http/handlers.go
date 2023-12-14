@@ -356,11 +356,13 @@ func (h *Handler) GetByIdHandler(w http.ResponseWriter, r *http.Request) {
 // @Summary		Change Password
 // @Tags		Auth
 // @Description	Takes old password and newpassword and chnge password
+// @Accept 		json
 // @Produce		json
-// @Success		200		{object}		Response[auth.ChangePasswordInput] 		"password Info"
+// @Param		userInput		body		auth.ChangePasswordInput		true		"username && password"
+// @Success		200		{object}		Response[auth.SignResponse] 			"user Info"
 // @Failure		400		{object}		ResponseError							"Client error"
 // @Failure		500		{object}		ResponseError							"Server error"
-// @Router		/api/auth/password [put]
+// @Router		/api/auth/password/ [put]
 func (h *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	user, err := response.GetUserFromRequest(r)
 	if err != nil {
@@ -390,11 +392,9 @@ func (h *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	changePassword.Id = user.ID
-
 	// Change Password
 	_, err = h.client.ChangePassword(r.Context(), &gen.ChangePasswordRequest{
-		Id:          changePassword.Id.String(),
+		Login:       user.Login,
 		OldPassword: changePassword.OldPassword,
 		NewPassword: changePassword.NewPassword,
 	})

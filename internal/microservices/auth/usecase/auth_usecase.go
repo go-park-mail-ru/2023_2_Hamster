@@ -94,7 +94,7 @@ func (u *Usecase) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, 
 }
 
 func (u *Usecase) ChangePassword(ctx context.Context, input auth.ChangePasswordInput) error {
-	user, err := u.authRepo.GetByID(ctx, input.Id)
+	user, err := u.authRepo.GetUserByLogin(ctx, input.Login)
 	if err != nil {
 		return fmt.Errorf("[usecase] can't find user: %w", err)
 	}
@@ -112,7 +112,7 @@ func (u *Usecase) ChangePassword(ctx context.Context, input auth.ChangePasswordI
 		return fmt.Errorf("[usecase] can't change password intenal err: %w", err)
 	}
 
-	if err := u.authRepo.ChangePassword(ctx, input.Id, newpwd); err != nil {
+	if err := u.authRepo.ChangePassword(ctx, user.ID, newpwd); err != nil {
 		return fmt.Errorf("[usecase] can't change password %w", err)
 	}
 	return nil

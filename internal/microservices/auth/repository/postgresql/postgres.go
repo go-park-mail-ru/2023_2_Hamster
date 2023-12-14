@@ -17,7 +17,7 @@ const (
 	UserCheckLoginUnique = `SELECT COUNT(*) FROM users WHERE login = $1;`
 	UserGetByUserName    = `SELECT id, login, username, password_hash, planned_budget, avatar_url From users WHERE (login=$1);`
 	UserCreate           = `INSERT INTO users (login, username, password_hash) VALUES ($1, $2, $3) RETURNING id;`
-	UserIDGetByID        = `SELECT id, login, username, password_hash, planned_budget, avatar_url FROM users WHERE id = $1;`
+	UserIDGetByID        = `SELECT id, login, username, password_hash, planned_budget, avatar_url FROM users WHERE id=CAST($1 AS UUID);`
 	UserChangePassword   = `UPDATE users SET password_hash = $1 WHERE id = $2;`
 )
 

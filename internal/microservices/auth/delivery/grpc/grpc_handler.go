@@ -13,6 +13,7 @@ import (
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type authGRPC struct {
@@ -121,6 +122,19 @@ func (a *authGRPC) GetByID(ctx context.Context, in *proto.UserIdRequest) (*proto
 			Username: user.Username,
 		},
 	}, nil
+}
+
+func (a *authGRPC) ChangePassword(ctx context.Context, in *proto.ChangePasswordRequest) (*emptypb.Empty, error) {
+	err := a.authServices.ChangePassword(ctx, auth.ChangePasswordInput{
+		Login:       in.Login,
+		OldPassword: in.OldPassword,
+		NewPassword: in.NewPassword,
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &emptypb.Empty{}, nil
 }
 
 // func (a *authGRPC) HealthCheck(ctx context.Context, in *emptypb.Empty) (*proto.HelthCheckResponse, error) {
