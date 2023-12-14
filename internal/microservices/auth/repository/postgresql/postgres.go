@@ -53,7 +53,7 @@ func (r *AuthRep) GetUserByLogin(ctx context.Context, login string) (*models.Use
 
 	if err != nil {
 		if errors.Is(err, pg.ErrNoRows) {
-			return nil, fmt.Errorf("[repo] %w: %v", &models.NoSuchUserError{}, err)
+			return nil, fmt.Errorf("[repo] %w, %v", &models.NoSuchUserError{}, err)
 		} else {
 			return nil, fmt.Errorf("[repo] failed request db: %w", err)
 		}

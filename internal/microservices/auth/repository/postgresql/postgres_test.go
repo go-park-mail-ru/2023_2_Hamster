@@ -13,6 +13,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v4"
 	"github.com/pashagolub/pgxmock"
 	"github.com/stretchr/testify/assert"
 )
@@ -100,15 +101,15 @@ func TestGetUserByLogin(t *testing.T) {
 		{
 			name:     "UserNotFound",
 			rows:     pgxmock.NewRows([]string{"id", "login", "username", "password", "planned_budget", "avatar_url"}),
-			rowsErr:  sql.ErrNoRows,
-			err:      fmt.Errorf("[repo] %w, %v", &models.NoSuchUserError{}, sql.ErrNoRows),
+			rowsErr:  pgx.ErrNoRows,
+			err:      fmt.Errorf("[repo] %w, %v", &models.NoSuchUserError{}, pgx.ErrNoRows),
 			expected: nil,
 		},
 		{
 			name:     "DatabaseError",
 			rows:     pgxmock.NewRows([]string{"id", "login", "username", "password", "planned_budget", "avatar_url"}),
 			rowsErr:  errors.New("database error"),
-			err:      fmt.Errorf("[repo] failed request db %w", errors.New("database error")),
+			err:      fmt.Errorf("[repo] failed request db: %w", errors.New("database error")),
 			expected: nil,
 		},
 	}
