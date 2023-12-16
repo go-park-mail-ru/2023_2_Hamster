@@ -31,26 +31,26 @@ type MasTransaction struct {
 }
 
 type CreateTransaction struct {
-	AccountIncomeID  uuid.UUID   `json:"account_income" valid:"-"`  // ???
-	AccountOutcomeID uuid.UUID   `json:"account_outcome" valid:"-"` // ???
-	Income           float64     `json:"income" valid:"-"`
-	Outcome          float64     `json:"outcome" valid:"-"`
-	Date             time.Time   `json:"date" valid:"required"`
-	Payer            string      `json:"payer," valid:"maxstringlength(20)"`
-	Description      string      `json:"description,omitempty" valid:""`
-	Categories       []uuid.UUID `json:"categories" valid:"-"`
+	AccountIncomeID  uuid.UUID             `json:"account_income" valid:"-"`  // ???
+	AccountOutcomeID uuid.UUID             `json:"account_outcome" valid:"-"` // ???
+	Income           float64               `json:"income" valid:"-"`
+	Outcome          float64               `json:"outcome" valid:"-"`
+	Date             time.Time             `json:"date" valid:"required"`
+	Payer            string                `json:"payer," valid:"maxstringlength(20)"`
+	Description      string                `json:"description,omitempty" valid:""`
+	Categories       []models.CategoryName `json:"categories" valid:"-"`
 }
 
 type UpdTransaction struct {
-	ID               uuid.UUID   `json:"transaction_id" valid:"required"`
-	AccountIncomeID  uuid.UUID   `json:"account_income" valid:"-"`
-	AccountOutcomeID uuid.UUID   `json:"account_outcome" valid:"-"`
-	Income           float64     `json:"income" valid:"-"`
-	Outcome          float64     `json:"outcome" valid:"-"`
-	Date             time.Time   `json:"date" valid:"required"`
-	Payer            string      `json:"payer" valid:"maxstringlength(20)"`
-	Description      string      `json:"description" valid:"-"`
-	Categories       []uuid.UUID `json:"categories"`
+	ID               uuid.UUID             `json:"transaction_id" valid:"required"`
+	AccountIncomeID  uuid.UUID             `json:"account_income" valid:"-"`
+	AccountOutcomeID uuid.UUID             `json:"account_outcome" valid:"-"`
+	Income           float64               `json:"income" valid:"-"`
+	Outcome          float64               `json:"outcome" valid:"-"`
+	Date             time.Time             `json:"date" valid:"required"`
+	Payer            string                `json:"payer" valid:"maxstringlength(20)"`
+	Description      string                `json:"description" valid:"-"`
+	Categories       []models.CategoryName `json:"categories"`
 }
 
 func (cr *CreateTransaction) CheckValid() error {

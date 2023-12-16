@@ -8,20 +8,22 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v4"
 )
 
 const (
-	AccountGetUserByID = `SELECT EXISTS(
-    						SELECT 1 FROM UserAccount 
-    						WHERE account_id = $1 AND user_id = $2);`
+	AccountGetUserByID = ` SELECT * FROM UserAccount 
+    						WHERE account_id = $1 AND user_id = $2;`
 
+	AccountSharingCheck       = `SELECT COUNT(*) FROM accounts WHERE sharing_id = $1 AND id = $2;`
 	AccountUpdate             = "UPDATE accounts SET balance = $1, accumulation = $2, balance_enabled = $3, mean_payment = $4 WHERE id = $5;"
 	AccountDelete             = "DELETE FROM accounts WHERE id = $1;"
 	UserAccountDelete         = "DELETE FROM userAccount WHERE account_id = $1;"
-	AccountCreate             = "INSERT INTO accounts (balance, accumulation, balance_enabled, mean_payment) VALUES ($1, $2, $3, $4) RETURNING id;"
+	AccountCreate             = "INSERT INTO accounts (balance, accumulation, balance_enabled, mean_payment, sharing_id) VALUES ($1, $2, $3, $4, $5) RETURNING id;"
 	AccountUserCreate         = "INSERT INTO userAccount (user_id, account_id) VALUES ($1, $2);"
 	TransactionCategoryDelete = "DELETE FROM TransactionCategory WHERE transaction_id IN (SELECT id FROM Transaction WHERE account_income = $1 OR account_outcome = $1)"
 	AccountTransactionDelete  = "DELETE FROM Transaction WHERE account_income = $1 OR account_outcome = $1"
+	Unsubscribe               = "DELETE FROM userAccount WHERE account_id = $1 AND user_id = $2"
 )
 
 type AccountRep struct {
@@ -36,7 +38,54 @@ func NewRepository(db postgresql.DbConn, log logger.Logger) *AccountRep {
 	}
 }
 
-func (r *AccountRep) CheckForbidden(ctx context.Context, accountID uuid.UUID, userID uuid.UUID) error { // need test
+func (r *AccountRep) SharingCheck(ctx context.Context, accountID uuid.UUID, userID uuid.UUID) error {
+	var count int
+	row := r.db.QueryRow(ctx, AccountSharingCheck, userID, accountID)
+
+	err := row.Scan(&count)
+	if err != nil {
+		return fmt.Errorf("[repo] failed %w, %v", &models.ForbiddenUserError{}, err)
+	}
+
+	if count == 0 {
+		return fmt.Errorf("[repo] failed %w", &models.ForbiddenUserError{})
+	}
+
+	return nil
+}
+
+func (r *AccountRep) Unsubscribe(ctx context.Context, userID uuid.UUID, accountID uuid.UUID) error {
+	_, err := r.db.Exec(ctx, Unsubscribe, accountID, userID)
+	if err != nil {
+		return fmt.Errorf("[repo] failed to delete from UserAccount table: %w", err)
+	}
+	return nil
+}
+
+func (r *AccountRep) DeleteUserInAccount(ctx context.Context, userID uuid.UUID, accountID uuid.UUID) error {
+	_, err := r.db.Exec(ctx, Unsubscribe, accountID, userID)
+	if err != nil {
+		return fmt.Errorf("[repo] failed to delete from UserAccount table: %w", err)
+	}
+	return nil
+}
+
+func (r *AccountRep) CheckDuplicate(ctx context.Context, userID uuid.UUID, accountID uuid.UUID) error {
+	row := r.db.QueryRow(ctx, AccountGetUserByID, accountID, userID)
+
+	err := row.Scan(&userID, &accountID)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil
+		} else {
+			return fmt.Errorf("[repo] query error: %w", err)
+		}
+	}
+
+	return &models.DuplicateError{}
+}
+
+func (r *AccountRep) CheckForbidden(ctx context.Context, accountID uuid.UUID, userID uuid.UUID) error {
 	var result bool
 	row := r.db.QueryRow(ctx, AccountGetUserByID, accountID, userID)
 
@@ -61,7 +110,7 @@ func (r *AccountRep) CreateAccount(ctx context.Context, userID uuid.UUID, accoun
 		}
 	}()
 
-	row := tx.QueryRow(ctx, AccountCreate, account.Balance, account.Accumulation, account.BalanceEnabled, account.MeanPayment)
+	row := tx.QueryRow(ctx, AccountCreate, account.Balance, account.Accumulation, account.BalanceEnabled, account.MeanPayment, userID)
 	var id uuid.UUID
 
 	err = row.Scan(&id)
@@ -79,6 +128,14 @@ func (r *AccountRep) CreateAccount(ctx context.Context, userID uuid.UUID, accoun
 	}
 
 	return id, nil
+}
+
+func (r *AccountRep) AddUserInAccount(ctx context.Context, userID uuid.UUID, accountID uuid.UUID) error {
+	_, err := r.db.Exec(ctx, AccountUserCreate, userID, accountID)
+	if err != nil {
+		return fmt.Errorf("[repo] can't create accountUser %s, %w", AccountUserCreate, err)
+	}
+	return nil
 }
 
 func (r *AccountRep) UpdateAccount(ctx context.Context, userID uuid.UUID, account *models.Accounts) error {

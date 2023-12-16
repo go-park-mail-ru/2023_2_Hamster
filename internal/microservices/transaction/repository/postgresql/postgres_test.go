@@ -90,7 +90,7 @@ func TestGetFeed(t *testing.T) {
 	transactionID1 := uuid.New()
 	categoryID := uuid.New()
 	time := time.Now()
-	categories := []uuid.UUID{categoryID}
+	categories := []models.CategoryName{}
 	tests := []struct {
 		name            string
 		rows            *pgxmock.Rows
@@ -450,21 +450,21 @@ func TestInsertCategories(t *testing.T) {
 		name          string
 		errRows       error
 		transactionID uuid.UUID
-		categories    []uuid.UUID
+		categories    []models.CategoryName
 		err           error
 		rowsErr       error
 	}{
 		{
 			name:          "ValidCategories",
 			transactionID: transactionID,
-			categories:    []uuid.UUID{transactionID},
+			categories:    []models.CategoryName{{ID: transactionID}},
 			err:           nil,
 			rowsErr:       nil,
 		},
 		{
 			name:          "Error",
 			transactionID: transactionID,
-			categories:    []uuid.UUID{transactionID},
+			categories:    []models.CategoryName{{ID: transactionID}},
 			err:           fmt.Errorf("[repo] failed to insert category association: %w", errors.New("err")),
 			rowsErr:       errors.New("err"),
 		},

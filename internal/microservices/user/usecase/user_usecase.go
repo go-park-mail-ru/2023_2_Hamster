@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user"
 	tranfer_models "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user/delivery/http/transfer_models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
@@ -14,16 +15,18 @@ import (
 )
 
 type Usecase struct {
-	userRepo user.Repository
-	logger   logger.Logger
+	userRepo    user.Repository
+	logger      logger.Logger
+	accountRepo account.Repository
 }
 
 func NewUsecase(
 	ur user.Repository,
-	log logger.Logger) *Usecase {
+	log logger.Logger, ar account.Repository) *Usecase {
 	return &Usecase{
-		userRepo: ur,
-		logger:   log,
+		userRepo:    ur,
+		logger:      log,
+		accountRepo: ar,
 	}
 }
 
@@ -121,4 +124,50 @@ func (u *Usecase) UpdatePhoto(ctx context.Context, userID uuid.UUID) (uuid.UUID,
 		return uuid.Nil, err
 	}
 	return path, nil
+}
+
+func (u *Usecase) AddUserInAccount(ctx context.Context, accountInput models.AddUserAccount, adminID uuid.UUID) error {
+	err := u.accountRepo.SharingCheck(ctx, accountInput.AccountID, adminID)
+	if err != nil {
+		return fmt.Errorf("[usecase] is not admin user: %w", err)
+	}
+
+	sharedUser, err := u.userRepo.GetUserByLogin(ctx, accountInput.Login)
+	if err != nil {
+		return fmt.Errorf("[usecase] can't get user in login: %w", err)
+	}
+
+	err = u.accountRepo.CheckDuplicate(ctx, sharedUser.ID, accountInput.AccountID)
+	if err != nil {
+		return fmt.Errorf("[usecase] %w", err)
+	}
+
+	err = u.accountRepo.AddUserInAccount(ctx, sharedUser.ID, accountInput.AccountID)
+	if err != nil {
+		return fmt.Errorf("[usecase] can't add user in account %w", err)
+	}
+
+	return nil
+}
+
+func (u *Usecase) Unsubscribe(ctx context.Context, accountID uuid.UUID, userID uuid.UUID) error {
+	err := u.accountRepo.DeleteUserInAccount(ctx, userID, accountID)
+	if err != nil {
+		return fmt.Errorf("[usecase] can't delete user in account: %w", err)
+	}
+	return nil
+}
+
+func (u *Usecase) DeleteUserInAccount(ctx context.Context, userID uuid.UUID, accountID uuid.UUID, adminID uuid.UUID) error {
+	err := u.accountRepo.SharingCheck(ctx, accountID, adminID)
+	if err != nil {
+		return fmt.Errorf("[usecase] is not admin user: %w", err)
+	}
+
+	err = u.accountRepo.DeleteUserInAccount(ctx, userID, accountID)
+	if err != nil {
+		return fmt.Errorf("[usecase] can't delete account %w", err)
+	}
+
+	return nil
 }
