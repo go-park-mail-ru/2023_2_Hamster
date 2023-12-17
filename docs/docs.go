@@ -251,9 +251,12 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/password": {
+        "/api/auth/password/": {
             "put": {
                 "description": "Takes old password and newpassword and chnge password",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -261,11 +264,22 @@ const docTemplate = `{
                     "Auth"
                 ],
                 "summary": "Change Password",
+                "parameters": [
+                    {
+                        "description": "username \u0026\u0026 password",
+                        "name": "userInput",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.ChangePasswordInput"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "password Info",
+                        "description": "user Info",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-auth_ChangePasswordInput"
+                            "$ref": "#/definitions/http.Response-auth_SignResponse"
                         }
                     },
                     "400": {
@@ -316,6 +330,18 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Incorrect Input",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Incorrect password",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "User doesn't exist",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
                         }
@@ -1453,7 +1479,7 @@ const docTemplate = `{
         "auth.ChangePasswordInput": {
             "type": "object",
             "properties": {
-                "id": {
+                "login": {
                     "type": "string"
                 },
                 "new_password": {
@@ -1602,17 +1628,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/models.Category"
                     }
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "http.Response-auth_ChangePasswordInput": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/auth.ChangePasswordInput"
                 },
                 "status": {
                     "type": "integer"

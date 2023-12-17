@@ -124,6 +124,8 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Param		userInput		body		auth.LoginInput		true		"username && password"
 // @Success		202			{object}	Response[auth.SignResponse]		"User logedin"
 // @Failure		400			{object}	ResponseError					"Incorrect Input"
+// @Failure		403			{object}	ResponseError					"Incorrect password"
+// @Failure		404			{object}	ResponseError					"User doesn't exist"
 // @Failure		429			{object}	ResponseError					"Server error"
 // @Router		/api/auth/signin	[post]
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
@@ -152,6 +154,16 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		Password: loginUser.PlaintPassword,
 	})
 	if err != nil {
+		if status.Code(err) == codes.NotFound {
+			response.ErrorResponse(w, http.StatusNotFound, err, "User already exists", h.log)
+			return
+		}
+
+		if status.Code(err) == codes.PermissionDenied {
+			response.ErrorResponse(w, http.StatusForbidden, err, "Incorrect password", h.log)
+			return
+		}
+
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Errorf("Error in login: %v", err)
@@ -356,11 +368,13 @@ func (h *Handler) GetByIdHandler(w http.ResponseWriter, r *http.Request) {
 // @Summary		Change Password
 // @Tags		Auth
 // @Description	Takes old password and newpassword and chnge password
+// @Accept 		json
 // @Produce		json
-// @Success		200		{object}		Response[auth.ChangePasswordInput] 		"password Info"
+// @Param		userInput		body		auth.ChangePasswordInput		true		"username && password"
+// @Success		200		{object}		Response[auth.SignResponse] 			"user Info"
 // @Failure		400		{object}		ResponseError							"Client error"
 // @Failure		500		{object}		ResponseError							"Server error"
-// @Router		/api/auth/password [put]
+// @Router		/api/auth/password/ [put]
 func (h *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	user, err := response.GetUserFromRequest(r)
 	if err != nil {
@@ -390,11 +404,9 @@ func (h *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	changePassword.Id = user.ID
-
 	// Change Password
 	_, err = h.client.ChangePassword(r.Context(), &gen.ChangePasswordRequest{
-		Id:          changePassword.Id.String(),
+		Login:       user.Login,
 		OldPassword: changePassword.OldPassword,
 		NewPassword: changePassword.NewPassword,
 	})

@@ -42,7 +42,7 @@ type (
 	}
 
 	ChangePasswordInput struct {
-		Id          uuid.UUID
+		Login       string
 		OldPassword string `json:"old_password" valid:"required,length(4|20)"`
 		NewPassword string `json:"new_password" valid:"required,length(4|20)"`
 	}
