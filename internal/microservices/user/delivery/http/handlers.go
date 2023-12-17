@@ -425,6 +425,16 @@ func (h *Handler) AddUserInAccount(w http.ResponseWriter, r *http.Request) {
 	commonHttp.SuccessResponse(w, http.StatusOK, commonHttp.NilBody{})
 }
 
+// @Summary		PUT 	Unsibscribe in Account
+// @Tags				User
+// @Description	Post 	User
+// @Produce		json
+// @Success		200		{object}	Response[NilBody]				    "Unsibscribe in Account"
+// @Failure		400		{object}	ResponseError						"Client error"
+// @Failure     401    	{object}  	ResponseError  						"Unauthorized user"
+// @Failure     403    	{object}  	ResponseError  						"Forbidden user"
+// @Failure		500		{object}	ResponseError						"Server error"
+// @Router		/api/user/unsubscribeAccount/{account_id} [put]
 func (h *Handler) Unsubscribe(w http.ResponseWriter, r *http.Request) {
 	accountID, err := commonHttp.GetIDFromRequest(accountID, r)
 
@@ -450,6 +460,17 @@ func (h *Handler) Unsubscribe(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// @Summary		DELETE 	Delete user in Account
+// @Tags				User
+// @Description	Post 	User
+// @Produce		json
+// @Param		User	body		models.DeleteInAccount		 true		    "Delete user in Account"
+// @Success		200		{object}	Response[NilBody]				    "Unsibscribe in Account"
+// @Failure		400		{object}	ResponseError						"Client error"
+// @Failure     401    	{object}  	ResponseError  						"Unauthorized user"
+// @Failure     403    	{object}  	ResponseError  						"Forbidden user"
+// @Failure		500		{object}	ResponseError						"Server error"
+// @Router		/api/user/deleteUserInAccount [delete]
 func (h *Handler) DeleteUserInAccount(w http.ResponseWriter, r *http.Request) {
 	user, err := commonHttp.GetUserFromRequest(r)
 
