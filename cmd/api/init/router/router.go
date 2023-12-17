@@ -102,6 +102,7 @@ func InitRouter(auth *auth.Handler,
 	transactionRouter.Use(authMid.Authentication)
 	//transactionRouter.Use(csrfMid.CheckCSRF)
 	{
+		transactionRouter.Methods("GET").Path("/export").HandlerFunc(transaction.ExportTransactions)
 		transactionRouter.Methods("GET").Path("/feed").HandlerFunc(transaction.GetFeed)
 		transactionRouter.Methods("GET").Path("/count").HandlerFunc(transaction.GetCount)
 		// 	transactionRouter.Methods("GET").Path("/{transaction_id}/").HandlerFunc(transaction.Get)

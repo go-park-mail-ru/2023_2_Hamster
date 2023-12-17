@@ -1,9 +1,16 @@
 package http
 
 import (
+	"bytes"
+	"encoding/csv"
 	"encoding/json"
 	"errors"
+	"io"
+	"log"
+	"mime/multipart"
 	"net/http"
+	"os"
+	"reflect"
 
 	commonHttp "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
@@ -245,5 +252,109 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	commonHttp.SuccessResponse(w, http.StatusOK, commonHttp.NilBody{})
+}
 
+// @Summary		Export .csv Transactions
+// @Tags		Transaction
+// @Description	Sends a .csv file with transactions based on the specified criteria.
+// @Produce		plain
+// @Failure		400		{object}	ResponseError	"Bad request - Transaction error"
+// @Failure		401		{object}	ResponseError	"Unauthorized - User unauthorized"
+// @Failure		403		{object}	ResponseError	"Forbidden - User doesn't have rights"
+// @Failure		404		{object}	ResponseError	"Not Found - No transactions found for the specified criteria"
+// @Failure		500		{object}	ResponseError	"Internal Server Error - Server error"
+// @Router		/api/transaction/export [get]
+// @Param		startDate	query	string	true	"Start date (format: 'YYYY-MM-DD')"
+// @Param		endDate		query	string	true	"End date (format: 'YYYY-MM-DD')"
+// @Param		authorization	header	string	true	"session_id"
+// @Success        200     {string}    "Successfully exported transactions"   {example: "TransactionID,Amount,Date\n1,100,2023-01-01\n2,150,2023-01-02\n"}
+func (h *Handler) ExportTransactions(w http.ResponseWriter, r *http.Request) {
+	user, err := commonHttp.GetUserFromRequest(r)
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusUnauthorized, err, commonHttp.ErrUnauthorized.Error(), h.logger)
+		return
+	}
+
+	query, err := commonHttp.GetQueryParam(r)
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
+		return
+	}
+
+	var errNoSuchTransaction *models.NoSuchTransactionError
+	dataFeed, err := h.transactionService.GetTransactionForExport(r.Context(), user.ID, query)
+	if errors.As(err, &errNoSuchTransaction) {
+		commonHttp.ErrorResponse(w, http.StatusNotFound, err, "no transactions found", h.logger)
+		return
+	} else if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, transfer_models.UserFeedServerError, h.logger)
+		return
+	}
+
+	fileName := "Transactions_" + user.Login + query.StartDate.String() + "-" + query.EndDate.String() + ".csv"
+
+	// 1. Create a CSV file and write the `dataFeed` into it.
+	csvFile, err := os.Create(fileName)
+	if err != nil {
+		h.logger.Error("can't crete datafile")
+		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, "can't create .csv file", h.logger)
+		return
+	}
+	defer csvFile.Close()
+
+	var csvHeader []string
+
+	t := reflect.TypeOf(dataFeed[0])
+	for i := 1; i < t.NumField(); i++ {
+		field := t.Field(i)
+		csvHeader = append(csvHeader, field.Name)
+	}
+
+	csvWriter := csv.NewWriter(csvFile)
+	if err = csvWriter.Write(csvHeader); err != nil {
+		h.logger.Errorf("Error in csv writing")
+	}
+
+	for _, row := range dataFeed {
+		record := row.String()
+		if err := csvWriter.Write(record); err != nil {
+			log.Fatalln("error writing record to csv:", err)
+		}
+	}
+
+	csvWriter.Flush()
+	if err := csvWriter.Error(); err != nil {
+		log.Fatal(err)
+	}
+
+	// 2. Create a new multipart form writer.
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	// 3. Create a new form file where the CSV file will be written.
+	part, err := writer.CreateFormFile("file", "dataFeed.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// 4. Write the CSV file into the form file.
+	_, err = csvFile.Seek(0, 0)
+	if err != nil {
+		h.logger.Errorf("Error in csv set start")
+	}
+
+	_, err = io.Copy(part, csvFile)
+	if err != nil {
+		h.logger.Errorf("Error in csv writing")
+	}
+
+	// 5. Write the multipart form's boundary to the response header.
+	w.Header().Set("Content-Type", writer.FormDataContentType())
+
+	// 6. Write the multipart form to the response.
+	writer.Close()
+	_, err = io.Copy(w, body)
+	if err != nil {
+		h.logger.Errorf("Error in csv writing")
+	}
 }
