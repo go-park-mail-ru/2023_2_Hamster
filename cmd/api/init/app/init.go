@@ -32,7 +32,7 @@ import (
 	userUsecase "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user/usecase"
 
 	accountDelivery "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account/delivery/http"
-
+	accountRep "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account/repository/postgresql"
 	sessionRep "github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions/repository/redis"
 	sessionUsecase "github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions/usecase"
 
@@ -83,11 +83,11 @@ func Init(db *pgxpool.Pool, redis *redis.Client, log *logger.Logger) *mux.Router
 	userRep := userRep.NewRepository(db, *log)
 	transactionRep := transactionRep.NewRepository(db, *log)
 	//categoryRep := categoryRep.NewRepository(db, *log)
-	// accountRep := accountRep.NewRepository(db, *log)
+	accountRep := accountRep.NewRepository(db, *log)
 
 	// authUsecase := authUsecase.NewUsecase(authRep, *log)
 	sessionUsecase := sessionUsecase.NewSessionUsecase(sessionRep)
-	userUsecase := userUsecase.NewUsecase(userRep, *log)
+	userUsecase := userUsecase.NewUsecase(userRep, *log, accountRep)
 	transactionUsecase := transactionUsecase.NewUsecase(transactionRep, *log)
 	//categoryUsecase := categoryUsecase.NewUsecase(categoryRep, *log)
 	csrfUsecase := csrfUsecase.NewUsecase(*log)

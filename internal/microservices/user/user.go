@@ -19,6 +19,9 @@ type Usecase interface {
 	//GetUser(ctx context.Context, userID uuid.UUID) (*models.User, error)
 	UpdateUser(ctx context.Context, user *models.User) error
 	UpdatePhoto(ctx context.Context, usserID uuid.UUID) (uuid.UUID, error)
+	AddUserInAccount(ctx context.Context, accountInput models.AddUserAccount, adminID uuid.UUID) error
+	Unsubscribe(ctx context.Context, accountID uuid.UUID, userID uuid.UUID) error
+	DeleteUserInAccount(ctx context.Context, userID uuid.UUID, accountID uuid.UUID, adminID uuid.UUID) error
 }
 
 type Repository interface {

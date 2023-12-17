@@ -72,7 +72,7 @@ definitions:
         type: string
       categories:
         items:
-          type: string
+          $ref: '#/definitions/models.CategoryName'
         type: array
       date:
         type: string
@@ -261,7 +261,7 @@ definitions:
         type: string
       categories:
         items:
-          type: string
+          $ref: '#/definitions/models.CategoryName'
         type: array
       date:
         type: string
@@ -306,6 +306,19 @@ definitions:
         type: string
       mean_payment:
         type: string
+      sharing_id:
+        type: string
+      users:
+        items:
+          $ref: '#/definitions/models.SharingUser'
+        type: array
+    type: object
+  models.AddUserAccount:
+    properties:
+      account_id:
+        type: string
+      login:
+        type: string
     type: object
   models.Category:
     properties:
@@ -325,6 +338,29 @@ definitions:
       user_id:
         type: string
     type: object
+  models.CategoryName:
+    properties:
+      category_name:
+        type: string
+      id:
+        type: string
+    type: object
+  models.DeleteInAccount:
+    properties:
+      account_id:
+        type: string
+      user_id:
+        type: string
+    type: object
+  models.SharingUser:
+    properties:
+      avatar_url:
+        type: string
+      id:
+        type: string
+      login:
+        type: string
+    type: object
   models.TransactionTransfer:
     properties:
       account_income:
@@ -333,7 +369,7 @@ definitions:
         type: string
       categories:
         items:
-          type: string
+          $ref: '#/definitions/models.CategoryName'
         type: array
       date:
         type: string
@@ -1099,6 +1135,42 @@ paths:
       summary: Get Actual Budget
       tags:
       - User
+  /api/user/addUserInAccount:
+    post:
+      description: "Post \tUser"
+      parameters:
+      - description: Add user in account
+        in: body
+        name: User
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddUserAccount'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Update account
+          schema:
+            $ref: '#/definitions/http.Response-http_NilBody'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: "POST \tAdd User in Account"
+      tags:
+      - User
   /api/user/balance:
     get:
       description: Get User balance
@@ -1126,6 +1198,42 @@ paths:
           schema:
             $ref: '#/definitions/http.ResponseError'
       summary: Get Balance
+      tags:
+      - User
+  /api/user/deleteUserInAccount:
+    delete:
+      description: "Post \tUser"
+      parameters:
+      - description: Delete user in Account
+        in: body
+        name: User
+        required: true
+        schema:
+          $ref: '#/definitions/models.DeleteInAccount'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Unsibscribe in Account
+          schema:
+            $ref: '#/definitions/http.Response-http_NilBody'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: "DELETE \tDelete user in Account"
       tags:
       - User
   /api/user/feed:
@@ -1184,6 +1292,35 @@ paths:
           schema:
             $ref: '#/definitions/http.ResponseError'
       summary: Get Planned Budget
+      tags:
+      - User
+  /api/user/unsubscribeAccount/{account_id}:
+    put:
+      description: "Post \tUser"
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Unsibscribe in Account
+          schema:
+            $ref: '#/definitions/http.Response-http_NilBody'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: "PUT \tUnsibscribe in Account"
       tags:
       - User
   /api/user/update:

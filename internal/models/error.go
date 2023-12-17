@@ -14,6 +14,13 @@ func (e *UnathorizedError) Error() string {
 
 // =========================================UserError================================================
 
+type DuplicateError struct {
+}
+
+type NoSuchUserInLogin struct {
+	Login string
+}
+
 type NoSuchUserError struct {
 	UserID uuid.UUID
 }
@@ -66,6 +73,14 @@ func (e *NoSuchUserError) Error() string {
 
 func (e *NoSuchTransactionError) Error() string {
 	return fmt.Sprintf("No Such transaction: %s doesn't exist", e.UserID.String())
+}
+
+func (e *NoSuchUserInLogin) Error() string {
+	return fmt.Sprintf("No Such user in login %s doesn't exist", e.Login)
+}
+
+func (e *DuplicateError) Error() string {
+	return "Duplicate rows"
 }
 
 // =========================================UserError================================================

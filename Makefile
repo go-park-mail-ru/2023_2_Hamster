@@ -57,7 +57,7 @@ testUp:
 	go run ./cmd/auth/main.go & \
 	go run ./cmd/category/category.go & \
 	go run ./cmd/account/account.go & \
-	go run ./cmd/api/main.go  \
+	go run ./cmd/api/main.go | jq  \
 
 testDown:
 	# Остановка Docker Compose

@@ -31,7 +31,7 @@ import (
 // @name			session_id
 
 func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 1000*time.Second)
 	defer cancel()
 
 	log := logger.NewLogger(ctx)

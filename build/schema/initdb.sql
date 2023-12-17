@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS Users (
 CREATE TABLE IF NOT EXISTS Accounts (
     id            UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     balance numeric(10, 2),
+    sharing_id UUID REFERENCES Users(id), -- только он может что-то менять
     accumulation BOOLEAN,
     balance_enabled BOOLEAN,
     mean_payment VARCHAR(30)
@@ -53,17 +54,16 @@ CREATE TABLE IF NOT EXISTS TransactionCategory (
     PRIMARY KEY (transaction_id, category_id)
 );
 
--- CREATE TABLE IF NOT EXISTS goal (
---     id            UUID            DEFAULT uuid_generate_v4() PRIMARY KEY,
---     user_id       UUID            REFERENCES Users(id)                                             NOT NULL,
---     "name"        TEXT                                       CHECK(LENGTH("name") <= 50)           NOT NULL,
---     "description" TEXT            DEFAULT ''                 CHECK(LENGTH("description") <= 255),
---     "target"      NUMERIC(10,2)                                                                    NOT NULL,
---     "date"        DATE,
---     "state"       TEXT            DEFAULT ''                 CHECK(LENGTH("state") <= 20),
---     created_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP                                        NOT NULL,
---     updated_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP                                        NOT NULL
--- );
+--CREATE TABLE IF NOT EXISTS goal (
+--    id            UUID            DEFAULT uuid_generate_v4() PRIMARY KEY,
+--    user_id       UUID            REFERENCES "user"(user_id)                                       NOT NULL,
+--    "name"        TEXT                                       CHECK(LENGTH("name") <= 50)           NOT NULL,
+--    "description" TEXT            DEFAULT ''                 CHECK(LENGTH("description") <= 255),
+--    "target"      NUMERIC(10,2)                                                                    NOT NULL,
+--    "date"        DATE,
+--    created_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP                                        NOT NULL,
+--    updated_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP                                        NOT NULL
+--);
 
 --========================================================================
 
@@ -109,11 +109,11 @@ BEGIN
     
     SELECT id INTO categoryID FROM category WHERE name = 'Продукты' AND user_id = NEW.id;
 
-    INSERT INTO accounts(balance, mean_payment, accumulation, balance_enabled)
-    VALUES (0, 'Карта', false, true) RETURNING id INTO accountCardID;
+    INSERT INTO accounts(balance, sharing_id, mean_payment, accumulation, balance_enabled)
+    VALUES (0, NEW.id, 'Карта', false, true) RETURNING id INTO accountCardID;
            
-    INSERT INTO accounts(balance, mean_payment, accumulation, balance_enabled)
-    VALUES (0, 'Наличка', false, true) RETURNING id INTO accountCashID;
+    INSERT INTO accounts(balance, sharing_id, mean_payment, accumulation, balance_enabled)
+    VALUES (0, NEW.id, 'Наличка', false, true) RETURNING id INTO accountCashID;
 
     INSERT INTO userAccount(user_id, account_id)
     VALUES (NEW.id, accountCardID);

@@ -34,7 +34,7 @@ func (a *Usecase) CreateAccount(ctx context.Context, userID uuid.UUID, account *
 }
 
 func (a *Usecase) UpdateAccount(ctx context.Context, userID uuid.UUID, account *models.Accounts) error {
-	err := a.accountRepo.CheckForbidden(ctx, account.ID, userID)
+	err := a.accountRepo.SharingCheck(ctx, account.ID, userID)
 	if err != nil {
 		return fmt.Errorf("[usecase] can't be update by user: %w", err)
 	}
@@ -47,7 +47,7 @@ func (a *Usecase) UpdateAccount(ctx context.Context, userID uuid.UUID, account *
 }
 
 func (a *Usecase) DeleteAccount(ctx context.Context, userID uuid.UUID, accountID uuid.UUID) error {
-	err := a.accountRepo.CheckForbidden(ctx, accountID, userID)
+	err := a.accountRepo.SharingCheck(ctx, accountID, userID)
 	if err != nil {
 		return fmt.Errorf("[usecase] can't be delete by user: %w", err)
 	}

@@ -18,4 +18,9 @@ type Repository interface {
 	UpdateAccount(ctx context.Context, userID uuid.UUID, account *models.Accounts) error
 	DeleteAccount(ctx context.Context, userID uuid.UUID, accountID uuid.UUID) error
 	CheckForbidden(ctx context.Context, accountID uuid.UUID, userID uuid.UUID) error
+	SharingCheck(ctx context.Context, accountID uuid.UUID, userID uuid.UUID) error
+	AddUserInAccount(ctx context.Context, userID uuid.UUID, accountID uuid.UUID) error
+	Unsubscribe(ctx context.Context, userID uuid.UUID, accountID uuid.UUID) error
+	DeleteUserInAccount(ctx context.Context, userID uuid.UUID, accountID uuid.UUID) error
+	CheckDuplicate(ctx context.Context, userID uuid.UUID, accountID uuid.UUID) error
 }

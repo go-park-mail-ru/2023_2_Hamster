@@ -22,6 +22,8 @@ const (
 	UserFileNotCorrectType = "no correct type file"
 	UserFileNotPath        = "can't get path in form"
 	UserFileNotDelete      = "can't delete old file"
+	UserNotFoundLogin      = "no user found with this login"
+	UserDuplicate          = "this user has already been added to the account"
 
 	BalanceGetServerError        = "can't get balance"
 	PlannedBudgetGetServerError  = "can't get planned budget"

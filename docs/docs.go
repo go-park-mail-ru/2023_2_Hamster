@@ -1034,6 +1034,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/user/addUserInAccount": {
+            "post": {
+                "description": "Post \tUser",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "POST \tAdd User in Account",
+                "parameters": [
+                    {
+                        "description": "Add user in account",
+                        "name": "User",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.AddUserAccount"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Update account",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-http_NilBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/user/balance": {
             "get": {
                 "description": "Get User balance",
@@ -1049,6 +1104,61 @@ const docTemplate = `{
                         "description": "Show balance",
                         "schema": {
                             "$ref": "#/definitions/http.Response-transfer_models_BalanceResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/deleteUserInAccount": {
+            "delete": {
+                "description": "Post \tUser",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "DELETE \tDelete user in Account",
+                "parameters": [
+                    {
+                        "description": "Delete user in Account",
+                        "name": "User",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.DeleteInAccount"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Unsibscribe in Account",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-http_NilBody"
                         }
                     },
                     "400": {
@@ -1137,6 +1247,50 @@ const docTemplate = `{
                         "description": "Show planned budget",
                         "schema": {
                             "$ref": "#/definitions/http.Response-transfer_models_BudgetPlannedResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/unsubscribeAccount/{account_id}": {
+            "put": {
+                "description": "Post \tUser",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "PUT \tUnsibscribe in Account",
+                "responses": {
+                    "200": {
+                        "description": "Unsibscribe in Account",
+                        "schema": {
+                            "$ref": "#/definitions/http.Response-http_NilBody"
                         }
                     },
                     "400": {
@@ -1406,7 +1560,7 @@ const docTemplate = `{
                 "categories": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/models.CategoryName"
                     }
                 },
                 "date": {
@@ -1702,7 +1856,7 @@ const docTemplate = `{
                 "categories": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/models.CategoryName"
                     }
                 },
                 "date": {
@@ -1770,6 +1924,26 @@ const docTemplate = `{
                 },
                 "mean_payment": {
                     "type": "string"
+                },
+                "sharing_id": {
+                    "type": "string"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SharingUser"
+                    }
+                }
+            }
+        },
+        "models.AddUserAccount": {
+            "type": "object",
+            "properties": {
+                "account_id": {
+                    "type": "string"
+                },
+                "login": {
+                    "type": "string"
                 }
             }
         },
@@ -1800,6 +1974,42 @@ const docTemplate = `{
                 }
             }
         },
+        "models.CategoryName": {
+            "type": "object",
+            "properties": {
+                "category_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.DeleteInAccount": {
+            "type": "object",
+            "properties": {
+                "account_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.SharingUser": {
+            "type": "object",
+            "properties": {
+                "avatar_url": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "login": {
+                    "type": "string"
+                }
+            }
+        },
         "models.TransactionTransfer": {
             "type": "object",
             "properties": {
@@ -1812,7 +2022,7 @@ const docTemplate = `{
                 "categories": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/models.CategoryName"
                     }
                 },
                 "date": {

@@ -37,6 +37,34 @@ func (m *MockUsecase) EXPECT() *MockUsecaseMockRecorder {
 	return m.recorder
 }
 
+// AddUserInAccount mocks base method.
+func (m *MockUsecase) AddUserInAccount(ctx context.Context, accountInput models.AddUserAccount, adminID uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddUserInAccount", ctx, accountInput, adminID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddUserInAccount indicates an expected call of AddUserInAccount.
+func (mr *MockUsecaseMockRecorder) AddUserInAccount(ctx, accountInput, adminID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddUserInAccount", reflect.TypeOf((*MockUsecase)(nil).AddUserInAccount), ctx, accountInput, adminID)
+}
+
+// DeleteUserInAccount mocks base method.
+func (m *MockUsecase) DeleteUserInAccount(ctx context.Context, userID, accountID, adminID uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteUserInAccount", ctx, userID, accountID, adminID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteUserInAccount indicates an expected call of DeleteUserInAccount.
+func (mr *MockUsecaseMockRecorder) DeleteUserInAccount(ctx, userID, accountID, adminID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUserInAccount", reflect.TypeOf((*MockUsecase)(nil).DeleteUserInAccount), ctx, userID, accountID, adminID)
+}
+
 // GetAccounts mocks base method.
 func (m *MockUsecase) GetAccounts(ctx context.Context, userID uuid.UUID) ([]models.Accounts, error) {
 	m.ctrl.T.Helper()
@@ -97,21 +125,6 @@ func (mr *MockUsecaseMockRecorder) GetPlannedBudget(ctx, userID interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPlannedBudget", reflect.TypeOf((*MockUsecase)(nil).GetPlannedBudget), ctx, userID)
 }
 
-// GetUser mocks base method.
-func (m *MockUsecase) GetUser(ctx context.Context, userID uuid.UUID) (*models.User, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUser", ctx, userID)
-	ret0, _ := ret[0].(*models.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetUser indicates an expected call of GetUser.
-func (mr *MockUsecaseMockRecorder) GetUser(ctx, userID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockUsecase)(nil).GetUser), ctx, userID)
-}
-
 // GetUserBalance mocks base method.
 func (m *MockUsecase) GetUserBalance(ctx context.Context, userID uuid.UUID) (float64, error) {
 	m.ctrl.T.Helper()
@@ -127,19 +140,18 @@ func (mr *MockUsecaseMockRecorder) GetUserBalance(ctx, userID interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserBalance", reflect.TypeOf((*MockUsecase)(nil).GetUserBalance), ctx, userID)
 }
 
-// IsLoginUnique mocks base method.
-func (m *MockUsecase) IsLoginUnique(ctx context.Context, login string) (bool, error) {
+// Unsubscribe mocks base method.
+func (m *MockUsecase) Unsubscribe(ctx context.Context, accountID, userID uuid.UUID) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsLoginUnique", ctx, login)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "Unsubscribe", ctx, accountID, userID)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
-// IsLoginUnique indicates an expected call of IsLoginUnique.
-func (mr *MockUsecaseMockRecorder) IsLoginUnique(ctx, login interface{}) *gomock.Call {
+// Unsubscribe indicates an expected call of Unsubscribe.
+func (mr *MockUsecaseMockRecorder) Unsubscribe(ctx, accountID, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsLoginUnique", reflect.TypeOf((*MockUsecase)(nil).IsLoginUnique), ctx, login)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Unsubscribe", reflect.TypeOf((*MockUsecase)(nil).Unsubscribe), ctx, accountID, userID)
 }
 
 // UpdatePhoto mocks base method.
@@ -192,20 +204,6 @@ func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
-}
-
-// CheckUser mocks base method.
-func (m *MockRepository) CheckUser(ctx context.Context, userID uuid.UUID) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CheckUser", ctx, userID)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// CheckUser indicates an expected call of CheckUser.
-func (mr *MockRepositoryMockRecorder) CheckUser(ctx, userID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckUser", reflect.TypeOf((*MockRepository)(nil).CheckUser), ctx, userID)
 }
 
 // CreateUser mocks base method.
@@ -311,21 +309,6 @@ func (m *MockRepository) GetUserByLogin(ctx context.Context, login string) (*mod
 func (mr *MockRepositoryMockRecorder) GetUserByLogin(ctx, login interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByLogin", reflect.TypeOf((*MockRepository)(nil).GetUserByLogin), ctx, login)
-}
-
-// IsLoginUnique mocks base method.
-func (m *MockRepository) IsLoginUnique(ctx context.Context, login string) (bool, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsLoginUnique", ctx, login)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// IsLoginUnique indicates an expected call of IsLoginUnique.
-func (mr *MockRepositoryMockRecorder) IsLoginUnique(ctx, login interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsLoginUnique", reflect.TypeOf((*MockRepository)(nil).IsLoginUnique), ctx, login)
 }
 
 // UpdatePhoto mocks base method.
