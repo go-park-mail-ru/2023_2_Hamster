@@ -66,10 +66,14 @@ services:
       - hamster-net
     ports:
       - "${REDIS_PORT}:6379"
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   auth:
-    depends_on:
-    - hammy-postgres
     container_name: ${AUTH_CONTAINER}
     image:  ${REGISTRY}/${AUTH_CONTAINER}:${GITHUB_SHA_SHORT}
     #container_name: hammywallet-auth
@@ -82,12 +86,16 @@ services:
       - "8011:8011"
     volumes:
     - ./.env:/docker-hammywallet/.env
+    depends_on:
+      hammy-postgres:
+        condition: service_healthy
+      hammy-redis:
+        condition: service_healthy
     networks:
-      - hamster-net  
+      - hamster-net
+
 
   account:
-    depends_on:
-    - hammy-postgres
     container_name: ${ACCOUNT_CONTAINER}
     image:  ${REGISTRY}/${ACCOUNT_CONTAINER}:${GITHUB_SHA_SHORT}
     #container_name: hammywallet-account
@@ -101,11 +109,15 @@ services:
     volumes:
     - ./.env:/docker-hammywallet/.env
     networks:
-      - hamster-net  
+      - hamster-net
+
+    depends_on:
+      hammy-postgres:
+        condition: service_healthy
+      hammy-redis:
+        condition: service_healthy
 
   category:
-    depends_on:
-    - hammy-postgres
     container_name: ${CATEGORY_CONTAINER}
     image:  ${REGISTRY}/${CATEGORY_CONTAINER}:${GITHUB_SHA_SHORT}
     #container_name: hammywallet-category
@@ -120,6 +132,11 @@ services:
     - ./.env:/docker-hammywallet/.env
     networks:
       - hamster-net  
+    depends_on:
+      hammy-postgres:
+        condition: service_healthy
+      hammy-redis:
+        condition: service_healthy
 
   hammywallet-api:
     container_name: ${CONTAINER_NAME}
@@ -138,11 +155,16 @@ services:
         source: /home/ubuntu/frontend/images
         target: /images
     depends_on:
-      - hammy-postgres
-      - hammy-redis
-      - category
-      - account
-      - auth
+      hammy-postgres:
+        condition: service_healthy
+      hammy-redis:
+        condition: service_healthy
+      category:
+        condition: service_healthy
+      account:
+        condition: service_healthy
+      auth:
+        condition: service_healthy
     networks:
       - hamster-net
 
