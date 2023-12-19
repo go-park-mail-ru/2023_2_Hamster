@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 )
 
+//easyjson:json
 type Category struct {
 	ID       uuid.UUID `json:"id" valid:"-"`
 	UserID   uuid.UUID `json:"user_id" valid:"required"`

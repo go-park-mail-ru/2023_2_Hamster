@@ -3,6 +3,8 @@ package category
 import "github.com/google/uuid"
 
 // input output models
+//
+//easyjson:json
 type (
 	TagInput struct {
 		UserId   uuid.UUID `json:"user_id"`

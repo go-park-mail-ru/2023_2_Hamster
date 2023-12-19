@@ -332,7 +332,7 @@ func TestHandler_GetAccounts(t *testing.T) {
 		{
 			name:         "No accounts found",
 			userID:       uuidTest.String(),
-			expectedCode: http.StatusOK,
+			expectedCode: http.StatusNoContent,
 			funcCtxUser: func(user *models.User, ctx context.Context) context.Context {
 				return context.WithValue(ctx, models.ContextKeyUserType{}, user)
 			},

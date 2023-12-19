@@ -1,7 +1,7 @@
 package http
 
 import (
-	"encoding/json"
+	"github.com/mailru/easyjson"
 	"net/http"
 	"time"
 
@@ -56,8 +56,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	var signUpUser auth.SignUpInput
 
 	// Unmarshal request.Body
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&signUpUser); err != nil {
+	if err := easyjson.UnmarshalFromReader(r.Body, &signUpUser); err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Error(err.Error())
@@ -132,8 +131,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	var loginUser auth.LoginInput
 
 	// Decode request Body
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&loginUser); err != nil {
+	if err := easyjson.UnmarshalFromReader(r.Body, &loginUser); err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Error(err.Error())
@@ -302,8 +300,7 @@ func (h *Handler) CheckLoginUnique(w http.ResponseWriter, r *http.Request) {
 	var userLogin auth.UniqCheckInput
 
 	// Decode request Body
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&userLogin); err != nil {
+	if err := easyjson.UnmarshalFromReader(r.Body, &userLogin); err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Error(err.Error())
@@ -342,8 +339,7 @@ func (h *Handler) GetByIdHandler(w http.ResponseWriter, r *http.Request) {
 	var userId auth.UserIdInput
 
 	// Decode request Body
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&userId); err != nil {
+	if err := easyjson.UnmarshalFromReader(r.Body, &userId); err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Error(err.Error())
@@ -388,8 +384,7 @@ func (h *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	var changePassword auth.ChangePasswordInput
 
 	// Decode request Body
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&changePassword); err != nil {
+	if err := easyjson.UnmarshalFromReader(r.Body, &changePassword); err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Error(err.Error())
