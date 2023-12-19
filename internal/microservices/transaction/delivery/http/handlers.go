@@ -11,16 +11,28 @@ import (
 	"net/http"
 	"os"
 	"reflect"
+	"strconv"
+	"sync"
+	"time"
 
 	commonHttp "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/transaction"
+	"github.com/google/uuid"
+
+	genAccount "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account/delivery/grpc/generated"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user/delivery/http/transfer_models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
+
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/transaction"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user"
 )
 
 type Handler struct {
 	transactionService transaction.Usecase
+	accountService     account.Usecase
+	userService        user.Usecase
+	client             genAccount.AccountServiceClient
 	logger             logger.Logger
 }
 
@@ -31,9 +43,12 @@ const (
 	// userloginUrlParam = "login"
 )
 
-func NewHandler(uu transaction.Usecase, l logger.Logger) *Handler {
+func NewHandler(uu transaction.Usecase, au account.Usecase, userUsecase user.Usecase, cl genAccount.AccountServiceClient, l logger.Logger) *Handler {
 	return &Handler{
 		transactionService: uu,
+		accountService:     au,
+		client:             cl,
+		userService:        userUsecase,
 		logger:             l,
 	}
 }
@@ -258,6 +273,7 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 // @Tags		Transaction
 // @Description	Sends a .csv file with transactions based on the specified criteria.
 // @Produce		plain
+// @Success        200     {string}    "Successfully exported transactions"   {example: "TransactionID,Amount,Date\n1,100,2023-01-01\n2,150,2023-01-02\n"}
 // @Failure		400		{object}	ResponseError	"Bad request - Transaction error"
 // @Failure		401		{object}	ResponseError	"Unauthorized - User unauthorized"
 // @Failure		403		{object}	ResponseError	"Forbidden - User doesn't have rights"
@@ -267,7 +283,6 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 // @Param		startDate	query	string	true	"Start date (format: 'YYYY-MM-DD')"
 // @Param		endDate		query	string	true	"End date (format: 'YYYY-MM-DD')"
 // @Param		authorization	header	string	true	"session_id"
-// @Success        200     {string}    "Successfully exported transactions"   {example: "TransactionID,Amount,Date\n1,100,2023-01-01\n2,150,2023-01-02\n"}
 func (h *Handler) ExportTransactions(w http.ResponseWriter, r *http.Request) {
 	user, err := commonHttp.GetUserFromRequest(r)
 	if err != nil {
@@ -356,5 +371,151 @@ func (h *Handler) ExportTransactions(w http.ResponseWriter, r *http.Request) {
 	_, err = io.Copy(w, body)
 	if err != nil {
 		h.logger.Errorf("Error in csv writing")
+	}
+}
+
+func (h *Handler) ImportTransactions(w http.ResponseWriter, r *http.Request) {
+	user, err := commonHttp.GetUserFromRequest(r)
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusUnauthorized, err, commonHttp.ErrUnauthorized.Error(), h.logger)
+		return
+	}
+
+	// Parse the multipart form in the request
+	err = r.ParseMultipartForm(10 << 20) // Max memory 10MB
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, "Error parsing the request", h.logger)
+		return
+	}
+
+	// Get the file from the form
+	file, header, err := r.FormFile("csv")
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, "Error getting the file", h.logger)
+		return
+	}
+	defer file.Close()
+
+	if header.Header.Get("Content-Type") != "text/csv" {
+		commonHttp.ErrorResponse(w, http.StatusUnsupportedMediaType, nil, "File must be a CSV", h.logger)
+		return
+	}
+
+	const maxFileSize = 10 << 20 // 10MB
+	if header.Size > maxFileSize {
+		commonHttp.ErrorResponse(w, http.StatusRequestEntityTooLarge, nil, "File is too large", h.logger)
+		return
+	}
+	// Create a new CSV reader reading from the file
+	reader := csv.NewReader(file)
+
+	var errNoSuchAccounts *models.NoSuchAccounts
+	accounts, err := h.userService.GetAccounts(r.Context(), user.ID)
+	if errors.As(err, &errNoSuchAccounts) {
+		h.logger.Println(errNoSuchAccounts)
+	} else if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, "Error getting accounts", h.logger)
+		return
+	}
+
+	accountCache := sync.Map{}
+	if len(accounts) != 0 {
+		for _, account := range accounts {
+			accountCache.Store(account.MeanPayment, account.ID)
+		}
+	}
+
+	// Iterate through the records
+	for {
+		// Read each record from csv
+		record, err := reader.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			commonHttp.ErrorResponse(w, http.StatusBadRequest, err, "Error reading the CSV file", h.logger)
+			return
+		}
+
+		accountIncome := record[0]
+		accountOutcome := record[1]
+
+		income, err := strconv.ParseFloat(record[2], 64)
+		if err != nil {
+			commonHttp.ErrorResponse(w, http.StatusBadRequest, err, "Error converting the amount to float", h.logger)
+			return
+		}
+		if income == 0 {
+			income = 0
+		}
+
+		outcome, err := strconv.ParseFloat(record[3], 64)
+		if err != nil {
+			commonHttp.ErrorResponse(w, http.StatusBadRequest, err, "Error converting the amount to float", h.logger)
+			return
+		}
+		if outcome == 0 {
+			outcome = 0
+		}
+
+		date, err := time.Parse(record[4], time.RFC3339Nano)
+		if err != nil {
+			commonHttp.ErrorResponse(w, http.StatusBadRequest, err, "Error wrong time format", h.logger)
+			return
+		}
+
+		payer := record[5]
+		description := record[6]
+
+		var accountIncomeId uuid.UUID
+		if value, ok := accountCache.Load(accountIncome); ok {
+			accountIncome = value.(string)
+		} else {
+			account, err := h.client.Create(r.Context(), &genAccount.CreateRequest{
+				UserId:         user.ID.String(),
+				Balance:        float32(accountInput.Balance),
+				Accumulation:   accountInput.Accumulation,
+				BalanceEnabled: accountInput.BalanceEnabled,
+				MeanPayment:    accountInput.MeanPayment,
+			})
+			if err != nil {
+				commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, "Import error account add failed", h.logger)
+				return
+			}
+			accountCache.Store(accountIncome, accountIncomeId)
+		}
+
+		var accountOutcomeId uuid.UUID
+		if value, ok := accountCache.Load(accountOutcome); ok {
+			accountOutcome = value.(string)
+		} else {
+			accountOutcomeId, err = h.accountService.CreateAccount(r.Context(), user.ID, &models.Accounts{
+				MeanPayment: accountOutcome,
+				Balance:     0,
+			})
+			if err != nil {
+				commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, "Import error account add failed", h.logger)
+				return
+			}
+			accountCache.Store(accountOutcome, accountOutcomeId)
+		}
+
+		// Parse the record to a Transaction struct
+		transaction := models.Transaction{
+			AccountIncomeID:  accountIncomeId,
+			AccountOutcomeID: accountOutcomeId,
+			Income:           income,
+			Outcome:          outcome,
+			Date:             date,
+			Payer:            payer,
+			Description:      description,
+		}
+
+		// Create the transaction in the database
+		_, err = h.transactionService.CreateTransaction(r.Context(), &transaction)
+		if err != nil {
+			commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, "Error creating the transaction", h.logger)
+			return
+		}
 	}
 }
