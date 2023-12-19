@@ -16,6 +16,7 @@ import (
 	"time"
 
 	genAccount "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account/delivery/grpc/generated"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user"
 
 	commonHttp "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
@@ -27,6 +28,8 @@ import (
 
 type Handler struct {
 	transactionService transaction.Usecase
+	userService        user.Usecase
+	client             genAccount.AccountServiceClient
 	logger             logger.Logger
 }
 
@@ -37,9 +40,11 @@ const (
 	// userloginUrlParam = "login"
 )
 
-func NewHandler(uu transaction.Usecase, l logger.Logger) *Handler {
+func NewHandler(uu transaction.Usecase, userUsecase user.Usecase, cl genAccount.AccountServiceClient, l logger.Logger) *Handler {
 	return &Handler{
 		transactionService: uu,
+		userService:        userUsecase,
+		client:             cl,
 		logger:             l,
 	}
 }
@@ -401,7 +406,7 @@ func (h *Handler) ImportTransactions(w http.ResponseWriter, r *http.Request) {
 	reader := csv.NewReader(file)
 
 	var errNoSuchAccounts *models.NoSuchAccounts
-	accounts, err := h.userService.GetAccounts(r.Context(), user.ID)
+	accounts, err := h.GetAccounts(r.Context(), user.ID)
 	if errors.As(err, &errNoSuchAccounts) {
 		h.logger.Println(errNoSuchAccounts)
 	} else if err != nil {
