@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/csv"
 	"errors"
-	"github.com/mailru/easyjson"
 	"io"
 	"log"
 	"mime/multipart"
@@ -14,6 +13,8 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/mailru/easyjson"
 
 	genAccount "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account/delivery/grpc/generated"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user"
@@ -406,7 +407,7 @@ func (h *Handler) ImportTransactions(w http.ResponseWriter, r *http.Request) {
 	reader := csv.NewReader(file)
 
 	var errNoSuchAccounts *models.NoSuchAccounts
-	accounts, err := h.GetAccounts(r.Context(), user.ID)
+	accounts, err := h.userService.GetAccounts(r.Context(), user.ID)
 	if errors.As(err, &errNoSuchAccounts) {
 		h.logger.Println(errNoSuchAccounts)
 	} else if err != nil {
@@ -465,34 +466,39 @@ func (h *Handler) ImportTransactions(w http.ResponseWriter, r *http.Request) {
 
 		var accountIncomeId uuid.UUID
 		if value, ok := accountCache.Load(accountIncome); ok {
-			accountIncome = value.(string)
+			accountIncomeId = value.(uuid.UUID)
 		} else {
 			account, err := h.client.Create(r.Context(), &genAccount.CreateRequest{
 				UserId:         user.ID.String(),
-				Balance:        float32(accountInput.Balance),
-				Accumulation:   accountInput.Accumulation,
-				BalanceEnabled: accountInput.BalanceEnabled,
-				MeanPayment:    accountInput.MeanPayment,
+				Balance:        0.0,
+				Accumulation:   true,
+				BalanceEnabled: true,
+				MeanPayment:    accountIncome,
 			})
 			if err != nil {
 				commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, "Import error account add failed", h.logger)
 				return
 			}
+			accountIncomeId, _ = uuid.Parse(account.AccountId)
 			accountCache.Store(accountIncome, accountIncomeId)
 		}
 
 		var accountOutcomeId uuid.UUID
 		if value, ok := accountCache.Load(accountOutcome); ok {
-			accountOutcome = value.(string)
+			accountOutcomeId = value.(uuid.UUID)
 		} else {
-			accountOutcomeId, err = h.accountService.CreateAccount(r.Context(), user.ID, &models.Accounts{
-				MeanPayment: accountOutcome,
-				Balance:     0,
+			account, err := h.client.Create(r.Context(), &genAccount.CreateRequest{
+				UserId:         user.ID.String(),
+				Balance:        0.0,
+				Accumulation:   true,
+				BalanceEnabled: true,
+				MeanPayment:    accountOutcome,
 			})
 			if err != nil {
 				commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, "Import error account add failed", h.logger)
 				return
 			}
+			accountOutcomeId, _ = uuid.Parse(account.AccountId)
 			accountCache.Store(accountOutcome, accountOutcomeId)
 		}
 
