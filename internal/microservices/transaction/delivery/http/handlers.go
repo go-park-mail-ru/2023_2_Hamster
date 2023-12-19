@@ -3,8 +3,8 @@ package http
 import (
 	"bytes"
 	"encoding/csv"
-	"encoding/json"
 	"errors"
+	"github.com/mailru/easyjson"
 	"io"
 	"log"
 	"mime/multipart"
@@ -141,7 +141,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	var transactionInput CreateTransaction
 
-	if err := json.NewDecoder(r.Body).Decode(&transactionInput); err != nil {
+	if err := easyjson.UnmarshalFromReader(r.Body, &transactionInput); err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidBodyRequest, h.logger)
 		return
 	}
@@ -181,7 +181,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 
 	var updTransactionInput UpdTransaction
 
-	if err := json.NewDecoder(r.Body).Decode(&updTransactionInput); err != nil {
+	if err := easyjson.UnmarshalFromReader(r.Body, &updTransactionInput); err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidBodyRequest, h.logger)
 		return
 	}

@@ -74,6 +74,7 @@ type UserTransfer struct {
 	AvatarURL     uuid.UUID `json:"avatar_url" valid:""`
 }
 
+//easyjson:json
 type UserUdate struct {
 	Username      string  `json:"username" valid:"required,maxstringlength(20)"`
 	PlannedBudget float64 `json:"planned_budget" valid:"float"`

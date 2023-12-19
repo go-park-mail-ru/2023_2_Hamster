@@ -1,9 +1,9 @@
 package http
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/mailru/easyjson"
 	"io"
 	"net/http"
 	"os"
@@ -256,7 +256,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 
 	var updProfile transfer_models.UserUdate
 
-	if err := json.NewDecoder(r.Body).Decode(&updProfile); err != nil {
+	if err := easyjson.UnmarshalFromReader(r.Body, &updProfile); err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidBodyRequest, h.logger)
 		return
 	}
@@ -392,7 +392,7 @@ func (h *Handler) AddUserInAccount(w http.ResponseWriter, r *http.Request) {
 
 	var accountInput models.AddUserAccount
 
-	if err := json.NewDecoder(r.Body).Decode(&accountInput); err != nil {
+	if err := easyjson.UnmarshalFromReader(r.Body, &accountInput); err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidBodyRequest, h.logger)
 		return
 	}
@@ -481,7 +481,7 @@ func (h *Handler) DeleteUserInAccount(w http.ResponseWriter, r *http.Request) {
 
 	var accountDelete models.DeleteInAccount
 
-	if err := json.NewDecoder(r.Body).Decode(&accountDelete); err != nil {
+	if err := easyjson.UnmarshalFromReader(r.Body, &accountDelete); err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidBodyRequest, h.logger)
 		return
 	}
