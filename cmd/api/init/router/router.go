@@ -109,6 +109,7 @@ func InitRouter(auth *auth.Handler,
 		transactionRouter.Methods("PUT").Path("/update").HandlerFunc(transaction.Update)
 		transactionRouter.Methods("POST").Path("/create").HandlerFunc(transaction.Create)
 		transactionRouter.Methods("DELETE").Path("/{transaction_id}/delete").HandlerFunc(transaction.Delete)
+		transactionRouter.Methods("POST").Path("/import").HandlerFunc(transaction.ImportTransactions)
 	}
 
 	categoryRouter := apiRouter.PathPrefix("/tag").Subrouter()
