@@ -735,6 +735,79 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/transaction/export": {
+            "get": {
+                "description": "Sends a .csv file with transactions based on the specified criteria.",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Export .csv Transactions",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start date (format: 'YYYY-MM-DD')",
+                        "name": "startDate",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date (format: 'YYYY-MM-DD')",
+                        "name": "endDate",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "session_id",
+                        "name": "authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully exported transactions\"   {example: \"TransactionID,Amount,Date\\n1,100,2023-01-01\\n2,150,2023-01-02\\n\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - Transaction error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - User unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - User doesn't have rights",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found - No transactions found for the specified criteria",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error - Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/transaction/feed": {
             "get": {
                 "description": "Get User all transaction",

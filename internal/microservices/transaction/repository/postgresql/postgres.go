@@ -17,10 +17,20 @@ import (
 const (
 	transactionCreate  = "INSERT INTO transaction (user_id, account_income, account_outcome, income, outcome, date, payer, description) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;"
 	transactionGetFeed = `
-    SELECT t.id, t.user_id, t.account_income, t.account_outcome, t.income, t.outcome, t.date, t.payer, t.description
+    	SELECT 
+			t.id, 
+			t.user_id, 
+			t.account_income, 
+			t.account_outcome, 
+			t.income, 
+			t.outcome, 
+			t.date, 
+			t.payer, 
+			t.description
 		FROM Transaction t
 		JOIN UserAccount ua ON t.account_income = ua.account_id
-		WHERE ua.user_id = $1`
+		WHERE ua.user_id = $1
+	`
 
 	transactionUpdate         = "UPDATE transaction set account_income=$2, account_outcome=$3, income=$4, outcome=$5, date=$6, payer=$7, description=$8 WHERE id = $1;"
 	transactionGet            = "SELECT income, outcome, account_income, account_outcome FROM transaction WHERE id = $1;"
@@ -32,6 +42,22 @@ const (
 	transactionUpdateAccount  = "UPDATE accounts SET balance = balance - $1 WHERE id = $2;"
 	transactionCheck          = "SELECT EXISTS( SELECT id FROM transaction WHERE id = $1);"
 	transactionCount          = "SELECT COUNT(*) FROM transaction WHERE user_id = $1;"
+
+	transactionGetFeedForExport = ` SELECT 
+										t.id,  
+										a_income.mean_payment AS account_income_name,
+    									a_outcome.mean_payment AS account_outcome_name, 
+										t.income, 
+										t.outcome, 
+										t.date, 
+										t.payer, 
+										t.description
+									FROM Transaction t
+									JOIN UserAccount ua ON t.account_income = ua.account_id
+									JOIN Accounts a_income ON t.account_income = a_income.id
+									JOIN Accounts a_outcome ON t.account_outcome = a_outcome.id
+									WHERE ua.user_id = $1
+	`
 )
 
 type transactionRep struct {
@@ -404,6 +430,143 @@ func (r *transactionRep) CheckForbidden(ctx context.Context, transactionID uuid.
 	}
 	return userID, nil
 }
+
+func (r *transactionRep) GetTransactionForExport(ctx context.Context, userId uuid.UUID, queryGet *models.QueryListOptions) ([]models.TransactionExport, error) {
+	var transactions []models.TransactionExport
+	count := 1
+	var queryParamsSlice []interface{}
+
+	query := transactionGetFeedForExport
+	queryParamsSlice = append(queryParamsSlice, userId.String())
+
+	if !queryGet.StartDate.IsZero() || !queryGet.EndDate.IsZero() {
+		count++
+		if !queryGet.StartDate.IsZero() && !queryGet.EndDate.IsZero() {
+			query += " AND date BETWEEN $" + strconv.Itoa(count) + " AND $" + strconv.Itoa(count+1)
+			queryParamsSlice = append(queryParamsSlice, queryGet.StartDate, queryGet.EndDate)
+		} else if !queryGet.StartDate.IsZero() {
+			query += " AND date >= $" + strconv.Itoa(count)
+			queryParamsSlice = append(queryParamsSlice, queryGet.StartDate)
+		} else {
+			query += " AND date <= $" + strconv.Itoa(count)
+			queryParamsSlice = append(queryParamsSlice, queryGet.EndDate)
+		}
+	}
+
+	query += " ORDER BY date DESC;"
+
+	rows, err := r.db.Query(ctx, query, queryParamsSlice...)
+	if err != nil {
+		return nil, fmt.Errorf("[repo] %v", err)
+	}
+
+	for rows.Next() {
+		var transaction models.TransactionExport
+		if err := rows.Scan(
+			&transaction.ID,
+			&transaction.AccountIncome,
+			&transaction.AccountOutcome,
+			&transaction.Income,
+			&transaction.Outcome,
+			&transaction.Date,
+			&transaction.Payer,
+			&transaction.Description,
+		); err != nil {
+			return nil, fmt.Errorf("[repo] %w", err)
+		}
+		transactions = append(transactions, transaction)
+	}
+
+	return transactions, nil
+}
+
+/*
+	var transactions []models.Transaction
+	count := 1
+	var queryParamsSlice []interface{}
+
+	query := transactionGetFeedForExport
+	queryParamsSlice = append(queryParamsSlice, userId.String())
+
+	if queryGet.Account != uuid.Nil {
+		count++
+		query += " AND (account_income = $" + strconv.Itoa(count) + " OR account_outcome = $" + strconv.Itoa(count) + ")"
+		queryParamsSlice = append(queryParamsSlice, queryGet.Account.String())
+	}
+
+	if queryGet.Category != uuid.Nil {
+		count++
+		query += " AND id IN (SELECT transaction_id FROM TransactionCategory WHERE category_id = $" + strconv.Itoa(count) + ")"
+		queryParamsSlice = append(queryParamsSlice, queryGet.Category.String())
+	}
+
+	if queryGet.Income && queryGet.Outcome {
+		query += " AND income > 0 AND outcome > 0"
+	}
+
+	if !queryGet.Income && queryGet.Outcome {
+		query += " AND outcome > 0 AND income = 0"
+	}
+
+	if queryGet.Income && !queryGet.Outcome {
+		query += " AND income > 0 AND outcome = 0"
+	}
+
+	if !queryGet.StartDate.IsZero() || !queryGet.EndDate.IsZero() {
+		count++
+		if !queryGet.StartDate.IsZero() && !queryGet.EndDate.IsZero() {
+			query += " AND date BETWEEN $" + strconv.Itoa(count) + " AND $" + strconv.Itoa(count+1)
+			queryParamsSlice = append(queryParamsSlice, queryGet.StartDate, queryGet.EndDate)
+		} else if !queryGet.StartDate.IsZero() {
+			query += " AND date >= $" + strconv.Itoa(count)
+			queryParamsSlice = append(queryParamsSlice, queryGet.StartDate)
+		} else {
+			query += " AND date <= $" + strconv.Itoa(count)
+			queryParamsSlice = append(queryParamsSlice, queryGet.EndDate)
+		}
+	}
+
+	query += " ORDER BY date DESC;"
+	rows, err := r.db.Query(ctx, query, queryParamsSlice...)
+	if err != nil {
+		return nil, fmt.Errorf("[repo] %v", err)
+	}
+
+	for rows.Next() {
+		var transaction models.Transaction
+		if err := rows.Scan(
+			&transaction.ID,
+			&transaction.UserID,
+			&transaction.AccountIncomeID,
+			&transaction.AccountOutcomeID,
+			&transaction.Income,
+			&transaction.Outcome,
+			&transaction.Date,
+			&transaction.Payer,
+			&transaction.Description,
+		); err != nil {
+			return nil, fmt.Errorf("[repo] %w", err)
+		}
+
+		categories, err := r.getCategoriesForTransaction(ctx, transaction.ID)
+		if err != nil {
+			return nil, fmt.Errorf("[repo] %w", err)
+		}
+		transaction.Categories = categories
+
+		transactions = append(transactions, transaction)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("[repo] %w", err)
+	}
+
+	if len(transactions) == 0 {
+		return nil, fmt.Errorf("[repo] %w: %v", &models.NoSuchTransactionError{UserID: userId}, err)
+	}
+
+	return transactions, nil
+*/
 
 // func (r *transactionRep) Check(ctx context.Context, transactionID uuid.UUID) error {
 // 	var exists bool

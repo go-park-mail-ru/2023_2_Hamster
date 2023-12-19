@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -43,6 +44,31 @@ type QueryListOptions struct {
 	Outcome   bool      `json:"outcome" validate:"optional" example:"true"`
 	StartDate time.Time `json:"start_date" validate:"optional" example:"2023-11-21T19:30:57+03:00"`
 	EndDate   time.Time `json:"end_date" validate:"optional" example:"2023-12-21T19:30:57+03:00"`
+}
+
+type TransactionExport struct {
+	ID             uuid.UUID `json:"id"`
+	AccountIncome  string    `json:"account_income"`
+	AccountOutcome string    `json:"acount_outcome"`
+	Income         float64   `json:"income"`
+	Outcome        float64   `json:"outcome"`
+	Date           time.Time `json:"date"`
+	Payer          string    `json:"payer"`
+	Description    string    `json:"description"`
+	Categories     []string  `json:"category"`
+}
+
+func (t *TransactionExport) String() []string {
+	var transaction []string
+	transaction = append(transaction, t.AccountIncome)
+	transaction = append(transaction, t.AccountOutcome)
+	transaction = append(transaction, fmt.Sprintf("%f", t.Income))
+	transaction = append(transaction, fmt.Sprintf("%f", t.Outcome))
+	transaction = append(transaction, t.Date.Format("2006-01-02"))
+	transaction = append(transaction, t.Payer)
+	transaction = append(transaction, t.Description)
+	transaction = append(transaction, t.Categories...)
+	return transaction
 }
 
 func InitTransactionTransfer(transaction Transaction) TransactionTransfer {

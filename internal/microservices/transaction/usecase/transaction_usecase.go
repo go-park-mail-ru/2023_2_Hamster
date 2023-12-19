@@ -84,3 +84,11 @@ func (t *Usecase) DeleteTransaction(ctx context.Context, transactionID uuid.UUID
 
 	return nil
 }
+
+func (u *Usecase) GetTransactionForExport(ctx context.Context, userId uuid.UUID, query *models.QueryListOptions) ([]models.TransactionExport, error) {
+	transaction, err := u.transactionRepo.GetTransactionForExport(ctx, userId, query)
+	if err != nil {
+		return transaction, fmt.Errorf("[usecase] can't get transactions from repository %w", err)
+	}
+	return transaction, nil
+}
