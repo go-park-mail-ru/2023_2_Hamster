@@ -44,7 +44,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Create account",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-http_AccountCreateResponse"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -99,7 +99,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Update account",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-http_NilBody"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -143,7 +143,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Account deleted",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-http_NilBody"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -201,7 +201,7 @@ const docTemplate = `{
                     "200": {
                         "description": "User status",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-auth_SignResponse"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -233,7 +233,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Show user",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-bool"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -279,7 +279,7 @@ const docTemplate = `{
                     "200": {
                         "description": "user Info",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-auth_SignResponse"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -325,7 +325,7 @@ const docTemplate = `{
                     "202": {
                         "description": "User logedin",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-auth_SignResponse"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -383,7 +383,7 @@ const docTemplate = `{
                     "201": {
                         "description": "User Created",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-auth_SignResponse"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -421,7 +421,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Csrf Token",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-http_getCSRFResponce"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "401": {
@@ -456,7 +456,7 @@ const docTemplate = `{
                     "200": {
                         "description": "tag slice",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-array_models_Category"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -508,7 +508,7 @@ const docTemplate = `{
                     "200": {
                         "description": "tag with id creted",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-category_CategoryCreateResponse"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -560,7 +560,7 @@ const docTemplate = `{
                     "200": {
                         "description": "tag slice",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-models_Category"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -612,7 +612,7 @@ const docTemplate = `{
                     "200": {
                         "description": "tag to update",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-models_Category"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -650,7 +650,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Show transaction count",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-http_TransactionCount"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -705,7 +705,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Create transaction",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-http_TransactionCreateResponse"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -860,13 +860,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Show transaction",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-http_MasTransaction"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "204": {
                         "description": "Show actual accounts",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-string"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -889,6 +889,98 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/transaction/import": {
+            "post": {
+                "description": "Uploads a CSV file containing transactions and processes them to be stored in the system.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Export Transactions from CSV",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "date",
+                        "description": "Start date (format: 'YYYY-MM-DD')",
+                        "name": "startDate",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "date",
+                        "description": "End date (format: 'YYYY-MM-DD')",
+                        "name": "endDate",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "session_id",
+                        "description": "Session ID",
+                        "name": "authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "CSV file containing transactions data",
+                        "name": "csv",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully imported transactions",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - Transaction error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - User unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - User doesn't have rights",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found - No transactions found for the specified criteria",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "413": {
+                        "description": "Request Entity Too Large - File is too large",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error - Server error",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
                         }
@@ -921,7 +1013,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Update transaction",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-http_NilBody"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -965,7 +1057,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Transaction deleted",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-http_NilBody"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -1009,7 +1101,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Show user",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-transfer_models_UserTransfer"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -1053,13 +1145,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Show actual accounts",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-transfer_models_Account"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "204": {
                         "description": "Show actual accounts",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-string"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -1103,7 +1195,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Show actual budget",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-transfer_models_BudgetActualResponse"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -1158,7 +1250,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Update account",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-http_NilBody"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -1202,7 +1294,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Show balance",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-transfer_models_BalanceResponse"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -1257,7 +1349,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Unsibscribe in Account",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-http_NilBody"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -1301,7 +1393,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Show actual accounts",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-transfer_models_UserFeed"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -1345,7 +1437,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Show planned budget",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-transfer_models_BudgetPlannedResponse"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -1389,7 +1481,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Unsibscribe in Account",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-http_NilBody"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -1447,7 +1539,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Update user info",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-http_NilBody"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -1517,7 +1609,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Photo updated successfully",
                         "schema": {
-                            "$ref": "#/definitions/http.Response-transfer_models_PhotoUpdate"
+                            "$ref": "#/definitions/http.Response"
                         }
                     },
                     "400": {
@@ -1574,28 +1666,6 @@ const docTemplate = `{
                 }
             }
         },
-        "auth.SignResponse": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "login": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "category.CategoryCreateResponse": {
-            "type": "object",
-            "properties": {
-                "category_id": {
-                    "type": "string"
-                }
-            }
-        },
         "category.TagInput": {
             "type": "object",
             "properties": {
@@ -1616,14 +1686,6 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "user_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "http.AccountCreateResponse": {
-            "type": "object",
-            "properties": {
-                "account_id": {
                     "type": "string"
                 }
             }
@@ -1679,227 +1741,10 @@ const docTemplate = `{
                 }
             }
         },
-        "http.MasTransaction": {
+        "http.Response": {
             "type": "object",
             "properties": {
-                "transactions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.TransactionTransfer"
-                    }
-                }
-            }
-        },
-        "http.NilBody": {
-            "type": "object"
-        },
-        "http.Response-array_models_Category": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.Category"
-                    }
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "http.Response-auth_SignResponse": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/auth.SignResponse"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "http.Response-bool": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "type": "boolean"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "http.Response-category_CategoryCreateResponse": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/category.CategoryCreateResponse"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "http.Response-http_AccountCreateResponse": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/http.AccountCreateResponse"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "http.Response-http_MasTransaction": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/http.MasTransaction"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "http.Response-http_NilBody": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/http.NilBody"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "http.Response-http_TransactionCount": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/http.TransactionCount"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "http.Response-http_TransactionCreateResponse": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/http.TransactionCreateResponse"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "http.Response-http_getCSRFResponce": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/http.getCSRFResponce"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "http.Response-models_Category": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/models.Category"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "http.Response-string": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "http.Response-transfer_models_Account": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/transfer_models.Account"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "http.Response-transfer_models_BalanceResponse": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/transfer_models.BalanceResponse"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "http.Response-transfer_models_BudgetActualResponse": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/transfer_models.BudgetActualResponse"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "http.Response-transfer_models_BudgetPlannedResponse": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/transfer_models.BudgetPlannedResponse"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "http.Response-transfer_models_PhotoUpdate": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/transfer_models.PhotoUpdate"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "http.Response-transfer_models_UserFeed": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/transfer_models.UserFeed"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "http.Response-transfer_models_UserTransfer": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/transfer_models.UserTransfer"
-                },
+                "body": {},
                 "status": {
                     "type": "integer"
                 }
@@ -1913,22 +1758,6 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "integer"
-                }
-            }
-        },
-        "http.TransactionCount": {
-            "type": "object",
-            "properties": {
-                "count": {
-                    "type": "integer"
-                }
-            }
-        },
-        "http.TransactionCreateResponse": {
-            "type": "object",
-            "properties": {
-                "transaction_id": {
-                    "type": "string"
                 }
             }
         },
@@ -1984,43 +1813,6 @@ const docTemplate = `{
                 },
                 "mean_payment": {
                     "type": "string"
-                }
-            }
-        },
-        "http.getCSRFResponce": {
-            "type": "object",
-            "properties": {
-                "csrf": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.Accounts": {
-            "type": "object",
-            "properties": {
-                "accumulation": {
-                    "type": "boolean"
-                },
-                "balance": {
-                    "type": "number"
-                },
-                "balance_enabled": {
-                    "type": "boolean"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "mean_payment": {
-                    "type": "string"
-                },
-                "sharing_id": {
-                    "type": "string"
-                },
-                "users": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.SharingUser"
-                    }
                 }
             }
         },
@@ -2084,55 +1876,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.SharingUser": {
-            "type": "object",
-            "properties": {
-                "avatar_url": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "login": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.TransactionTransfer": {
-            "type": "object",
-            "properties": {
-                "account_income": {
-                    "type": "string"
-                },
-                "account_outcome": {
-                    "type": "string"
-                },
-                "categories": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.CategoryName"
-                    }
-                },
-                "date": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "income": {
-                    "type": "number"
-                },
-                "outcome": {
-                    "type": "number"
-                },
-                "payer": {
-                    "type": "string"
-                }
-            }
-        },
         "models.User": {
             "type": "object",
             "properties": {
@@ -2146,89 +1889,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
-                    "type": "string"
-                },
-                "planned_budget": {
-                    "type": "number"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "transfer_models.Account": {
-            "type": "object",
-            "properties": {
-                "accounts": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.Accounts"
-                    }
-                }
-            }
-        },
-        "transfer_models.BalanceResponse": {
-            "type": "object",
-            "properties": {
-                "balance": {
-                    "type": "number"
-                }
-            }
-        },
-        "transfer_models.BudgetActualResponse": {
-            "type": "object",
-            "properties": {
-                "actual_budget": {
-                    "type": "number"
-                }
-            }
-        },
-        "transfer_models.BudgetPlannedResponse": {
-            "type": "object",
-            "properties": {
-                "planned_budget": {
-                    "type": "number"
-                }
-            }
-        },
-        "transfer_models.PhotoUpdate": {
-            "type": "object",
-            "properties": {
-                "path": {
-                    "type": "string"
-                }
-            }
-        },
-        "transfer_models.UserFeed": {
-            "type": "object",
-            "properties": {
-                "accounts": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.Accounts"
-                    }
-                },
-                "actual_budget": {
-                    "type": "number"
-                },
-                "balance": {
-                    "type": "number"
-                },
-                "planned_budget": {
-                    "type": "number"
-                }
-            }
-        },
-        "transfer_models.UserTransfer": {
-            "type": "object",
-            "properties": {
-                "avatar_url": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "login": {
                     "type": "string"
                 },
                 "planned_budget": {

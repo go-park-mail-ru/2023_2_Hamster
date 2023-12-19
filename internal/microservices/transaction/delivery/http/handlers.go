@@ -270,6 +270,7 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 // @Tags		Transaction
 // @Description	Sends a .csv file with transactions based on the specified criteria.
 // @Produce		plain
+// @Success     200     {string}    "Successfully exported transactions"   {example: "TransactionID,Amount,Date\n1,100,2023-01-01\n2,150,2023-01-02\n"}
 // @Failure		400		{object}	ResponseError	"Bad request - Transaction error"
 // @Failure		401		{object}	ResponseError	"Unauthorized - User unauthorized"
 // @Failure		403		{object}	ResponseError	"Forbidden - User doesn't have rights"
@@ -279,7 +280,6 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 // @Param		startDate	query	string	true	"Start date (format: 'YYYY-MM-DD')"
 // @Param		endDate		query	string	true	"End date (format: 'YYYY-MM-DD')"
 // @Param		authorization	header	string	true	"session_id"
-// @Success        200     {string}    "Successfully exported transactions"   {example: "TransactionID,Amount,Date\n1,100,2023-01-01\n2,150,2023-01-02\n"}
 func (h *Handler) ExportTransactions(w http.ResponseWriter, r *http.Request) {
 	user, err := commonHttp.GetUserFromRequest(r)
 	if err != nil {
@@ -371,6 +371,20 @@ func (h *Handler) ExportTransactions(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary 	Export Transactions from CSV
+// @Tags 		Transaction
+// @Description `Uploads a CSV file containing transactions and processes them to be stored in the system.
+// @Accept  mult`ipart/form-data
+// @Produce json
+// @Param 	csv formData file true "CSV file containing transactions data"
+// @Success 200 {string} string "Successfully imported transactions"
+// @Failure 400 {object} ResponseError "Bad request - Transaction error"
+// @Failure 401 {object} ResponseError "Unauthorized - User unauthorized"
+// @Failure 403 {object} ResponseError "Forbidden - User doesn't have rights"
+// @Failure 404 {object} ResponseError "Not Found - No transactions found for the specified criteria"
+// @Failure 413 {object} ResponseError "Request Entity Too Large - File is too large"
+// @Failure 500 {object} ResponseError "Internal Server Error - Server error"
+// @Router /api/transaction/import [post]
 func (h *Handler) ImportTransactions(w http.ResponseWriter, r *http.Request) {
 	user, err := commonHttp.GetUserFromRequest(r)
 	if err != nil {
@@ -379,29 +393,25 @@ func (h *Handler) ImportTransactions(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Parse the multipart form in the request
-	err = r.ParseMultipartForm(10 << 20) // Max memory 10MB
+	err = r.ParseMultipartForm(15 << 20) // Max memory 10MB
 	if err != nil {
-		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, "Error parsing the request", h.logger)
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, "File too big or contains errors", h.logger)
 		return
 	}
 
 	// Get the file from the form
-	file, header, err := r.FormFile("csv")
+	file, _, err := r.FormFile("csvFile")
 	if err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, "Error getting the file", h.logger)
 		return
 	}
 	defer file.Close()
 
-	const maxFileSize = 10 << 20 // 10MB
-	if header.Size > maxFileSize {
-		commonHttp.ErrorResponse(w, http.StatusRequestEntityTooLarge, nil, "File is too large", h.logger)
-		return
-	}
 	// Create a new CSV reader reading from the file
 	reader := csv.NewReader(file)
 
 	var errNoSuchAccounts *models.NoSuchAccounts
+
 	accounts, err := h.userService.GetAccounts(r.Context(), user.ID)
 	if errors.As(err, &errNoSuchAccounts) {
 		h.logger.Info(errNoSuchAccounts)
@@ -437,20 +447,14 @@ func (h *Handler) ImportTransactions(w http.ResponseWriter, r *http.Request) {
 			commonHttp.ErrorResponse(w, http.StatusBadRequest, err, "Error converting the amount to float", h.logger)
 			return
 		}
-		if income == 0 {
-			income = 0
-		}
 
 		outcome, err := strconv.ParseFloat(record[3], 64)
 		if err != nil {
 			commonHttp.ErrorResponse(w, http.StatusBadRequest, err, "Error converting the amount to float", h.logger)
 			return
 		}
-		if outcome == 0 {
-			outcome = 0
-		}
 
-		date, err := time.Parse(record[4], time.RFC3339Nano)
+		date, err := time.Parse(time.RFC3339Nano, record[4])
 		if err != nil {
 			commonHttp.ErrorResponse(w, http.StatusBadRequest, err, "Error wrong time format", h.logger)
 			return
@@ -515,4 +519,6 @@ func (h *Handler) ImportTransactions(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+
+	commonHttp.SuccessResponse(w, http.StatusOK, "Successfully imported transactions")
 }

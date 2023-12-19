@@ -59,7 +59,6 @@ func (r *Repository) CreateTag(ctx context.Context, tag models.Category) (uuid.U
 	row := r.db.QueryRow(ctx, CategoryCreate,
 		tag.UserID,
 		parentID,
-		// tag.Image,
 		tag.Name,
 		tag.ShowIncome,
 		tag.ShowOutcome,
