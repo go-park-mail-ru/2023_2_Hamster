@@ -20,11 +20,13 @@ type AccounstTransfer struct {
 	MeanPayment    string    `json:"mean_payment"`
 }
 
+//easyjson:json
 type AddUserAccount struct {
 	Login     string    `json:"login"`
 	AccountID uuid.UUID `json:"account_id"`
 }
 
+//easyjson:json
 type DeleteInAccount struct {
 	UserID    uuid.UUID `json:"user_id"`
 	AccountID uuid.UUID `json:"account_id"`

@@ -30,6 +30,7 @@ type MasTransaction struct {
 	Transactions []models.TransactionTransfer `json:"transactions"`
 }
 
+//easyjson:json
 type CreateTransaction struct {
 	AccountIncomeID  uuid.UUID             `json:"account_income" valid:"-"`  // ???
 	AccountOutcomeID uuid.UUID             `json:"account_outcome" valid:"-"` // ???
@@ -41,6 +42,7 @@ type CreateTransaction struct {
 	Categories       []models.CategoryName `json:"categories" valid:"-"`
 }
 
+//easyjson:json
 type UpdTransaction struct {
 	ID               uuid.UUID             `json:"transaction_id" valid:"required"`
 	AccountIncomeID  uuid.UUID             `json:"account_income" valid:"-"`
