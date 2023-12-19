@@ -65,7 +65,7 @@ func InitRouter(auth *auth.Handler,
 		authRouter.Methods("POST").Path("/checkAuth").HandlerFunc(auth.HealthCheck)
 		authRouter.Methods("POST").Path("/loginCheck").HandlerFunc(auth.CheckLoginUnique)
 		authRouter.Methods("POST").Path("/logout").HandlerFunc(auth.LogOut)
-		// TODO:Костыль наверно в юзера надо
+		// TODO:Костыль наверно в юзера надо, ага обязательно доделаем после защиты
 		passwordRouter := authRouter.PathPrefix("/password").Subrouter()
 		passwordRouter.Use(authMid.Authentication)
 		passwordRouter.Methods("PUT").Path("/").HandlerFunc(auth.ChangePassword)
@@ -73,7 +73,7 @@ func InitRouter(auth *auth.Handler,
 
 	accountRouter := apiRouter.PathPrefix("/account").Subrouter()
 	accountRouter.Use(authMid.Authentication)
-	//accountRouter.Use(csrfMid.CheckCSRF)
+	accountRouter.Use(csrfMid.CheckCSRF)
 	{
 		accountRouter.Methods("POST").Path("/create").HandlerFunc(account.Create)
 		accountRouter.Methods("PUT").Path("/update").HandlerFunc(account.Update)
@@ -82,7 +82,7 @@ func InitRouter(auth *auth.Handler,
 
 	userRouter := apiRouter.PathPrefix("/user").Subrouter()
 	userRouter.Use(authMid.Authentication)
-	//userRouter.Use(csrfMid.CheckCSRF)
+	userRouter.Use(csrfMid.CheckCSRF)
 	{
 		userRouter.Methods("PUT").Path("/updatePhoto").HandlerFunc(user.UpdatePhoto)
 		userRouter.Methods("PUT").Path("/update").HandlerFunc(user.Update)
@@ -100,7 +100,7 @@ func InitRouter(auth *auth.Handler,
 
 	transactionRouter := apiRouter.PathPrefix("/transaction").Subrouter()
 	transactionRouter.Use(authMid.Authentication)
-	//transactionRouter.Use(csrfMid.CheckCSRF)
+	transactionRouter.Use(csrfMid.CheckCSRF)
 	{
 		transactionRouter.Methods("GET").Path("/export").HandlerFunc(transaction.ExportTransactions)
 		transactionRouter.Methods("GET").Path("/feed").HandlerFunc(transaction.GetFeed)
@@ -114,7 +114,7 @@ func InitRouter(auth *auth.Handler,
 
 	categoryRouter := apiRouter.PathPrefix("/tag").Subrouter()
 	categoryRouter.Use(authMid.Authentication)
-	//categoryRouter.Use(csrfMid.CheckCSRF)
+	categoryRouter.Use(csrfMid.CheckCSRF)
 	{
 		categoryRouter.Methods("POST").Path("/create").HandlerFunc(category.CreateTag)
 		categoryRouter.Methods("GET").Path("/all").HandlerFunc(category.GetTags)
