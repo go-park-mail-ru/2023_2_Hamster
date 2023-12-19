@@ -393,11 +393,6 @@ func (h *Handler) ImportTransactions(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	if header.Header.Get("Content-Type") != "text/csv" {
-		commonHttp.ErrorResponse(w, http.StatusUnsupportedMediaType, nil, "File must be a CSV", h.logger)
-		return
-	}
-
 	const maxFileSize = 10 << 20 // 10MB
 	if header.Size > maxFileSize {
 		commonHttp.ErrorResponse(w, http.StatusRequestEntityTooLarge, nil, "File is too large", h.logger)
@@ -409,7 +404,7 @@ func (h *Handler) ImportTransactions(w http.ResponseWriter, r *http.Request) {
 	var errNoSuchAccounts *models.NoSuchAccounts
 	accounts, err := h.userService.GetAccounts(r.Context(), user.ID)
 	if errors.As(err, &errNoSuchAccounts) {
-		h.logger.Println(errNoSuchAccounts)
+		h.logger.Info(errNoSuchAccounts)
 	} else if err != nil {
 		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, "Error getting accounts", h.logger)
 		return

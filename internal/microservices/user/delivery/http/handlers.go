@@ -3,10 +3,11 @@ package http
 import (
 	"errors"
 	"fmt"
-	"github.com/mailru/easyjson"
 	"io"
 	"net/http"
 	"os"
+
+	"github.com/mailru/easyjson"
 
 	commonHttp "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
@@ -298,7 +299,6 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 // @Router      /api/user/updatePhoto [put]
 func (h *Handler) UpdatePhoto(w http.ResponseWriter, r *http.Request) { // need test
 	user, err := commonHttp.GetUserFromRequest(r)
-
 	if err != nil {
 		commonHttp.ErrorResponse(w, http.StatusUnauthorized, err, commonHttp.ErrUnauthorized.Error(), h.logger)
 		return
