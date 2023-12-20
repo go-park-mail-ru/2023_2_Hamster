@@ -279,7 +279,9 @@ func TestHandler_HealthCheck(t *testing.T) {
 			expectedCode:  http.StatusForbidden,
 			expectedBody:  `{"status":403,"message":"No cookie provided"}`,
 			mockSU:        func(mockSU *mocksSession.MockUsecase) {},
-			mockAU:        nil,
+			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
+				// mockAU.EXPECT().Login(gomock.Any(), gomock.Any(), gomock.Any()).Return(userID, "testuser", nil)
+			},
 		},
 		{
 			name:          "Session Doesn't Exist",
@@ -289,7 +291,9 @@ func TestHandler_HealthCheck(t *testing.T) {
 			mockSU: func(mockSU *mocksSession.MockUsecase) {
 				mockSU.EXPECT().GetSessionByCookie(gomock.Any(), sessionCookie).Return(models.Session{}, errors.New("session not found"))
 			},
-			mockAU: nil,
+			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
+				// mockAU.EXPECT().Login(gomock.Any(), gomock.Any(), gomock.Any()).Return(userID, "testuser", nil)
+			},
 		},
 		// Add more test cases as needed
 	}
