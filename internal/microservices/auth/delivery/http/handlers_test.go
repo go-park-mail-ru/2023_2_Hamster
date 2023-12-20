@@ -288,16 +288,6 @@ func TestHandler_HealthCheck(t *testing.T) {
 	}
 }
 
-<<<<<<< HEAD
-=======
-//func TestHandler_LogOut(t *testing.T) {
-//	sessionCookie := "testCookie"
-//	assert.Equal(t, tt.expectedCode, recorder.Result().StatusCode)
-//	assert.Equal(t, tt.expectedBody, strings.TrimSpace(recorder.Body.String()))
-//
-//}
-
->>>>>>> 19f1206818f5714cb35a056fc0f9c49f8cffe124
 func TestHandler_LogOut(t *testing.T) {
 	sessionCookie := "testCookie"
 
@@ -368,7 +358,7 @@ func TestHandler_LogOut(t *testing.T) {
 func TestHandler_CheckLoginUnique(t *testing.T) {
 	tests := []struct {
 		name         string
-		urlParam     string
+		expectBody   io.Reader
 		isUnique     bool
 		expectedCode int
 		expectedBody string
@@ -376,7 +366,7 @@ func TestHandler_CheckLoginUnique(t *testing.T) {
 	}{
 		{
 			name:         "Login is Unique",
-			urlParam:     "uniqueLogin",
+			expectBody:   strings.NewReader(`{"login":"login"}`),
 			isUnique:     true,
 			expectedCode: http.StatusOK,
 			expectedBody: `{"status":200,"body":true}`,
@@ -386,7 +376,7 @@ func TestHandler_CheckLoginUnique(t *testing.T) {
 		},
 		{
 			name:         "Login is Not Unique",
-			urlParam:     "nonUniqueLogin",
+			expectBody:   strings.NewReader(`{"login":"login"}`),
 			isUnique:     false,
 			expectedCode: http.StatusOK,
 			expectedBody: `{"status":200,"body":false}`,
@@ -396,7 +386,7 @@ func TestHandler_CheckLoginUnique(t *testing.T) {
 		},
 		{
 			name:         "Error Checking Unique Login",
-			urlParam:     "errorLogin",
+			expectBody:   strings.NewReader(`{"login":"login"}`),
 			isUnique:     false,
 			expectedCode: http.StatusInternalServerError,
 			expectedBody: `{"status":500,"message":"Can't get unique info login"}`,
@@ -421,7 +411,7 @@ func TestHandler_CheckLoginUnique(t *testing.T) {
 				log:    *logger.NewLogger(context.TODO()),
 			}
 
-			req := httptest.NewRequest("GET", fmt.Sprintf("/api/check-login-unique?%s=%s", userloginUrlParam, tt.urlParam), nil)
+			req := httptest.NewRequest("POST", "/api/loginCheck", tt.expectBody)
 			recorder := httptest.NewRecorder()
 
 			handler.CheckLoginUnique(recorder, req)
