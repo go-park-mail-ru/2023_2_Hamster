@@ -16,15 +16,16 @@ import (
 
 	"github.com/mailru/easyjson"
 
-	genAccount "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account/delivery/grpc/generated"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user"
-
 	commonHttp "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/transaction"
+	"github.com/google/uuid"
+
+	genAccount "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account/delivery/grpc/generated"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user/delivery/http/transfer_models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
-	"github.com/google/uuid"
+
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/transaction"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user"
 )
 
 type Handler struct {

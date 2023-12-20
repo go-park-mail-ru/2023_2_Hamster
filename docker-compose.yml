@@ -160,11 +160,11 @@ services:
       hammy-redis:
         condition: service_healthy
       category:
-        condition: service_healthy
+        condition: service_started
       account:
-        condition: service_healthy
+        condition: service_started
       auth:
-        condition: service_healthy
+        condition: service_started
     networks:
       - hamster-net
 
