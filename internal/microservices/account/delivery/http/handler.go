@@ -1,8 +1,8 @@
 package http
 
 import (
-	"encoding/json"
 	"errors"
+	"github.com/mailru/easyjson"
 	"net/http"
 
 	commonHttp "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
@@ -51,7 +51,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	var accountInput CreateAccount
 
-	if err := json.NewDecoder(r.Body).Decode(&accountInput); err != nil {
+	if err := easyjson.UnmarshalFromReader(r.Body, &accountInput); err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidBodyRequest, h.logger)
 		return
 	}
@@ -83,7 +83,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 // @Tags				Account
 // @Description	Put 	account
 // @Produce		json
-// @Param		account	body		UpdateAccount		true		    "Input transactin update"
+// @Param		account	body		UpdateAccount		 true		    "Input transactin update"
 // @Success		200		{object}	Response[NilBody]				    "Update account"
 // @Failure		400		{object}	ResponseError						"Client error"
 // @Failure     401    	{object}  	ResponseError  						"Unauthorized user"
@@ -99,7 +99,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 
 	var updateAccountInput UpdateAccount
 
-	if err := json.NewDecoder(r.Body).Decode(&updateAccountInput); err != nil {
+	if err := easyjson.UnmarshalFromReader(r.Body, &updateAccountInput); err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidBodyRequest, h.logger)
 		return
 	}

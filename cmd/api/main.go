@@ -28,7 +28,7 @@ import (
 
 // @securityDefinitions	AuthKey
 // @in				header
-// @name				session_id
+// @name			session_id
 
 func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

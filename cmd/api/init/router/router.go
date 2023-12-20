@@ -65,6 +65,10 @@ func InitRouter(auth *auth.Handler,
 		authRouter.Methods("POST").Path("/checkAuth").HandlerFunc(auth.HealthCheck)
 		authRouter.Methods("POST").Path("/loginCheck").HandlerFunc(auth.CheckLoginUnique)
 		authRouter.Methods("POST").Path("/logout").HandlerFunc(auth.LogOut)
+		// TODO:Костыль наверно в юзера надо, ага обязательно доделаем после защиты
+		passwordRouter := authRouter.PathPrefix("/password").Subrouter()
+		passwordRouter.Use(authMid.Authentication)
+		passwordRouter.Methods("PUT").Path("/").HandlerFunc(auth.ChangePassword)
 	}
 
 	accountRouter := apiRouter.PathPrefix("/account").Subrouter()
@@ -82,13 +86,15 @@ func InitRouter(auth *auth.Handler,
 	{
 		userRouter.Methods("PUT").Path("/updatePhoto").HandlerFunc(user.UpdatePhoto)
 		userRouter.Methods("PUT").Path("/update").HandlerFunc(user.Update)
-
-		// userRouter.Methods("GET").Path("/balance").HandlerFunc(user.GetUserBalance)
-		// userRouter.Methods("GET").Path("/plannedBudget").HandlerFunc(user.GetPlannedBudget)
-		// userRouter.Methods("GET").Path("/actualBudget").HandlerFunc(user.GetCurrentBudget)
+		userRouter.Methods("POST").Path("/addUserInAccount").HandlerFunc(user.AddUserInAccount)
+		userRouter.Methods("PUT").Path("/unsubscribeAccount/{account_id}").HandlerFunc(user.Unsubscribe)
+		userRouter.Methods("DELETE").Path("/deleteUserInAccount").HandlerFunc(user.DeleteUserInAccount)
 		userRouter.Methods("GET").Path("/account/all").HandlerFunc(user.GetAccounts)
 		userRouter.Methods("GET").Path("/feed").HandlerFunc(user.GetFeed)
 		userRouter.Methods("GET").Path("/").HandlerFunc(user.Get)
+		// userRouter.Methods("GET").Path("/balance").HandlerFunc(user.GetUserBalance)
+		// userRouter.Methods("GET").Path("/plannedBudget").HandlerFunc(user.GetPlannedBudget)
+		// userRouter.Methods("GET").Path("/actualBudget").HandlerFunc(user.GetCurrentBudget)
 
 	}
 
@@ -96,12 +102,14 @@ func InitRouter(auth *auth.Handler,
 	transactionRouter.Use(authMid.Authentication)
 	transactionRouter.Use(csrfMid.CheckCSRF)
 	{
+		transactionRouter.Methods("GET").Path("/export").HandlerFunc(transaction.ExportTransactions)
 		transactionRouter.Methods("GET").Path("/feed").HandlerFunc(transaction.GetFeed)
 		transactionRouter.Methods("GET").Path("/count").HandlerFunc(transaction.GetCount)
 		// 	transactionRouter.Methods("GET").Path("/{transaction_id}/").HandlerFunc(transaction.Get)
 		transactionRouter.Methods("PUT").Path("/update").HandlerFunc(transaction.Update)
 		transactionRouter.Methods("POST").Path("/create").HandlerFunc(transaction.Create)
 		transactionRouter.Methods("DELETE").Path("/{transaction_id}/delete").HandlerFunc(transaction.Delete)
+		transactionRouter.Methods("POST").Path("/import").HandlerFunc(transaction.ImportTransactions)
 	}
 
 	categoryRouter := apiRouter.PathPrefix("/tag").Subrouter()

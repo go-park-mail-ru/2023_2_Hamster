@@ -95,6 +95,21 @@ func (mr *MockUsecaseMockRecorder) GetFeed(ctx, userID, query interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFeed", reflect.TypeOf((*MockUsecase)(nil).GetFeed), ctx, userID, query)
 }
 
+// GetTransactionForExport mocks base method.
+func (m *MockUsecase) GetTransactionForExport(ctx context.Context, userId uuid.UUID, query *models.QueryListOptions) ([]models.TransactionExport, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTransactionForExport", ctx, userId, query)
+	ret0, _ := ret[0].([]models.TransactionExport)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTransactionForExport indicates an expected call of GetTransactionForExport.
+func (mr *MockUsecaseMockRecorder) GetTransactionForExport(ctx, userId, query interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactionForExport", reflect.TypeOf((*MockUsecase)(nil).GetTransactionForExport), ctx, userId, query)
+}
+
 // UpdateTransaction mocks base method.
 func (m *MockUsecase) UpdateTransaction(ctx context.Context, transaction *models.Transaction) error {
 	m.ctrl.T.Helper()
@@ -204,6 +219,21 @@ func (m *MockRepository) GetFeed(ctx context.Context, userID uuid.UUID, query *m
 func (mr *MockRepositoryMockRecorder) GetFeed(ctx, userID, query interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFeed", reflect.TypeOf((*MockRepository)(nil).GetFeed), ctx, userID, query)
+}
+
+// GetTransactionForExport mocks base method.
+func (m *MockRepository) GetTransactionForExport(ctx context.Context, userId uuid.UUID, query *models.QueryListOptions) ([]models.TransactionExport, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTransactionForExport", ctx, userId, query)
+	ret0, _ := ret[0].([]models.TransactionExport)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTransactionForExport indicates an expected call of GetTransactionForExport.
+func (mr *MockRepositoryMockRecorder) GetTransactionForExport(ctx, userId, query interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactionForExport", reflect.TypeOf((*MockRepository)(nil).GetTransactionForExport), ctx, userId, query)
 }
 
 // UpdateTransaction mocks base method.

@@ -1,5 +1,14 @@
 basePath: /user/{userID}/account/feed
 definitions:
+  auth.ChangePasswordInput:
+    properties:
+      login:
+        type: string
+      new_password:
+        type: string
+      old_password:
+        type: string
+    type: object
   auth.LoginInput:
     properties:
       login:
@@ -7,23 +16,10 @@ definitions:
       password:
         type: string
     type: object
-  auth.SignResponse:
-    properties:
-      id:
-        type: string
-      login:
-        type: string
-      username:
-        type: string
-    type: object
-  category.CategoryCreateResponse:
-    properties:
-      category_id:
-        type: string
-    type: object
   category.TagInput:
     properties:
       name:
+        description: Image       int       `json:"image_id"`
         type: string
       parent_id:
         type: string
@@ -34,11 +30,6 @@ definitions:
       show_outcome:
         type: boolean
       user_id:
-        type: string
-    type: object
-  http.AccountCreateResponse:
-    properties:
-      account_id:
         type: string
     type: object
   http.CreateAccount:
@@ -62,7 +53,7 @@ definitions:
         type: string
       categories:
         items:
-          type: string
+          $ref: '#/definitions/models.CategoryName'
         type: array
       date:
         type: string
@@ -75,147 +66,9 @@ definitions:
       payer:
         type: string
     type: object
-  http.MasTransaction:
+  http.Response:
     properties:
-      transactions:
-        items:
-          $ref: '#/definitions/models.TransactionTransfer'
-        type: array
-    type: object
-  http.NilBody:
-    type: object
-  http.Response-array_models_Category:
-    properties:
-      body:
-        items:
-          $ref: '#/definitions/models.Category'
-        type: array
-      status:
-        type: integer
-    type: object
-  http.Response-auth_SignResponse:
-    properties:
-      body:
-        $ref: '#/definitions/auth.SignResponse'
-      status:
-        type: integer
-    type: object
-  http.Response-bool:
-    properties:
-      body:
-        type: boolean
-      status:
-        type: integer
-    type: object
-  http.Response-category_CategoryCreateResponse:
-    properties:
-      body:
-        $ref: '#/definitions/category.CategoryCreateResponse'
-      status:
-        type: integer
-    type: object
-  http.Response-http_AccountCreateResponse:
-    properties:
-      body:
-        $ref: '#/definitions/http.AccountCreateResponse'
-      status:
-        type: integer
-    type: object
-  http.Response-http_MasTransaction:
-    properties:
-      body:
-        $ref: '#/definitions/http.MasTransaction'
-      status:
-        type: integer
-    type: object
-  http.Response-http_NilBody:
-    properties:
-      body:
-        $ref: '#/definitions/http.NilBody'
-      status:
-        type: integer
-    type: object
-  http.Response-http_TransactionCount:
-    properties:
-      body:
-        $ref: '#/definitions/http.TransactionCount'
-      status:
-        type: integer
-    type: object
-  http.Response-http_TransactionCreateResponse:
-    properties:
-      body:
-        $ref: '#/definitions/http.TransactionCreateResponse'
-      status:
-        type: integer
-    type: object
-  http.Response-http_getCSRFResponce:
-    properties:
-      body:
-        $ref: '#/definitions/http.getCSRFResponce'
-      status:
-        type: integer
-    type: object
-  http.Response-models_Category:
-    properties:
-      body:
-        $ref: '#/definitions/models.Category'
-      status:
-        type: integer
-    type: object
-  http.Response-string:
-    properties:
-      body:
-        type: string
-      status:
-        type: integer
-    type: object
-  http.Response-transfer_models_Account:
-    properties:
-      body:
-        $ref: '#/definitions/transfer_models.Account'
-      status:
-        type: integer
-    type: object
-  http.Response-transfer_models_BalanceResponse:
-    properties:
-      body:
-        $ref: '#/definitions/transfer_models.BalanceResponse'
-      status:
-        type: integer
-    type: object
-  http.Response-transfer_models_BudgetActualResponse:
-    properties:
-      body:
-        $ref: '#/definitions/transfer_models.BudgetActualResponse'
-      status:
-        type: integer
-    type: object
-  http.Response-transfer_models_BudgetPlannedResponse:
-    properties:
-      body:
-        $ref: '#/definitions/transfer_models.BudgetPlannedResponse'
-      status:
-        type: integer
-    type: object
-  http.Response-transfer_models_PhotoUpdate:
-    properties:
-      body:
-        $ref: '#/definitions/transfer_models.PhotoUpdate'
-      status:
-        type: integer
-    type: object
-  http.Response-transfer_models_UserFeed:
-    properties:
-      body:
-        $ref: '#/definitions/transfer_models.UserFeed'
-      status:
-        type: integer
-    type: object
-  http.Response-transfer_models_UserTransfer:
-    properties:
-      body:
-        $ref: '#/definitions/transfer_models.UserTransfer'
+      body: {}
       status:
         type: integer
     type: object
@@ -226,16 +79,6 @@ definitions:
       status:
         type: integer
     type: object
-  http.TransactionCount:
-    properties:
-      count:
-        type: integer
-    type: object
-  http.TransactionCreateResponse:
-    properties:
-      transaction_id:
-        type: string
-    type: object
   http.UpdTransaction:
     properties:
       account_income:
@@ -244,7 +87,7 @@ definitions:
         type: string
       categories:
         items:
-          type: string
+          $ref: '#/definitions/models.CategoryName'
         type: array
       date:
         type: string
@@ -272,22 +115,11 @@ definitions:
       mean_payment:
         type: string
     type: object
-  http.getCSRFResponce:
+  models.AddUserAccount:
     properties:
-      csrf:
+      account_id:
         type: string
-    type: object
-  models.Accounts:
-    properties:
-      accumulation:
-        type: boolean
-      balance:
-        type: number
-      balance_enabled:
-        type: boolean
-      id:
-        type: string
-      mean_payment:
+      login:
         type: string
     type: object
   models.Category:
@@ -295,6 +127,7 @@ definitions:
       id:
         type: string
       name:
+        description: Image       int       `json:"image_id" valid:"-"`
         type: string
       parent_id:
         type: string
@@ -307,27 +140,18 @@ definitions:
       user_id:
         type: string
     type: object
-  models.TransactionTransfer:
+  models.CategoryName:
     properties:
-      account_income:
-        type: string
-      account_outcome:
-        type: string
-      categories:
-        items:
-          type: string
-        type: array
-      date:
-        type: string
-      description:
+      category_name:
         type: string
       id:
         type: string
-      income:
-        type: number
-      outcome:
-        type: number
-      payer:
+    type: object
+  models.DeleteInAccount:
+    properties:
+      account_id:
+        type: string
+      user_id:
         type: string
     type: object
   models.User:
@@ -339,59 +163,6 @@ definitions:
       login:
         type: string
       password:
-        type: string
-      planned_budget:
-        type: number
-      username:
-        type: string
-    type: object
-  transfer_models.Account:
-    properties:
-      accounts:
-        items:
-          $ref: '#/definitions/models.Accounts'
-        type: array
-    type: object
-  transfer_models.BalanceResponse:
-    properties:
-      balance:
-        type: number
-    type: object
-  transfer_models.BudgetActualResponse:
-    properties:
-      actual_budget:
-        type: number
-    type: object
-  transfer_models.BudgetPlannedResponse:
-    properties:
-      planned_budget:
-        type: number
-    type: object
-  transfer_models.PhotoUpdate:
-    properties:
-      path:
-        type: string
-    type: object
-  transfer_models.UserFeed:
-    properties:
-      accounts:
-        items:
-          $ref: '#/definitions/models.Accounts'
-        type: array
-      actual_budget:
-        type: number
-      balance:
-        type: number
-      planned_budget:
-        type: number
-    type: object
-  transfer_models.UserTransfer:
-    properties:
-      avatar_url:
-        type: string
-      id:
-        type: string
-      login:
         type: string
       planned_budget:
         type: number
@@ -424,7 +195,7 @@ paths:
         "200":
           description: Account deleted
           schema:
-            $ref: '#/definitions/http.Response-http_NilBody'
+            $ref: '#/definitions/http.Response'
         "400":
           description: Account error
           schema:
@@ -460,7 +231,7 @@ paths:
         "200":
           description: Create account
           schema:
-            $ref: '#/definitions/http.Response-http_AccountCreateResponse'
+            $ref: '#/definitions/http.Response'
         "400":
           description: Client error
           schema:
@@ -496,7 +267,7 @@ paths:
         "200":
           description: Update account
           schema:
-            $ref: '#/definitions/http.Response-http_NilBody'
+            $ref: '#/definitions/http.Response'
         "400":
           description: Client error
           schema:
@@ -534,7 +305,7 @@ paths:
         "200":
           description: User status
           schema:
-            $ref: '#/definitions/http.Response-auth_SignResponse'
+            $ref: '#/definitions/http.Response'
         "400":
           description: Invalid cookie
           schema:
@@ -555,7 +326,7 @@ paths:
         "200":
           description: Show user
           schema:
-            $ref: '#/definitions/http.Response-bool'
+            $ref: '#/definitions/http.Response'
         "400":
           description: Client error
           schema:
@@ -565,6 +336,36 @@ paths:
           schema:
             $ref: '#/definitions/http.ResponseError'
       summary: Get unique login info
+      tags:
+      - Auth
+  /api/auth/password/:
+    put:
+      consumes:
+      - application/json
+      description: Takes old password and newpassword and chnge password
+      parameters:
+      - description: username && password
+        in: body
+        name: userInput
+        required: true
+        schema:
+          $ref: '#/definitions/auth.ChangePasswordInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: user Info
+          schema:
+            $ref: '#/definitions/http.Response'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Change Password
       tags:
       - Auth
   /api/auth/signin:
@@ -585,9 +386,17 @@ paths:
         "202":
           description: User logedin
           schema:
-            $ref: '#/definitions/http.Response-auth_SignResponse'
+            $ref: '#/definitions/http.Response'
         "400":
           description: Incorrect Input
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Incorrect password
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "404":
+          description: User doesn't exist
           schema:
             $ref: '#/definitions/http.ResponseError'
         "429":
@@ -615,9 +424,13 @@ paths:
         "201":
           description: User Created
           schema:
-            $ref: '#/definitions/http.Response-auth_SignResponse'
+            $ref: '#/definitions/http.Response'
         "400":
           description: Incorrect Input
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "409":
+          description: User already exists
           schema:
             $ref: '#/definitions/http.ResponseError'
         "429":
@@ -636,7 +449,7 @@ paths:
         "200":
           description: Csrf Token
           schema:
-            $ref: '#/definitions/http.Response-http_getCSRFResponce'
+            $ref: '#/definitions/http.Response'
         "401":
           description: Unauthorized user
           schema:
@@ -666,7 +479,7 @@ paths:
         "200":
           description: tag to update
           schema:
-            $ref: '#/definitions/http.Response-models_Category'
+            $ref: '#/definitions/http.Response'
         "400":
           description: Incorrect Input
           schema:
@@ -693,7 +506,7 @@ paths:
         "200":
           description: tag slice
           schema:
-            $ref: '#/definitions/http.Response-array_models_Category'
+            $ref: '#/definitions/http.Response'
         "400":
           description: Incorrect Input
           schema:
@@ -727,7 +540,7 @@ paths:
         "200":
           description: tag with id creted
           schema:
-            $ref: '#/definitions/http.Response-category_CategoryCreateResponse'
+            $ref: '#/definitions/http.Response'
         "400":
           description: Incorrect Input
           schema:
@@ -761,7 +574,7 @@ paths:
         "200":
           description: tag slice
           schema:
-            $ref: '#/definitions/http.Response-models_Category'
+            $ref: '#/definitions/http.Response'
         "400":
           description: Incorrect Input
           schema:
@@ -786,7 +599,7 @@ paths:
         "200":
           description: Transaction deleted
           schema:
-            $ref: '#/definitions/http.Response-http_NilBody'
+            $ref: '#/definitions/http.Response'
         "400":
           description: Transaction error
           schema:
@@ -815,7 +628,7 @@ paths:
         "200":
           description: Show transaction count
           schema:
-            $ref: '#/definitions/http.Response-http_TransactionCount'
+            $ref: '#/definitions/http.Response'
         "400":
           description: Client error
           schema:
@@ -851,7 +664,7 @@ paths:
         "200":
           description: Create transaction
           schema:
-            $ref: '#/definitions/http.Response-http_TransactionCreateResponse'
+            $ref: '#/definitions/http.Response'
         "400":
           description: Client error
           schema:
@@ -869,6 +682,55 @@ paths:
           schema:
             $ref: '#/definitions/http.ResponseError'
       summary: Create transaction
+      tags:
+      - Transaction
+  /api/transaction/export:
+    get:
+      description: Sends a .csv file with transactions based on the specified criteria.
+      parameters:
+      - description: 'Start date (format: ''YYYY-MM-DD'')'
+        in: query
+        name: startDate
+        required: true
+        type: string
+      - description: 'End date (format: ''YYYY-MM-DD'')'
+        in: query
+        name: endDate
+        required: true
+        type: string
+      - description: session_id
+        in: header
+        name: authorization
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: 'Successfully exported transactions"   {example: "TransactionID,Amount,Date\n1,100,2023-01-01\n2,150,2023-01-02\n"}'
+          schema:
+            type: string
+        "400":
+          description: Bad request - Transaction error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized - User unauthorized
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden - User doesn't have rights
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "404":
+          description: Not Found - No transactions found for the specified criteria
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Internal Server Error - Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Export .csv Transactions
       tags:
       - Transaction
   /api/transaction/feed:
@@ -905,11 +767,11 @@ paths:
         "200":
           description: Show transaction
           schema:
-            $ref: '#/definitions/http.Response-http_MasTransaction'
+            $ref: '#/definitions/http.Response'
         "204":
           description: Show actual accounts
           schema:
-            $ref: '#/definitions/http.Response-string'
+            $ref: '#/definitions/http.Response'
         "400":
           description: Client error
           schema:
@@ -929,6 +791,52 @@ paths:
       summary: Get all transaction
       tags:
       - Transaction
+  /api/transaction/import:
+    post:
+      consumes:
+      - mult`ipart/form-data
+      description: '`Uploads a CSV file containing transactions and processes them
+        to be stored in the system.'
+      parameters:
+      - description: CSV file containing transactions data
+        in: formData
+        name: csv
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully imported transactions
+          schema:
+            type: string
+        "400":
+          description: Bad request - Transaction error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized - User unauthorized
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden - User doesn't have rights
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "404":
+          description: Not Found - No transactions found for the specified criteria
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "413":
+          description: Request Entity Too Large - File is too large
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Internal Server Error - Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: Export Transactions from CSV
+      tags:
+      - Transaction
   /api/transaction/update:
     put:
       description: Put transaction
@@ -945,7 +853,7 @@ paths:
         "200":
           description: Update transaction
           schema:
-            $ref: '#/definitions/http.Response-http_NilBody'
+            $ref: '#/definitions/http.Response'
         "400":
           description: Client error
           schema:
@@ -974,7 +882,7 @@ paths:
         "200":
           description: Show user
           schema:
-            $ref: '#/definitions/http.Response-transfer_models_UserTransfer'
+            $ref: '#/definitions/http.Response'
         "400":
           description: Client error
           schema:
@@ -1003,11 +911,11 @@ paths:
         "200":
           description: Show actual accounts
           schema:
-            $ref: '#/definitions/http.Response-transfer_models_Account'
+            $ref: '#/definitions/http.Response'
         "204":
           description: Show actual accounts
           schema:
-            $ref: '#/definitions/http.Response-string'
+            $ref: '#/definitions/http.Response'
         "400":
           description: Client error
           schema:
@@ -1036,7 +944,7 @@ paths:
         "200":
           description: Show actual budget
           schema:
-            $ref: '#/definitions/http.Response-transfer_models_BudgetActualResponse'
+            $ref: '#/definitions/http.Response'
         "400":
           description: Client error
           schema:
@@ -1056,6 +964,46 @@ paths:
       summary: Get Actual Budget
       tags:
       - User
+  /api/user/addUserInAccount:
+    post:
+      description: "Post \tUser"
+      parameters:
+      - description: Add user in account
+        in: body
+        name: User
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddUserAccount'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Update account
+          schema:
+            $ref: '#/definitions/http.Response'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "404":
+          description: No user found with this login
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: "POST \tAdd User in Account"
+      tags:
+      - User
   /api/user/balance:
     get:
       description: Get User balance
@@ -1065,7 +1013,7 @@ paths:
         "200":
           description: Show balance
           schema:
-            $ref: '#/definitions/http.Response-transfer_models_BalanceResponse'
+            $ref: '#/definitions/http.Response'
         "400":
           description: Client error
           schema:
@@ -1085,6 +1033,42 @@ paths:
       summary: Get Balance
       tags:
       - User
+  /api/user/deleteUserInAccount:
+    delete:
+      description: "Post \tUser"
+      parameters:
+      - description: Delete user in Account
+        in: body
+        name: User
+        required: true
+        schema:
+          $ref: '#/definitions/models.DeleteInAccount'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Unsibscribe in Account
+          schema:
+            $ref: '#/definitions/http.Response'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: "DELETE \tDelete user in Account"
+      tags:
+      - User
   /api/user/feed:
     get:
       description: Get Feed user info
@@ -1094,7 +1078,7 @@ paths:
         "200":
           description: Show actual accounts
           schema:
-            $ref: '#/definitions/http.Response-transfer_models_UserFeed'
+            $ref: '#/definitions/http.Response'
         "400":
           description: Client error
           schema:
@@ -1123,7 +1107,7 @@ paths:
         "200":
           description: Show planned budget
           schema:
-            $ref: '#/definitions/http.Response-transfer_models_BudgetPlannedResponse'
+            $ref: '#/definitions/http.Response'
         "400":
           description: Client error
           schema:
@@ -1141,6 +1125,35 @@ paths:
           schema:
             $ref: '#/definitions/http.ResponseError'
       summary: Get Planned Budget
+      tags:
+      - User
+  /api/user/unsubscribeAccount/{account_id}:
+    put:
+      description: "Post \tUser"
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Unsibscribe in Account
+          schema:
+            $ref: '#/definitions/http.Response'
+        "400":
+          description: Client error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "403":
+          description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      summary: "PUT \tUnsibscribe in Account"
       tags:
       - User
   /api/user/update:
@@ -1161,7 +1174,7 @@ paths:
         "200":
           description: Update user info
           schema:
-            $ref: '#/definitions/http.Response-http_NilBody'
+            $ref: '#/definitions/http.Response'
         "400":
           description: Client error
           schema:
@@ -1208,7 +1221,7 @@ paths:
         "200":
           description: Photo updated successfully
           schema:
-            $ref: '#/definitions/http.Response-transfer_models_PhotoUpdate'
+            $ref: '#/definitions/http.Response'
         "400":
           description: Client error
           schema:

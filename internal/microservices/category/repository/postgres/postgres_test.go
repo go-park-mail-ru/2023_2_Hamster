@@ -35,7 +35,7 @@ func Test_CreateTag(t *testing.T) {
 		},
 		{
 			name:      "Failure",
-			tag:       models.Category{UserID: uuid.New(), Name: "TestTag", ShowIncome: true, ShowOutcome: true, Regular: true},
+			tag:       models.Category{UserID: uuid.New(), ParentID: uuid.Nil, Name: "TestTag", ShowIncome: true, ShowOutcome: true, Regular: true},
 			returnID:  uuid.Nil,
 			expected:  uuid.Nil,
 			returnErr: errors.New("some database error"),
@@ -133,7 +133,7 @@ func Test_UpdateTag(t *testing.T) {
 }
 
 /*
-	 func Test_DeleteTag(t *testing.T) {
+	func Test_DeleteTag(t *testing.T) {
 		testCases := []struct {
 			name        string
 			tagID       uuid.UUID
@@ -177,11 +177,11 @@ func Test_UpdateTag(t *testing.T) {
 				logger := *logger.NewLogger(context.TODO())
 				repo := NewRepository(mock, logger)
 
-					escapedQuery := regexp.QuoteMeta(CategoryGet)
-					mock.ExpectQuery(escapedQuery).
-						WithArgs(tc.tagID).
-						WillReturnRows(pgxmock.NewRows([]string{"exists"}).AddRow(tc.rowExists)).
-						WillReturnError(tc.sqlNoRows)
+				escapedQuery := regexp.QuoteMeta(CategoryGet)
+				mock.ExpectQuery(escapedQuery).
+					WithArgs(tc.tagID).
+					WillReturnRows(pgxmock.NewRows([]string{"exists"}).AddRow(tc.rowExists)).
+					WillReturnError(tc.sqlNoRows)
 
 				mock.ExpectBegin()
 				if tc.transaction {
@@ -190,7 +190,7 @@ func Test_UpdateTag(t *testing.T) {
 					mock.ExpectRollback()
 				}
 
-				escapedQuery := regexp.QuoteMeta(CategoryDelete)
+				escapedQuery = regexp.QuoteMeta(CategoryDelete)
 				mock.ExpectExec(escapedQuery).
 					WithArgs(tc.tagID).
 					WillReturnResult(pgxmock.NewResult("DELETE", 1)).

@@ -1,7 +1,7 @@
 package http
 
 import (
-	"encoding/json"
+	"github.com/mailru/easyjson"
 	"net/http"
 
 	contextutils "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/context_utils"
@@ -45,8 +45,7 @@ func (h *Handler) CreateTag(w http.ResponseWriter, r *http.Request) {
 
 	var tag category.TagInput
 
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&tag); err != nil {
+	if err := easyjson.UnmarshalFromReader(r.Body, &tag); err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Errorf("[handler] Error Corupted request body: %v", err)
@@ -69,7 +68,7 @@ func (h *Handler) CreateTag(w http.ResponseWriter, r *http.Request) {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Errorf("[handler] Error: %v", err)
-		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't crate tag", h.log)
+		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't create tag", h.log)
 		return
 	}
 	tagID, _ := uuid.Parse(id.TagId)
@@ -151,8 +150,7 @@ func (h *Handler) UpdateTag(w http.ResponseWriter, r *http.Request) {
 
 	var tag models.Category
 
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&tag); err != nil {
+	if err := easyjson.UnmarshalFromReader(r.Body, &tag); err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Errorf("[handler] Error Corupted request body: %v", err)
@@ -219,8 +217,7 @@ func (h *Handler) DeleteTag(w http.ResponseWriter, r *http.Request) {
 
 	var tagId category.TagDeleteInput
 
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&tagId); err != nil {
+	if err := easyjson.UnmarshalFromReader(r.Body, &tagId); err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Errorf("[handler] Error Corupted request body: %v", err)
@@ -230,7 +227,6 @@ func (h *Handler) DeleteTag(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	_, err = h.client.DeleteTag(r.Context(), &genCategory.DeleteRequest{TagId: tagId.ID.String(), UserId: user.ID.String()})
-
 	if err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),

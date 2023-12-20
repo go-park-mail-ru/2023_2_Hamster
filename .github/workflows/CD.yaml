@@ -1,14 +1,20 @@
 name: CD
-
+#1
 env:
   REGISTRY: "codemaster482"
   IMAGE_NAME: "hammywallet"
   CONTAINER_NAME: "hammywallet-api"
   FOLDER_COMPOSE: "production"
+  GITHUB_SHA_SHORT:
+  
   AUTH_CONTAINER: "hammywallet-auth"
   ACCOUNT_CONTAINER: "hammywallet-account"
   CATEGORY_CONTAINER: "hammywallet-category"
-
+  
+  AUTH_ADDR: "auth:8010"
+  ACCOUNT_ADDR: "account:8020"
+  CATEGORY_ADDR: "category:8030"
+  
 on:
   push:
     branches:
@@ -166,6 +172,9 @@ jobs:
             CONTAINER_NAME=${{ env.CONTAINER_NAME }}
             REDIS_HOST=${{ secrets.REDIS_HOST }}
             REDIS_PORT=${{ secrets.REDIS_PORT }}
+            AUTH_ADDR=${{ env.AUTH_ADDR }}
+            ACCOUNT_ADDR=${{ env.ACCOUNT_ADDR }}
+            CATEGORY_ADDR=${{ env.CATEGORY_ADDR }}
             EOF
 
             echo "GITHUB_SHA_SHORT=`echo $GITHUB_SHA | head -c8`" >> .env

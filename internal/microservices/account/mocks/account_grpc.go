@@ -2,7 +2,7 @@
 // Source: delivery/grpc/generated/account_grpc.pb.go
 
 // Package mock___ is a generated GoMock package.
-package mock___
+package mock
 
 import (
 	context "context"

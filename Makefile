@@ -49,3 +49,28 @@ prod: #lint doc
 	git commit -m "deploy" ; \
 	git push ; \
 	git checkout develop
+
+testDockerUp:
+	docker-compose -f local-docker-compose.yaml up -d
+
+testUp:
+	go run ./cmd/auth/main.go & \
+	go run ./cmd/category/category.go & \
+	go run ./cmd/account/account.go & \
+	go run ./cmd/api/main.go | jq  \
+
+testDown:
+	# Остановка Docker Compose
+	#docker-compose -f local-docker-compose.yaml down
+
+	# Остановка приложения auth (если запущено)
+	pkill -f "go run ./cmd/auth/main.go"
+
+	# Остановка приложения category (если запущено)
+	pkill -f "go run ./cmd/category/category.go"
+
+	# Остановка приложения account (если запущено)
+	pkill -f "go run ./cmd/account/account.go"
+
+	# Остановка API (если запущено)
+	pkill -f "go run ./cmd/api/main.go"

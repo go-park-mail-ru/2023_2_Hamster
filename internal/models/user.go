@@ -17,6 +17,12 @@ type User struct {
 	AvatarURL     uuid.UUID `json:"avatar_url"`
 }
 
+type SharingUser struct {
+	ID        uuid.UUID `json:"id"`
+	Login     string    `json:"login"`
+	AvatarURL uuid.UUID `json:"avatar_url"`
+}
+
 type ContextKeyUserType struct{}
 
 type UserAlreadyExistsError struct{}

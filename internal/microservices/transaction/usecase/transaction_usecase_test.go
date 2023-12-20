@@ -272,3 +272,51 @@ func TestUsecase_DeleteTransaction(t *testing.T) {
 		})
 	}
 }
+
+func TestUsecase_GetTransactionForExport(t *testing.T) {
+	testCases := []struct {
+		name           string
+		expectedResult []models.TransactionExport
+		expectedErr    error
+		mockRepoFn     func(*mock.MockRepository)
+	}{
+		{
+			name:           "Successful GetTransactionForExport",
+			expectedResult: []models.TransactionExport{},
+			expectedErr:    nil,
+			mockRepoFn: func(mockRepositry *mock.MockRepository) {
+				mockRepositry.EXPECT().GetTransactionForExport(gomock.Any(), gomock.Any(), gomock.Any()).Return([]models.TransactionExport{}, nil)
+			},
+		},
+		{
+			name:           "Error in GetTransactionForExport",
+			expectedResult: nil,
+			expectedErr:    fmt.Errorf("[usecase] can't get transactions from repository some error"),
+			mockRepoFn: func(mockRepositry *mock.MockRepository) {
+				mockRepositry.EXPECT().GetTransactionForExport(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, errors.New("some error"))
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockRepo := mock.NewMockRepository(ctrl)
+			tc.mockRepoFn(mockRepo)
+
+			mockUsecase := NewUsecase(mockRepo, *logger.NewLogger(context.TODO()))
+
+			userID := uuid.New()
+			query := &models.QueryListOptions{}
+
+			result, err := mockUsecase.GetTransactionForExport(context.Background(), userID, query)
+
+			assert.Equal(t, tc.expectedResult, result)
+			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
+				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
+			}
+		})
+	}
+}

@@ -1,41 +1,147 @@
+version: '3.8'
+
+networks:
+  hammy-network:
+    driver: bridge
+
 services:
   db:
     container_name: hammy-db
     image: postgres:latest
     restart: always
-    networks:
-      - hammy-network
     env_file:
-      - .env
+      - .local.env
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PORT: ${DB_PORT}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "5436:5432"
+      - "${DB_PORT}:5432"
     volumes:
       - ./build/schema/:/docker-entrypoint-initdb.d/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hamster -d HammyWallets"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - hammy-network
+  
+  redis:
+    container_name: hammy-redis
+    image: redis:latest
+    restart: on-failure
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - hammy-network
 
-#  hammywallet-api:
-#    container_name: ${CONTAINER_NAME}
-#    image:  ${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA_SHORT}
-#    env_file:
-#      - .env
-#    restart: always
-#    ports:
-#      - "8080:8080"
-#    volumes:
-#      - ./.env:/docker-hammywallet/.env
-#      - ./api-logs:/docker-hammywallet/logs
-#      - type: bind
-#        source: /home/ubuntu/frontend/images
-#        target: /images
-#    depends_on:
-#      - db
-#      - redis
-#    networks:
-#      - hamster-net
+  # hammywallet-api:
+  #   #container_name: ${CONTAINER_NAME}
+  #   #image:  ${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA_SHORT}
+  #   build: 
+  #     context: .
+  #     dockerfile: build/Dockerfile
+  #   env_file:
+  #     - .local.env
+  #   restart: always
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - ./.env:/docker-hammywallet/.env
+  #     - ./api-logs:/docker-hammywallet/logs
+  #     - type: bind
+  #       source: /images
+  #       target: /images
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #     category:
+  #       condition: service_started
+  #     account:
+  #       condition: service_started
+  #     auth:
+  #       condition: service_started
+  #   networks:
+  #     - hammy-network
+  
+  # auth:
+  #   container_name: auth
+  #   #image:  ${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA_SHORT}
+  #   build: 
+  #     context: .
+  #     dockerfile: build/auth.Dockerfile
+  #   env_file:
+  #     - .local.env
+  #   restart: always
+  #   ports:
+  #     - "8010:8010"
+  #     - "8011:8011"
+  #   volumes:
+  #     - ./.env:/docker-hammywallet/.env
+  #     - ./api-logs:/docker-hammywallet/logs
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - hammy-network
+  
+  # account:
+  #   container_name: account
+  #   #image:  ${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA_SHORT}
+  #   build: 
+  #     context: .
+  #     dockerfile: build/account.Dockerfile
+  #   env_file:
+  #     - .local.env
+  #   restart: always
+  #   ports:
+  #     - "8020:8020"
+  #     - "8021:8021"
+  #   volumes:
+  #     - ./.env:/docker-hammywallet/.env
+  #     - ./api-logs:/docker-hammywallet/logs
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - hammy-network
+  # category:
+  #   container_name: category
+  #   #image:  ${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA_SHORT}
+  #   build: 
+  #     context: .
+  #     dockerfile: build/category.Dockerfile
+  #   env_file:
+  #     - .local.env
+  #   restart: always
+  #   ports:
+  #     - "8030:8030"
+  #     - "8031:8031"
+  #   volumes:
+  #     - ./.env:/docker-hammywallet/.env
+  #     - ./api-logs:/docker-hammywallet/logs
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - hammy-network
 #
 #  question:
 #    container_name: question
@@ -50,15 +156,6 @@ services:
 #    env_file:
 #      - .env
 #    restart: always
-
-  redis:
-    container_name: hammy-redis
-    image: redis:latest
-    networks:
-      - hammy-network
-    restart: on-failure
-    ports:
-      - "6379:6379"
 
 #  prometheus:
 #    container_name: prometheus
@@ -92,6 +189,4 @@ services:
 #        target: /var/lib/grafana
 
 
-networks:
-  hammy-network:
-    driver: bridge
+

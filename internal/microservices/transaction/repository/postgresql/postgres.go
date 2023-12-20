@@ -16,20 +16,48 @@ import (
 
 const (
 	transactionCreate  = "INSERT INTO transaction (user_id, account_income, account_outcome, income, outcome, date, payer, description) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;"
-	transactionGetFeed = `SELECT id, user_id, account_income, account_outcome, income, outcome, date, payer, description 
-							FROM transaction 
-							WHERE user_id = $1`
+	transactionGetFeed = `
+    	SELECT 
+			t.id, 
+			t.user_id, 
+			t.account_income, 
+			t.account_outcome, 
+			t.income, 
+			t.outcome, 
+			t.date, 
+			t.payer, 
+			t.description
+		FROM Transaction t
+		JOIN UserAccount ua ON t.account_income = ua.account_id
+		WHERE ua.user_id = $1
+	`
 
 	transactionUpdate         = "UPDATE transaction set account_income=$2, account_outcome=$3, income=$4, outcome=$5, date=$6, payer=$7, description=$8 WHERE id = $1;"
 	transactionGet            = "SELECT income, outcome, account_income, account_outcome FROM transaction WHERE id = $1;"
 	TransactionGetUserByID    = "SELECT user_id FROM transaction WHERE id = $1;"
 	transactionDelete         = "DELETE FROM transaction WHERE id = $1;"
-	transactionGetCategory    = "SELECT category_id FROM TransactionCategory WHERE transaction_id = $1;"
+	transactionGetCategory    = "SELECT tc.category_id, c.name AS category_name FROM TransactionCategory tc JOIN category c ON tc.category_id = c.id WHERE tc.transaction_id = $1;"
 	transactionCreateCategory = "INSERT INTO transactionCategory (transaction_id, category_id) VALUES ($1, $2);"
 	transactionDeleteCategory = "DELETE FROM transactionCategory WHERE transaction_id = $1;"
 	transactionUpdateAccount  = "UPDATE accounts SET balance = balance - $1 WHERE id = $2;"
 	transactionCheck          = "SELECT EXISTS( SELECT id FROM transaction WHERE id = $1);"
 	transactionCount          = "SELECT COUNT(*) FROM transaction WHERE user_id = $1;"
+
+	transactionGetFeedForExport = ` SELECT 
+										t.id,  
+										a_income.mean_payment AS account_income_name,
+    									a_outcome.mean_payment AS account_outcome_name, 
+										t.income, 
+										t.outcome, 
+										t.date, 
+										t.payer, 
+										t.description
+									FROM Transaction t
+									JOIN UserAccount ua ON t.account_income = ua.account_id
+									JOIN Accounts a_income ON t.account_income = a_income.id
+									JOIN Accounts a_outcome ON t.account_outcome = a_outcome.id
+									WHERE ua.user_id = $1
+	`
 )
 
 type transactionRep struct {
@@ -57,7 +85,6 @@ func (r *transactionRep) GetCount(ctx context.Context, user_id uuid.UUID) (int, 
 func (r *transactionRep) GetFeed(ctx context.Context, user_id uuid.UUID, queryGet *models.QueryListOptions) ([]models.Transaction, error) {
 	var transactions []models.Transaction
 	count := 1
-	//rows, err := r.db.Query(ctx, transactionGetFeed, user_id, pageSize, offset)
 	var queryParamsSlice []interface{}
 
 	query := transactionGetFeed
@@ -89,13 +116,13 @@ func (r *transactionRep) GetFeed(ctx context.Context, user_id uuid.UUID, queryGe
 
 	if !queryGet.StartDate.IsZero() || !queryGet.EndDate.IsZero() {
 		count++
-		if !queryGet.StartDate.IsZero() {
+		if !queryGet.StartDate.IsZero() && !queryGet.EndDate.IsZero() {
+			query += " AND date BETWEEN $" + strconv.Itoa(count) + " AND $" + strconv.Itoa(count+1)
+			queryParamsSlice = append(queryParamsSlice, queryGet.StartDate, queryGet.EndDate)
+		} else if !queryGet.StartDate.IsZero() {
 			query += " AND date >= $" + strconv.Itoa(count)
 			queryParamsSlice = append(queryParamsSlice, queryGet.StartDate)
-		}
-
-		if !queryGet.EndDate.IsZero() {
-			count++
+		} else {
 			query += " AND date <= $" + strconv.Itoa(count)
 			queryParamsSlice = append(queryParamsSlice, queryGet.EndDate)
 		}
@@ -122,6 +149,7 @@ func (r *transactionRep) GetFeed(ctx context.Context, user_id uuid.UUID, queryGe
 		); err != nil {
 			return nil, fmt.Errorf("[repo] %w", err)
 		}
+
 		categories, err := r.getCategoriesForTransaction(ctx, transaction.ID)
 		if err != nil {
 			return nil, fmt.Errorf("[repo] %w", err)
@@ -142,8 +170,8 @@ func (r *transactionRep) GetFeed(ctx context.Context, user_id uuid.UUID, queryGe
 	return transactions, nil
 }
 
-func (r *transactionRep) getCategoriesForTransaction(ctx context.Context, transactionID uuid.UUID) ([]uuid.UUID, error) {
-	var categoryIDs []uuid.UUID
+func (r *transactionRep) getCategoriesForTransaction(ctx context.Context, transactionID uuid.UUID) ([]models.CategoryName, error) {
+	var categoryIDs []models.CategoryName
 
 	rows, err := r.db.Query(ctx, transactionGetCategory, transactionID)
 	if err != nil {
@@ -151,8 +179,8 @@ func (r *transactionRep) getCategoriesForTransaction(ctx context.Context, transa
 	}
 
 	for rows.Next() {
-		var categoryID uuid.UUID
-		if err := rows.Scan(&categoryID); err != nil {
+		var categoryID models.CategoryName
+		if err := rows.Scan(&categoryID.ID, &categoryID.Name); err != nil {
 			return nil, err
 		}
 		categoryIDs = append(categoryIDs, categoryID)
@@ -210,10 +238,9 @@ func (r *transactionRep) insertTransaction(ctx context.Context, tx pgx.Tx, trans
 		transaction.Payer,
 		transaction.Description,
 	)
-	var id uuid.UUID
 
-	err := row.Scan(&id)
-	if err != nil {
+	var id uuid.UUID
+	if err := row.Scan(&id); err != nil {
 		return id, fmt.Errorf("[repo] failed create transaction: %w", err)
 	}
 
@@ -237,12 +264,12 @@ func (r *transactionRep) updateAccountBalance(ctx context.Context, tx pgx.Tx, ac
 	return err
 }
 
-func (r *transactionRep) insertCategories(ctx context.Context, tx pgx.Tx, transactionID uuid.UUID, categoryIDs []uuid.UUID) (err error) {
+func (r *transactionRep) insertCategories(ctx context.Context, tx pgx.Tx, transactionID uuid.UUID, categoryIDs []models.CategoryName) (err error) {
 	for _, categoryID := range categoryIDs {
-		if categoryID == uuid.Nil {
+		if categoryID.ID == uuid.Nil {
 			_, err = tx.Exec(ctx, transactionCreateCategory, transactionID, nil)
 		} else {
-			_, err = tx.Exec(ctx, transactionCreateCategory, transactionID, categoryID)
+			_, err = tx.Exec(ctx, transactionCreateCategory, transactionID, categoryID.ID)
 		}
 		if err != nil {
 			return fmt.Errorf("[repo] failed to insert category association: %w", err)
@@ -307,7 +334,8 @@ func (r *transactionRep) updateTransactionInfo(ctx context.Context, tx pgx.Tx, t
 		transaction.Outcome,
 		transaction.Date,
 		transaction.Payer,
-		transaction.Description)
+		transaction.Description,
+	)
 	if err != nil {
 		return fmt.Errorf("[repo] failed to update transaction information: %w", err)
 	}
@@ -401,6 +429,64 @@ func (r *transactionRep) CheckForbidden(ctx context.Context, transactionID uuid.
 			fmt.Errorf("[repo] failed request db %s, %w", TransactionGetUserByID, err)
 	}
 	return userID, nil
+}
+
+func (r *transactionRep) GetTransactionForExport(ctx context.Context, userId uuid.UUID, queryGet *models.QueryListOptions) ([]models.TransactionExport, error) {
+	var transactions []models.TransactionExport
+	count := 1
+	var queryParamsSlice []interface{}
+
+	query := transactionGetFeedForExport
+	queryParamsSlice = append(queryParamsSlice, userId.String())
+
+	if !queryGet.StartDate.IsZero() || !queryGet.EndDate.IsZero() {
+		count++
+		if !queryGet.StartDate.IsZero() && !queryGet.EndDate.IsZero() {
+			query += " AND date BETWEEN $" + strconv.Itoa(count) + " AND $" + strconv.Itoa(count+1)
+			queryParamsSlice = append(queryParamsSlice, queryGet.StartDate, queryGet.EndDate)
+		} else if !queryGet.StartDate.IsZero() {
+			query += " AND date >= $" + strconv.Itoa(count)
+			queryParamsSlice = append(queryParamsSlice, queryGet.StartDate)
+		} else {
+			query += " AND date <= $" + strconv.Itoa(count)
+			queryParamsSlice = append(queryParamsSlice, queryGet.EndDate)
+		}
+	}
+
+	query += " ORDER BY date DESC;"
+
+	rows, err := r.db.Query(ctx, query, queryParamsSlice...)
+	if err != nil {
+		return nil, fmt.Errorf("[repo] %v", err)
+	}
+
+	for rows.Next() {
+		var transaction models.TransactionExport
+		if err := rows.Scan(
+			&transaction.ID,
+			&transaction.AccountIncome,
+			&transaction.AccountOutcome,
+			&transaction.Income,
+			&transaction.Outcome,
+			&transaction.Date,
+			&transaction.Payer,
+			&transaction.Description,
+		); err != nil {
+			return nil, fmt.Errorf("[repo] %w", err)
+		}
+
+		categories, err := r.getCategoriesForTransaction(ctx, transaction.ID)
+		if err != nil {
+			return nil, fmt.Errorf("[repo] %w", err)
+		}
+		for _, data := range categories {
+			transaction.Categories = append(transaction.Categories, data.Name)
+		}
+
+		transactions = append(transactions, transaction)
+	}
+
+	return transactions, nil
 }
 
 // func (r *transactionRep) Check(ctx context.Context, transactionID uuid.UUID) error {

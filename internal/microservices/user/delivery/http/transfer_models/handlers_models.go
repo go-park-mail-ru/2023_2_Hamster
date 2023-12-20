@@ -22,6 +22,8 @@ const (
 	UserFileNotCorrectType = "no correct type file"
 	UserFileNotPath        = "can't get path in form"
 	UserFileNotDelete      = "can't delete old file"
+	UserNotFoundLogin      = "no user found with this login"
+	UserDuplicate          = "this user has already been added to the account"
 
 	BalanceGetServerError        = "can't get balance"
 	PlannedBudgetGetServerError  = "can't get planned budget"
@@ -72,6 +74,7 @@ type UserTransfer struct {
 	AvatarURL     uuid.UUID `json:"avatar_url" valid:""`
 }
 
+//easyjson:json
 type UserUdate struct {
 	Username      string  `json:"username" valid:"required,maxstringlength(20)"`
 	PlannedBudget float64 `json:"planned_budget" valid:"float"`

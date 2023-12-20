@@ -1,12 +1,13 @@
 package http
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+
+	"github.com/mailru/easyjson"
 
 	commonHttp "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
@@ -14,6 +15,10 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user/delivery/http/transfer_models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
+)
+
+const (
+	accountID = "account_id"
 )
 
 type Handler struct {
@@ -252,7 +257,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 
 	var updProfile transfer_models.UserUdate
 
-	if err := json.NewDecoder(r.Body).Decode(&updProfile); err != nil {
+	if err := easyjson.UnmarshalFromReader(r.Body, &updProfile); err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidBodyRequest, h.logger)
 		return
 	}
@@ -294,7 +299,6 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 // @Router      /api/user/updatePhoto [put]
 func (h *Handler) UpdatePhoto(w http.ResponseWriter, r *http.Request) { // need test
 	user, err := commonHttp.GetUserFromRequest(r)
-
 	if err != nil {
 		commonHttp.ErrorResponse(w, http.StatusUnauthorized, err, commonHttp.ErrUnauthorized.Error(), h.logger)
 		return
@@ -365,4 +369,142 @@ func (h *Handler) UpdatePhoto(w http.ResponseWriter, r *http.Request) { // need 
 	}
 
 	commonHttp.SuccessResponse(w, http.StatusOK, transfer_models.PhotoUpdate{Path: name})
+}
+
+// @Summary		POST 	Add User in Account
+// @Tags				User
+// @Description	Post 	User
+// @Produce		json
+// @Param		User	body		models.AddUserAccount		 true		    "Add user in account"
+// @Success		200		{object}	Response[NilBody]				    "Update account"
+// @Failure		400		{object}	ResponseError						"Client error"
+// @Failure     401    	{object}  	ResponseError  						"Unauthorized user"
+// @Failure     403    	{object}  	ResponseError  						"Forbidden user"
+// @Failure     404    	{object}  	ResponseError  						"No user found with this login"
+// @Failure		500		{object}	ResponseError						"Server error"
+// @Router		/api/user/addUserInAccount [post]
+func (h *Handler) AddUserInAccount(w http.ResponseWriter, r *http.Request) {
+	user, err := commonHttp.GetUserFromRequest(r)
+
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusUnauthorized, err, commonHttp.ErrUnauthorized.Error(), h.logger)
+		return
+	}
+
+	var accountInput models.AddUserAccount
+
+	if err := easyjson.UnmarshalFromReader(r.Body, &accountInput); err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidBodyRequest, h.logger)
+		return
+	}
+
+	if err := h.userService.AddUserInAccount(r.Context(), accountInput, user.ID); err != nil {
+		var errNoSuchUser *models.NoSuchUserInLogin
+		if errors.As(err, &errNoSuchUser) {
+			commonHttp.ErrorResponse(w, http.StatusNotFound, err, transfer_models.UserNotFoundLogin, h.logger)
+			return
+		}
+
+		var errForbiddenUser *models.ForbiddenUserError
+		if errors.As(err, &errForbiddenUser) {
+			commonHttp.ErrorResponse(w, http.StatusForbidden, err, commonHttp.ForbiddenUser, h.logger)
+			return
+		}
+
+		var errDuplicate *models.DuplicateError
+		if errors.As(err, &errDuplicate) {
+			commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserDuplicate, h.logger)
+			return
+		}
+
+		if err != nil {
+			commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, transfer_models.UserServerError, h.logger)
+			return
+		}
+	}
+
+	commonHttp.SuccessResponse(w, http.StatusOK, commonHttp.NilBody{})
+}
+
+// @Summary		PUT 	Unsibscribe in Account
+// @Tags				User
+// @Description	Post 	User
+// @Produce		json
+// @Success		200		{object}	Response[NilBody]				    "Unsibscribe in Account"
+// @Failure		400		{object}	ResponseError						"Client error"
+// @Failure     401    	{object}  	ResponseError  						"Unauthorized user"
+// @Failure     403    	{object}  	ResponseError  						"Forbidden user"
+// @Failure		500		{object}	ResponseError						"Server error"
+// @Router		/api/user/unsubscribeAccount/{account_id} [put]
+func (h *Handler) Unsubscribe(w http.ResponseWriter, r *http.Request) {
+	accountID, err := commonHttp.GetIDFromRequest(accountID, r)
+
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidURLParameter, h.logger)
+		return
+	}
+	user, err := commonHttp.GetUserFromRequest(r)
+
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusUnauthorized, err, commonHttp.ErrUnauthorized.Error(), h.logger)
+		return
+	}
+
+	if err := h.userService.Unsubscribe(r.Context(), accountID, user.ID); err != nil {
+		if err != nil {
+			commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, transfer_models.UserServerError, h.logger)
+			return
+		}
+	}
+
+	commonHttp.SuccessResponse(w, http.StatusOK, commonHttp.NilBody{})
+
+}
+
+// @Summary		DELETE 	Delete user in Account
+// @Tags				User
+// @Description	Post 	User
+// @Produce		json
+// @Param		User	body		models.DeleteInAccount		 true		    "Delete user in Account"
+// @Success		200		{object}	Response[NilBody]				    "Unsibscribe in Account"
+// @Failure		400		{object}	ResponseError						"Client error"
+// @Failure     401    	{object}  	ResponseError  						"Unauthorized user"
+// @Failure     403    	{object}  	ResponseError  						"Forbidden user"
+// @Failure		500		{object}	ResponseError						"Server error"
+// @Router		/api/user/deleteUserInAccount [delete]
+func (h *Handler) DeleteUserInAccount(w http.ResponseWriter, r *http.Request) {
+	user, err := commonHttp.GetUserFromRequest(r)
+
+	if err != nil {
+		commonHttp.ErrorResponse(w, http.StatusUnauthorized, err, commonHttp.ErrUnauthorized.Error(), h.logger)
+		return
+	}
+
+	var accountDelete models.DeleteInAccount
+
+	if err := easyjson.UnmarshalFromReader(r.Body, &accountDelete); err != nil {
+		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidBodyRequest, h.logger)
+		return
+	}
+
+	if err := h.userService.DeleteUserInAccount(r.Context(), accountDelete.UserID, accountDelete.AccountID, user.ID); err != nil {
+		var errNoSuchUser *models.NoSuchUserInLogin
+		if errors.As(err, &errNoSuchUser) {
+			commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserNotFound, h.logger)
+			return
+		}
+
+		var errForbiddenUser *models.ForbiddenUserError
+		if errors.As(err, &errForbiddenUser) {
+			commonHttp.ErrorResponse(w, http.StatusForbidden, err, commonHttp.ForbiddenUser, h.logger)
+			return
+		}
+
+		if err != nil {
+			commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, transfer_models.UserServerError, h.logger)
+			return
+		}
+	}
+
+	commonHttp.SuccessResponse(w, http.StatusOK, commonHttp.NilBody{})
 }

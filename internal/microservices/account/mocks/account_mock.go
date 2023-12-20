@@ -2,7 +2,7 @@
 // Source: account.go
 
 // Package mock_account is a generated GoMock package.
-package mock___
+package mock
 
 import (
 	context "context"
@@ -102,6 +102,34 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
 }
 
+// AddUserInAccount mocks base method.
+func (m *MockRepository) AddUserInAccount(ctx context.Context, userID, accountID uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddUserInAccount", ctx, userID, accountID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddUserInAccount indicates an expected call of AddUserInAccount.
+func (mr *MockRepositoryMockRecorder) AddUserInAccount(ctx, userID, accountID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddUserInAccount", reflect.TypeOf((*MockRepository)(nil).AddUserInAccount), ctx, userID, accountID)
+}
+
+// CheckDuplicate mocks base method.
+func (m *MockRepository) CheckDuplicate(ctx context.Context, userID, accountID uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckDuplicate", ctx, userID, accountID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CheckDuplicate indicates an expected call of CheckDuplicate.
+func (mr *MockRepositoryMockRecorder) CheckDuplicate(ctx, userID, accountID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckDuplicate", reflect.TypeOf((*MockRepository)(nil).CheckDuplicate), ctx, userID, accountID)
+}
+
 // CheckForbidden mocks base method.
 func (m *MockRepository) CheckForbidden(ctx context.Context, accountID, userID uuid.UUID) error {
 	m.ctrl.T.Helper()
@@ -143,6 +171,48 @@ func (m *MockRepository) DeleteAccount(ctx context.Context, userID, accountID uu
 func (mr *MockRepositoryMockRecorder) DeleteAccount(ctx, userID, accountID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAccount", reflect.TypeOf((*MockRepository)(nil).DeleteAccount), ctx, userID, accountID)
+}
+
+// DeleteUserInAccount mocks base method.
+func (m *MockRepository) DeleteUserInAccount(ctx context.Context, userID, accountID uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteUserInAccount", ctx, userID, accountID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteUserInAccount indicates an expected call of DeleteUserInAccount.
+func (mr *MockRepositoryMockRecorder) DeleteUserInAccount(ctx, userID, accountID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUserInAccount", reflect.TypeOf((*MockRepository)(nil).DeleteUserInAccount), ctx, userID, accountID)
+}
+
+// SharingCheck mocks base method.
+func (m *MockRepository) SharingCheck(ctx context.Context, accountID, userID uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SharingCheck", ctx, accountID, userID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SharingCheck indicates an expected call of SharingCheck.
+func (mr *MockRepositoryMockRecorder) SharingCheck(ctx, accountID, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SharingCheck", reflect.TypeOf((*MockRepository)(nil).SharingCheck), ctx, accountID, userID)
+}
+
+// Unsubscribe mocks base method.
+func (m *MockRepository) Unsubscribe(ctx context.Context, userID, accountID uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Unsubscribe", ctx, userID, accountID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Unsubscribe indicates an expected call of Unsubscribe.
+func (mr *MockRepositoryMockRecorder) Unsubscribe(ctx, userID, accountID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Unsubscribe", reflect.TypeOf((*MockRepository)(nil).Unsubscribe), ctx, userID, accountID)
 }
 
 // UpdateAccount mocks base method.

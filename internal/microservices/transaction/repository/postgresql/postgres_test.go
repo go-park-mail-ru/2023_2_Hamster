@@ -90,7 +90,7 @@ func TestGetFeed(t *testing.T) {
 	transactionID1 := uuid.New()
 	categoryID := uuid.New()
 	time := time.Now()
-	categories := []uuid.UUID{categoryID}
+	categories := []models.CategoryName{{ID: categoryID, Name: "ffdsf"}}
 	tests := []struct {
 		name            string
 		rows            *pgxmock.Rows
@@ -110,9 +110,11 @@ func TestGetFeed(t *testing.T) {
 				transactionID1, userID, transactionID1, transactionID1, 100.0, 0.0, time, "John Doe", "Transaction 1",
 			),
 			rowsCategory: pgxmock.NewRows([]string{
-				"catygory_id",
+				"category_id",
+				"name",
 			}).AddRow(
 				categoryID,
+				"ffdsf",
 			),
 
 			err:             nil,
@@ -130,12 +132,14 @@ func TestGetFeed(t *testing.T) {
 				transactionID1, userID, transactionID1, transactionID1, 100.0, 0.0, time, "John Doe", "Transaction 1",
 			),
 			rowsCategory: pgxmock.NewRows([]string{
-				"catygory_id",
+				"category_id",
+				"name",
 			}).AddRow(
+				"dff",
 				"sfd",
 			),
 
-			err:             fmt.Errorf("[repo] Scanning value error for column 'catygory_id': Scan: invalid UUID length: 3"),
+			err:             fmt.Errorf("[repo] Scanning value error for column 'category_id': Scan: invalid UUID length: 3"),
 			rowsErr:         nil,
 			rowsCategoryErr: nil,
 			expected:        nil,
@@ -165,9 +169,11 @@ func TestGetFeed(t *testing.T) {
 				transactionID1, userID, transactionID1, transactionID1, 100.0, 0.0, time, "John Doe", "Transaction 1",
 			),
 			rowsCategory: pgxmock.NewRows([]string{
-				"catygory_id",
+				"category_id",
+				"name",
 			}).AddRow(
 				categoryID,
+				"dddd",
 			),
 
 			err:             fmt.Errorf("[repo] err"),
@@ -183,7 +189,8 @@ func TestGetFeed(t *testing.T) {
 				"id", "user_id", "account_income_id", "account_outcome_id", "income", "outcome", "date", "payer", "description",
 			}).RowError(0, errors.New("err")),
 			rowsCategory: pgxmock.NewRows([]string{
-				"catygory_id",
+				"category_id",
+				"name",
 			}),
 
 			err:             fmt.Errorf("[repo] err"),
@@ -201,7 +208,8 @@ func TestGetFeed(t *testing.T) {
 				transactionID1, userID, transactionID1, transactionID1, 100.0, 0.0, time, "John Doe", "Transaction 1",
 			),
 			rowsCategory: pgxmock.NewRows([]string{
-				"catygory_id",
+				"category_id",
+				"name",
 			}).RowError(0, errors.New("err")),
 			err:             fmt.Errorf("[repo] err"),
 			rowsErr:         nil,
@@ -218,7 +226,8 @@ func TestGetFeed(t *testing.T) {
 			rowsErr:         nil,
 			rowsCategoryErr: nil,
 			rowsCategory: pgxmock.NewRows([]string{
-				"catygory_id",
+				"category_id",
+				"name",
 			}),
 			err:            fmt.Errorf("[repo] %w: <nil>", &models.NoSuchTransactionError{UserID: userID}),
 			expected:       nil,
@@ -233,8 +242,10 @@ func TestGetFeed(t *testing.T) {
 			rowsErr: errors.New("err"),
 			rowsCategory: pgxmock.NewRows([]string{
 				"category_id",
+				"name",
 			}).AddRow(
 				uuid.New(),
+				"ffff",
 			),
 			rowsCategoryErr: errors.New("err"),
 			err:             fmt.Errorf("[repo] err"),
@@ -450,21 +461,21 @@ func TestInsertCategories(t *testing.T) {
 		name          string
 		errRows       error
 		transactionID uuid.UUID
-		categories    []uuid.UUID
+		categories    []models.CategoryName
 		err           error
 		rowsErr       error
 	}{
 		{
 			name:          "ValidCategories",
 			transactionID: transactionID,
-			categories:    []uuid.UUID{transactionID},
+			categories:    []models.CategoryName{{ID: transactionID}},
 			err:           nil,
 			rowsErr:       nil,
 		},
 		{
 			name:          "Error",
 			transactionID: transactionID,
-			categories:    []uuid.UUID{transactionID},
+			categories:    []models.CategoryName{{ID: transactionID}},
 			err:           fmt.Errorf("[repo] failed to insert category association: %w", errors.New("err")),
 			rowsErr:       errors.New("err"),
 		},
@@ -728,3 +739,213 @@ func TestCheckForbidden(t *testing.T) {
 		})
 	}
 }
+
+/*
+func TestGetExportInfo(t *testing.T) {
+	userID := uuid.New()
+	transactionID1 := uuid.New()
+	categoryID := uuid.New()
+	time := time.Now()
+	categories := []models.CategoryName{{ID: categoryID, Name: "ffdsf"}}
+	tests := []struct {
+		name            string
+		rows            *pgxmock.Rows
+		rowsCategory    *pgxmock.Rows
+		rowsCategoryErr error
+		err             error
+		rowsErr         error
+		expected        []models.Transaction
+		expectedLast    bool
+		errTransaction  bool
+	}{
+		{
+			name: "ValidFeed",
+			rows: pgxmock.NewRows([]string{
+				"id", "user_id", "account_income_id", "account_outcome_id", "income", "outcome", "date", "payer", "description",
+			}).AddRow(
+				transactionID1, userID, transactionID1, transactionID1, 100.0, 0.0, time, "John Doe", "Transaction 1",
+			),
+			rowsCategory: pgxmock.NewRows([]string{
+				"category_id",
+				"name",
+			}).AddRow(
+				categoryID,
+				"ffdsf",
+			),
+
+			err:             nil,
+			rowsErr:         nil,
+			rowsCategoryErr: nil,
+			expected:        []models.Transaction{{ID: transactionID1, UserID: userID, AccountIncomeID: transactionID1, AccountOutcomeID: transactionID1, Income: 100.0, Outcome: 0.0, Date: time, Payer: "John Doe", Description: "Transaction 1", Categories: categories}},
+			expectedLast:    false,
+			errTransaction:  true,
+		},
+		{
+			name: "Invalid Scan Category",
+			rows: pgxmock.NewRows([]string{
+				"id", "user_id", "account_income_id", "account_outcome_id", "income", "outcome", "date", "payer", "description",
+			}).AddRow(
+				transactionID1, userID, transactionID1, transactionID1, 100.0, 0.0, time, "John Doe", "Transaction 1",
+			),
+			rowsCategory: pgxmock.NewRows([]string{
+				"category_id",
+				"name",
+			}).AddRow(
+				"dff",
+				"sfd",
+			),
+
+			err:             fmt.Errorf("[repo] Scanning value error for column 'category_id': Scan: invalid UUID length: 3"),
+			rowsErr:         nil,
+			rowsCategoryErr: nil,
+			expected:        nil,
+			expectedLast:    false,
+			errTransaction:  true,
+		},
+		{
+			name: "Invalid Scan transaction",
+			rows: pgxmock.NewRows([]string{
+				"id", "user_id", "account_income_id", "account_outcome_id", "income", "outcome", "date", "payer", "description",
+			}).AddRow(
+				"fff", userID, transactionID1, transactionID1, 100.0, 0.0, time, "John Doe", "Transaction 1",
+			),
+
+			err:             fmt.Errorf("[repo] Scanning value error for column 'id': Scan: invalid UUID length: 3"),
+			rowsErr:         nil,
+			rowsCategoryErr: nil,
+			expected:        nil,
+			expectedLast:    false,
+			errTransaction:  false,
+		},
+		{
+			name: "INValid category",
+			rows: pgxmock.NewRows([]string{
+				"id", "user_id", "account_income_id", "account_outcome_id", "income", "outcome", "date", "payer", "description",
+			}).AddRow(
+				transactionID1, userID, transactionID1, transactionID1, 100.0, 0.0, time, "John Doe", "Transaction 1",
+			),
+			rowsCategory: pgxmock.NewRows([]string{
+				"category_id",
+				"name",
+			}).AddRow(
+				categoryID,
+				"dddd",
+			),
+
+			err:             fmt.Errorf("[repo] err"),
+			rowsErr:         nil,
+			rowsCategoryErr: errors.New("err"),
+			expected:        nil,
+			expectedLast:    false,
+			errTransaction:  true,
+		},
+		{
+			name: "Rows err",
+			rows: pgxmock.NewRows([]string{
+				"id", "user_id", "account_income_id", "account_outcome_id", "income", "outcome", "date", "payer", "description",
+			}).RowError(0, errors.New("err")),
+			rowsCategory: pgxmock.NewRows([]string{
+				"category_id",
+				"name",
+			}),
+
+			err:             fmt.Errorf("[repo] err"),
+			rowsErr:         nil,
+			rowsCategoryErr: nil,
+			expected:        nil,
+			expectedLast:    false,
+			errTransaction:  false,
+		},
+		{
+			name: "Rows err",
+			rows: pgxmock.NewRows([]string{
+				"id", "user_id", "account_income_id", "account_outcome_id", "income", "outcome", "date", "payer", "description",
+			}).AddRow(
+				transactionID1, userID, transactionID1, transactionID1, 100.0, 0.0, time, "John Doe", "Transaction 1",
+			),
+			rowsCategory: pgxmock.NewRows([]string{
+				"category_id",
+				"name",
+			}).RowError(0, errors.New("err")),
+			err:             fmt.Errorf("[repo] err"),
+			rowsErr:         nil,
+			rowsCategoryErr: nil,
+			expected:        nil,
+			expectedLast:    false,
+			errTransaction:  true,
+		},
+		{
+			name: "NoRows",
+			rows: pgxmock.NewRows([]string{
+				"id", "user_id", "account_income_id", "account_outcome_id", "income", "outcome", "date", "payer", "description",
+			}),
+			rowsErr:         nil,
+			rowsCategoryErr: nil,
+			rowsCategory: pgxmock.NewRows([]string{
+				"category_id",
+				"name",
+			}),
+			err:            fmt.Errorf("[repo] %w: <nil>", &models.NoSuchTransactionError{UserID: userID}),
+			expected:       nil,
+			expectedLast:   false,
+			errTransaction: false,
+		},
+		{
+			name: "DatabaseError",
+			rows: pgxmock.NewRows([]string{
+				"id", "user_id", "account_income_id", "account_outcome_id", "income", "outcome", "date", "payer", "description",
+			}),
+			rowsErr: errors.New("err"),
+			rowsCategory: pgxmock.NewRows([]string{
+				"category_id",
+				"name",
+			}).AddRow(
+				uuid.New(),
+				"ffff",
+			),
+			rowsCategoryErr: errors.New("err"),
+			err:             fmt.Errorf("[repo] err"),
+			expected:        nil,
+			expectedLast:    false,
+			errTransaction:  false,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mock, _ := pgxmock.NewPool()
+			ctl := gomock.NewController(t)
+			defer ctl.Finish()
+			logger := *logger.NewLogger(context.TODO())
+			repo := NewRepository(mock, logger)
+
+			escapedQuery := regexp.QuoteMeta(transactionGetFeed + " ORDER BY date DESC;")
+			mock.ExpectQuery(escapedQuery).
+				WithArgs(userID.String()).
+				WillReturnRows(test.rows).
+				WillReturnError(test.rowsErr)
+
+			if test.errTransaction {
+				escapedQueryCategory := regexp.QuoteMeta(transactionGetFeedForExport)
+				mock.ExpectQuery(escapedQueryCategory).
+					WithArgs(transactionID1).
+					WillReturnRows(test.rowsCategory).
+					WillReturnError(test.rowsCategoryErr)
+			}
+			transactions, err := repo.GetTransactionForExport(context.Background(), userID, &models.QueryListOptions{})
+
+			if !reflect.DeepEqual(transactions, test.expected) {
+				t.Errorf("Expected transactions: %v, but got: %v", test.expected, transactions)
+			}
+
+			if (test.err == nil && err != nil) || (test.err != nil && err == nil) || (test.err != nil && err != nil && test.err.Error() != err.Error()) {
+				t.Errorf("Expected error: %v, but got: %v", test.err, err)
+			}
+
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("There were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
+*/

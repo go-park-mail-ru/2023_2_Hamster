@@ -1,14 +1,17 @@
 package http
 
 import (
-	"encoding/json"
 	"net/http"
 	"time"
+
+	"github.com/mailru/easyjson"
 
 	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth"
 	gen "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/grpc/generated"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions"
 	"github.com/google/uuid"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	contextutils "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/context_utils"
 	response "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
@@ -44,17 +47,17 @@ func NewHandler(
 // @Description	Create Account
 // @Accept 		json
 // @Produce		json
-// @Param			user		body		models.User			true		"user info"
-// @Success		201		{object}	Response[auth.SignResponse]		"User Created"
-// @Failure		400		{object}	ResponseError					"Incorrect Input"
-// @Failure		429		{object}	ResponseError					"Server error"
+// @Param			user		body		models.User				true	"user info"
+// @Success		201		{object}	Response[auth.SignResponse]				"User Created"
+// @Failure		400		{object}	ResponseError							"Incorrect Input"
+// @Failure		409		{object}	ResponseError							"User already exists"
+// @Failure		429		{object}	ResponseError							"Server error"
 // @Router		/api/auth/signup	[post]
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	var signUpUser auth.SignUpInput
 
-	// Unmarshal r.Body
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&signUpUser); err != nil {
+	// Unmarshal request.Body
+	if err := easyjson.UnmarshalFromReader(r.Body, &signUpUser); err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Error(err.Error())
@@ -76,6 +79,11 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		Password: signUpUser.PlaintPassword,
 	})
 	if err != nil {
+		// errUserAlreadyExists := status.Error(codes.AlreadyExists, "Alredy exist") //*models.UserAlreadyExistsError
+		if status.Code(err) == codes.AlreadyExists {
+			response.ErrorResponse(w, http.StatusConflict, err, "User already exists", h.log)
+			return
+		}
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Errorf("Error in sign up: %v", err)
@@ -113,17 +121,18 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Description	Login account
 // @Accept 		json
 // @Produce		json
-// @Param			userInput		body		auth.LoginInput		true		"username && password"
+// @Param		userInput		body		auth.LoginInput		true		"username && password"
 // @Success		202			{object}	Response[auth.SignResponse]		"User logedin"
 // @Failure		400			{object}	ResponseError					"Incorrect Input"
+// @Failure		403			{object}	ResponseError					"Incorrect password"
+// @Failure		404			{object}	ResponseError					"User doesn't exist"
 // @Failure		429			{object}	ResponseError					"Server error"
 // @Router		/api/auth/signin	[post]
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	var loginUser auth.LoginInput
 
 	// Decode request Body
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&loginUser); err != nil {
+	if err := easyjson.UnmarshalFromReader(r.Body, &loginUser); err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Error(err.Error())
@@ -144,6 +153,16 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		Password: loginUser.PlaintPassword,
 	})
 	if err != nil {
+		if status.Code(err) == codes.NotFound {
+			response.ErrorResponse(w, http.StatusNotFound, err, "User don't exists", h.log)
+			return
+		}
+
+		if status.Code(err) == codes.PermissionDenied {
+			response.ErrorResponse(w, http.StatusForbidden, err, "Incorrect password", h.log)
+			return
+		}
+
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Errorf("Error in login: %v", err)
@@ -181,11 +200,11 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary		Validate Auth
-// @Tags			Auth
+// @Tags		Auth
 // @Description	Validate auth
 // @Accept 		json
 // @Produce		json
-// @Param			user		body		models.User		true		"user info"
+// @Param		user		body		models.User		true		"user info"
 // @Success		200		{object}	Response[auth.SignResponse]	"User status"
 // @Failure		401		{object}	ResponseError				"Session doesn't exist"
 // @Failure		403		{object}	ResponseError				"Invalid cookie"
@@ -282,8 +301,7 @@ func (h *Handler) CheckLoginUnique(w http.ResponseWriter, r *http.Request) {
 	var userLogin auth.UniqCheckInput
 
 	// Decode request Body
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&userLogin); err != nil {
+	if err := easyjson.UnmarshalFromReader(r.Body, &userLogin); err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Error(err.Error())
@@ -291,6 +309,11 @@ func (h *Handler) CheckLoginUnique(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
+
+	if err := userLogin.CheckValid(); err != nil {
+		response.ErrorResponse(w, http.StatusBadRequest, err, response.InvalidBodyRequest, h.log)
+		return
+	}
 
 	// request login userLogin.Login
 	isUnique, err := h.client.CheckLoginUnique(r.Context(), &gen.UniqCheckRequest{Login: userLogin.Login})
@@ -317,8 +340,7 @@ func (h *Handler) GetByIdHandler(w http.ResponseWriter, r *http.Request) {
 	var userId auth.UserIdInput
 
 	// Decode request Body
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&userId); err != nil {
+	if err := easyjson.UnmarshalFromReader(r.Body, &userId); err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Error(err.Error())
@@ -338,4 +360,67 @@ func (h *Handler) GetByIdHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.SuccessResponse(w, http.StatusOK, isUnique)
+}
+
+// @Summary		Change Password
+// @Tags		Auth
+// @Description	Takes old password and newpassword and chnge password
+// @Accept 		json
+// @Produce		json
+// @Param		userInput		body		auth.ChangePasswordInput		true		"username && password"
+// @Success		200		{object}		Response[auth.SignResponse] 			"user Info"
+// @Failure		400		{object}		ResponseError							"Client error"
+// @Failure		500		{object}		ResponseError							"Server error"
+// @Router		/api/auth/password/ [put]
+func (h *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
+	user, err := response.GetUserFromRequest(r)
+	if err != nil {
+		h.log.WithField(
+			"Request-Id", contextutils.GetReqID(r.Context()),
+		).Errorf("[handler] Error: %v", err)
+		response.ErrorResponse(w, http.StatusUnauthorized, err, response.ErrUnauthorized.Error(), h.log)
+		return
+	}
+
+	var changePassword auth.ChangePasswordInput
+
+	// Decode request Body
+	if err := easyjson.UnmarshalFromReader(r.Body, &changePassword); err != nil {
+		h.log.WithField(
+			"Request-Id", contextutils.GetReqID(r.Context()),
+		).Error(err.Error())
+		response.ErrorResponse(w, http.StatusBadRequest, err, "Corrupted request body can't unmarshal", h.log)
+		return
+	}
+	defer r.Body.Close()
+
+	// Sanitaize Input
+	if err := changePassword.CheckValid(); err != nil {
+		response.ErrorResponse(w, http.StatusBadRequest, err, response.InvalidBodyRequest, h.log)
+		return
+	}
+
+	// Change Password
+	_, err = h.client.ChangePassword(r.Context(), &gen.ChangePasswordRequest{
+		Login:       user.Login,
+		OldPassword: changePassword.OldPassword,
+		NewPassword: changePassword.NewPassword,
+	})
+	if err != nil {
+		h.log.WithField(
+			"Request-Id", contextutils.GetReqID(r.Context()),
+		).Errorf("Error in change password: %v", err)
+		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't Change Password", h.log)
+		return
+	}
+
+	// Create Response
+	regUser := auth.SignResponse{
+		ID:       user.ID,
+		Login:    user.Login,
+		Username: user.Username,
+	}
+
+	// Send Response
+	response.SuccessResponse(w, http.StatusOK, regUser)
 }

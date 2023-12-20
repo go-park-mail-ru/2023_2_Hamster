@@ -73,7 +73,7 @@ func TestUsecase_UpdateAccount(t *testing.T) {
 			name:        "Successful TestUsecase_UpdateAccount",
 			expectedErr: nil,
 			mockRepoFn: func(mockRepository *mock.MockRepository) {
-				mockRepository.EXPECT().CheckForbidden(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+				mockRepository.EXPECT().SharingCheck(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 				mockRepository.EXPECT().UpdateAccount(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 			},
 		},
@@ -81,14 +81,14 @@ func TestUsecase_UpdateAccount(t *testing.T) {
 			name:        "Forbidden Error in TestUsecase_UpdateAccount",
 			expectedErr: fmt.Errorf("[usecase] can't be update by user: some forbidden error"),
 			mockRepoFn: func(mockRepository *mock.MockRepository) {
-				mockRepository.EXPECT().CheckForbidden(gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("some forbidden error"))
+				mockRepository.EXPECT().SharingCheck(gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("some forbidden error"))
 			},
 		},
 		{
 			name:        "Update Error in TestUsecase_UpdateAccount",
 			expectedErr: fmt.Errorf("[usecase] can't update account into repository: some update error"),
 			mockRepoFn: func(mockRepository *mock.MockRepository) {
-				mockRepository.EXPECT().CheckForbidden(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+				mockRepository.EXPECT().SharingCheck(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 				mockRepository.EXPECT().UpdateAccount(gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("some update error"))
 			},
 		},
@@ -129,7 +129,7 @@ func TestUsecase_DeleteAccount(t *testing.T) {
 			name:        "Successful deletion",
 			expectedErr: nil,
 			mockRepoFn: func(mockRepository *mock.MockRepository) {
-				mockRepository.EXPECT().CheckForbidden(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+				mockRepository.EXPECT().SharingCheck(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 				mockRepository.EXPECT().DeleteAccount(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 			},
 		},
@@ -137,14 +137,14 @@ func TestUsecase_DeleteAccount(t *testing.T) {
 			name:        "Error in CheckForbidden",
 			expectedErr: fmt.Errorf("[usecase] can't be delete by user: %w", errors.New("forbidden")),
 			mockRepoFn: func(mockRepository *mock.MockRepository) {
-				mockRepository.EXPECT().CheckForbidden(gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("forbidden"))
+				mockRepository.EXPECT().SharingCheck(gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("forbidden"))
 			},
 		},
 		{
 			name:        "Error in DeleteAccount",
 			expectedErr: fmt.Errorf("[usecase] can't delete account into repository: %w", errors.New("repository error")),
 			mockRepoFn: func(mockRepository *mock.MockRepository) {
-				mockRepository.EXPECT().CheckForbidden(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+				mockRepository.EXPECT().SharingCheck(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 				mockRepository.EXPECT().DeleteAccount(gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("repository error"))
 			},
 		},

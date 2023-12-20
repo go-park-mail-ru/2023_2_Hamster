@@ -16,29 +16,41 @@ type (
 		Cookie string    `json:"cookie"`
 	}
 
+	//easyjson:json
 	UserIdInput struct {
 		ID uuid.UUID `json:"user_id"`
 	}
 
+	//easyjson:json
 	SignUpInput struct {
 		Login          string `json:"login" valid:"required,length(4|20)"`
 		Username       string `json:"username" valid:"required,length(4|20)"`
 		PlaintPassword string `json:"password" valid:"required,length(4|20)"`
 	}
 
+	//easyjson:json
 	LoginInput struct {
 		Login          string `json:"login" valid:"required,length(4|20)"`
 		PlaintPassword string `json:"password" valid:"required,length(4|20)"`
 	}
 
+	//easyjson:json
 	SignResponse struct {
 		ID       uuid.UUID `json:"id" valid:"required"`
 		Login    string    `json:"login" valid:"required"`
 		Username string    `json:"username" valid:"required"`
 	}
 
+	//easyjson:json
 	UniqCheckInput struct {
 		Login string `json:"login" valid:"required"`
+	}
+
+	//easyjson:json
+	ChangePasswordInput struct {
+		Login       string
+		OldPassword string `json:"old_password" valid:"required,length(4|20)"`
+		NewPassword string `json:"new_password" valid:"required,length(4|20)"`
 	}
 )
 
@@ -57,6 +69,19 @@ func (si *SignUpInput) CheckValid() error {
 	si.PlaintPassword = html.EscapeString(si.PlaintPassword)
 
 	_, err := valid.ValidateStruct(*si)
+	return err
+}
+
+func (ui *UniqCheckInput) CheckValid() error {
+	ui.Login = html.EscapeString(ui.Login)
+	_, err := valid.ValidateStruct(*ui)
+	return err
+}
+
+func (ci *ChangePasswordInput) CheckValid() error {
+	ci.OldPassword = html.EscapeString(ci.OldPassword)
+	ci.NewPassword = html.EscapeString(ci.NewPassword)
+	_, err := valid.ValidateStruct(*ci)
 	return err
 }
 

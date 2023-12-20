@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS Users (
 CREATE TABLE IF NOT EXISTS Accounts (
     id            UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     balance numeric(10, 2),
+    sharing_id UUID REFERENCES Users(id), -- только он может что-то менять
     accumulation BOOLEAN,
     balance_enabled BOOLEAN,
     mean_payment VARCHAR(30)
@@ -28,6 +29,7 @@ CREATE TABLE IF NOT EXISTS category (
     user_id         UUID          REFERENCES Users(id)    CONSTRAINT fk_user_category       NOT NULL,
     parent_tag      UUID          REFERENCES category(id),
     "name"          VARCHAR(30)                                                             NOT NULL,
+    --image_id        INT           DEFAULT 0                                                 NOT NULL,
     show_income     BOOLEAN,
     show_outcome    BOOLEAN,
     regular         BOOLEAN                                                                 NOT NULL
@@ -47,10 +49,37 @@ CREATE TABLE IF NOT EXISTS Transaction (
 );
 
 CREATE TABLE IF NOT EXISTS TransactionCategory (
-    transaction_id UUID REFERENCES Transaction(id),
-    category_id UUID REFERENCES Category(id),
+    transaction_id UUID REFERENCES Transaction(id) ON DELETE CASCADE,
+    category_id UUID REFERENCES Category(id) ON DELETE CASCADE,
     PRIMARY KEY (transaction_id, category_id)
 );
+
+--CREATE TABLE IF NOT EXISTS goal (
+--    id            UUID            DEFAULT uuid_generate_v4() PRIMARY KEY,
+--    user_id       UUID            REFERENCES "user"(user_id)                                       NOT NULL,
+--    "name"        TEXT                                       CHECK(LENGTH("name") <= 50)           NOT NULL,
+--    "description" TEXT            DEFAULT ''                 CHECK(LENGTH("description") <= 255),
+--    "target"      NUMERIC(10,2)                                                                    NOT NULL,
+--    "date"        DATE,
+--    created_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP                                        NOT NULL,
+--    updated_at    TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP                                        NOT NULL
+--);
+
+--========================================================================
+
+--CREATE OR REPLACE FUNCTION public.moddatetime()
+--    RETURNS TRIGGER AS $$
+--BEGIN
+--    NEW.updated_at = NOW();
+--    RETURN NEW;
+--END;
+--$$ LANGUAGE plpgsql;
+--
+--CREATE OR REPLACE TRIGGER modify_updated_at
+--    BEFORE UPDATE
+--    ON goal
+--    FOR EACH ROW
+--EXECUTE PROCEDURE public.moddatetime(updated_at);
 
 --========================================================================
 
@@ -67,7 +96,7 @@ BEGIN
     VALUES  (NEW.id, NULL, 'Дети',                     false, true,  false),
             (NEW.id, NULL, 'Забота о себе',            false, true,  false),
             (NEW.id, NULL, 'Зарплата',                 true,  false, true),
-            (NEW.id, NULL, 'Здровье и фитнес',         false, true,  false),
+            (NEW.id, NULL, 'Здоровье и фитнес',         false, true,  false),
             (NEW.id, NULL, 'Кафе и рестораны',         false, true,  false),
             (NEW.id, NULL, 'Машина',                   false, true,  false),
             (NEW.id, NULL, 'Образование',              false, true,  false),
@@ -80,11 +109,11 @@ BEGIN
     
     SELECT id INTO categoryID FROM category WHERE name = 'Продукты' AND user_id = NEW.id;
 
-    INSERT INTO accounts(balance, mean_payment, accumulation, balance_enabled)
-    VALUES (0, 'Карта', false, true) RETURNING id INTO accountCardID;
+    INSERT INTO accounts(balance, sharing_id, mean_payment, accumulation, balance_enabled)
+    VALUES (0, NEW.id, 'Карта', false, true) RETURNING id INTO accountCardID;
            
-    INSERT INTO accounts(balance, mean_payment, accumulation, balance_enabled)
-    VALUES (0, 'Наличка', false, true) RETURNING id INTO accountCashID;
+    INSERT INTO accounts(balance, sharing_id, mean_payment, accumulation, balance_enabled)
+    VALUES (0, NEW.id, 'Наличка', false, true) RETURNING id INTO accountCashID;
 
     INSERT INTO userAccount(user_id, account_id)
     VALUES (NEW.id, accountCardID);
@@ -94,11 +123,11 @@ BEGIN
 
     INSERT INTO transaction(user_id, account_income, account_outcome, income, outcome, payer, description)
     VALUES (NEW.id, accountCardID,
-                    accountCardID, 0, 100, 'Пятерочка', 'Пошел в магазин за вкусняшками') RETURNING id INTO transaction_idI;
+                    accountCardID, 0, 100, 'Тестовая транзакция1', 'Все хомячки приветствуют вас, и просят удалить эти транзации)') RETURNING id INTO transaction_idI;
 
     INSERT INTO transaction(user_id, account_income, account_outcome, income, outcome, payer, description)
     VALUES (NEW.id, accountCardID,
-                    accountCardID, 100, 0, 'Пятерочка', 'Вернули деньги оплата не прошла') RETURNING id INTO transaction_idO;
+                    accountCardID, 100, 0, 'Тестовая транзакция2', 'Все хомячки приветствуют вас, и просят удалить эти транзации)') RETURNING id INTO transaction_idO;
             
     INSERT INTO TransactionCategory(transaction_id, category_id)
     VALUES (transaction_idI, categoryID),

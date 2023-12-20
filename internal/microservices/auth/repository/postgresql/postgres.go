@@ -11,13 +11,15 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx"
+	pg "github.com/jackc/pgx/v4"
 )
 
 const (
 	UserCheckLoginUnique = `SELECT COUNT(*) FROM users WHERE login = $1;`
 	UserGetByUserName    = `SELECT id, login, username, password_hash, planned_budget, avatar_url From users WHERE (login=$1);`
 	UserCreate           = `INSERT INTO users (login, username, password_hash) VALUES ($1, $2, $3) RETURNING id;`
-	UserIDGetByID        = `SELECT id, login, username, password_hash, planned_budget, avatar_url FROM users WHERE id = $1;`
+	UserIDGetByID        = `SELECT id, login, username, password_hash, planned_budget, avatar_url FROM users WHERE id=CAST($1 AS UUID);`
+	UserChangePassword   = `UPDATE users SET password_hash = $1 WHERE id = $2;`
 )
 
 const errorUserExists = "unique_violation"
@@ -49,11 +51,12 @@ func (r *AuthRep) GetUserByLogin(ctx context.Context, login string) (*models.Use
 	var u models.User
 	err := row.Scan(&u.ID, &u.Login, &u.Username, &u.Password, &u.PlannedBudget, &u.AvatarURL)
 
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, fmt.Errorf("[repo] %w, %v", &models.NoSuchUserError{}, err)
-	} else if err != nil {
-		return nil,
-			fmt.Errorf("[repo] failed request db %w", err)
+	if err != nil {
+		if errors.Is(err, pg.ErrNoRows) {
+			return nil, fmt.Errorf("[repo] %w, %v", &models.NoSuchUserError{}, err)
+		} else {
+			return nil, fmt.Errorf("[repo] failed request db: %w", err)
+		}
 	}
 	return &u, nil
 }
@@ -93,4 +96,12 @@ func (r *AuthRep) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, 
 		return nil, fmt.Errorf("failed request db %s, %w", UserIDGetByID, err)
 	}
 	return &u, nil
+}
+
+func (r *AuthRep) ChangePassword(ctx context.Context, userID uuid.UUID, newPassword string) error {
+	_, err := r.db.Exec(ctx, UserChangePassword, newPassword, userID)
+	if err != nil {
+		return fmt.Errorf("[repo] failed to update password: %w", err)
+	}
+	return nil
 }
