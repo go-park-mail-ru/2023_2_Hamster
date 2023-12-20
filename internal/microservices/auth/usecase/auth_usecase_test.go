@@ -210,3 +210,116 @@ func TestUsecase_CheckLoginUnique(t *testing.T) {
 		})
 	}
 }
+
+func TestUsecase_GetByID(t *testing.T) {
+	userIdTest := uuid.New()
+	testCases := []struct {
+		name         string
+		inputUserID  uuid.UUID
+		expectedUser *models.User
+		expectedErr  error
+		mockRepoFn   func(*mock.MockRepository)
+	}{
+		{
+			name:        "Successful GetByID",
+			inputUserID: userIdTest,
+			expectedUser: &models.User{
+				ID: userIdTest,
+				// Add other expected user fields here
+			},
+			expectedErr: nil,
+			mockRepoFn: func(mockRepository *mock.MockRepository) {
+				mockRepository.EXPECT().GetByID(gomock.Any(), userIdTest).Return(&models.User{
+					ID: userIdTest,
+					// Add other mocked user fields here
+				}, nil)
+			},
+		},
+		{
+			name:         "Error in GetByID",
+			inputUserID:  userIdTest,
+			expectedUser: nil,
+			expectedErr:  fmt.Errorf("[usecase] can't get user from repository some error"),
+			mockRepoFn: func(mockRepository *mock.MockRepository) {
+				mockRepository.EXPECT().GetByID(gomock.Any(), userIdTest).Return(nil, errors.New("some error"))
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockRepo := mock.NewMockRepository(ctrl)
+			tc.mockRepoFn(mockRepo)
+
+			mockUsecase := NewUsecase(mockRepo, *logger.NewLogger(context.TODO()))
+
+			user, err := mockUsecase.GetByID(context.Background(), tc.inputUserID)
+
+			assert.Equal(t, tc.expectedUser, user)
+			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
+				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
+			}
+		})
+	}
+}
+
+func TestUsecase_ChangePassword(t *testing.T) {
+	userIdTest := uuid.New()
+	testCases := []struct {
+		name        string
+		input       auth.ChangePasswordInput
+		expectedErr error
+		mockRepoFn  func(*mock.MockRepository)
+	}{
+		{
+			name: "Successful ChangePassword",
+			input: auth.ChangePasswordInput{
+				Login:       "testLogin",
+				OldPassword: "testPassword",
+				NewPassword: "newPassword",
+			},
+			expectedErr: nil,
+			mockRepoFn: func(mockRepository *mock.MockRepository) {
+				mockRepository.EXPECT().GetUserByLogin(gomock.Any(), "testLogin").Return(&models.User{
+					ID:       userIdTest,
+					Password: "$argon2id$v=19$m=65536,t=1,p=4$YcsUni+F/VK3Vsjuw7Hb/Q$eZwr1GdO2/bkDRa2PGfTw5l6LPymywRdE9St5ot2Gv8", // Replace with actual hashed password
+				}, nil)
+				mockRepository.EXPECT().ChangePassword(gomock.Any(), userIdTest, gomock.Any()).Return(nil)
+			},
+		},
+		{
+			name: "Error in GetUserByLogin",
+			input: auth.ChangePasswordInput{
+				Login:       "testLogin",
+				OldPassword: "oldPassword",
+				NewPassword: "newPassword",
+			},
+			expectedErr: fmt.Errorf("[usecase] can't find user: some error"),
+			mockRepoFn: func(mockRepository *mock.MockRepository) {
+				mockRepository.EXPECT().GetUserByLogin(gomock.Any(), "testLogin").Return(nil, errors.New("some error"))
+			},
+		},
+		// Add more test cases for different scenarios (e.g., incorrect old password, hasher errors, repo errors)
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockRepo := mock.NewMockRepository(ctrl)
+			tc.mockRepoFn(mockRepo)
+
+			mockUsecase := NewUsecase(mockRepo, *logger.NewLogger(context.TODO()))
+
+			err := mockUsecase.ChangePassword(context.Background(), tc.input)
+
+			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
+				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
+			}
+		})
+	}
+}

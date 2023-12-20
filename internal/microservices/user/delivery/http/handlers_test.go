@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/gorilla/mux"
 	"image"
 	"image/color"
 	"image/png"
@@ -1045,6 +1046,328 @@ func TestUserHandler_UpdateProfilePhoto(t *testing.T) {
 			mockHandler.UpdatePhoto(w, r)
 			require.Equal(t, test.expectedStatus, w.Code, fmt.Errorf("%s :  expected %d, got %d,"+
 				" for test:%s, response %s", test.name, test.expectedStatus, w.Code, test.name, w.Body.String()))
+		})
+	}
+}
+
+func TestHandler_AddUserInAccount(t *testing.T) {
+	uuidTest := uuid.New()
+	user := &models.User{ID: uuidTest}
+
+	tests := []struct {
+		name          string
+		user          *models.User
+		requestBody   io.Reader
+		expectedCode  int
+		expectedBody  string
+		mockUsecaseFn func(*mocks.MockUsecase)
+	}{
+		{
+			name:          "Invalid JSON body",
+			user:          user,
+			requestBody:   strings.NewReader("invalid json data"),
+			expectedCode:  http.StatusBadRequest,
+			expectedBody:  `{"status":400,"message":"invalid input body"}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {},
+		},
+		{
+			name: "Successful Add User in Account",
+			user: user,
+			requestBody: strings.NewReader(`{
+				"field1": "value1",
+				"field2": "value2"
+			}`),
+			expectedCode: http.StatusOK,
+			expectedBody: `{"status":200,"body":{}}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+				mockUsecase.EXPECT().AddUserInAccount(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+			},
+		},
+		{
+			name: "Unauthorized Request",
+			user: nil,
+			requestBody: strings.NewReader(`{
+				"field1": "value1",
+				"field2": "value2"
+			}`),
+			expectedCode:  http.StatusUnauthorized,
+			expectedBody:  `{"status":401,"message":"unauthorized"}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {},
+		},
+		{
+			name: "Error adding user in account - Not Found",
+			user: user,
+			requestBody: strings.NewReader(`{
+				"field1": "value1",
+				"field2": "value2"
+			}`),
+			expectedCode: http.StatusNotFound,
+			expectedBody: `{"status":404,"message":"no user found with this login"}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+				mockUsecase.EXPECT().AddUserInAccount(gomock.Any(), gomock.Any(), gomock.Any()).Return(&models.NoSuchUserInLogin{})
+			},
+		},
+		{
+			name: "Error adding user in account - Forbidden",
+			user: user,
+			requestBody: strings.NewReader(`{
+				"field1": "value1",
+				"field2": "value2"
+			}`),
+			expectedCode: http.StatusForbidden,
+			expectedBody: `{"status":403,"message":"user has no rights"}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+				mockUsecase.EXPECT().AddUserInAccount(gomock.Any(), gomock.Any(), gomock.Any()).Return(&models.ForbiddenUserError{})
+			},
+		},
+		{
+			name: "Error adding user in account - Duplicate",
+			user: user,
+			requestBody: strings.NewReader(`{
+				"field1": "value1",
+				"field2": "value2"
+			}`),
+			expectedCode: http.StatusBadRequest,
+			expectedBody: `{"status":400,"message":"this user has already been added to the account"}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+				mockUsecase.EXPECT().AddUserInAccount(gomock.Any(), gomock.Any(), gomock.Any()).Return(&models.DuplicateError{})
+			},
+		},
+		{
+			name: "Error adding user in account - Internal Server Error",
+			user: user,
+			requestBody: strings.NewReader(`{
+				"field1": "value1",
+				"field2": "value2"
+			}`),
+			expectedCode: http.StatusInternalServerError,
+			expectedBody: `{"status":500,"message":"can't get user"}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+				mockUsecase.EXPECT().AddUserInAccount(gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("internal server error"))
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockService := mocks.NewMockUsecase(ctrl)
+			tt.mockUsecaseFn(mockService)
+
+			mockHandler := NewHandler(mockService, *logger.NewLogger(context.TODO()))
+
+			req := httptest.NewRequest("POST", "/api/user/add", tt.requestBody)
+
+			if tt.user != nil {
+				ctx := context.WithValue(req.Context(), models.ContextKeyUserType{}, tt.user)
+				req = req.WithContext(ctx)
+			}
+
+			recorder := httptest.NewRecorder()
+
+			mockHandler.AddUserInAccount(recorder, req)
+
+			actual := strings.TrimSpace(recorder.Body.String())
+
+			assert.Equal(t, tt.expectedCode, recorder.Code)
+			assert.Equal(t, tt.expectedBody, actual)
+		})
+	}
+}
+
+func TestHandler_Unsubscribe(t *testing.T) {
+	uuidTest := uuid.New()
+	user := &models.User{ID: uuidTest}
+	//accountID := uuid.New()
+
+	tests := []struct {
+		name          string
+		user          *models.User
+		accountID     string
+		expectedCode  int
+		expectedBody  string
+		mockUsecaseFn func(*mocks.MockUsecase)
+	}{
+		{
+			name:          "Invalid URL parameter",
+			user:          user,
+			accountID:     uuid.Nil.String(),
+			expectedCode:  http.StatusBadRequest,
+			expectedBody:  `{"status":400,"message":"invalid url parameter"}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {},
+		},
+		{
+			name:          "Unauthorized Request",
+			user:          nil,
+			accountID:     "account_id",
+			expectedCode:  http.StatusUnauthorized,
+			expectedBody:  `{"status":401,"message":"unauthorized"}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {},
+		},
+		{
+			name:         "Successful Unsubscribe",
+			user:         user,
+			accountID:    "account_id",
+			expectedCode: http.StatusOK,
+			expectedBody: `{"status":200,"body":{}}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+				mockUsecase.EXPECT().Unsubscribe(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+			},
+		},
+		{
+			name:         "Error unsubscribing user - Internal Server Error",
+			user:         user,
+			accountID:    "account_id",
+			expectedCode: http.StatusInternalServerError,
+			expectedBody: `{"status":500,"message":"can't get user"}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+				mockUsecase.EXPECT().Unsubscribe(gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("internal server error"))
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockService := mocks.NewMockUsecase(ctrl)
+			tt.mockUsecaseFn(mockService)
+
+			mockHandler := NewHandler(mockService, *logger.NewLogger(context.TODO()))
+
+			url := "/api/account/delete"
+			req := httptest.NewRequest("GET", url, nil)
+			req = mux.SetURLVars(req, map[string]string{tt.accountID: uuidTest.String()})
+
+			// Create a new request with the specified URL
+
+			if tt.user != nil {
+				ctx := context.WithValue(req.Context(), models.ContextKeyUserType{}, tt.user)
+				req = req.WithContext(ctx)
+			}
+
+			recorder := httptest.NewRecorder()
+
+			mockHandler.Unsubscribe(recorder, req)
+			actual := strings.TrimSpace(recorder.Body.String())
+
+			assert.Equal(t, tt.expectedCode, recorder.Code)
+			assert.Equal(t, tt.expectedBody, actual)
+		})
+	}
+}
+
+func TestHandler_DeleteUserInAccount(t *testing.T) {
+	uuidTest := uuid.New()
+	user := &models.User{ID: uuidTest}
+	accountID := uuid.New()
+
+	tests := []struct {
+		name          string
+		user          *models.User
+		requestBody   io.Reader
+		expectedCode  int
+		expectedBody  string
+		mockUsecaseFn func(*mocks.MockUsecase)
+	}{
+		{
+			name:          "Unauthorized Request",
+			user:          nil,
+			requestBody:   strings.NewReader(`{"user_id": "testuser", "account_id": "account123"}`),
+			expectedCode:  http.StatusUnauthorized,
+			expectedBody:  `{"status":401,"message":"unauthorized"}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {},
+		},
+		{
+			name: "Successful User Deletion in Account",
+			user: user,
+			requestBody: strings.NewReader(`{
+				"user_id": "` + user.ID.String() + `",
+				"account_id": "` + accountID.String() + `"
+			}`),
+			expectedCode: http.StatusOK,
+			expectedBody: `{"status":200,"body":{}}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+				mockUsecase.EXPECT().DeleteUserInAccount(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+			},
+		},
+		{
+			name: "User Not Found - Bad Request",
+			user: user,
+			requestBody: strings.NewReader(`{
+				"user_id": "` + uuid.New().String() + `",
+				"account_id": "` + accountID.String() + `"
+			}`),
+			expectedCode: http.StatusBadRequest,
+			expectedBody: `{"status":400,"message":"no such user"}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+				mockUsecase.EXPECT().DeleteUserInAccount(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&models.NoSuchUserInLogin{})
+			},
+		},
+		{
+			name: "User Not Found - Bad Request",
+			user: user,
+			requestBody: strings.NewReader(`{
+				"user_id": "` + uuid.New().String() + `",
+				"account_id": "` + accountID.String() + `"
+			}`),
+			expectedCode: http.StatusInternalServerError,
+			expectedBody: `{"status":500,"message":"can't get user"}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+				mockUsecase.EXPECT().DeleteUserInAccount(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("some"))
+			},
+		},
+		{
+			name: "Forbidden User - Forbidden",
+			user: user,
+			requestBody: strings.NewReader(`{
+				"user_id": "` + user.ID.String() + `",
+				"account_id": "` + uuid.New().String() + `"
+			}`),
+			expectedCode: http.StatusForbidden,
+			expectedBody: `{"status":403,"message":"user has no rights"}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+				mockUsecase.EXPECT().DeleteUserInAccount(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&models.ForbiddenUserError{})
+			},
+		},
+		{
+			name:          "Invalid JSON body",
+			user:          user,
+			requestBody:   strings.NewReader("invalid json data"),
+			expectedCode:  http.StatusBadRequest,
+			expectedBody:  `{"status":400,"message":"invalid input body"}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockService := mocks.NewMockUsecase(ctrl)
+			tt.mockUsecaseFn(mockService)
+
+			mockHandler := NewHandler(mockService, *logger.NewLogger(context.TODO()))
+
+			req := httptest.NewRequest("DELETE", "/api/user/delete", tt.requestBody)
+
+			if tt.user != nil {
+				ctx := context.WithValue(req.Context(), models.ContextKeyUserType{}, tt.user)
+				req = req.WithContext(ctx)
+			}
+
+			recorder := httptest.NewRecorder()
+
+			mockHandler.DeleteUserInAccount(recorder, req)
+
+			actual := strings.TrimSpace(recorder.Body.String())
+
+			assert.Equal(t, tt.expectedCode, recorder.Code)
+			assert.Equal(t, tt.expectedBody, actual)
 		})
 	}
 }

@@ -474,99 +474,20 @@ func (r *transactionRep) GetTransactionForExport(ctx context.Context, userId uui
 		); err != nil {
 			return nil, fmt.Errorf("[repo] %w", err)
 		}
-		transactions = append(transactions, transaction)
-	}
-
-	return transactions, nil
-}
-
-/*
-	var transactions []models.Transaction
-	count := 1
-	var queryParamsSlice []interface{}
-
-	query := transactionGetFeedForExport
-	queryParamsSlice = append(queryParamsSlice, userId.String())
-
-	if queryGet.Account != uuid.Nil {
-		count++
-		query += " AND (account_income = $" + strconv.Itoa(count) + " OR account_outcome = $" + strconv.Itoa(count) + ")"
-		queryParamsSlice = append(queryParamsSlice, queryGet.Account.String())
-	}
-
-	if queryGet.Category != uuid.Nil {
-		count++
-		query += " AND id IN (SELECT transaction_id FROM TransactionCategory WHERE category_id = $" + strconv.Itoa(count) + ")"
-		queryParamsSlice = append(queryParamsSlice, queryGet.Category.String())
-	}
-
-	if queryGet.Income && queryGet.Outcome {
-		query += " AND income > 0 AND outcome > 0"
-	}
-
-	if !queryGet.Income && queryGet.Outcome {
-		query += " AND outcome > 0 AND income = 0"
-	}
-
-	if queryGet.Income && !queryGet.Outcome {
-		query += " AND income > 0 AND outcome = 0"
-	}
-
-	if !queryGet.StartDate.IsZero() || !queryGet.EndDate.IsZero() {
-		count++
-		if !queryGet.StartDate.IsZero() && !queryGet.EndDate.IsZero() {
-			query += " AND date BETWEEN $" + strconv.Itoa(count) + " AND $" + strconv.Itoa(count+1)
-			queryParamsSlice = append(queryParamsSlice, queryGet.StartDate, queryGet.EndDate)
-		} else if !queryGet.StartDate.IsZero() {
-			query += " AND date >= $" + strconv.Itoa(count)
-			queryParamsSlice = append(queryParamsSlice, queryGet.StartDate)
-		} else {
-			query += " AND date <= $" + strconv.Itoa(count)
-			queryParamsSlice = append(queryParamsSlice, queryGet.EndDate)
-		}
-	}
-
-	query += " ORDER BY date DESC;"
-	rows, err := r.db.Query(ctx, query, queryParamsSlice...)
-	if err != nil {
-		return nil, fmt.Errorf("[repo] %v", err)
-	}
-
-	for rows.Next() {
-		var transaction models.Transaction
-		if err := rows.Scan(
-			&transaction.ID,
-			&transaction.UserID,
-			&transaction.AccountIncomeID,
-			&transaction.AccountOutcomeID,
-			&transaction.Income,
-			&transaction.Outcome,
-			&transaction.Date,
-			&transaction.Payer,
-			&transaction.Description,
-		); err != nil {
-			return nil, fmt.Errorf("[repo] %w", err)
-		}
 
 		categories, err := r.getCategoriesForTransaction(ctx, transaction.ID)
 		if err != nil {
 			return nil, fmt.Errorf("[repo] %w", err)
 		}
-		transaction.Categories = categories
+		for _, data := range categories {
+			transaction.Categories = append(transaction.Categories, data.Name)
+		}
 
 		transactions = append(transactions, transaction)
 	}
 
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("[repo] %w", err)
-	}
-
-	if len(transactions) == 0 {
-		return nil, fmt.Errorf("[repo] %w: %v", &models.NoSuchTransactionError{UserID: userId}, err)
-	}
-
 	return transactions, nil
-*/
+}
 
 // func (r *transactionRep) Check(ctx context.Context, transactionID uuid.UUID) error {
 // 	var exists bool
