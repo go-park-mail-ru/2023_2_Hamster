@@ -76,7 +76,7 @@ func TestHandler_SignUp(t *testing.T) {
 		requestBody  io.Reader
 		expectedCode int
 		expectedBody string
-		mockAU       func(*mocks.MockUsecase)
+		mockAU       func(client *mocks.MockAuthServiceClient)
 		mockSU       func(*mocksSession.MockUsecase)
 	}{
 		{
@@ -84,7 +84,7 @@ func TestHandler_SignUp(t *testing.T) {
 			requestBody:  strings.NewReader(`{"login": "testlogin", "username": "testuser", "password": "testpassword"}`),
 			expectedCode: http.StatusOK,
 			expectedBody: fmt.Sprintf(`{"status":202,"body":{"id":"%s","username":"testuser"}}`, strUserId),
-			mockAU: func(mockAU *mocks.MockUsecase) {
+			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
 				mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(userid, "testuser", nil)
 			},
 			mockSU: func(mockSU *mocksSession.MockUsecase) {
@@ -96,7 +96,7 @@ func TestHandler_SignUp(t *testing.T) {
 			requestBody:  strings.NewReader(`{"login": "testlogin","username": "testuser", "password": "testpassword`),
 			expectedCode: http.StatusBadRequest,
 			expectedBody: `{"status":400,"message":"Corrupted request body can't unmarshal"}`,
-			mockAU: func(mockAU *mocks.MockUsecase) {
+			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
 				// mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(userid, "testuser", nil)
 			},
 			mockSU: func(mockSU *mocksSession.MockUsecase) {
@@ -108,7 +108,7 @@ func TestHandler_SignUp(t *testing.T) {
 			requestBody:  strings.NewReader(`{"login": "testlogin","username": "testuser", "password": "testpassword"}`),
 			expectedCode: http.StatusTooManyRequests,
 			expectedBody: `{"status":429,"message":"Can't Sign Up user"}`,
-			mockAU: func(mockAU *mocks.MockUsecase) {
+			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
 				mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(uuid.Nil, "", errors.New("signup error"))
 			},
 			mockSU: func(mockSU *mocksSession.MockUsecase) {},
@@ -121,15 +121,15 @@ func TestHandler_SignUp(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			mockAU := mocks.NewMockUsecase(ctrl)
+			mockAU := mocks.NewMockAuthServiceClient(ctrl)
 			mockSU := mocksSession.NewMockUsecase(ctrl)
 			tt.mockAU(mockAU)
 			tt.mockSU(mockSU)
 
 			handler := &Handler{
-				au:  mockAU,
-				su:  mockSU,
-				log: *logger.NewLogger(context.TODO()),
+				client: mockAU,
+				su:     mockSU,
+				log:    *logger.NewLogger(context.TODO()),
 			}
 
 			req := httptest.NewRequest("POST", "/api/signup", tt.requestBody)
@@ -151,7 +151,7 @@ func TestHandler_Login(t *testing.T) {
 		requestBody  io.Reader
 		expectedCode int
 		expectedBody string
-		mockAU       func(*mocks.MockUsecase)
+		mockAU       func(client *mocks.MockAuthServiceClient)
 		mockSU       func(*mocksSession.MockUsecase)
 	}{
 		{
@@ -159,7 +159,7 @@ func TestHandler_Login(t *testing.T) {
 			requestBody:  strings.NewReader(`{"login": "testuser", "password": "testpassword"}`),
 			expectedCode: http.StatusOK,
 			expectedBody: fmt.Sprintf(`{"status":202,"body":{"id":"%s","username":"testuser"}}`, strUserID),
-			mockAU: func(mockAU *mocks.MockUsecase) {
+			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
 				mockAU.EXPECT().Login(gomock.Any(), gomock.Any(), gomock.Any()).Return(userID, "testuser", nil)
 			},
 			mockSU: func(mockSU *mocksSession.MockUsecase) {
@@ -171,7 +171,7 @@ func TestHandler_Login(t *testing.T) {
 			requestBody:  strings.NewReader(`{"login": "testuser", "password": "testpassword`),
 			expectedCode: http.StatusBadRequest,
 			expectedBody: `{"status":400,"message":"Corrupted request body can't unmarshal"}`,
-			mockAU: func(mockAU *mocks.MockUsecase) {
+			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
 				// mockAU.EXPECT().Login(gomock.Any(), gomock.Any(), gomock.Any()).Return(userID, "testuser", nil)
 			},
 			mockSU: func(mockSU *mocksSession.MockUsecase) {
@@ -183,7 +183,7 @@ func TestHandler_Login(t *testing.T) {
 			requestBody:  strings.NewReader(`{"login": "testuser", "password": "testpassword"}`),
 			expectedCode: http.StatusTooManyRequests,
 			expectedBody: `{"status":429,"message":"Can't Login user"}`,
-			mockAU: func(mockAU *mocks.MockUsecase) {
+			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
 				mockAU.EXPECT().Login(gomock.Any(), gomock.Any(), gomock.Any()).Return(uuid.Nil, "", errors.New("login error"))
 			},
 			mockSU: func(mockSU *mocksSession.MockUsecase) {},
@@ -196,15 +196,15 @@ func TestHandler_Login(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			mockAU := mocks.NewMockUsecase(ctrl)
+			mockAU := mocks.NewMockAuthServiceClient(ctrl)
 			mockSU := mocksSession.NewMockUsecase(ctrl)
 			tt.mockAU(mockAU)
 			tt.mockSU(mockSU)
 
 			handler := &Handler{
-				au:  mockAU,
-				su:  mockSU,
-				log: *logger.NewLogger(context.TODO()),
+				client: mockAU,
+				su:     mockSU,
+				log:    *logger.NewLogger(context.TODO()),
 			}
 
 			req := httptest.NewRequest("POST", "/api/login", tt.requestBody)
@@ -268,9 +268,9 @@ func TestHandler_HealthCheck(t *testing.T) {
 			tt.mockSU(mockSU)
 
 			handler := &Handler{
-				au:  nil,
-				su:  mockSU,
-				log: *logger.NewLogger(context.TODO()),
+				client: nil,
+				su:     mockSU,
+				log:    *logger.NewLogger(context.TODO()),
 			}
 
 			req := httptest.NewRequest("GET", "/api/health", nil)
@@ -288,6 +288,16 @@ func TestHandler_HealthCheck(t *testing.T) {
 	}
 }
 
+<<<<<<< HEAD
+=======
+//func TestHandler_LogOut(t *testing.T) {
+//	sessionCookie := "testCookie"
+//	assert.Equal(t, tt.expectedCode, recorder.Result().StatusCode)
+//	assert.Equal(t, tt.expectedBody, strings.TrimSpace(recorder.Body.String()))
+//
+//}
+
+>>>>>>> 19f1206818f5714cb35a056fc0f9c49f8cffe124
 func TestHandler_LogOut(t *testing.T) {
 	sessionCookie := "testCookie"
 
@@ -335,9 +345,9 @@ func TestHandler_LogOut(t *testing.T) {
 			tt.mockSU(mockSU)
 
 			handler := &Handler{
-				au:  nil,
-				su:  mockSU,
-				log: *logger.NewLogger(context.TODO()),
+				client: nil,
+				su:     mockSU,
+				log:    *logger.NewLogger(context.TODO()),
 			}
 
 			req := httptest.NewRequest("POST", "/api/logout", nil)
@@ -362,7 +372,7 @@ func TestHandler_CheckLoginUnique(t *testing.T) {
 		isUnique     bool
 		expectedCode int
 		expectedBody string
-		mockAU       func(*mocks.MockUsecase)
+		mockAU       func(*mocks.MockAuthServiceClient)
 	}{
 		{
 			name:         "Login is Unique",
@@ -370,7 +380,7 @@ func TestHandler_CheckLoginUnique(t *testing.T) {
 			isUnique:     true,
 			expectedCode: http.StatusOK,
 			expectedBody: `{"status":200,"body":true}`,
-			mockAU: func(mockAU *mocks.MockUsecase) {
+			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
 				mockAU.EXPECT().CheckLoginUnique(gomock.Any(), gomock.Any()).Return(true, nil)
 			},
 		},
@@ -380,7 +390,7 @@ func TestHandler_CheckLoginUnique(t *testing.T) {
 			isUnique:     false,
 			expectedCode: http.StatusOK,
 			expectedBody: `{"status":200,"body":false}`,
-			mockAU: func(mockAU *mocks.MockUsecase) {
+			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
 				mockAU.EXPECT().CheckLoginUnique(gomock.Any(), gomock.Any()).Return(false, nil)
 			},
 		},
@@ -390,7 +400,7 @@ func TestHandler_CheckLoginUnique(t *testing.T) {
 			isUnique:     false,
 			expectedCode: http.StatusInternalServerError,
 			expectedBody: `{"status":500,"message":"Can't get unique info login"}`,
-			mockAU: func(mockAU *mocks.MockUsecase) {
+			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
 				mockAU.EXPECT().CheckLoginUnique(gomock.Any(), gomock.Any()).Return(false, errors.New("check unique error"))
 			},
 		},
@@ -402,13 +412,13 @@ func TestHandler_CheckLoginUnique(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			mockAU := mocks.NewMockUsecase(ctrl)
+			mockAU := mocks.NewMockAuthServiceClient(ctrl)
 			tt.mockAU(mockAU)
 
 			handler := &Handler{
-				au:  mockAU,
-				su:  nil,
-				log: *logger.NewLogger(context.TODO()),
+				client: mockAU,
+				su:     nil,
+				log:    *logger.NewLogger(context.TODO()),
 			}
 
 			req := httptest.NewRequest("GET", fmt.Sprintf("/api/check-login-unique?%s=%s", userloginUrlParam, tt.urlParam), nil)
