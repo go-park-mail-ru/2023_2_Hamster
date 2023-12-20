@@ -4,15 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	proto "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/grpc/generated"
+	mocks "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/mocks"
+	mocksSession "github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions/mocks"
+	"github.com/google/uuid"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
-
-	mocks "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/mocks"
-	mocksSession "github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions/mocks"
-	"github.com/google/uuid"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
@@ -82,10 +82,18 @@ func TestHandler_SignUp(t *testing.T) {
 		{
 			name:         "Successful SignUp",
 			requestBody:  strings.NewReader(`{"login": "testlogin", "username": "testuser", "password": "testpassword"}`),
-			expectedCode: http.StatusOK,
-			expectedBody: fmt.Sprintf(`{"status":202,"body":{"id":"%s","username":"testuser"}}`, strUserId),
+			expectedCode: http.StatusCreated,
+			expectedBody: fmt.Sprintf(`{"status":201,"body":{"id":"%s","login":"testlogin","username":"testuser"}}`, strUserId),
 			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
-				mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(userid, "testuser", nil)
+				body := proto.SignUpResponseBody{
+					Id:       userid.String(),
+					Login:    "testlogin",
+					Username: "testuser",
+				}
+				mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(&proto.SignUpResponse{
+					Status: "200",
+					Body:   &body,
+				}, nil)
 			},
 			mockSU: func(mockSU *mocksSession.MockUsecase) {
 				mockSU.EXPECT().CreateSessionById(gomock.Any(), gomock.Any()).Return(models.Session{UserId: userid, Cookie: "testCookie"}, nil)
@@ -97,10 +105,12 @@ func TestHandler_SignUp(t *testing.T) {
 			expectedCode: http.StatusBadRequest,
 			expectedBody: `{"status":400,"message":"Corrupted request body can't unmarshal"}`,
 			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
-				// mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(userid, "testuser", nil)
+				// You may add more specific expectations if needed
+				mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Times(0)
 			},
 			mockSU: func(mockSU *mocksSession.MockUsecase) {
-				// mockSU.EXPECT().CreateSessionById(gomock.Any(), gomock.Any()).Return(models.Session{UserId: userid, Cookie: "testCookie"}, nil)
+				// You may add more specific expectations if needed
+				mockSU.EXPECT().CreateSessionById(gomock.Any(), gomock.Any()).Times(0)
 			},
 		},
 		{
@@ -109,9 +119,12 @@ func TestHandler_SignUp(t *testing.T) {
 			expectedCode: http.StatusTooManyRequests,
 			expectedBody: `{"status":429,"message":"Can't Sign Up user"}`,
 			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
-				mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(uuid.Nil, "", errors.New("signup error"))
+				mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(nil, errors.New("signup error"))
 			},
-			mockSU: func(mockSU *mocksSession.MockUsecase) {},
+			mockSU: func(mockSU *mocksSession.MockUsecase) {
+				// You may add more specific expectations if needed
+				mockSU.EXPECT().CreateSessionById(gomock.Any(), gomock.Any()).Times(0)
+			},
 		},
 		// Add more test cases as needed
 	}
@@ -160,7 +173,7 @@ func TestHandler_Login(t *testing.T) {
 			expectedCode: http.StatusOK,
 			expectedBody: fmt.Sprintf(`{"status":202,"body":{"id":"%s","username":"testuser"}}`, strUserID),
 			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
-				mockAU.EXPECT().Login(gomock.Any(), gomock.Any(), gomock.Any()).Return(userID, "testuser", nil)
+				mockAU.EXPECT().Login(gomock.Any(), gomock.Any(), gomock.Any()).Return(userID, nil)
 			},
 			mockSU: func(mockSU *mocksSession.MockUsecase) {
 				mockSU.EXPECT().CreateSessionById(gomock.Any(), gomock.Any()).Return(models.Session{UserId: userID, Cookie: "testCookie"}, nil)
