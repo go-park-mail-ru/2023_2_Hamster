@@ -312,7 +312,17 @@ func (h *Handler) ExportTransactions(w http.ResponseWriter, r *http.Request) {
 		commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, "can't create .csv file", h.logger)
 		return
 	}
-	defer csvFile.Close()
+	defer func() {
+		// 7. Close the CSV file.
+		if err := csvFile.Close(); err != nil {
+			h.logger.Errorf("Error closing CSV file: %v", err)
+		}
+
+		// 8. Delete the CSV file after serving it.
+		if err := os.Remove(fileName); err != nil {
+			h.logger.Errorf("Error deleting CSV file: %v", err)
+		}
+	}()
 
 	var csvHeader []string
 
@@ -503,6 +513,7 @@ func (h *Handler) ImportTransactions(w http.ResponseWriter, r *http.Request) {
 
 		// Parse the record to a Transaction struct
 		transaction := models.Transaction{
+			UserID:           user.ID,
 			AccountIncomeID:  accountIncomeId,
 			AccountOutcomeID: accountOutcomeId,
 			Income:           income,
