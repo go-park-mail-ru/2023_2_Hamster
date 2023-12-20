@@ -380,6 +380,7 @@ func (h *Handler) UpdatePhoto(w http.ResponseWriter, r *http.Request) { // need 
 // @Failure		400		{object}	ResponseError						"Client error"
 // @Failure     401    	{object}  	ResponseError  						"Unauthorized user"
 // @Failure     403    	{object}  	ResponseError  						"Forbidden user"
+// @Failure     404    	{object}  	ResponseError  						"No user found with this login"
 // @Failure		500		{object}	ResponseError						"Server error"
 // @Router		/api/user/addUserInAccount [post]
 func (h *Handler) AddUserInAccount(w http.ResponseWriter, r *http.Request) {
@@ -400,7 +401,7 @@ func (h *Handler) AddUserInAccount(w http.ResponseWriter, r *http.Request) {
 	if err := h.userService.AddUserInAccount(r.Context(), accountInput, user.ID); err != nil {
 		var errNoSuchUser *models.NoSuchUserInLogin
 		if errors.As(err, &errNoSuchUser) {
-			commonHttp.ErrorResponse(w, http.StatusBadRequest, err, transfer_models.UserNotFoundLogin, h.logger)
+			commonHttp.ErrorResponse(w, http.StatusNotFound, err, transfer_models.UserNotFoundLogin, h.logger)
 			return
 		}
 
