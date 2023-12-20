@@ -503,6 +503,7 @@ func (h *Handler) ImportTransactions(w http.ResponseWriter, r *http.Request) {
 
 		// Parse the record to a Transaction struct
 		transaction := models.Transaction{
+			UserID:           user.ID,
 			AccountIncomeID:  accountIncomeId,
 			AccountOutcomeID: accountOutcomeId,
 			Income:           income,
