@@ -794,28 +794,10 @@ paths:
   /api/transaction/import:
     post:
       consumes:
-      - multipart/form-data
-      description: Uploads a CSV file containing transactions and processes them to
-        be stored in the system.
+      - mult`ipart/form-data
+      description: '`Uploads a CSV file containing transactions and processes them
+        to be stored in the system.'
       parameters:
-      - description: 'Start date (format: ''YYYY-MM-DD'')'
-        format: date
-        in: query
-        name: startDate
-        required: true
-        type: string
-      - description: 'End date (format: ''YYYY-MM-DD'')'
-        format: date
-        in: query
-        name: endDate
-        required: true
-        type: string
-      - default: session_id
-        description: Session ID
-        in: header
-        name: authorization
-        required: true
-        type: string
       - description: CSV file containing transactions data
         in: formData
         name: csv
@@ -1009,6 +991,10 @@ paths:
             $ref: '#/definitions/http.ResponseError'
         "403":
           description: Forbidden user
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "404":
+          description: No user found with this login
           schema:
             $ref: '#/definitions/http.ResponseError'
         "500":
