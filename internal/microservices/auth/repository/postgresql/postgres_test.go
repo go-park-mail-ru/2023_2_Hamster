@@ -204,3 +204,129 @@ func TestCreateUser(t *testing.T) {
 		})
 	}
 }
+
+func TestGetByID(t *testing.T) {
+	staticUUID := uuid.New()
+	tests := []struct {
+		name        string
+		userID      uuid.UUID
+		rows        *pgxmock.Rows
+		expected    *models.User
+		expectedErr error
+		err         error
+	}{
+		{
+			name:   "ValidUser",
+			userID: staticUUID,
+			rows: pgxmock.NewRows([]string{
+				"id", "login", "username", "password", "planned_budget", "avatar_url",
+			}).AddRow(
+				staticUUID, "testuser", "Test User", "password", 1000.0, staticUUID,
+			),
+			expected: &models.User{
+				ID:            staticUUID,
+				Login:         "testuser",
+				Username:      "Test User",
+				Password:      "password",
+				PlannedBudget: 1000.0,
+				AvatarURL:     staticUUID,
+			},
+			expectedErr: nil,
+			err:         nil,
+		},
+		{
+			name:        "NoSuchUser",
+			userID:      staticUUID,
+			rows:        pgxmock.NewRows([]string{}).RowError(0, sql.ErrNoRows),
+			expected:    nil,
+			expectedErr: fmt.Errorf("[repo] %w: %v", &models.NoSuchUserError{UserID: staticUUID}, sql.ErrNoRows),
+			err:         sql.ErrNoRows,
+		},
+
+		{
+			name:        "DatabaseError",
+			userID:      uuid.New(),
+			rows:        pgxmock.NewRows([]string{}).RowError(0, errors.New("database error")),
+			expected:    nil,
+			expectedErr: fmt.Errorf("failed request db %s, %w", UserIDGetByID, errors.New("database error")),
+			err:         errors.New("database error"),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mock, _ := pgxmock.NewPool()
+			ctl := gomock.NewController(t)
+			defer ctl.Finish()
+
+			logger := *logger.NewLogger(context.TODO())
+			repo := NewRepository(mock, logger)
+
+			escapedQuery := regexp.QuoteMeta(UserIDGetByID)
+
+			mock.ExpectQuery(escapedQuery).
+				WithArgs(staticUUID).
+				WillReturnRows(test.rows).
+				WillReturnError(test.err)
+
+			user, err := repo.GetByID(context.Background(), staticUUID)
+
+			assert.Equal(t, test.expected, user)
+			if !reflect.DeepEqual(test.expectedErr, err) {
+				t.Errorf("Expected error: %v, but got: %v", test.expectedErr, err)
+			}
+		})
+	}
+}
+
+func TestChangePassword(t *testing.T) {
+	staticUUID := uuid.New()
+	newPassword := "newpassword"
+
+	tests := []struct {
+		name        string
+		userID      uuid.UUID
+		newPassword string
+		execError   error
+		expectedErr error
+	}{
+		{
+			name:        "Success",
+			userID:      staticUUID,
+			newPassword: newPassword,
+			execError:   nil,
+			expectedErr: nil,
+		},
+		{
+			name:        "DatabaseError",
+			userID:      staticUUID,
+			newPassword: newPassword,
+			execError:   errors.New("database error"),
+			expectedErr: fmt.Errorf("[repo] failed to update password: %w", errors.New("database error")),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mock, _ := pgxmock.NewPool()
+			ctl := gomock.NewController(t)
+			defer ctl.Finish()
+
+			logger := *logger.NewLogger(context.TODO())
+			repo := NewRepository(mock, logger)
+
+			escapedQuery := regexp.QuoteMeta(UserChangePassword)
+
+			mock.ExpectExec(escapedQuery).
+				WithArgs(newPassword, test.userID).
+				WillReturnResult(pgxmock.NewResult("0", 1)).
+				WillReturnError(test.execError)
+
+			err := repo.ChangePassword(context.Background(), test.userID, test.newPassword)
+
+			if !reflect.DeepEqual(test.expectedErr, err) {
+				t.Errorf("Expected error: %v, but got: %v", test.expectedErr, err)
+			}
+		})
+	}
+}
