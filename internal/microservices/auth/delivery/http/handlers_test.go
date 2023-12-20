@@ -377,7 +377,7 @@ func TestHandler_CheckLoginUnique(t *testing.T) {
 			isUnique:     true,
 			expectedCode: http.StatusOK,
 			expectedBody: `{"status":200,"body":true}`,
-			mockAU: func(mockAU *mocks.MockUsecase) {
+			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
 				mockAU.EXPECT().CheckLoginUnique(gomock.Any(), gomock.Any()).Return(true, nil)
 			},
 		},
