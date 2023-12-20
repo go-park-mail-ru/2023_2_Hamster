@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	gen "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/grpc/generated"
+	proto "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/grpc/generated"
 	mocks "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/mocks"
 	mocksSession "github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions/mocks"
 	"github.com/google/uuid"
@@ -83,16 +83,17 @@ func TestHandler_SignUp(t *testing.T) {
 		{
 			name:         "Successful SignUp",
 			requestBody:  strings.NewReader(`{"login": "testlogin", "username": "testuser", "password": "testpassword"}`),
-			expectedCode: http.StatusOK,
-			expectedBody: fmt.Sprintf(`{"status":202,"body":{"id":"%s","username":"testuser"}}`, strUserId),
+			expectedCode: http.StatusCreated,
+			expectedBody: fmt.Sprintf(`{"status":201,"body":{"id":"%s","login":"testlogin","username":"testuser"}}`, strUserId),
 			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
-				mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(&gen.LoginResponse{
+				body := proto.SignUpResponseBody{
+					Id:       userid.String(),
+					Login:    "testlogin",
+					Username: "testuser",
+				}
+				mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(&proto.SignUpResponse{
 					Status: "200",
-					Body: &gen.LoginResponseBody{
-						Id:       strUserId,
-						Login:    "login",
-						Username: "username",
-					},
+					Body:   &body,
 				}, nil)
 			},
 			mockSU: func(mockSU *mocksSession.MockUsecase) {
@@ -105,10 +106,12 @@ func TestHandler_SignUp(t *testing.T) {
 			expectedCode: http.StatusBadRequest,
 			expectedBody: `{"status":400,"message":"Corrupted request body can't unmarshal"}`,
 			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
-				// mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(userid, "testuser", nil)
+				// You may add more specific expectations if needed
+				mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Times(0)
 			},
 			mockSU: func(mockSU *mocksSession.MockUsecase) {
-				// mockSU.EXPECT().CreateSessionById(gomock.Any(), gomock.Any()).Return(models.Session{UserId: userid, Cookie: "testCookie"}, nil)
+				// You may add more specific expectations if needed
+				mockSU.EXPECT().CreateSessionById(gomock.Any(), gomock.Any()).Times(0)
 			},
 		},
 		{
@@ -119,7 +122,10 @@ func TestHandler_SignUp(t *testing.T) {
 			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
 				mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(nil, errors.New("signup error"))
 			},
-			mockSU: func(mockSU *mocksSession.MockUsecase) {},
+			mockSU: func(mockSU *mocksSession.MockUsecase) {
+				// You may add more specific expectations if needed
+				mockSU.EXPECT().CreateSessionById(gomock.Any(), gomock.Any()).Times(0)
+			},
 		},
 		// Add more test cases as needed
 	}
@@ -168,7 +174,7 @@ func TestHandler_Login(t *testing.T) {
 			expectedCode: http.StatusOK,
 			expectedBody: fmt.Sprintf(`{"status":202,"body":{"id":"%s","username":"testuser"}}`, strUserID),
 			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
-				mockAU.EXPECT().Login(gomock.Any(), gomock.Any(), gomock.Any()).Return(userID, "testuser", nil)
+				mockAU.EXPECT().Login(gomock.Any(), gomock.Any(), gomock.Any()).Return(userID, nil)
 			},
 			mockSU: func(mockSU *mocksSession.MockUsecase) {
 				mockSU.EXPECT().CreateSessionById(gomock.Any(), gomock.Any()).Return(models.Session{UserId: userID, Cookie: "testCookie"}, nil)
@@ -237,6 +243,7 @@ func TestHandler_HealthCheck(t *testing.T) {
 		expectedCode  int
 		expectedBody  string
 		mockSU        func(*mocksSession.MockUsecase)
+		mockAU        func(*mocks.MockAuthServiceClient)
 	}{
 		{
 			name:          "Successful Health Check",
@@ -246,6 +253,17 @@ func TestHandler_HealthCheck(t *testing.T) {
 			mockSU: func(mockSU *mocksSession.MockUsecase) {
 				mockSU.EXPECT().GetSessionByCookie(gomock.Any(), sessionCookie).Return(models.Session{UserId: userID, Cookie: sessionCookie}, nil)
 			},
+			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
+				body := proto.UserResponseBody{
+					Id:       userID.String(),
+					Login:    "testlogin",
+					Username: "testuser",
+				}
+				mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(&proto.UserResponse{
+					Status: "200",
+					Body:   &body,
+				}, nil)
+			},
 		},
 		{
 			name:          "No Cookie Provided",
@@ -253,6 +271,7 @@ func TestHandler_HealthCheck(t *testing.T) {
 			expectedCode:  http.StatusForbidden,
 			expectedBody:  `{"status":403,"message":"No cookie provided"}`,
 			mockSU:        func(mockSU *mocksSession.MockUsecase) {},
+			mockAU:        nil,
 		},
 		{
 			name:          "Session Doesn't Exist",
@@ -262,6 +281,7 @@ func TestHandler_HealthCheck(t *testing.T) {
 			mockSU: func(mockSU *mocksSession.MockUsecase) {
 				mockSU.EXPECT().GetSessionByCookie(gomock.Any(), sessionCookie).Return(models.Session{}, errors.New("session not found"))
 			},
+			mockAU: nil,
 		},
 		// Add more test cases as needed
 	}
@@ -272,10 +292,12 @@ func TestHandler_HealthCheck(t *testing.T) {
 			defer ctrl.Finish()
 
 			mockSU := mocksSession.NewMockUsecase(ctrl)
+			mockAU := mocks.NewMockAuthServiceClient(ctrl)
 			tt.mockSU(mockSU)
+			tt.mockAU(mockAU)
 
 			handler := &Handler{
-				client: nil,
+				client: mockAU,
 				su:     mockSU,
 				log:    *logger.NewLogger(context.TODO()),
 			}
