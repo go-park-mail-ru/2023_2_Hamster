@@ -170,10 +170,18 @@ func TestHandler_Login(t *testing.T) {
 		{
 			name:         "Successful Login",
 			requestBody:  strings.NewReader(`{"login": "testuser", "password": "testpassword"}`),
-			expectedCode: http.StatusOK,
-			expectedBody: fmt.Sprintf(`{"status":202,"body":{"id":"%s","username":"testuser"}}`, strUserID),
+			expectedCode: http.StatusAccepted,
+			expectedBody: fmt.Sprintf(`{"status":202,"body":{"id":"%s","login":"login","username":"testuser"}}`, strUserID),
 			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
-				mockAU.EXPECT().Login(gomock.Any(), gomock.Any(), gomock.Any()).Return(userID, nil)
+				body := proto.LoginResponseBody{
+					Id:       strUserID,
+					Login:    "login",
+					Username: "testuser",
+				}
+				mockAU.EXPECT().Login(gomock.Any(), gomock.Any(), gomock.Any()).Return(&proto.LoginResponse{
+					Status: "200",
+					Body:   &body,
+				}, nil)
 			},
 			mockSU: func(mockSU *mocksSession.MockUsecase) {
 				mockSU.EXPECT().CreateSessionById(gomock.Any(), gomock.Any()).Return(models.Session{UserId: userID, Cookie: "testCookie"}, nil)
@@ -197,7 +205,7 @@ func TestHandler_Login(t *testing.T) {
 			expectedCode: http.StatusTooManyRequests,
 			expectedBody: `{"status":429,"message":"Can't Login user"}`,
 			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
-				mockAU.EXPECT().Login(gomock.Any(), gomock.Any(), gomock.Any()).Return(uuid.Nil, "", errors.New("login error"))
+				mockAU.EXPECT().Login(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, errors.New("login error"))
 			},
 			mockSU: func(mockSU *mocksSession.MockUsecase) {},
 		},
@@ -382,9 +390,12 @@ func TestHandler_CheckLoginUnique(t *testing.T) {
 			expectBody:   strings.NewReader(`{"login":"login"}`),
 			isUnique:     true,
 			expectedCode: http.StatusOK,
-			expectedBody: `{"status":200,"body":true}`,
+			expectedBody: `{"status":200,"body":{"status":"200","body":true}}`,
 			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
-				mockAU.EXPECT().CheckLoginUnique(gomock.Any(), gomock.Any()).Return(true, nil)
+				mockAU.EXPECT().CheckLoginUnique(gomock.Any(), gomock.Any()).Return(&proto.UniqCheckResponse{
+					Status: "200",
+					Body:   true,
+				}, nil)
 			},
 		},
 		{
@@ -392,9 +403,12 @@ func TestHandler_CheckLoginUnique(t *testing.T) {
 			expectBody:   strings.NewReader(`{"login":"login"}`),
 			isUnique:     false,
 			expectedCode: http.StatusOK,
-			expectedBody: `{"status":200,"body":false}`,
+			expectedBody: `{"status":200,"body":{"status":"200"}}`,
 			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
-				mockAU.EXPECT().CheckLoginUnique(gomock.Any(), gomock.Any()).Return(false, nil)
+				mockAU.EXPECT().CheckLoginUnique(gomock.Any(), gomock.Any()).Return(&proto.UniqCheckResponse{
+					Status: "200",
+					Body:   false,
+				}, nil)
 			},
 		},
 		{
@@ -402,9 +416,12 @@ func TestHandler_CheckLoginUnique(t *testing.T) {
 			expectBody:   strings.NewReader(`{"login":"login"}`),
 			isUnique:     false,
 			expectedCode: http.StatusInternalServerError,
-			expectedBody: `{"status":500,"message":"Can't get unique info login"}`,
+			expectedBody: `{"status":500,"message":"Can't query DB"}`,
 			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
-				mockAU.EXPECT().CheckLoginUnique(gomock.Any(), gomock.Any()).Return(false, errors.New("check unique error"))
+				mockAU.EXPECT().CheckLoginUnique(gomock.Any(), gomock.Any()).Return(&proto.UniqCheckResponse{
+					Status: "200",
+					Body:   false,
+				}, errors.New("check unique error"))
 			},
 		},
 		// Add more test cases as needed
