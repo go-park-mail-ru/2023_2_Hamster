@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	gen "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/grpc/generated"
 	mocks "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/mocks"
 	mocksSession "github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions/mocks"
 	"github.com/google/uuid"
@@ -85,7 +86,14 @@ func TestHandler_SignUp(t *testing.T) {
 			expectedCode: http.StatusOK,
 			expectedBody: fmt.Sprintf(`{"status":202,"body":{"id":"%s","username":"testuser"}}`, strUserId),
 			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
-				mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(userid, "testuser", nil)
+				mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(&gen.LoginResponse{
+					Status: "200",
+					Body: &gen.LoginResponseBody{
+						Id:       strUserId,
+						Login:    "login",
+						Username: "username",
+					},
+				}, nil)
 			},
 			mockSU: func(mockSU *mocksSession.MockUsecase) {
 				mockSU.EXPECT().CreateSessionById(gomock.Any(), gomock.Any()).Return(models.Session{UserId: userid, Cookie: "testCookie"}, nil)
@@ -109,7 +117,7 @@ func TestHandler_SignUp(t *testing.T) {
 			expectedCode: http.StatusTooManyRequests,
 			expectedBody: `{"status":429,"message":"Can't Sign Up user"}`,
 			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
-				mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(uuid.Nil, "", errors.New("signup error"))
+				mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(nil, errors.New("signup error"))
 			},
 			mockSU: func(mockSU *mocksSession.MockUsecase) {},
 		},
@@ -235,7 +243,6 @@ func TestHandler_HealthCheck(t *testing.T) {
 			requestCookie: &http.Cookie{Name: "session_id", Value: sessionCookie},
 			expectedCode:  http.StatusOK,
 			expectedBody:  fmt.Sprintf(`{"status":200,"body":{"user_id":"%s","cookie":"%s"}}`, strUserID, sessionCookie),
-			// expectedBody:  fmt.Sprintf(`{"status":200,"body":{"id":"%s","username":"%s"}}`, strUserID, sessionCookie),
 			mockSU: func(mockSU *mocksSession.MockUsecase) {
 				mockSU.EXPECT().GetSessionByCookie(gomock.Any(), sessionCookie).Return(models.Session{UserId: userID, Cookie: sessionCookie}, nil)
 			},
@@ -273,7 +280,7 @@ func TestHandler_HealthCheck(t *testing.T) {
 				log:    *logger.NewLogger(context.TODO()),
 			}
 
-			req := httptest.NewRequest("GET", "/api/health", nil)
+			req := httptest.NewRequest("POST", "/api/checkAuth", nil)
 			if tt.requestCookie != nil {
 				req.AddCookie(tt.requestCookie)
 			}
