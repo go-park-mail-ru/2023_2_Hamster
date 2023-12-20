@@ -1,7 +1,7 @@
 package http
 
 import (
-	"encoding/json"
+	"github.com/mailru/easyjson"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
@@ -15,11 +15,13 @@ const (
 
 const minErrorToLogCode = 500
 
-type Response[T any] struct {
-	Status int `json:"status"`
-	Body   T   `json:"body"`
+//easyjson:json
+type Response struct {
+	Status int         `json:"status"`
+	Body   interface{} `json:"body"`
 }
 
+//easyjson:json
 type ResponseError struct {
 	Status int    `json:"status"`
 	ErrMes string `json:"message"`
@@ -46,8 +48,9 @@ func ErrorResponse(w http.ResponseWriter, code int, err error, message string, l
 		log.Error(err.Error())
 	}
 
-	encoder := json.NewEncoder(w)
-	if err := encoder.Encode(errorMsg); err != nil {
+	// Marshal response using easyjson
+	_, _, err = easyjson.MarshalToHTTPResponseWriter(errorMsg, w)
+	if err != nil {
 		log.Errorf("Error failed to marshal error message: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 
@@ -58,13 +61,15 @@ func ErrorResponse(w http.ResponseWriter, code int, err error, message string, l
 }
 
 func SuccessResponse[T any](w http.ResponseWriter, status int, response T) {
-	date := Response[T]{Status: status, Body: response}
-	encoder := json.NewEncoder(w)
-	if err := encoder.Encode(date); err != nil {
-		w.WriteHeader(status)
-		return
-	}
+	date := Response{Status: status, Body: response}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(status)
+
+	// Marshal response using easyjson
+	_, _, err := easyjson.MarshalToHTTPResponseWriter(date, w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }

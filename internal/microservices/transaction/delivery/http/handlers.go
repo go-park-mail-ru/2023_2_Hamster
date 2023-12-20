@@ -3,7 +3,6 @@ package http
 import (
 	"bytes"
 	"encoding/csv"
-	"encoding/json"
 	"errors"
 	"io"
 	"log"
@@ -14,6 +13,8 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/mailru/easyjson"
 
 	commonHttp "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
@@ -26,6 +27,7 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/transaction"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user"
+	"github.com/google/uuid"
 )
 
 type Handler struct {
@@ -150,7 +152,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	var transactionInput CreateTransaction
 
-	if err := json.NewDecoder(r.Body).Decode(&transactionInput); err != nil {
+	if err := easyjson.UnmarshalFromReader(r.Body, &transactionInput); err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidBodyRequest, h.logger)
 		return
 	}
@@ -190,7 +192,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 
 	var updTransactionInput UpdTransaction
 
-	if err := json.NewDecoder(r.Body).Decode(&updTransactionInput); err != nil {
+	if err := easyjson.UnmarshalFromReader(r.Body, &updTransactionInput); err != nil {
 		commonHttp.ErrorResponse(w, http.StatusBadRequest, err, commonHttp.InvalidBodyRequest, h.logger)
 		return
 	}

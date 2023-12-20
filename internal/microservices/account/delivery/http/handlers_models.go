@@ -20,6 +20,7 @@ type AccountCreateResponse struct {
 	AccountID uuid.UUID `json:"account_id"`
 }
 
+//easyjson:json
 type CreateAccount struct {
 	Balance        float64 `json:"balance" valid:"-"`
 	Accumulation   bool    `json:"accumulation" valid:"-"`
@@ -27,6 +28,7 @@ type CreateAccount struct {
 	MeanPayment    string  `json:"mean_payment" valid:"required,length(1|30)"`
 }
 
+//easyjson:json
 type UpdateAccount struct {
 	ID             uuid.UUID `json:"id" valid:"required"`
 	Balance        float64   `json:"balance" valid:""`
