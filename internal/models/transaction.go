@@ -64,7 +64,7 @@ func (t *TransactionExport) String() []string {
 	transaction = append(transaction, t.AccountOutcome)
 	transaction = append(transaction, fmt.Sprintf("%f", t.Income))
 	transaction = append(transaction, fmt.Sprintf("%f", t.Outcome))
-	transaction = append(transaction, t.Date.Format(time.RFC3339Nano))
+	transaction = append(transaction, t.Date.Format(time.RFC3339))
 	transaction = append(transaction, t.Payer)
 	transaction = append(transaction, t.Description)
 	transaction = append(transaction, t.Categories...)
