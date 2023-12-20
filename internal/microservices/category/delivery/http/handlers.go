@@ -68,7 +68,7 @@ func (h *Handler) CreateTag(w http.ResponseWriter, r *http.Request) {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Errorf("[handler] Error: %v", err)
-		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't crate tag", h.log)
+		response.ErrorResponse(w, http.StatusTooManyRequests, err, "Can't create tag", h.log)
 		return
 	}
 	tagID, _ := uuid.Parse(id.TagId)
