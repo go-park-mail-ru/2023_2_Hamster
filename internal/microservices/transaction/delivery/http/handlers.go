@@ -16,9 +16,6 @@ import (
 
 	"github.com/mailru/easyjson"
 
-	genAccount "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account/delivery/grpc/generated"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user"
-
 	commonHttp "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/google/uuid"
@@ -29,7 +26,6 @@ import (
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/transaction"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user"
-	"github.com/google/uuid"
 )
 
 type Handler struct {
