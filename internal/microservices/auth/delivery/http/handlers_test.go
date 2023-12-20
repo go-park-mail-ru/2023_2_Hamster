@@ -4,15 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	proto "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/grpc/generated"
-	mocks "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/mocks"
-	mocksSession "github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions/mocks"
-	"github.com/google/uuid"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	proto "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/grpc/generated"
+	mocks "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/mocks"
+	mocksSession "github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions/mocks"
+	"github.com/google/uuid"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
@@ -250,15 +251,26 @@ func TestHandler_HealthCheck(t *testing.T) {
 		expectedCode  int
 		expectedBody  string
 		mockSU        func(*mocksSession.MockUsecase)
+		mockAU        func(*mocks.MockAuthServiceClient)
 	}{
 		{
 			name:          "Successful Health Check",
 			requestCookie: &http.Cookie{Name: "session_id", Value: sessionCookie},
 			expectedCode:  http.StatusOK,
 			expectedBody:  fmt.Sprintf(`{"status":200,"body":{"user_id":"%s","cookie":"%s"}}`, strUserID, sessionCookie),
-			// expectedBody:  fmt.Sprintf(`{"status":200,"body":{"id":"%s","username":"%s"}}`, strUserID, sessionCookie),
 			mockSU: func(mockSU *mocksSession.MockUsecase) {
 				mockSU.EXPECT().GetSessionByCookie(gomock.Any(), sessionCookie).Return(models.Session{UserId: userID, Cookie: sessionCookie}, nil)
+			},
+			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
+				body := proto.UserResponseBody{
+					Id:       userID.String(),
+					Login:    "testlogin",
+					Username: "testuser",
+				}
+				mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(&proto.UserResponse{
+					Status: "200",
+					Body:   &body,
+				}, nil)
 			},
 		},
 		{
@@ -267,6 +279,7 @@ func TestHandler_HealthCheck(t *testing.T) {
 			expectedCode:  http.StatusForbidden,
 			expectedBody:  `{"status":403,"message":"No cookie provided"}`,
 			mockSU:        func(mockSU *mocksSession.MockUsecase) {},
+			mockAU:        nil,
 		},
 		{
 			name:          "Session Doesn't Exist",
@@ -276,6 +289,7 @@ func TestHandler_HealthCheck(t *testing.T) {
 			mockSU: func(mockSU *mocksSession.MockUsecase) {
 				mockSU.EXPECT().GetSessionByCookie(gomock.Any(), sessionCookie).Return(models.Session{}, errors.New("session not found"))
 			},
+			mockAU: nil,
 		},
 		// Add more test cases as needed
 	}
@@ -286,15 +300,17 @@ func TestHandler_HealthCheck(t *testing.T) {
 			defer ctrl.Finish()
 
 			mockSU := mocksSession.NewMockUsecase(ctrl)
+			mockAU := mocks.NewMockAuthServiceClient(ctrl)
 			tt.mockSU(mockSU)
+			tt.mockAU(mockAU)
 
 			handler := &Handler{
-				client: nil,
+				client: mockAU,
 				su:     mockSU,
 				log:    *logger.NewLogger(context.TODO()),
 			}
 
-			req := httptest.NewRequest("GET", "/api/health", nil)
+			req := httptest.NewRequest("POST", "/api/checkAuth", nil)
 			if tt.requestCookie != nil {
 				req.AddCookie(tt.requestCookie)
 			}
