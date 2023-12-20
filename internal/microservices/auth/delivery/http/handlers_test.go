@@ -257,7 +257,7 @@ func TestHandler_HealthCheck(t *testing.T) {
 			name:          "Successful Health Check",
 			requestCookie: &http.Cookie{Name: "session_id", Value: sessionCookie},
 			expectedCode:  http.StatusOK,
-			expectedBody:  fmt.Sprintf(`{"status":200,"body":{"user_id":"%s","cookie":"%s"}}`, strUserID, sessionCookie),
+			expectedBody:  fmt.Sprintf(`{"status":200,"body":{"id":"%s","login":"testlogin","username":"testuser"}}`, strUserID),
 			mockSU: func(mockSU *mocksSession.MockUsecase) {
 				mockSU.EXPECT().GetSessionByCookie(gomock.Any(), sessionCookie).Return(models.Session{UserId: userID, Cookie: sessionCookie}, nil)
 			},
@@ -267,7 +267,7 @@ func TestHandler_HealthCheck(t *testing.T) {
 					Login:    "testlogin",
 					Username: "testuser",
 				}
-				mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(&proto.UserResponse{
+				mockAU.EXPECT().GetByID(gomock.Any(), gomock.Any()).Return(&proto.UserResponse{
 					Status: "200",
 					Body:   &body,
 				}, nil)
@@ -279,9 +279,7 @@ func TestHandler_HealthCheck(t *testing.T) {
 			expectedCode:  http.StatusForbidden,
 			expectedBody:  `{"status":403,"message":"No cookie provided"}`,
 			mockSU:        func(mockSU *mocksSession.MockUsecase) {},
-			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
-				// mockAU.EXPECT().Login(gomock.Any(), gomock.Any(), gomock.Any()).Return(userID, "testuser", nil)
-			},
+			mockAU:        func(mockAU *mocks.MockAuthServiceClient) {},
 		},
 		{
 			name:          "Session Doesn't Exist",
@@ -291,9 +289,7 @@ func TestHandler_HealthCheck(t *testing.T) {
 			mockSU: func(mockSU *mocksSession.MockUsecase) {
 				mockSU.EXPECT().GetSessionByCookie(gomock.Any(), sessionCookie).Return(models.Session{}, errors.New("session not found"))
 			},
-			mockAU: func(mockAU *mocks.MockAuthServiceClient) {
-				// mockAU.EXPECT().Login(gomock.Any(), gomock.Any(), gomock.Any()).Return(userID, "testuser", nil)
-			},
+			mockAU: func(mockAU *mocks.MockAuthServiceClient) {},
 		},
 		// Add more test cases as needed
 	}
