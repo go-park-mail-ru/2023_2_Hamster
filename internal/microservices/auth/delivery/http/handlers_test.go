@@ -1,55 +1,5 @@
 package http
 
-/*
-
-func TestHandler_SignUp(t *testing.T) {
-	userid := uuid.New()
-	strUserId := userid.String()
-	tests := []struct {
-		name         string
-		requestBody  io.Reader
-		expectedCode int
-		expectedBody string
-		mockAU       func(*mocks.MockUsecase)
-		mockSU       func(*mocksSession.MockUsecase)
-	}{
-		{
-			name:         "Successful SignUp",
-			requestBody:  strings.NewReader(`{"login": "testlogin", "username": "testuser", "password": "testpassword"}`),
-			expectedCode: http.StatusOK,
-			expectedBody: fmt.Sprintf(`{"status":202,"body":{"id":"%s","username":"testuser"}}`, strUserId),
-			mockAU: func(mockAU *mocks.MockUsecase) {
-				mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(userid, "testuser", nil)
-			},
-			mockSU: func(mockSU *mocksSession.MockUsecase) {
-				mockSU.EXPECT().CreateSessionById(gomock.Any(), gomock.Any()).Return(models.Session{UserId: userid, Cookie: "testCookie"}, nil)
-			},
-		},
-		{
-			name:         "Corrupted request body",
-			requestBody:  strings.NewReader(`{"login": "testlogin","username": "testuser", "password": "testpassword`),
-			expectedCode: http.StatusBadRequest,
-			expectedBody: `{"status":400,"message":"Corrupted request body can't unmarshal"}`,
-			mockAU: func(mockAU *mocks.MockUsecase) {
-				// mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(userid, "testuser", nil)
-			},
-			mockSU: func(mockSU *mocksSession.MockUsecase) {
-				// mockSU.EXPECT().CreateSessionById(gomock.Any(), gomock.Any()).Return(models.Session{UserId: userid, Cookie: "testCookie"}, nil)
-			},
-		},
-		{
-			name:         "Error during SignUp",
-			requestBody:  strings.NewReader(`{"login": "testlogin","username": "testuser", "password": "testpassword"}`),
-			expectedCode: http.StatusTooManyRequests,
-			expectedBody: `{"status":429,"message":"Can't Sign Up user"}`,
-			mockAU: func(mockAU *mocks.MockUsecase) {
-				mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(uuid.Nil, "", errors.New("signup error"))
-			},
-			mockSU: func(mockSU *mocksSession.MockUsecase) {},
-		},
-		// Add more test cases as needed
-	}
-
 import (
 	"context"
 	"errors"
@@ -69,6 +19,54 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
+
+//func TestHandler_SignUp(t *testing.T) {
+//	userid := uuid.New()
+//	strUserId := userid.String()
+//	tests := []struct {
+//		name         string
+//		requestBody  io.Reader
+//		expectedCode int
+//		expectedBody string
+//		mockAU       func(*mocks.MockUsecase)
+//		mockSU       func(*mocksSession.MockUsecase)
+//	}{
+//		{
+//			name:         "Successful SignUp",
+//			requestBody:  strings.NewReader(`{"login": "testlogin", "username": "testuser", "password": "testpassword"}`),
+//			expectedCode: http.StatusOK,
+//			expectedBody: fmt.Sprintf(`{"status":202,"body":{"id":"%s","username":"testuser"}}`, strUserId),
+//			mockAU: func(mockAU *mocks.MockUsecase) {
+//				mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(userid, "testuser", nil)
+//			},
+//			mockSU: func(mockSU *mocksSession.MockUsecase) {
+//				mockSU.EXPECT().CreateSessionById(gomock.Any(), gomock.Any()).Return(models.Session{UserId: userid, Cookie: "testCookie"}, nil)
+//			},
+//		},
+//		{
+//			name:         "Corrupted request body",
+//			requestBody:  strings.NewReader(`{"login": "testlogin","username": "testuser", "password": "testpassword`),
+//			expectedCode: http.StatusBadRequest,
+//			expectedBody: `{"status":400,"message":"Corrupted request body can't unmarshal"}`,
+//			mockAU: func(mockAU *mocks.MockUsecase) {
+//				// mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(userid, "testuser", nil)
+//			},
+//			mockSU: func(mockSU *mocksSession.MockUsecase) {
+//				// mockSU.EXPECT().CreateSessionById(gomock.Any(), gomock.Any()).Return(models.Session{UserId: userid, Cookie: "testCookie"}, nil)
+//			},
+//		},
+//		{
+//			name:         "Error during SignUp",
+//			requestBody:  strings.NewReader(`{"login": "testlogin","username": "testuser", "password": "testpassword"}`),
+//			expectedCode: http.StatusTooManyRequests,
+//			expectedBody: `{"status":429,"message":"Can't Sign Up user"}`,
+//			mockAU: func(mockAU *mocks.MockUsecase) {
+//				mockAU.EXPECT().SignUp(gomock.Any(), gomock.Any()).Return(uuid.Nil, "", errors.New("signup error"))
+//			},
+//			mockSU: func(mockSU *mocksSession.MockUsecase) {},
+//		},
+//		// Add more test cases as needed
+//	}
 
 func TestHandler_SignUp(t *testing.T) {
 	userid := uuid.New()
@@ -292,9 +290,8 @@ func TestHandler_HealthCheck(t *testing.T) {
 
 func TestHandler_LogOut(t *testing.T) {
 	sessionCookie := "testCookie"
-				assert.Equal(t, tt.expectedCode, recorder.Result().StatusCode)
-				assert.Equal(t, tt.expectedBody, strings.TrimSpace(recorder.Body.String()))
-
+	assert.Equal(t, tt.expectedCode, recorder.Result().StatusCode)
+	assert.Equal(t, tt.expectedBody, strings.TrimSpace(recorder.Body.String()))
 
 }
 
@@ -431,4 +428,3 @@ func TestHandler_CheckLoginUnique(t *testing.T) {
 		})
 	}
 }
-*/
