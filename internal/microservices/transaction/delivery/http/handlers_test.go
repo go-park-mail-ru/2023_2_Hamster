@@ -10,7 +10,9 @@ import (
 	"testing"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
+	mockClient "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account/mocks"
 	mocks "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/transaction/mocks"
+	mockUser "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user/mocks"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
@@ -66,7 +68,10 @@ func TestHandler_GetCount(t *testing.T) {
 			mockService := mocks.NewMockUsecase(ctrl)
 			tt.mockUsecaseFn(mockService)
 
-			mockHandler := NewHandler(mockService, *logger.NewLogger(context.TODO()))
+			mockUsecase := mockUser.NewMockUsecase(ctrl)
+			mockAccount := mockClient.NewMockAccountServiceClient(ctrl)
+
+			mockHandler := NewHandler(mockService, mockUsecase, mockAccount, *logger.NewLogger(context.TODO()))
 
 			req := httptest.NewRequest("GET", "/api/user/balance", nil)
 
@@ -98,80 +103,80 @@ func TestHandler_GetFeed(t *testing.T) {
 		expectedBody  string
 		mockUsecaseFn func(*mocks.MockUsecase)
 	}{
-		//{
-		//	name:         "Successful call to GetFeed",
-		//	user:         user,
-		//	queryParam:   "page=2&page_size=10",
-		//	expectedCode: http.StatusOK,
-		//	expectedBody: `{"status":200,"body":{"transactions":[{"id":"00000000-0000-0000-0000-000000000000","account_income":"00000000-0000-0000-0000-000000000000","account_outcome":"00000000-0000-0000-0000-000000000000","income":0,"outcome":0,"date":"0001-01-01T00:00:00Z","payer":"","description":"","categories":null}]}}`,
-		//	mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
-		//		mockUsecase.EXPECT().GetFeed(gomock.Any(), gomock.Any(), gomock.Any()).Return([]models.Transaction{{UserID: uuidTest}}, nil)
-		//	},
-		//},
-		//{
-		//	name:         "Unauthorized Request",
-		//	user:         nil,
-		//	queryParam:   "page=2&page_size=10",
-		//	expectedCode: http.StatusUnauthorized,
-		//	expectedBody: `{"status":401,"message":"unauthorized"}`,
-		//	mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
-		//		// No service calls are expected for unauthorized request.
-		//	},
-		//},
-		//{
-		//	name:         "Invalid Query account",
-		//	user:         user,
-		//	queryParam:   "account='12'",
-		//	expectedCode: http.StatusBadRequest,
-		//	expectedBody: `{"status":400,"message":"invalid url parameter"}`,
-		//	mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
-		//	},
-		//},
-		//{
-		//	name:         "Invalid Query category",
-		//	user:         user,
-		//	queryParam:   "category='12'",
-		//	expectedCode: http.StatusBadRequest,
-		//	expectedBody: `{"status":400,"message":"invalid url parameter"}`,
-		//	mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
-		//	},
-		//},
-		//{
-		//	name:         "Invalid Query income",
-		//	user:         user,
-		//	queryParam:   "income='trueee'",
-		//	expectedCode: http.StatusBadRequest,
-		//	expectedBody: `{"status":400,"message":"invalid url parameter"}`,
-		//	mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
-		//	},
-		//},
-		//{
-		//	name:         "Invalid Query outcome",
-		//	user:         user,
-		//	queryParam:   "outcome='trueee'",
-		//	expectedCode: http.StatusBadRequest,
-		//	expectedBody: `{"status":400,"message":"invalid url parameter"}`,
-		//	mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
-		//	},
-		//},
-		//{
-		//	name:         "Invalid Query start_date",
-		//	user:         user,
-		//	queryParam:   "start_date='trueee'",
-		//	expectedCode: http.StatusBadRequest,
-		//	expectedBody: `{"status":400,"message":"invalid url parameter"}`,
-		//	mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
-		//	},
-		//},
-		//{
-		//	name:         "Invalid Query end_date",
-		//	user:         user,
-		//	queryParam:   "end_date='trueee'",
-		//	expectedCode: http.StatusBadRequest,
-		//	expectedBody: `{"status":400,"message":"invalid url parameter"}`,
-		//	mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
-		//	},
-		//},
+		{
+			name:         "Successful call to GetFeed",
+			user:         user,
+			queryParam:   "page=2&page_size=10",
+			expectedCode: http.StatusOK,
+			expectedBody: `{"status":200,"body":{"transactions":[{"id":"00000000-0000-0000-0000-000000000000","account_income":"00000000-0000-0000-0000-000000000000","account_outcome":"00000000-0000-0000-0000-000000000000","income":0,"outcome":0,"date":"0001-01-01T00:00:00Z","payer":"","description":"","categories":null}]}}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+				mockUsecase.EXPECT().GetFeed(gomock.Any(), gomock.Any(), gomock.Any()).Return([]models.Transaction{{UserID: uuidTest}}, nil)
+			},
+		},
+		{
+			name:         "Unauthorized Request",
+			user:         nil,
+			queryParam:   "page=2&page_size=10",
+			expectedCode: http.StatusUnauthorized,
+			expectedBody: `{"status":401,"message":"unauthorized"}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+				// No service calls are expected for unauthorized request.
+			},
+		},
+		{
+			name:         "Invalid Query account",
+			user:         user,
+			queryParam:   "account='12'",
+			expectedCode: http.StatusBadRequest,
+			expectedBody: `{"status":400,"message":"invalid url parameter"}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+			},
+		},
+		{
+			name:         "Invalid Query category",
+			user:         user,
+			queryParam:   "category='12'",
+			expectedCode: http.StatusBadRequest,
+			expectedBody: `{"status":400,"message":"invalid url parameter"}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+			},
+		},
+		{
+			name:         "Invalid Query income",
+			user:         user,
+			queryParam:   "income='trueee'",
+			expectedCode: http.StatusBadRequest,
+			expectedBody: `{"status":400,"message":"invalid url parameter"}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+			},
+		},
+		{
+			name:         "Invalid Query outcome",
+			user:         user,
+			queryParam:   "outcome='trueee'",
+			expectedCode: http.StatusBadRequest,
+			expectedBody: `{"status":400,"message":"invalid url parameter"}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+			},
+		},
+		{
+			name:         "Invalid Query start_date",
+			user:         user,
+			queryParam:   "start_date='trueee'",
+			expectedCode: http.StatusBadRequest,
+			expectedBody: `{"status":400,"message":"invalid url parameter"}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+			},
+		},
+		{
+			name:         "Invalid Query end_date",
+			user:         user,
+			queryParam:   "end_date='trueee'",
+			expectedCode: http.StatusBadRequest,
+			expectedBody: `{"status":400,"message":"invalid url parameter"}`,
+			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+			},
+		},
 		{
 			name:         "No Such Transaction Error",
 			user:         user,
@@ -203,7 +208,10 @@ func TestHandler_GetFeed(t *testing.T) {
 			mockService := mocks.NewMockUsecase(ctrl)
 			tt.mockUsecaseFn(mockService)
 
-			mockHandler := NewHandler(mockService, *logger.NewLogger(context.TODO()))
+			mockUsecase := mockUser.NewMockUsecase(ctrl)
+			mockAccount := mockClient.NewMockAccountServiceClient(ctrl)
+
+			mockHandler := NewHandler(mockService, mockUsecase, mockAccount, *logger.NewLogger(context.TODO()))
 
 			req := httptest.NewRequest("GET", "/api/user/balance", nil)
 
@@ -250,7 +258,10 @@ func TestHandler_GetUserFromRequest(t *testing.T) {
 			mockService := mocks.NewMockUsecase(ctrl)
 			tt.mockUsecaseFn(mockService)
 
-			mockHandler := NewHandler(mockService, *logger.NewLogger(context.TODO()))
+			mockUsecase := mockUser.NewMockUsecase(ctrl)
+			mockAccount := mockClient.NewMockAccountServiceClient(ctrl)
+
+			mockHandler := NewHandler(mockService, mockUsecase, mockAccount, *logger.NewLogger(context.TODO()))
 
 			req := httptest.NewRequest("GET", "/api/user/balance", nil)
 
@@ -364,7 +375,10 @@ func TestHandler_CreateTransaction(t *testing.T) {
 			mockService := mocks.NewMockUsecase(ctrl)
 			tt.mockUsecaseFn(mockService)
 
-			mockHandler := NewHandler(mockService, *logger.NewLogger(context.TODO()))
+			mockUsecase := mockUser.NewMockUsecase(ctrl)
+			mockAccount := mockClient.NewMockAccountServiceClient(ctrl)
+
+			mockHandler := NewHandler(mockService, mockUsecase, mockAccount, *logger.NewLogger(context.TODO()))
 
 			req := httptest.NewRequest("POST", "/api/transaction/create", tt.requestBody)
 
@@ -522,7 +536,10 @@ func TestHandler_UpdateTransaction(t *testing.T) {
 			mockService := mocks.NewMockUsecase(ctrl)
 			tt.mockUsecaseFn(mockService)
 
-			mockHandler := NewHandler(mockService, *logger.NewLogger(context.TODO()))
+			mockUsecase := mockUser.NewMockUsecase(ctrl)
+			mockAccount := mockClient.NewMockAccountServiceClient(ctrl)
+
+			mockHandler := NewHandler(mockService, mockUsecase, mockAccount, *logger.NewLogger(context.TODO()))
 
 			req := httptest.NewRequest("POST", "/api/transaction/update", tt.requestBody)
 
@@ -646,10 +663,13 @@ func TestHandler_TransactionDelete(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			mockUsecase := mocks.NewMockUsecase(ctrl)
-			tt.mockUsecaseFn(mockUsecase)
+			mockService := mocks.NewMockUsecase(ctrl)
+			tt.mockUsecaseFn(mockService)
 
-			mockHandler := NewHandler(mockUsecase, *logger.NewLogger(context.TODO()))
+			mockUsecase := mockUser.NewMockUsecase(ctrl)
+			mockAccount := mockClient.NewMockAccountServiceClient(ctrl)
+
+			mockHandler := NewHandler(mockService, mockUsecase, mockAccount, *logger.NewLogger(context.TODO()))
 
 			url := "/api/transaction/" + tt.userID + "/delete"
 			req := httptest.NewRequest("GET", url, nil)

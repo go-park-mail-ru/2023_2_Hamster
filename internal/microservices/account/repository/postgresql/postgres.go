@@ -46,7 +46,6 @@ func (r *AccountRep) SharingCheck(ctx context.Context, accountID uuid.UUID, user
 	if err != nil {
 		return fmt.Errorf("[repo] failed %w, %v", &models.ForbiddenUserError{}, err)
 	}
-
 	if count == 0 {
 		return fmt.Errorf("[repo] failed %w", &models.ForbiddenUserError{})
 	}

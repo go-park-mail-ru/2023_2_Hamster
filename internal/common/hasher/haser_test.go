@@ -80,3 +80,14 @@ func TestDecodeHash(t *testing.T) {
 		t.Error("Decoding should fail for an invalid encoded hash")
 	}
 }
+
+func TestGenRandomBytes(t *testing.T) {
+	length := uint32(10)
+	bytes, err := genRandomBytes(length)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	if uint32(len(bytes)) != length {
+		t.Errorf("Expected length %v, got %v", length, len(bytes))
+	}
+}

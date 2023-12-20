@@ -94,6 +94,7 @@ func (ut *UpdTransaction) ToTransaction(user *models.User) *models.Transaction {
 		AccountIncomeID:  ut.AccountIncomeID,
 		AccountOutcomeID: ut.AccountOutcomeID,
 		Income:           ut.Income,
+		Payer:            ut.Payer,
 		Outcome:          ut.Outcome,
 		Date:             ut.Date,
 		Description:      ut.Description,

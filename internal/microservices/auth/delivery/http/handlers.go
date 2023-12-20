@@ -1,9 +1,10 @@
 package http
 
 import (
-	"github.com/mailru/easyjson"
 	"net/http"
 	"time"
+
+	"github.com/mailru/easyjson"
 
 	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth"
 	gen "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/grpc/generated"
@@ -153,7 +154,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		if status.Code(err) == codes.NotFound {
-			response.ErrorResponse(w, http.StatusNotFound, err, "User already exists", h.log)
+			response.ErrorResponse(w, http.StatusNotFound, err, "User don't exists", h.log)
 			return
 		}
 
@@ -199,11 +200,11 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary		Validate Auth
-// @Tags			Auth
+// @Tags		Auth
 // @Description	Validate auth
 // @Accept 		json
 // @Produce		json
-// @Param			user		body		models.User		true		"user info"
+// @Param		user		body		models.User		true		"user info"
 // @Success		200		{object}	Response[auth.SignResponse]	"User status"
 // @Failure		401		{object}	ResponseError				"Session doesn't exist"
 // @Failure		403		{object}	ResponseError				"Invalid cookie"
