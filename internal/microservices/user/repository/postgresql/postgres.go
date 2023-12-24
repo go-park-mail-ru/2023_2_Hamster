@@ -84,7 +84,7 @@ func (r *UserRep) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, 
 			fmt.Errorf("failed request db %s, %w", UserIDGetByID, err)
 
 	}
-	return nil, nil
+	return &u, nil
 }
 
 func (r *UserRep) GetUserByLogin(ctx context.Context, login string) (*models.User, error) {
