@@ -8,13 +8,17 @@ import (
 
 	commonHttp "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
-	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/transaction"
+
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/user/delivery/http/transfer_models"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
+
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/transaction"
 )
 
 type Handler struct {
 	transactionService transaction.Usecase
+	userService        user.Usecase
 	logger             logger.Logger
 }
 
@@ -25,9 +29,10 @@ const (
 	// userloginUrlParam = "login"
 )
 
-func NewHandler(uu transaction.Usecase, l logger.Logger) *Handler {
+func NewHandler(uu transaction.Usecase, user user.Usecase, l logger.Logger) *Handler {
 	return &Handler{
 		transactionService: uu,
+		userService:        user,
 		logger:             l,
 	}
 }
@@ -100,8 +105,10 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 
 	var dataResponse []models.TransactionTransfer
 
+	var userT *models.User
 	for _, transaction := range dataFeed {
-		dataResponse = append(dataResponse, models.InitTransactionTransfer(transaction))
+		userT, _ = h.userService.GetUser(r.Context(), transaction.UserID)
+		dataResponse = append(dataResponse, models.InitTransactionTransfer(transaction, userT.Login))
 	}
 
 	response := MasTransaction{Transactions: dataResponse}
