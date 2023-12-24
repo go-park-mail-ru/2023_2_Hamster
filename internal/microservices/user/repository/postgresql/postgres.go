@@ -72,19 +72,19 @@ func (r *UserRep) CreateUser(ctx context.Context, u models.User) (uuid.UUID, err
 	return id, nil
 }
 
-func (r *UserRep) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
+func (r *UserRep) GetByID(ctx context.Context, userID uuid.UUID) (models.User, error) {
 	row := r.db.QueryRow(ctx, UserIDGetByID, userID)
 	var u models.User
 
 	err := row.Scan(&u.ID, &u.Login, &u.Username, &u.Password, &u.PlannedBudget, &u.AvatarURL)
 	if errors.Is(err, sql.ErrNoRows) {
-		return nil, fmt.Errorf("[repo] %w: %v", &models.NoSuchUserError{UserID: userID}, err)
+		return u, fmt.Errorf("[repo] %w: %v", &models.NoSuchUserError{UserID: userID}, err)
 	} else if err != nil {
-		return nil,
+		return u,
 			fmt.Errorf("failed request db %s, %w", UserIDGetByID, err)
 
 	}
-	return &u, nil
+	return u, nil
 }
 
 func (r *UserRep) GetUserByLogin(ctx context.Context, login string) (*models.User, error) {

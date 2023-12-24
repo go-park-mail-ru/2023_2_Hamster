@@ -119,8 +119,10 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 
 	var dataResponse []models.TransactionTransfer
 
+	var userT models.User
 	for _, transaction := range dataFeed {
-		dataResponse = append(dataResponse, models.InitTransactionTransfer(transaction))
+		userT, err = h.userService.GetUser(r.Context(), transaction.UserID)
+		dataResponse = append(dataResponse, models.InitTransactionTransfer(transaction, userT.Login))
 	}
 
 	response := MasTransaction{Transactions: dataResponse}
