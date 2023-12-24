@@ -108,7 +108,7 @@ func TestHandler_GetFeed(t *testing.T) {
 			user:         user,
 			queryParam:   "page=2&page_size=10",
 			expectedCode: http.StatusOK,
-			expectedBody: `{"status":200,"body":{"transactions":[{"id":"00000000-0000-0000-0000-000000000000","account_income":"00000000-0000-0000-0000-000000000000","account_outcome":"00000000-0000-0000-0000-000000000000","income":0,"outcome":0,"date":"0001-01-01T00:00:00Z","payer":"","description":"","categories":null}]}}`,
+			expectedBody: `{"status":200,"body":{"transactions":[{"id":"00000000-0000-0000-0000-000000000000","account_income":"00000000-0000-0000-0000-000000000000","account_outcome":"00000000-0000-0000-0000-000000000000","income":0,"user_id":"` + user.ID.String() + `","outcome":0,"date":"0001-01-01T00:00:00Z","payer":"","description":"","categories":null}]}}`,
 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
 				mockUsecase.EXPECT().GetFeed(gomock.Any(), gomock.Any(), gomock.Any()).Return([]models.Transaction{{UserID: uuidTest}}, nil)
 			},
