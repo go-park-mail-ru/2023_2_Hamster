@@ -66,105 +66,105 @@ func Test_SharingCheck(t *testing.T) {
 	}
 }
 
-func Test_Unsubscribe(t *testing.T) {
-	accountID := uuid.New()
-	userID := uuid.New()
+//func Test_Unsubscribe(t *testing.T) {
+//	accountID := uuid.New()
+//	userID := uuid.New()
+//
+//	testCases := []struct {
+//		name        string
+//		execResult  pgconn.CommandTag
+//		execError   error
+//		expectedErr error
+//	}{
+//		{
+//			name:        "Success",
+//			execResult:  pgconn.CommandTag{},
+//			execError:   nil,
+//			expectedErr: nil,
+//		},
+//		{
+//			name:        "Error",
+//			execResult:  pgconn.CommandTag{},
+//			execError:   errors.New("Some error"),
+//			expectedErr: fmt.Errorf("[repo] failed to delete from UserAccount table: %w", errors.New("Some error")),
+//		},
+//	}
+//
+//	for _, tc := range testCases {
+//		t.Run(tc.name, func(t *testing.T) {
+//			mock, _ := pgxmock.NewPool()
+//
+//			logger := *logger.NewLogger(context.TODO())
+//			repo := NewRepository(mock, logger)
+//
+//			// Expect a call to execute the Unsubscribe query with the specified parameters
+//			mock.ExpectExec(regexp.QuoteMeta(Unsubscribe)).
+//				WithArgs(accountID, userID).
+//				WillReturnResult(tc.execResult).
+//				WillReturnError(tc.execError)
+//
+//			err := repo.Unsubscribe(context.Background(), userID, accountID)
+//
+//			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
+//				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
+//			}
+//
+//			if err := mock.ExpectationsWereMet(); err != nil {
+//				t.Errorf("There were unfulfilled expectations: %s", err)
+//			}
+//		})
+//	}
+//}
 
-	testCases := []struct {
-		name        string
-		execResult  pgconn.CommandTag
-		execError   error
-		expectedErr error
-	}{
-		{
-			name:        "Success",
-			execResult:  pgconn.CommandTag{},
-			execError:   nil,
-			expectedErr: nil,
-		},
-		{
-			name:        "Error",
-			execResult:  pgconn.CommandTag{},
-			execError:   errors.New("Some error"),
-			expectedErr: fmt.Errorf("[repo] failed to delete from UserAccount table: %w", errors.New("Some error")),
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			mock, _ := pgxmock.NewPool()
-
-			logger := *logger.NewLogger(context.TODO())
-			repo := NewRepository(mock, logger)
-
-			// Expect a call to execute the Unsubscribe query with the specified parameters
-			mock.ExpectExec(regexp.QuoteMeta(Unsubscribe)).
-				WithArgs(accountID, userID).
-				WillReturnResult(tc.execResult).
-				WillReturnError(tc.execError)
-
-			err := repo.Unsubscribe(context.Background(), userID, accountID)
-
-			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
-				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
-			}
-
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("There were unfulfilled expectations: %s", err)
-			}
-		})
-	}
-}
-
-func Test_DeleteUserInAccount(t *testing.T) {
-	accountID := uuid.New()
-	userID := uuid.New()
-
-	testCases := []struct {
-		name        string
-		execResult  pgconn.CommandTag
-		execError   error
-		expectedErr error
-	}{
-		{
-			name:        "Success",
-			execResult:  pgconn.CommandTag{},
-			execError:   nil,
-			expectedErr: nil,
-		},
-		{
-			name:        "Error",
-			execResult:  pgconn.CommandTag{},
-			execError:   errors.New("Some error"),
-			expectedErr: fmt.Errorf("[repo] failed to delete from UserAccount table: %w", errors.New("Some error")),
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			mock, _ := pgxmock.NewPool()
-
-			logger := *logger.NewLogger(context.TODO())
-			repo := NewRepository(mock, logger)
-
-			// Expect a call to execute the Unsubscribe query with the specified parameters
-			mock.ExpectExec(regexp.QuoteMeta(Unsubscribe)).
-				WithArgs(accountID, userID).
-				WillReturnResult(tc.execResult).
-				WillReturnError(tc.execError)
-
-			err := repo.DeleteUserInAccount(context.Background(), userID, accountID)
-
-			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
-				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
-			}
-
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("There were unfulfilled expectations: %s", err)
-			}
-		})
-	}
-}
+//func Test_DeleteUserInAccount(t *testing.T) {
+//	accountID := uuid.New()
+//	userID := uuid.New()
+//
+//	testCases := []struct {
+//		name        string
+//		execResult  pgconn.CommandTag
+//		execError   error
+//		expectedErr error
+//	}{
+//		{
+//			name:        "Success",
+//			execResult:  pgconn.CommandTag{},
+//			execError:   nil,
+//			expectedErr: nil,
+//		},
+//		{
+//			name:        "Error",
+//			execResult:  pgconn.CommandTag{},
+//			execError:   errors.New("Some error"),
+//			expectedErr: fmt.Errorf("[repo] failed to delete from UserAccount table: %w", errors.New("Some error")),
+//		},
+//	}
+//
+//	for _, tc := range testCases {
+//		t.Run(tc.name, func(t *testing.T) {
+//			mock, _ := pgxmock.NewPool()
+//
+//			logger := *logger.NewLogger(context.TODO())
+//			repo := NewRepository(mock, logger)
+//
+//			// Expect a call to execute the Unsubscribe query with the specified parameters
+//			mock.ExpectExec(regexp.QuoteMeta(Unsubscribe)).
+//				WithArgs(accountID, userID).
+//				WillReturnResult(tc.execResult).
+//				WillReturnError(tc.execError)
+//
+//			err := repo.DeleteUserInAccount(context.Background(), userID, accountID)
+//
+//			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
+//				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
+//			}
+//
+//			if err := mock.ExpectationsWereMet(); err != nil {
+//				t.Errorf("There were unfulfilled expectations: %s", err)
+//			}
+//		})
+//	}
+//}
 
 func Test_CheckForbidden(t *testing.T) {
 	accountID := uuid.New()

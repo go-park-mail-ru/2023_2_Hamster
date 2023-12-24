@@ -30,6 +30,7 @@ type TransactionTransfer struct {
 	AccountIncomeID  uuid.UUID      `json:"account_income" valid:"-"`
 	AccountOutcomeID uuid.UUID      `json:"account_outcome" valid:"-"`
 	Income           float64        `json:"income" valid:"required"`
+	UserId           uuid.UUID      `json:"user_id"`
 	Outcome          float64        `json:"outcome" valid:"required"`
 	Date             time.Time      `json:"date" valid:"isdate"`
 	Payer            string         `json:"payer" valid:"-"`
@@ -77,6 +78,7 @@ func InitTransactionTransfer(transaction Transaction) TransactionTransfer {
 		AccountIncomeID:  transaction.AccountIncomeID,
 		AccountOutcomeID: transaction.AccountOutcomeID,
 		Income:           transaction.Income,
+		UserId:           transaction.UserID,
 		Outcome:          transaction.Outcome,
 		Date:             transaction.Date,
 		Payer:            transaction.Payer,
