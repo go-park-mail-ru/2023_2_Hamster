@@ -1,12 +1,11 @@
 package http
 
 import (
-	"bytes"
 	"encoding/csv"
 	"errors"
+	"fmt"
 	"io"
 	"log"
-	"mime/multipart"
 	"net/http"
 	"os"
 	"reflect"
@@ -133,33 +132,23 @@ func (h *Handler) ExportTransactions(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	// 2. Create a new multipart form writer.
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
+	// ...
 
-	// 3. Create a new form file where the CSV file will be written.
-	part, err := writer.CreateFormFile("file", fileName)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// Instead of creating a multipart writer and writing the CSV file to it,
+	// we directly write the CSV file to the response.
 
-	// 4. Write the CSV file into the form file.
+	// Set the appropriate headers for a CSV file.
+	w.Header().Set("Content-Type", "text/csv")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment;filename=%s", fileName))
+
+	// Seek to the start of the CSV file.
 	_, err = csvFile.Seek(0, 0)
 	if err != nil {
 		h.logger.Errorf("Error in csv set start")
 	}
 
-	_, err = io.Copy(part, csvFile)
-	if err != nil {
-		h.logger.Errorf("Error in csv writing")
-	}
-
-	// 5. Write the multipart form's boundary to the response header.
-	// w.Header().Set("Content-Type", writer.FormDataContentType())
-
-	// 6. Write the multipart form to the response.
-	writer.Close()
-	_, err = io.Copy(w, body)
+	// Write the CSV file directly to the response.
+	_, err = io.Copy(w, csvFile)
 	if err != nil {
 		h.logger.Errorf("Error in csv writing")
 	}
