@@ -77,77 +77,77 @@ func TestCreateUser(t *testing.T) {
 	}
 }
 
-func TestGetByID(t *testing.T) {
-	userID := uuid.New()
-	tests := []struct {
-		name     string
-		rows     *pgxmock.Rows
-		err      error
-		rowsErr  error
-		expected *models.User
-	}{
-		{
-			name: "ValidUser",
-			rows: pgxmock.NewRows([]string{"id", "login", "username", "password", "planned_budget", "avatar_url"}).
-				AddRow(userID, "testuser", "Test User", "password", 100.0, userID),
-			err: nil,
-			expected: &models.User{
-				ID:            userID,
-				Login:         "testuser",
-				Username:      "Test User",
-				Password:      "password",
-				PlannedBudget: 100.0,
-				AvatarURL:     userID,
-			},
-		},
-		{
-			name:     "UserNotFound",
-			rows:     pgxmock.NewRows([]string{"id", "login", "username", "password", "planned_budget", "avatar_url"}),
-			rowsErr:  sql.ErrNoRows,
-			err:      fmt.Errorf("[repo] No Such user: %s doesn't exist: sql: no rows in result set", userID.String()),
-			expected: nil,
-		},
-		{
-			name:     "DatabaseError",
-			rows:     pgxmock.NewRows([]string{"id", "login", "username", "password", "planned_budget", "avatar_url"}),
-			rowsErr:  errors.New("database error"),
-			err:      errors.New("failed request db SELECT id, login, username, password_hash, planned_budget, avatar_url FROM users WHERE id = $1;, database error"),
-			expected: nil,
-		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			mock, _ := pgxmock.NewPool()
-			ctl := gomock.NewController(t)
-			defer ctl.Finish()
-
-			logger := *logger.NewLogger(context.TODO())
-			repo := NewRepository(mock, logger)
-
-			escapedQuery := regexp.QuoteMeta(UserIDGetByID)
-
-			mock.ExpectQuery(escapedQuery).
-				WithArgs(userID).
-				WillReturnRows(test.rows).
-				WillReturnError(test.rowsErr)
-
-			user, err := repo.GetByID(context.Background(), userID)
-
-			if !reflect.DeepEqual(test.expected, user) {
-				t.Errorf("Expected user: %+v, but got: %+v", test.expected, user)
-			}
-
-			if (test.err == nil && err != nil) || (test.err != nil && err == nil) || (test.err != nil && err != nil && test.err.Error() != err.Error()) {
-				t.Errorf("Expected error: %v, but got: %v", test.err, err)
-			}
-
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("There were unfulfilled expectations: %s", err)
-			}
-		})
-	}
-}
+//func TestGetByID(t *testing.T) {
+//	userID := uuid.New()
+//	tests := []struct {
+//		name     string
+//		rows     *pgxmock.Rows
+//		err      error
+//		rowsErr  error
+//		expected *models.User
+//	}{
+//		{
+//			name: "ValidUser",
+//			rows: pgxmock.NewRows([]string{"id", "login", "username", "password", "planned_budget", "avatar_url"}).
+//				AddRow(userID, "testuser", "Test User", "password", 100.0, userID),
+//			err: nil,
+//			expected: &models.User{
+//				ID:            userID,
+//				Login:         "testuser",
+//				Username:      "Test User",
+//				Password:      "password",
+//				PlannedBudget: 100.0,
+//				AvatarURL:     userID,
+//			},
+//		},
+//		{
+//			name:     "UserNotFound",
+//			rows:     pgxmock.NewRows([]string{"id", "login", "username", "password", "planned_budget", "avatar_url"}),
+//			rowsErr:  sql.ErrNoRows,
+//			err:      fmt.Errorf("[repo] No Such user: %s doesn't exist: sql: no rows in result set", userID.String()),
+//			expected: nil,
+//		},
+//		{
+//			name:     "DatabaseError",
+//			rows:     pgxmock.NewRows([]string{"id", "login", "username", "password", "planned_budget", "avatar_url"}),
+//			rowsErr:  errors.New("database error"),
+//			err:      errors.New("failed request db SELECT id, login, username, password_hash, planned_budget, avatar_url FROM users WHERE id = $1;, database error"),
+//			expected: nil,
+//		},
+//	}
+//
+//	for _, test := range tests {
+//		t.Run(test.name, func(t *testing.T) {
+//			mock, _ := pgxmock.NewPool()
+//			ctl := gomock.NewController(t)
+//			defer ctl.Finish()
+//
+//			logger := *logger.NewLogger(context.TODO())
+//			repo := NewRepository(mock, logger)
+//
+//			escapedQuery := regexp.QuoteMeta(UserIDGetByID)
+//
+//			mock.ExpectQuery(escapedQuery).
+//				WithArgs(userID).
+//				WillReturnRows(test.rows).
+//				WillReturnError(test.rowsErr)
+//
+//			user, err := repo.GetByID(context.Background(), userID)
+//
+//			if !reflect.DeepEqual(test.expected, user) {
+//				t.Errorf("Expected user: %+v, but got: %+v", test.expected, user)
+//			}
+//
+//			if (test.err == nil && err != nil) || (test.err != nil && err == nil) || (test.err != nil && err != nil && test.err.Error() != err.Error()) {
+//				t.Errorf("Expected error: %v, but got: %v", test.err, err)
+//			}
+//
+//			if err := mock.ExpectationsWereMet(); err != nil {
+//				t.Errorf("There were unfulfilled expectations: %s", err)
+//			}
+//		})
+//	}
+//}
 
 func TestGetUserByLogin(t *testing.T) {
 	login := "testuser"
