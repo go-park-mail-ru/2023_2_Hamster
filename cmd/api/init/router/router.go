@@ -9,6 +9,7 @@ import (
 	_ "github.com/go-park-mail-ru/2023_2_Hamster/docs"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
+	iohub "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/IOhub/delivery/http"
 	account "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/account/delivery/http"
 	auth "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/auth/delivery/http"
 	category "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/category/delivery/http"
@@ -26,12 +27,14 @@ func InitRouter(auth *auth.Handler,
 	user *user.Handler,
 	transaction *transaction.Handler,
 	category *category.Handler,
-	csrf *csrf.Handler,
 	account *account.Handler,
+	iohub *iohub.Handler,
+	csrf *csrf.Handler,
 	logMid *middleware.LoggingMiddleware,
 	recoveryMid *middleware.RecoveryMiddleware,
 	authMid *middleware.AuthMiddleware,
-	csrfMid *middleware.CSRFMiddleware) *mux.Router {
+	csrfMid *middleware.CSRFMiddleware,
+) *mux.Router {
 
 	r := mux.NewRouter()
 	r.Use(middleware.RequestID)
@@ -102,14 +105,16 @@ func InitRouter(auth *auth.Handler,
 	transactionRouter.Use(authMid.Authentication)
 	transactionRouter.Use(csrfMid.CheckCSRF)
 	{
-		transactionRouter.Methods("GET").Path("/export").HandlerFunc(transaction.ExportTransactions)
-		transactionRouter.Methods("GET").Path("/feed").HandlerFunc(transaction.GetFeed)
-		transactionRouter.Methods("GET").Path("/count").HandlerFunc(transaction.GetCount)
 		// 	transactionRouter.Methods("GET").Path("/{transaction_id}/").HandlerFunc(transaction.Get)
-		transactionRouter.Methods("PUT").Path("/update").HandlerFunc(transaction.Update)
 		transactionRouter.Methods("POST").Path("/create").HandlerFunc(transaction.Create)
+		transactionRouter.Methods("PUT").Path("/update").HandlerFunc(transaction.Update)
 		transactionRouter.Methods("DELETE").Path("/{transaction_id}/delete").HandlerFunc(transaction.Delete)
-		transactionRouter.Methods("POST").Path("/import").HandlerFunc(transaction.ImportTransactions)
+		transactionRouter.Methods("GET").Path("/feed").HandlerFunc(transaction.GetFeed)
+
+		transactionRouter.Methods("GET").Path("/count").HandlerFunc(transaction.GetCount)
+
+		transactionRouter.Methods("GET").Path("/export").HandlerFunc(iohub.ExportTransactions)
+		transactionRouter.Methods("POST").Path("/import").HandlerFunc(iohub.ImportTransactions)
 	}
 
 	categoryRouter := apiRouter.PathPrefix("/tag").Subrouter()
@@ -121,5 +126,16 @@ func InitRouter(auth *auth.Handler,
 		categoryRouter.Methods("PUT").Path("/{tagID}/update").HandlerFunc(category.UpdateTag)
 		categoryRouter.Methods("DELETE").Path("/delete").HandlerFunc(category.DeleteTag)
 	}
+
+	goalsRouter := userRouter.PathPrefix("/goal").Subrouter()
+	// goalsRouter.Use(authMid.Authentication)
+	// goalsRouter.Use(csrfMid.CheckCSRF)
+	{
+		goalsRouter.Methods("GET").Path("/")
+		goalsRouter.Methods("POST").Path("/add")
+		goalsRouter.Methods("PUT").Path("/update")
+		goalsRouter.Methods("DELETE").Path("/delete")
+	}
+
 	return r
 }

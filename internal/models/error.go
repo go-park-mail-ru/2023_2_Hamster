@@ -84,3 +84,9 @@ func (e *DuplicateError) Error() string {
 }
 
 // =========================================UserError================================================
+
+type ErrNoTags struct{}
+
+func (e *ErrNoTags) Error() string {
+	return "Don't have tags"
+}

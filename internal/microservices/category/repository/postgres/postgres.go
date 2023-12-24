@@ -158,7 +158,6 @@ func (r *Repository) GetTags(ctx context.Context, userID uuid.UUID) ([]models.Ca
 			&tag.ID,
 			&tag.UserID,
 			&tag.ParentID,
-			// &tag.Image,
 			&tag.Name,
 			&tag.ShowIncome,
 			&tag.ShowOutcome,
@@ -175,7 +174,7 @@ func (r *Repository) GetTags(ctx context.Context, userID uuid.UUID) ([]models.Ca
 	}
 
 	if len(categories) == 0 {
-		return nil, fmt.Errorf("[repo] Error no tags found: %v", err)
+		return nil, fmt.Errorf("[repo] Error no tags found: %w ,%v", &models.ErrNoTags{}, err)
 	}
 	return categories, nil
 }
