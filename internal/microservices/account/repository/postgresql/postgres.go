@@ -15,6 +15,16 @@ const (
 	AccountGetUserByID = ` SELECT * FROM UserAccount 
     						WHERE account_id = $1 AND user_id = $2;`
 
+	DeleteUserTransactions = `
+							-- Delete related entries in TransactionCategory
+							DELETE FROM TransactionCategory
+							WHERE transaction_id IN (SELECT id FROM Transaction WHERE user_id = $1 AND (account_income = $2 OR account_outcome = $2));
+						
+							-- Delete transactions
+							DELETE FROM Transaction
+							WHERE user_id = $1 AND (account_income = $2 OR account_outcome = $2);
+						`
+
 	AccountSharingCheck       = `SELECT COUNT(*) FROM accounts WHERE sharing_id = $1 AND id = $2;`
 	AccountUpdate             = "UPDATE accounts SET balance = $1, accumulation = $2, balance_enabled = $3, mean_payment = $4 WHERE id = $5;"
 	AccountDelete             = "DELETE FROM accounts WHERE id = $1;"
@@ -54,10 +64,26 @@ func (r *AccountRep) SharingCheck(ctx context.Context, accountID uuid.UUID, user
 }
 
 func (r *AccountRep) Unsubscribe(ctx context.Context, userID uuid.UUID, accountID uuid.UUID) error {
-	_, err := r.db.Exec(ctx, Unsubscribe, accountID, userID)
+	tx, err := r.db.Begin(ctx)
+
+	if err != nil {
+		return fmt.Errorf("[repo] failed to start transaction: %w", err)
+	}
+
+	_, err = tx.Exec(ctx, DeleteUserTransactions, userID, accountID)
+	if err != nil {
+		return fmt.Errorf("[repo] failed to delete transaction table: %w", err)
+	}
+
+	_, err = tx.Exec(ctx, Unsubscribe, accountID, userID)
 	if err != nil {
 		return fmt.Errorf("[repo] failed to delete from UserAccount table: %w", err)
 	}
+
+	if err = tx.Commit(ctx); err != nil {
+		return fmt.Errorf("[repo] failed to commit account: %w", err)
+	}
+
 	return nil
 }
 

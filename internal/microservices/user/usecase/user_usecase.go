@@ -151,7 +151,7 @@ func (u *Usecase) AddUserInAccount(ctx context.Context, accountInput models.AddU
 }
 
 func (u *Usecase) Unsubscribe(ctx context.Context, accountID uuid.UUID, userID uuid.UUID) error {
-	err := u.accountRepo.DeleteUserInAccount(ctx, userID, accountID)
+	err := u.accountRepo.Unsubscribe(ctx, userID, accountID)
 	if err != nil {
 		return fmt.Errorf("[usecase] can't delete user in account: %w", err)
 	}
@@ -164,7 +164,7 @@ func (u *Usecase) DeleteUserInAccount(ctx context.Context, userID uuid.UUID, acc
 		return fmt.Errorf("[usecase] is not admin user: %w", err)
 	}
 
-	err = u.accountRepo.DeleteUserInAccount(ctx, userID, accountID)
+	err = u.accountRepo.Unsubscribe(ctx, userID, accountID)
 	if err != nil {
 		return fmt.Errorf("[usecase] can't delete account %w", err)
 	}
