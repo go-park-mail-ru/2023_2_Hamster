@@ -107,7 +107,10 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 
 	var userT *models.User
 	for _, transaction := range dataFeed {
-		userT, _ = h.userService.GetUser(r.Context(), transaction.UserID)
+		userT, err = h.userService.GetUser(r.Context(), transaction.UserID)
+		if err != nil {
+			commonHttp.ErrorResponse(w, http.StatusInternalServerError, err, transfer_models.UserFeedServerError, h.logger)
+		}
 		dataResponse = append(dataResponse, models.InitTransactionTransfer(transaction, userT.Login))
 	}
 
