@@ -1,8 +1,11 @@
 package http
 
 import (
-	"github.com/mailru/easyjson"
 	"net/http"
+
+	"github.com/mailru/easyjson"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	contextutils "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/context_utils"
 	response "github.com/go-park-mail-ru/2023_2_Hamster/internal/common/http"
@@ -98,6 +101,10 @@ func (h *Handler) GetTags(w http.ResponseWriter, r *http.Request) {
 
 	gtags, err := h.client.GetTags(r.Context(), &genCategory.UserIdRequest{UserId: user.ID.String()})
 	if err != nil {
+		if status.Code(err) == codes.NotFound {
+			response.ErrorResponse(w, http.StatusNotFound, err, "You don't have tags", h.log)
+			return
+		}
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
 		).Errorf("[handler] get tags Error: %v", err)

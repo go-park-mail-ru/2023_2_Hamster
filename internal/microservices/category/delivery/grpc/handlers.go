@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"errors"
 
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/category"
@@ -9,6 +10,8 @@ import (
 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/google/uuid"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type categoryGRPC struct {
@@ -46,6 +49,10 @@ func (c *categoryGRPC) GetTags(ctx context.Context, in *proto.UserIdRequest) (*p
 
 	tags, err := c.CategoryServices.GetTags(ctx, userId)
 	if err != nil {
+		var errNoTags *models.ErrNoTags
+		if errors.As(err, &errNoTags) {
+			return nil, status.Error(codes.NotFound, err.Error())
+		}
 		return nil, err
 	}
 

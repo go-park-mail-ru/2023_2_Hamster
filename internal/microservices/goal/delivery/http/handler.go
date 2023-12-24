@@ -24,6 +24,18 @@ func NewHandler(gu goal.Useace, l logger.Logger) *Handler {
 	}
 }
 
+// @Summary        Create Goal
+// @Tags           Goals
+// @Description    Create a new goal for the authenticated user
+// @Accept         json
+// @Produce        json
+// @Security       ApiKeyAuth
+// @Param          goalInput body goal.GoalCreateRequest true "Goal creation input"
+// @Success        200 {object} Response[uuid.UUID] "Successfully created goal"
+// @Failure        400 {object} ResponseError "Bad Request: Invalid request body"
+// @Failure        401 {object} ResponseError "Unauthorized: Invalid or expired token"
+// @Failure        500 {object} ResponseError "Internal Server Error: Failed to create goal"
+// @Router         /api/user/goal/add [post]
 func (h *Handler) CreateGoal(w http.ResponseWriter, r *http.Request) {
 	// get user from context
 	user, err := response.GetUserFromRequest(r)
@@ -56,6 +68,19 @@ func (h *Handler) CreateGoal(w http.ResponseWriter, r *http.Request) {
 	response.SuccessResponse(w, http.StatusOK, goalId)
 }
 
+// @Summary        Update Goal
+// @Tags           Goals
+// @Description    Update an existing goal for the authenticated user
+// @Accept         json
+// @Produce        json
+// @Security       ApiKeyAuth
+// @Param          goalInput body models.Goal true "Updated goal information"
+// @Success        200 {object} Response[response.NilBody] "Successfully updated goal"
+// @Failure        400 {object} ResponseError "Bad Request: Invalid request body"
+// @Failure        401 {object} ResponseError "Unauthorized: Invalid or expired token"
+// @Failure        404 {object} ResponseError "Not Found: Goal not found"
+// @Failure        500 {object} ResponseError "Internal Server Error: Failed to update goal"
+// @Router         /api/goals [put]
 func (h *Handler) UpdateGoal(w http.ResponseWriter, r *http.Request) {
 	user, err := response.GetUserFromRequest(r)
 	if err != nil {
@@ -85,6 +110,20 @@ func (h *Handler) UpdateGoal(w http.ResponseWriter, r *http.Request) {
 	response.SuccessResponse(w, http.StatusOK, response.NilBody{})
 }
 
+// @Summary        Delete Goal
+// @Tags           Goals
+// @Description    Delete an existing goal for the authenticated user
+// @Accept         json
+// @Produce        json
+// @Security       ApiKeyAuth
+// @Param          Authorization header string true "JWT token for authentication"
+// @Param          goalID path string true "ID of the goal to delete"
+// @Success        200 {object} Response[response.NilBody] "Successfully deleted goal"
+// @Failure        400 {object} ResponseError "Bad Request: Invalid request body"
+// @Failure        401 {object} ResponseError "Unauthorized: Invalid or expired token"
+// @Failure        404 {object} ResponseError "Not Found: Goal not found"
+// @Failure        500 {object} ResponseError "Internal Server Error: Failed to delete goal"
+// @Router         /api/user/goal/{goalID} [delete]
 func (h *Handler) DeleteGoal(w http.ResponseWriter, r *http.Request) {
 	user, err := response.GetUserFromRequest(r)
 	if err != nil {
@@ -94,16 +133,6 @@ func (h *Handler) DeleteGoal(w http.ResponseWriter, r *http.Request) {
 
 	var goalInput goal.GoalDeleteRequest
 
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&goalInput); err != nil {
-		h.log.WithField(
-			"Request-Id", contextutils.GetReqID(r.Context()),
-		).Errorf("[handler] Error Corupted request body: %v", err)
-		response.ErrorResponse(w, http.StatusBadRequest, err, "Corrupted request body can't unmarshal", h.log)
-		return
-	}
-	defer r.Body.Close()
-
 	if err := h.goalUsecase.DeleteGoal(r.Context(), goalInput.ID, user.ID); err != nil {
 		response.ErrorResponse(w, http.StatusBadRequest, err, "can't delete goal", h.log)
 		return
@@ -112,6 +141,17 @@ func (h *Handler) DeleteGoal(w http.ResponseWriter, r *http.Request) {
 	response.SuccessResponse(w, http.StatusOK, response.NilBody{})
 }
 
+// @Summary        Get User Goals
+// @Tags           Goals
+// @Description    Retrieve goals for the authenticated user
+// @Accept         json
+// @Produce        json
+// @Security       ApiKeyAuth
+// @Param          Authorization header string true "JWT token for authentication"
+// @Success        200 {object} Response[]models.Goal "Successfully retrieved user goals"
+// @Failure        401 {object} ResponseError "Unauthorized: Invalid or expired token"
+// @Failure        500 {object} ResponseError "Internal Server Error: Failed to get user goals"
+// @Router         /api/user/goal/ [get]
 func (h *Handler) GetGoals(w http.ResponseWriter, r *http.Request) {
 	user, err := response.GetUserFromRequest(r)
 	if err != nil {
@@ -128,6 +168,17 @@ func (h *Handler) GetGoals(w http.ResponseWriter, r *http.Request) {
 	response.SuccessResponse(w, http.StatusOK, goals)
 }
 
+// @Summary        Check Goals State
+// @Tags           Goals
+// @Description    Check the state of goals for the authenticated user
+// @Accept         json
+// @Produce        json
+// @Security       ApiKeyAuth
+// @Param          Authorization header string true "JWT token for authentication"
+// @Success        200 {object} Response[]models.GoalState "Successfully checked goals state"
+// @Failure        401 {object} ResponseError "Unauthorized: Invalid or expired token"
+// @Failure        400 {object} ResponseError "Bad Request: Failed to check goals state"
+// @Router         /api/goals/checkState [get]
 func (h *Handler) CheckGoalsState(w http.ResponseWriter, r *http.Request) {
 	user, err := response.GetUserFromRequest(r)
 	if err != nil {

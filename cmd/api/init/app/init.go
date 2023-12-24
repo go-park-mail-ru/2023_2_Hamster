@@ -36,6 +36,8 @@ import (
 	sessionRep "github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions/repository/redis"
 	sessionUsecase "github.com/go-park-mail-ru/2023_2_Hamster/internal/monolithic/sessions/usecase"
 
+	iohub "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/IOhub/delivery/http"
+
 	"github.com/gorilla/mux"
 )
 
@@ -101,18 +103,20 @@ func Init(db *pgxpool.Pool, redis *redis.Client, log *logger.Logger) *mux.Router
 	csrfMiddlewear := middleware.NewCSRFMiddleware(csrfUsecase, *log)
 
 	userHandler := userDelivery.NewHandler(userUsecase, *log)
-	transactionHandler := transactionDelivery.NewHandler(transactionUsecase, userUsecase, accountClient, *log)
+	transactionHandler := transactionDelivery.NewHandler(transactionUsecase, *log)
 	categoryHandler := categoryDelivary.NewHandler(categortClient, *log)
 	csrfHandler := csrfDelivery.NewHandler(csrfUsecase, *log)
 	accountHandler := accountDelivery.NewHandler(accountClient, *log)
+	iohubHandler := iohub.NewHandler(transactionUsecase, userUsecase, categortClient, accountClient, *log)
 
 	return router.InitRouter(
 		authHandler,
 		userHandler,
 		transactionHandler,
 		categoryHandler,
-		csrfHandler,
 		accountHandler,
+		iohubHandler,
+		csrfHandler,
 		logMiddlewear,
 		recoveryMiddlewear,
 		authMiddlewear,
