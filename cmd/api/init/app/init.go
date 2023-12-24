@@ -103,7 +103,7 @@ func Init(db *pgxpool.Pool, redis *redis.Client, log *logger.Logger) *mux.Router
 	csrfMiddlewear := middleware.NewCSRFMiddleware(csrfUsecase, *log)
 
 	userHandler := userDelivery.NewHandler(userUsecase, *log)
-	transactionHandler := transactionDelivery.NewHandler(transactionUsecase, *log)
+	transactionHandler := transactionDelivery.NewHandler(transactionUsecase, userUsecase, *log)
 	categoryHandler := categoryDelivary.NewHandler(categortClient, *log)
 	csrfHandler := csrfDelivery.NewHandler(csrfUsecase, *log)
 	accountHandler := accountDelivery.NewHandler(accountClient, *log)
