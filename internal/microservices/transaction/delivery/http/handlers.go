@@ -119,7 +119,7 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 
 	var dataResponse []models.TransactionTransfer
 
-	var userT models.User
+	var userT *models.User
 	for _, transaction := range dataFeed {
 		userT, err = h.userService.GetUser(r.Context(), transaction.UserID)
 		dataResponse = append(dataResponse, models.InitTransactionTransfer(transaction, userT.Login))
