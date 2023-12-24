@@ -898,9 +898,9 @@ const docTemplate = `{
         },
         "/api/transaction/import": {
             "post": {
-                "description": "Uploads a CSV file containing transactions and processes them to be stored in the system.",
+                "description": "` + "`" + `Uploads a CSV file containing transactions and processes them to be stored in the system.",
                 "consumes": [
-                    "multipart/form-data"
+                    "mult` + "`" + `ipart/form-data"
                 ],
                 "produces": [
                     "application/json"
@@ -910,30 +910,6 @@ const docTemplate = `{
                 ],
                 "summary": "Export Transactions from CSV",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "format": "date",
-                        "description": "Start date (format: 'YYYY-MM-DD')",
-                        "name": "startDate",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "format": "date",
-                        "description": "End date (format: 'YYYY-MM-DD')",
-                        "name": "endDate",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "default": "session_id",
-                        "description": "Session ID",
-                        "name": "authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "file",
                         "description": "CSV file containing transactions data",
@@ -1267,6 +1243,12 @@ const docTemplate = `{
                     },
                     "403": {
                         "description": "Forbidden user",
+                        "schema": {
+                            "$ref": "#/definitions/http.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "No user found with this login",
                         "schema": {
                             "$ref": "#/definitions/http.ResponseError"
                         }

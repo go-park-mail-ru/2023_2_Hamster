@@ -465,7 +465,7 @@ func (h *Handler) ImportTransactions(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		date, err := time.Parse(time.RFC3339Nano, record[4])
+		date, err := time.Parse(time.RFC3339, record[4])
 		if err != nil {
 			commonHttp.ErrorResponse(w, http.StatusBadRequest, err, "Error wrong time format", h.logger)
 			return
