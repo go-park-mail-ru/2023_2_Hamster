@@ -127,6 +127,6 @@ func GetIpFromRequest(r *http.Request) (string, error) {
 	return "", errors.New("IP not found")
 }
 
-func GetGoalIdFromRequest(r *http.Request) {
-	return
-}
+// func GetGoalIdFromRequest(r *http.Request) {
+// 	return
+// }
