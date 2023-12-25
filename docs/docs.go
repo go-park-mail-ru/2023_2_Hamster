@@ -520,15 +520,6 @@ const docTemplate = `{
                     "Goals"
                 ],
                 "summary": "Check Goals State",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "JWT token for authentication",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Successfully checked goals state",
@@ -1535,15 +1526,6 @@ const docTemplate = `{
                     "Goals"
                 ],
                 "summary": "Get User Goals",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "JWT token for authentication",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Successfully retrieved user goals",
@@ -1642,13 +1624,6 @@ const docTemplate = `{
                 ],
                 "summary": "Delete Goal",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "JWT token for authentication",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "string",
                         "description": "ID of the goal to delete",

@@ -116,7 +116,6 @@ func (h *Handler) UpdateGoal(w http.ResponseWriter, r *http.Request) {
 // @Accept         json
 // @Produce        json
 // @Security       ApiKeyAuth
-// @Param          Authorization header string true "JWT token for authentication"
 // @Param          goalID path string true "ID of the goal to delete"
 // @Success        200 {object} Response[response.NilBody] "Successfully deleted goal"
 // @Failure        400 {object} ResponseError "Bad Request: Invalid request body"
@@ -131,9 +130,13 @@ func (h *Handler) DeleteGoal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var goalInput goal.GoalDeleteRequest
+	goalID, err := response.GetIDFromRequest("goalID", r)
+	if err != nil {
+		response.ErrorResponse(w, http.StatusBadRequest, err, "no id provided in path", h.log)
+		return
+	}
 
-	if err := h.goalUsecase.DeleteGoal(r.Context(), goalInput.ID, user.ID); err != nil {
+	if err := h.goalUsecase.DeleteGoal(r.Context(), goalID, user.ID); err != nil {
 		response.ErrorResponse(w, http.StatusBadRequest, err, "can't delete goal", h.log)
 		return
 	}
@@ -147,8 +150,7 @@ func (h *Handler) DeleteGoal(w http.ResponseWriter, r *http.Request) {
 // @Accept         json
 // @Produce        json
 // @Security       ApiKeyAuth
-// @Param          Authorization header string true "JWT token for authentication"
-// @Success        200 {object} Response[]models.Goal "Successfully retrieved user goals"
+// @Success        200 {object} Response[models.Goal] "Successfully retrieved user goals"
 // @Failure        401 {object} ResponseError "Unauthorized: Invalid or expired token"
 // @Failure        500 {object} ResponseError "Internal Server Error: Failed to get user goals"
 // @Router         /api/user/goal/ [get]
@@ -174,8 +176,7 @@ func (h *Handler) GetGoals(w http.ResponseWriter, r *http.Request) {
 // @Accept         json
 // @Produce        json
 // @Security       ApiKeyAuth
-// @Param          Authorization header string true "JWT token for authentication"
-// @Success        200 {object} Response[]models.GoalState "Successfully checked goals state"
+// @Success        200 {object} Response[models.GoalState] "Successfully checked goals state"
 // @Failure        401 {object} ResponseError "Unauthorized: Invalid or expired token"
 // @Failure        400 {object} ResponseError "Bad Request: Failed to check goals state"
 // @Router         /api/goals/checkState [get]

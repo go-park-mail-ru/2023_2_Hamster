@@ -534,12 +534,6 @@ paths:
       consumes:
       - application/json
       description: Check the state of goals for the authenticated user
-      parameters:
-      - description: JWT token for authentication
-        in: header
-        name: Authorization
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -1202,12 +1196,6 @@ paths:
       consumes:
       - application/json
       description: Retrieve goals for the authenticated user
-      parameters:
-      - description: JWT token for authentication
-        in: header
-        name: Authorization
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -1234,11 +1222,6 @@ paths:
       - application/json
       description: Delete an existing goal for the authenticated user
       parameters:
-      - description: JWT token for authentication
-        in: header
-        name: Authorization
-        required: true
-        type: string
       - description: ID of the goal to delete
         in: path
         name: goalID
