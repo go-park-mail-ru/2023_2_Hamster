@@ -87,8 +87,8 @@ CREATE OR REPLACE FUNCTION add_default_categories_accounts_transactions()
 RETURNS TRIGGER AS $$
 DECLARE
     categoryID UUID;
-    transaction_idI UUID;
-    transaction_idO UUID;
+    -- transaction_idI UUID;
+    -- transaction_idO UUID;
     accountCashID UUID;
     accountCardID UUID;
 BEGIN
@@ -121,17 +121,17 @@ BEGIN
     INSERT INTO userAccount(user_id, account_id)
     VALUES (NEW.id, accountCashID);
 
-    INSERT INTO transaction(user_id, account_income, account_outcome, income, outcome, payer, description)
-    VALUES (NEW.id, accountCardID,
-                    accountCardID, 0, 100, 'Тестовая транзакция1', 'Все хомячки приветствуют вас, и просят удалить эти транзации)') RETURNING id INTO transaction_idI;
+    -- INSERT INTO transaction(user_id, account_income, account_outcome, income, outcome, payer, description)
+    -- VALUES (NEW.id, accountCardID,
+    --                 accountCardID, 0, 100, 'Тестовая транзакция1', 'Все хомячки приветствуют вас, и просят удалить эти транзации)') RETURNING id INTO transaction_idI;
 
-    INSERT INTO transaction(user_id, account_income, account_outcome, income, outcome, payer, description)
-    VALUES (NEW.id, accountCardID,
-                    accountCardID, 100, 0, 'Тестовая транзакция2', 'Все хомячки приветствуют вас, и просят удалить эти транзации)') RETURNING id INTO transaction_idO;
+    -- INSERT INTO transaction(user_id, account_income, account_outcome, income, outcome, payer, description)
+    -- VALUES (NEW.id, accountCardID,
+    --                 accountCardID, 100, 0, 'Тестовая транзакция2', 'Все хомячки приветствуют вас, и просят удалить эти транзации)') RETURNING id INTO transaction_idO;
             
-    INSERT INTO TransactionCategory(transaction_id, category_id)
-    VALUES (transaction_idI, categoryID),
-            (transaction_idO, categoryID);
+    -- INSERT INTO TransactionCategory(transaction_id, category_id)
+    -- VALUES (transaction_idI, categoryID),
+    --         (transaction_idO, categoryID);
 
     RETURN NEW;
 END;
