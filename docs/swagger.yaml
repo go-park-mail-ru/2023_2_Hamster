@@ -32,6 +32,19 @@ definitions:
       user_id:
         type: string
     type: object
+  goal.GoalCreateRequest:
+    properties:
+      date:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      total:
+        type: number
+      user_id:
+        type: string
+    type: object
   http.CreateAccount:
     properties:
       accumulation:
@@ -151,6 +164,21 @@ definitions:
     properties:
       account_id:
         type: string
+      user_id:
+        type: string
+    type: object
+  models.Goal:
+    properties:
+      date:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      total:
+        type: number
       user_id:
         type: string
     type: object
@@ -461,6 +489,77 @@ paths:
       summary: Get csrf token
       tags:
       - Csrf
+  /api/goals:
+    put:
+      consumes:
+      - application/json
+      description: Update an existing goal for the authenticated user
+      parameters:
+      - description: Updated goal information
+        in: body
+        name: goalInput
+        required: true
+        schema:
+          $ref: '#/definitions/models.Goal'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated goal
+          schema:
+            $ref: '#/definitions/http.Response'
+        "400":
+          description: 'Bad Request: Invalid request body'
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: 'Unauthorized: Invalid or expired token'
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "404":
+          description: 'Not Found: Goal not found'
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: 'Internal Server Error: Failed to update goal'
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Update Goal
+      tags:
+      - Goals
+  /api/goals/checkState:
+    get:
+      consumes:
+      - application/json
+      description: Check the state of goals for the authenticated user
+      parameters:
+      - description: JWT token for authentication
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully checked goals state
+          schema:
+            $ref: '#/definitions/http.Response'
+        "400":
+          description: 'Bad Request: Failed to check goals state'
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: 'Unauthorized: Invalid or expired token'
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Check Goals State
+      tags:
+      - Goals
   /api/tag/{tagId}/update:
     put:
       consumes:
@@ -1098,6 +1197,117 @@ paths:
       summary: Get Feed
       tags:
       - User
+  /api/user/goal/:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve goals for the authenticated user
+      parameters:
+      - description: JWT token for authentication
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved user goals
+          schema:
+            $ref: '#/definitions/http.Response'
+        "401":
+          description: 'Unauthorized: Invalid or expired token'
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: 'Internal Server Error: Failed to get user goals'
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Get User Goals
+      tags:
+      - Goals
+  /api/user/goal/{goalID}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an existing goal for the authenticated user
+      parameters:
+      - description: JWT token for authentication
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: ID of the goal to delete
+        in: path
+        name: goalID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully deleted goal
+          schema:
+            $ref: '#/definitions/http.Response'
+        "400":
+          description: 'Bad Request: Invalid request body'
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: 'Unauthorized: Invalid or expired token'
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "404":
+          description: 'Not Found: Goal not found'
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: 'Internal Server Error: Failed to delete goal'
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Goal
+      tags:
+      - Goals
+  /api/user/goal/add:
+    post:
+      consumes:
+      - application/json
+      description: Create a new goal for the authenticated user
+      parameters:
+      - description: Goal creation input
+        in: body
+        name: goalInput
+        required: true
+        schema:
+          $ref: '#/definitions/goal.GoalCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully created goal
+          schema:
+            $ref: '#/definitions/http.Response'
+        "400":
+          description: 'Bad Request: Invalid request body'
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "401":
+          description: 'Unauthorized: Invalid or expired token'
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+        "500":
+          description: 'Internal Server Error: Failed to create goal'
+          schema:
+            $ref: '#/definitions/http.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Create Goal
+      tags:
+      - Goals
   /api/user/plannedBudget:
     get:
       description: Get User planned budget
