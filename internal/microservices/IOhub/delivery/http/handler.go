@@ -132,11 +132,6 @@ func (h *Handler) ExportTransactions(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	// ...
-
-	// Instead of creating a multipart writer and writing the CSV file to it,
-	// we directly write the CSV file to the response.
-
 	// Set the appropriate headers for a CSV file.
 	w.Header().Set("Content-Type", "text/csv")
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment;filename=%s", fileName))

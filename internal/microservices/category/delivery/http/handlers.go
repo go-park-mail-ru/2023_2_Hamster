@@ -66,6 +66,7 @@ func (h *Handler) CreateTag(w http.ResponseWriter, r *http.Request) {
 		ShowIncome:  tag.ShowIncome,
 		ShowOutcome: tag.ShowOutcome,
 		Regular:     tag.Regular,
+		Image:       int32(tag.Image),
 	})
 	if err != nil {
 		h.log.WithField(
@@ -127,6 +128,7 @@ func (h *Handler) GetTags(w http.ResponseWriter, r *http.Request) {
 			ShowIncome:  gtag.ShowIncome,
 			ShowOutcome: gtag.ShowOutcome,
 			Regular:     gtag.Regular,
+			Image:       int(gtag.Image),
 		}
 		tags[i] = tag
 	}
@@ -176,8 +178,8 @@ func (h *Handler) UpdateTag(w http.ResponseWriter, r *http.Request) {
 		ShowIncome:  tag.ShowIncome,
 		ShowOutcome: tag.ShowOutcome,
 		Regular:     tag.Regular,
+		Image:       int32(tag.Image),
 	})
-
 	if err != nil {
 		h.log.WithField(
 			"Request-Id", contextutils.GetReqID(r.Context()),
@@ -197,6 +199,7 @@ func (h *Handler) UpdateTag(w http.ResponseWriter, r *http.Request) {
 	tag.ShowIncome = upd.ShowIncome
 	tag.ShowOutcome = upd.ShowOutcome
 	tag.Regular = upd.Regular
+	tag.Image = int(upd.Image)
 
 	response.SuccessResponse(w, http.StatusOK, tag)
 }

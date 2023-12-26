@@ -4,10 +4,10 @@ package generated
 
 import (
 	context "context"
-	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -22,7 +22,7 @@ type CategoryServiceClient interface {
 	CreateTag(ctx context.Context, in *CreateTagRequest, opts ...grpc.CallOption) (*CreateTagResponse, error)
 	GetTags(ctx context.Context, in *UserIdRequest, opts ...grpc.CallOption) (*GetTagsResponse, error)
 	UpdateTag(ctx context.Context, in *Category, opts ...grpc.CallOption) (*Category, error)
-	DeleteTag(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	DeleteTag(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type categoryServiceClient struct {
@@ -60,8 +60,8 @@ func (c *categoryServiceClient) UpdateTag(ctx context.Context, in *Category, opt
 	return out, nil
 }
 
-func (c *categoryServiceClient) DeleteTag(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	out := new(empty.Empty)
+func (c *categoryServiceClient) DeleteTag(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/category.CategoryService/DeleteTag", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -76,7 +76,7 @@ type CategoryServiceServer interface {
 	CreateTag(context.Context, *CreateTagRequest) (*CreateTagResponse, error)
 	GetTags(context.Context, *UserIdRequest) (*GetTagsResponse, error)
 	UpdateTag(context.Context, *Category) (*Category, error)
-	DeleteTag(context.Context, *DeleteRequest) (*empty.Empty, error)
+	DeleteTag(context.Context, *DeleteRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedCategoryServiceServer()
 }
 
@@ -93,7 +93,7 @@ func (UnimplementedCategoryServiceServer) GetTags(context.Context, *UserIdReques
 func (UnimplementedCategoryServiceServer) UpdateTag(context.Context, *Category) (*Category, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateTag not implemented")
 }
-func (UnimplementedCategoryServiceServer) DeleteTag(context.Context, *DeleteRequest) (*empty.Empty, error) {
+func (UnimplementedCategoryServiceServer) DeleteTag(context.Context, *DeleteRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTag not implemented")
 }
 func (UnimplementedCategoryServiceServer) mustEmbedUnimplementedCategoryServiceServer() {}

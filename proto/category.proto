@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package category;
-option go_package = "internal/microservices/category/delivery/grpc/generated";
+option go_package = "../internal/microservices/category/delivery/grpc/generated";
 
 import "google/protobuf/empty.proto";
 
@@ -9,9 +9,10 @@ message CreateTagRequest {
     string user_id = 1;
     string parent_id = 2;
     string name = 3;
-    bool show_income = 4;
-    bool show_outcome = 5;
-    bool regular = 6;
+    int32 image = 4;
+    bool show_income = 5;
+    bool show_outcome = 6;
+    bool regular = 7;
 };
 
 message CreateTagResponse {
@@ -27,9 +28,10 @@ message Category {
   string user_id = 2;
   string parent_id = 3;
   string name = 4;
-  bool show_income = 5;
-  bool show_outcome = 6;
-  bool regular = 7;
+  int32 image = 5;
+  bool show_income = 6;
+  bool show_outcome = 7;
+  bool regular = 8;
 }
 
 message GetTagsResponse {
