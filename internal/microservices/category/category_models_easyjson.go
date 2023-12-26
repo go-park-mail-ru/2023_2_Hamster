@@ -44,6 +44,8 @@ func easyjson12bfe9e7DecodeGithubComGoParkMailRu20232HamsterInternalMicroservice
 			if data := in.UnsafeBytes(); in.Ok() {
 				in.AddError((out.ParentID).UnmarshalText(data))
 			}
+		case "image_id":
+			out.Image = int(in.Int())
 		case "name":
 			out.Name = string(in.String())
 		case "show_income":
@@ -75,6 +77,11 @@ func easyjson12bfe9e7EncodeGithubComGoParkMailRu20232HamsterInternalMicroservice
 		const prefix string = ",\"parent_id\":"
 		out.RawString(prefix)
 		out.RawText((in.ParentID).MarshalText())
+	}
+	{
+		const prefix string = ",\"image_id\":"
+		out.RawString(prefix)
+		out.Int(int(in.Image))
 	}
 	{
 		const prefix string = ",\"name\":"
@@ -149,6 +156,8 @@ func easyjson12bfe9e7DecodeGithubComGoParkMailRu20232HamsterInternalMicroservice
 			if data := in.UnsafeBytes(); in.Ok() {
 				in.AddError((out.ParentId).UnmarshalText(data))
 			}
+		case "image_id":
+			out.Image = int(in.Int())
 		case "name":
 			out.Name = string(in.String())
 		case "show_income":
@@ -180,6 +189,11 @@ func easyjson12bfe9e7EncodeGithubComGoParkMailRu20232HamsterInternalMicroservice
 		const prefix string = ",\"parent_id\":"
 		out.RawString(prefix)
 		out.RawText((in.ParentId).MarshalText())
+	}
+	{
+		const prefix string = ",\"image_id\":"
+		out.RawString(prefix)
+		out.Int(int(in.Image))
 	}
 	{
 		const prefix string = ",\"name\":"
