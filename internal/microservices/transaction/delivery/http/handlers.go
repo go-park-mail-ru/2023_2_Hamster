@@ -94,7 +94,7 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 
 	var errNoSuchTransaction *models.NoSuchTransactionError
 	if errors.As(err, &errNoSuchTransaction) {
-		commonHttp.SuccessResponse(w, http.StatusNoContent, "")
+		commonHttp.SuccessResponse(w, http.StatusNoContent, commonHttp.NilBody{})
 		return
 	}
 
