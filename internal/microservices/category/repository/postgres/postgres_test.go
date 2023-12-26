@@ -27,7 +27,7 @@ func Test_CreateTag(t *testing.T) {
 	}{
 		{
 			name:      "Success",
-			tag:       models.Category{UserID: uuid.New(), Name: "TestTag", ShowIncome: true, ShowOutcome: true, Regular: true},
+			tag:       models.Category{UserID: uuid.New(), Name: "TestTag", ShowIncome: true, ShowOutcome: true, Regular: true, Image: 1},
 			returnID:  testUUID,
 			expected:  testUUID,
 			returnErr: nil,
@@ -35,7 +35,7 @@ func Test_CreateTag(t *testing.T) {
 		},
 		{
 			name:      "Failure",
-			tag:       models.Category{UserID: uuid.New(), ParentID: uuid.Nil, Name: "TestTag", ShowIncome: true, ShowOutcome: true, Regular: true},
+			tag:       models.Category{UserID: uuid.New(), Name: "TestTag", ShowIncome: true, ShowOutcome: true, Regular: true, Image: 1},
 			returnID:  uuid.Nil,
 			expected:  uuid.Nil,
 			returnErr: errors.New("some database error"),
@@ -52,7 +52,7 @@ func Test_CreateTag(t *testing.T) {
 
 			escapedQuery := regexp.QuoteMeta(CategoryCreate)
 			mock.ExpectQuery(escapedQuery).
-				WithArgs(tc.tag.UserID, nil, tc.tag.Name, tc.tag.ShowIncome, tc.tag.ShowOutcome, tc.tag.Regular).
+				WithArgs(tc.tag.UserID, nil, tc.tag.Name, tc.tag.ShowIncome, tc.tag.ShowOutcome, tc.tag.Regular, tc.tag.Image).
 				WillReturnRows(pgxmock.NewRows([]string{"id"}).AddRow(tc.returnID)).
 				WillReturnError(tc.returnErr)
 
@@ -83,15 +83,30 @@ func Test_UpdateTag(t *testing.T) {
 		sqlNoRows   error
 	}{
 		{
-			name:        "Success",
-			tag:         &models.Category{ID: uuid.New(), ParentID: uuid.Nil, Name: "UpdatedTag", ShowIncome: true, ShowOutcome: true, Regular: true},
+			name: "Success",
+			tag: &models.Category{
+				ID:          uuid.New(),
+				ParentID:    uuid.Nil,
+				Name:        "UpdatedTag",
+				ShowIncome:  true,
+				ShowOutcome: true,
+				Regular:     true,
+				Image:       1,
+			},
 			rowExists:   true,
 			execError:   nil,
 			expectedErr: nil,
 		},
 		{
-			name:        "UpdateError",
-			tag:         &models.Category{ID: uuid.New(), ParentID: uuid.Nil, Name: "UpdatedTag", ShowIncome: true, ShowOutcome: true, Regular: true},
+			name: "UpdateError",
+			tag: &models.Category{
+				ID:          uuid.New(),
+				Name:        "UpdatedTag",
+				ShowIncome:  true,
+				ShowOutcome: true,
+				Regular:     true,
+				Image:       1,
+			},
 			rowExists:   true,
 			execError:   errors.New("some database error"),
 			expectedErr: fmt.Errorf("[repo] failed to update category info: %s, %w", CategoryUpdate, errors.New("some database error")),
@@ -105,17 +120,10 @@ func Test_UpdateTag(t *testing.T) {
 
 			logger := *logger.NewLogger(context.TODO())
 			repo := NewRepository(mock, logger)
-			/*
-				escapedQuery := regexp.QuoteMeta(CategoryGet)
-				mock.ExpectQuery(escapedQuery).
-					WithArgs(tc.tag.ID).
-					WillReturnRows(pgxmock.NewRows([]string{"exists"}).AddRow(tc.rowExists)).
-					WillReturnError(tc.sqlNoRows)
-			*/
 
 			escapedQuery := regexp.QuoteMeta(CategoryUpdate)
 			mock.ExpectExec(escapedQuery).
-				WithArgs(nil, tc.tag.Name, tc.tag.ShowIncome, tc.tag.ShowOutcome, tc.tag.Regular, tc.tag.ID).
+				WithArgs(nil, tc.tag.Name, tc.tag.ShowIncome, tc.tag.ShowOutcome, tc.tag.Regular, tc.tag.Image, tc.tag.ID).
 				WillReturnResult(pgxmock.NewResult("UPDATE", 1)).
 				WillReturnError(tc.execError)
 
@@ -132,82 +140,6 @@ func Test_UpdateTag(t *testing.T) {
 	}
 }
 
-/*
-	func Test_DeleteTag(t *testing.T) {
-		testCases := []struct {
-			name        string
-			tagID       uuid.UUID
-			rowExists   bool
-			execError   error
-			expectedErr error
-			sqlNoRows   error
-			transaction bool
-		}{
-			{
-				name:        "Success",
-				tagID:       uuid.New(),
-				rowExists:   true,
-				execError:   nil,
-				expectedErr: nil,
-				transaction: true,
-			},
-			{
-				name:        "TagNotFound",
-				tagID:       uuid.New(),
-				rowExists:   false,
-				execError:   nil,
-				expectedErr: fmt.Errorf("[repo] tag doesn't exist Error: %v", sql.ErrNoRows),
-				sqlNoRows:   sql.ErrNoRows,
-				transaction: false,
-			},
-			{
-				name:        "DeleteError",
-				tagID:       uuid.New(),
-				rowExists:   true,
-				execError:   errors.New("some database error"),
-				expectedErr: fmt.Errorf("[repo] failed to delete category %s, %w", CategoryDelete, errors.New("some database error")),
-				transaction: false,
-			},
-		}
-
-		for _, tc := range testCases {
-			t.Run(tc.name, func(t *testing.T) {
-				mock, _ := pgxmock.NewPool()
-
-				logger := *logger.NewLogger(context.TODO())
-				repo := NewRepository(mock, logger)
-
-				escapedQuery := regexp.QuoteMeta(CategoryGet)
-				mock.ExpectQuery(escapedQuery).
-					WithArgs(tc.tagID).
-					WillReturnRows(pgxmock.NewRows([]string{"exists"}).AddRow(tc.rowExists)).
-					WillReturnError(tc.sqlNoRows)
-
-				mock.ExpectBegin()
-				if tc.transaction {
-					mock.ExpectCommit()
-				} else {
-					mock.ExpectRollback()
-				}
-
-				escapedQuery = regexp.QuoteMeta(CategoryDelete)
-				mock.ExpectExec(escapedQuery).
-					WithArgs(tc.tagID).
-					WillReturnResult(pgxmock.NewResult("DELETE", 1)).
-					WillReturnError(tc.execError)
-
-				err := repo.DeleteTag(context.Background(), tc.tagID)
-				if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
-					t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
-				}
-
-				if err := mock.ExpectationsWereMet(); err != nil {
-					t.Errorf("There were unfulfilled expectations: %s", err)
-				}
-			})
-		}
-	}
-*/
 func Test_GetTags(t *testing.T) {
 	tagId := uuid.New()
 	userId := uuid.New()
@@ -223,15 +155,16 @@ func Test_GetTags(t *testing.T) {
 		{
 			name:   "Success",
 			userID: uuid.New(),
-			rows: pgxmock.NewRows([]string{"id", "user_id", "parent_id", "name", "show_income", "show_outcome", "regular"}).
-				AddRow(tagId, userId, parentId, "Tag1", true, true, true).
-				AddRow(tagId, userId, parentId, "Tag2", false, true, false),
+			rows: pgxmock.NewRows([]string{"id", "user_id", "parent_id", "name", "image_id", "show_income", "show_outcome", "regular"}).
+				AddRow(tagId, userId, parentId, "Tag1", 1, true, true, true).
+				AddRow(tagId, userId, parentId, "Tag2", 1, false, true, false),
 			rowsError: nil,
 			expected: []models.Category{{
 				ID:          tagId,
 				UserID:      userId,
 				ParentID:    parentId,
 				Name:        "Tag1",
+				Image:       1,
 				ShowIncome:  true,
 				ShowOutcome: true,
 				Regular:     true,
@@ -240,6 +173,7 @@ func Test_GetTags(t *testing.T) {
 				UserID:      userId,
 				ParentID:    parentId,
 				Name:        "Tag2",
+				Image:       1,
 				ShowIncome:  false,
 				ShowOutcome: true,
 				Regular:     false,

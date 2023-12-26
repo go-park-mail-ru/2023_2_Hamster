@@ -89,12 +89,16 @@ func InitRouter(auth *auth.Handler,
 	{
 		userRouter.Methods("PUT").Path("/updatePhoto").HandlerFunc(user.UpdatePhoto)
 		userRouter.Methods("PUT").Path("/update").HandlerFunc(user.Update)
-		userRouter.Methods("POST").Path("/addUserInAccount").HandlerFunc(user.AddUserInAccount)
 		userRouter.Methods("PUT").Path("/unsubscribeAccount/{account_id}").HandlerFunc(user.Unsubscribe)
+
+		userRouter.Methods("POST").Path("/addUserInAccount").HandlerFunc(user.AddUserInAccount)
+
 		userRouter.Methods("DELETE").Path("/deleteUserInAccount").HandlerFunc(user.DeleteUserInAccount)
+
 		userRouter.Methods("GET").Path("/account/all").HandlerFunc(user.GetAccounts)
 		userRouter.Methods("GET").Path("/feed").HandlerFunc(user.GetFeed)
 		userRouter.Methods("GET").Path("/").HandlerFunc(user.Get)
+
 		// userRouter.Methods("GET").Path("/balance").HandlerFunc(user.GetUserBalance)
 		// userRouter.Methods("GET").Path("/plannedBudget").HandlerFunc(user.GetPlannedBudget)
 		// userRouter.Methods("GET").Path("/actualBudget").HandlerFunc(user.GetCurrentBudget)

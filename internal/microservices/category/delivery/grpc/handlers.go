@@ -38,6 +38,7 @@ func (c *categoryGRPC) CreateTag(ctx context.Context, in *proto.CreateTagRequest
 		ShowIncome:  in.ShowIncome,
 		ShowOutcome: in.ShowOutcome,
 		Regular:     in.Regular,
+		Image:       int(in.Image),
 	}
 	id, err := c.CategoryServices.CreateTag(ctx, request)
 
@@ -67,6 +68,7 @@ func (c *categoryGRPC) GetTags(ctx context.Context, in *proto.UserIdRequest) (*p
 			ShowIncome:  tag.ShowIncome,
 			ShowOutcome: tag.ShowOutcome,
 			Regular:     tag.Regular,
+			Image:       int32(tag.Image),
 		}
 
 		generatedCategories = append(generatedCategories, generatedCategory)
@@ -87,6 +89,7 @@ func (c *categoryGRPC) UpdateTag(ctx context.Context, in *proto.Category) (*prot
 		ShowIncome:  in.ShowIncome,
 		ShowOutcome: in.ShowOutcome,
 		Regular:     in.Regular,
+		Image:       int(in.Image),
 	}
 	err := c.CategoryServices.UpdateTag(ctx, tag)
 
@@ -98,6 +101,7 @@ func (c *categoryGRPC) UpdateTag(ctx context.Context, in *proto.Category) (*prot
 		ShowIncome:  tag.ShowIncome,
 		ShowOutcome: tag.ShowOutcome,
 		Regular:     tag.Regular,
+		Image:       int32(tag.Image),
 	}
 
 	return updatedProtoCategory, err

@@ -13,13 +13,13 @@ import (
 )
 
 const (
-	CategoryGet = `SELECT user_id, parent_tag, "name", show_income, show_outcome, regular FROM category WHERE id=$1;`
+	CategoryGet = `SELECT user_id, parent_tag, "name", show_income, show_outcome, regular, image_id FROM category WHERE id=$1;`
 
-	CategoryCreate = `INSERT INTO category (user_id, parent_tag, "name", show_income, show_outcome, regular)
-				      VALUES ($1, $2, $3, $4, $5, $6)
+	CategoryCreate = `INSERT INTO category (user_id, parent_tag, "name", show_income, show_outcome, regular, image_id)
+				      VALUES ($1, $2, $3, $4, $5, $6, $7)
 				      RETURNING id;`
 
-	CategoryUpdate = `UPDATE category SET parent_tag=CAST($1 AS UUID), "name"=$2, show_income=$3, show_outcome=$4, regular=$5 WHERE id=CAST($6 AS UUID);`
+	CategoryUpdate = `UPDATE category SET parent_tag=CAST($1 AS UUID), "name"=$2, show_income=$3, show_outcome=$4, regular=$5, image_id=$6 WHERE id=CAST($7 AS UUID);`
 
 	CategoryDelete = "DELETE FROM category WHERE id = $1;"
 
@@ -63,6 +63,7 @@ func (r *Repository) CreateTag(ctx context.Context, tag models.Category) (uuid.U
 		tag.ShowIncome,
 		tag.ShowOutcome,
 		tag.Regular,
+		tag.Image,
 	)
 
 	var id uuid.UUID
@@ -95,6 +96,7 @@ func (r *Repository) UpdateTag(ctx context.Context, tag *models.Category) error 
 		tag.ShowIncome,
 		tag.ShowOutcome,
 		tag.Regular,
+		tag.Image,
 		tag.ID,
 	)
 
@@ -159,6 +161,7 @@ func (r *Repository) GetTags(ctx context.Context, userID uuid.UUID) ([]models.Ca
 			&tag.UserID,
 			&tag.ParentID,
 			&tag.Name,
+			&tag.Image,
 			&tag.ShowIncome,
 			&tag.ShowOutcome,
 			&tag.Regular,
