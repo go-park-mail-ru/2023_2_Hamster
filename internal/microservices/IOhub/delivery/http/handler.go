@@ -255,14 +255,16 @@ func (h *Handler) ImportTransactions(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if len(record) < 7 {
-			response.ErrorResponse(w, http.StatusBadRequest, err, "wrong format not enough args for transaction", h.logger)
-			return
+		if len(record) < 8 {
+			continue
+			// response.ErrorResponse(w, http.StatusBadRequest, err, "wrong format not enough args for transaction", h.logger)
+			// return
 		}
 
-		if len(record) > 8 {
-			response.ErrorResponse(w, http.StatusBadRequest, err, "wrong format too much args for transaction", h.logger)
-			return
+		if len(record) > 9 {
+			continue
+			// response.ErrorResponse(w, http.StatusBadRequest, err, "wrong format too much args for transaction", h.logger)
+			// return
 		}
 
 		accountIncome := record[0]

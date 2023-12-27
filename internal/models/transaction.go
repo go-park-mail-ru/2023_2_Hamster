@@ -69,6 +69,10 @@ func (t *TransactionExport) String() []string {
 	transaction = append(transaction, t.Date.Format(time.RFC3339))
 	transaction = append(transaction, t.Payer)
 	transaction = append(transaction, t.Description)
+	if len(t.Categories) == 0 {
+		transaction = append(transaction, "")
+		return transaction
+	}
 	transaction = append(transaction, t.Categories...)
 	return transaction
 }
