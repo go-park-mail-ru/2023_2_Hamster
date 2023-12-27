@@ -45,7 +45,7 @@ func easyjson12bfe9e7DecodeGithubComGoParkMailRu20232HamsterInternalMicroservice
 				in.AddError((out.ParentID).UnmarshalText(data))
 			}
 		case "image_id":
-			out.Image = int(in.Int())
+			out.Image = int32(in.Int32())
 		case "name":
 			out.Name = string(in.String())
 		case "show_income":
@@ -81,7 +81,7 @@ func easyjson12bfe9e7EncodeGithubComGoParkMailRu20232HamsterInternalMicroservice
 	{
 		const prefix string = ",\"image_id\":"
 		out.RawString(prefix)
-		out.Int(int(in.Image))
+		out.Int32(int32(in.Image))
 	}
 	{
 		const prefix string = ",\"name\":"
@@ -157,7 +157,7 @@ func easyjson12bfe9e7DecodeGithubComGoParkMailRu20232HamsterInternalMicroservice
 				in.AddError((out.ParentId).UnmarshalText(data))
 			}
 		case "image_id":
-			out.Image = int(in.Int())
+			out.Image = int32(in.Int32())
 		case "name":
 			out.Name = string(in.String())
 		case "show_income":
@@ -193,7 +193,7 @@ func easyjson12bfe9e7EncodeGithubComGoParkMailRu20232HamsterInternalMicroservice
 	{
 		const prefix string = ",\"image_id\":"
 		out.RawString(prefix)
-		out.Int(int(in.Image))
+		out.Int32(int32(in.Image))
 	}
 	{
 		const prefix string = ",\"name\":"

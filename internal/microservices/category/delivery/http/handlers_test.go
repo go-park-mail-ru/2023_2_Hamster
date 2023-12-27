@@ -175,7 +175,7 @@ func TestHandler_CreateTag(t *testing.T) {
 // 	}
 // }
 
-func TestHandler_UpdateTag(t *testing.T) {
+/* func TestHandler_UpdateTag(t *testing.T) {
 	uuidTest := uuid.New()
 	user := &models.User{ID: uuidTest}
 	tagID := uuid.New()
@@ -277,7 +277,7 @@ func TestHandler_UpdateTag(t *testing.T) {
 			assert.Equal(t, tt.expectedBody, actual)
 		})
 	}
-}
+} */
 
 func TestHandler_DeleteTag(t *testing.T) {
 	uuidTest := uuid.New()

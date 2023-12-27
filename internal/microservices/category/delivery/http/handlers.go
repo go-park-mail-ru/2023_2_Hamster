@@ -128,7 +128,7 @@ func (h *Handler) GetTags(w http.ResponseWriter, r *http.Request) {
 			ShowIncome:  gtag.ShowIncome,
 			ShowOutcome: gtag.ShowOutcome,
 			Regular:     gtag.Regular,
-			Image:       int(gtag.Image),
+			Image:       gtag.Image,
 		}
 		tags[i] = tag
 	}
@@ -199,7 +199,7 @@ func (h *Handler) UpdateTag(w http.ResponseWriter, r *http.Request) {
 	tag.ShowIncome = upd.ShowIncome
 	tag.ShowOutcome = upd.ShowOutcome
 	tag.Regular = upd.Regular
-	tag.Image = int(upd.Image)
+	tag.Image = upd.Image
 
 	response.SuccessResponse(w, http.StatusOK, tag)
 }

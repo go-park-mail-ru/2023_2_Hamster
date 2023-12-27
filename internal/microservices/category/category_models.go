@@ -9,7 +9,7 @@ type (
 	TagInput struct {
 		UserId      uuid.UUID `json:"user_id"`
 		ParentId    uuid.UUID `json:"parent_id"`
-		Image       int       `json:"image_id"`
+		Image       int32     `json:"image_id"`
 		Name        string    `json:"name"`
 		ShowIncome  bool      `json:"show_income"`
 		ShowOutcome bool      `json:"show_outcome"`
@@ -19,7 +19,7 @@ type (
 	TagUpdateInput struct {
 		UserID      uuid.UUID `json:"user_id" valid:"required"`
 		ParentID    uuid.UUID `json:"parent_id" valid:"-"`
-		Image       int       `json:"image_id"`
+		Image       int32     `json:"image_id"`
 		Name        string    `json:"name" valid:"required"`
 		ShowIncome  bool      `json:"show_income" valid:"-"`
 		ShowOutcome bool      `json:"show_outcome" valid:"-"`

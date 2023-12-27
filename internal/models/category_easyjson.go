@@ -49,7 +49,7 @@ func easyjson6a91a67cDecodeGithubComGoParkMailRu20232HamsterInternalModels(in *j
 				in.AddError((out.ParentID).UnmarshalText(data))
 			}
 		case "image_id":
-			out.Image = int(in.Int())
+			out.Image = int32(in.Int32())
 		case "name":
 			out.Name = string(in.String())
 		case "show_income":
@@ -90,7 +90,7 @@ func easyjson6a91a67cEncodeGithubComGoParkMailRu20232HamsterInternalModels(out *
 	{
 		const prefix string = ",\"image_id\":"
 		out.RawString(prefix)
-		out.Int(int(in.Image))
+		out.Int32(int32(in.Image))
 	}
 	{
 		const prefix string = ",\"name\":"
