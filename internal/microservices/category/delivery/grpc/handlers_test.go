@@ -1,165 +1,166 @@
 package grpc
 
-// import (
-// 	"context"
-// 	"errors"
-// 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
-// 	proto "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/category/delivery/grpc/generated"
-// 	mocks "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/category/mocks"
-// 	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
-// 	"github.com/golang/mock/gomock"
-// 	"github.com/golang/protobuf/ptypes/empty"
-// 	"github.com/google/uuid"
-// 	"github.com/stretchr/testify/assert"
-// 	"testing"
-// )
+import (
+	"context"
+	"errors"
+	"testing"
 
-// func TestCreateTag(t *testing.T) {
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/common/logger"
+	proto "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/category/delivery/grpc/generated"
+	mocks "github.com/go-park-mail-ru/2023_2_Hamster/internal/microservices/category/mocks"
+	"github.com/go-park-mail-ru/2023_2_Hamster/internal/models"
+	"github.com/golang/mock/gomock"
+	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
+)
 
-// 	expectedTagID := uuid.New()
+func TestCreateTag(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-// 	request := &proto.CreateTagRequest{
-// 		UserId:      expectedTagID.String(),
-// 		ParentId:    expectedTagID.String(),
-// 		Name:        "TestTag",
-// 		ShowIncome:  true,
-// 		ShowOutcome: true,
-// 		Regular:     false,
-// 	}
+	expectedTagID := uuid.New()
 
-// 	mockCategoryServices := mocks.NewMockUsecase(ctrl)
-// 	mockCategoryServices.EXPECT().
-// 		CreateTag(gomock.Any(), gomock.Any()).
-// 		Return(expectedTagID, nil)
+	request := &proto.CreateTagRequest{
+		UserId:      expectedTagID.String(),
+		ParentId:    expectedTagID.String(),
+		Name:        "TestTag",
+		ShowIncome:  true,
+		ShowOutcome: true,
+		Regular:     false,
+	}
 
-// 	categoryGRPC := NewCategoryGRPC(mockCategoryServices, *logger.NewLogger(context.TODO()))
+	mockCategoryServices := mocks.NewMockUsecase(ctrl)
+	mockCategoryServices.EXPECT().
+		CreateTag(gomock.Any(), gomock.Any()).
+		Return(expectedTagID, nil)
 
-// 	response, err := categoryGRPC.CreateTag(context.Background(), request)
+	categoryGRPC := NewCategoryGRPC(mockCategoryServices, *logger.NewLogger(context.TODO()))
 
-// 	assert.NoError(t, err)
-// 	assert.NotNil(t, response)
-// 	assert.Equal(t, expectedTagID.String(), response.TagId)
-// }
+	response, err := categoryGRPC.CreateTag(context.Background(), request)
 
-// func TestGetTags(t *testing.T) {
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
+	assert.NoError(t, err)
+	assert.NotNil(t, response)
+	assert.Equal(t, expectedTagID.String(), response.TagId)
+}
 
-// 	expectedUserID := uuid.New()
+func TestGetTags(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-// 	request := &proto.UserIdRequest{
-// 		UserId: expectedUserID.String(),
-// 	}
+	expectedUserID := uuid.New()
 
-// 	expectedTags := []models.Category{{}, {}}
+	request := &proto.UserIdRequest{
+		UserId: expectedUserID.String(),
+	}
 
-// 	mockCategoryServices := mocks.NewMockUsecase(ctrl)
-// 	mockCategoryServices.EXPECT().
-// 		GetTags(gomock.Any(), gomock.Any()).
-// 		Return(expectedTags, nil)
+	expectedTags := []models.Category{{}, {}}
 
-// 	categoryGRPC := NewCategoryGRPC(mockCategoryServices, *logger.NewLogger(context.TODO()))
+	mockCategoryServices := mocks.NewMockUsecase(ctrl)
+	mockCategoryServices.EXPECT().
+		GetTags(gomock.Any(), gomock.Any()).
+		Return(expectedTags, nil)
 
-// 	response, err := categoryGRPC.GetTags(context.Background(), request)
+	categoryGRPC := NewCategoryGRPC(mockCategoryServices, *logger.NewLogger(context.TODO()))
 
-// 	assert.NoError(t, err)
-// 	assert.NotNil(t, response)
-// 	assert.Len(t, response.Categories, len(expectedTags))
+	response, err := categoryGRPC.GetTags(context.Background(), request)
 
-// }
+	assert.NoError(t, err)
+	assert.NotNil(t, response)
+	assert.Len(t, response.Categories, len(expectedTags))
 
-// func TestGetTags2(t *testing.T) {
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
+}
 
-// 	expectedUserID := uuid.New()
+func TestGetTags2(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-// 	request := &proto.UserIdRequest{
-// 		UserId: expectedUserID.String(),
-// 	}
+	expectedUserID := uuid.New()
 
-// 	expectedError := errors.New("some error message")
+	request := &proto.UserIdRequest{
+		UserId: expectedUserID.String(),
+	}
 
-// 	mockCategoryServices := mocks.NewMockUsecase(ctrl)
-// 	mockCategoryServices.EXPECT().
-// 		GetTags(gomock.Any(), gomock.Any()).
-// 		Return(nil, expectedError)
+	expectedError := errors.New("some error message")
 
-// 	categoryGRPC := NewCategoryGRPC(mockCategoryServices, *logger.NewLogger(context.TODO()))
+	mockCategoryServices := mocks.NewMockUsecase(ctrl)
+	mockCategoryServices.EXPECT().
+		GetTags(gomock.Any(), gomock.Any()).
+		Return(nil, expectedError)
 
-// 	response, err := categoryGRPC.GetTags(context.Background(), request)
+	categoryGRPC := NewCategoryGRPC(mockCategoryServices, *logger.NewLogger(context.TODO()))
 
-// 	assert.Error(t, err)
-// 	assert.Nil(t, response)
-// 	assert.Equal(t, expectedError, err)
-// }
+	response, err := categoryGRPC.GetTags(context.Background(), request)
 
-// func TestUpdateTag(t *testing.T) {
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
+	assert.Error(t, err)
+	assert.Nil(t, response)
+	assert.Equal(t, expectedError, err)
+}
 
-// 	expectedID := uuid.New()
-// 	expectedUserID := uuid.New()
-// 	expectedParentID := uuid.New()
+func TestUpdateTag(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-// 	request := &proto.Category{
-// 		Id:          expectedID.String(),
-// 		UserId:      expectedUserID.String(),
-// 		ParentId:    expectedParentID.String(),
-// 		Name:        "UpdatedTag",
-// 		ShowIncome:  true,
-// 		ShowOutcome: false,
-// 		Regular:     true,
-// 	}
+	expectedID := uuid.New()
+	expectedUserID := uuid.New()
+	expectedParentID := uuid.New()
 
-// 	mockCategoryServices := mocks.NewMockUsecase(ctrl)
-// 	mockCategoryServices.EXPECT().
-// 		UpdateTag(gomock.Any(), gomock.Any()).
-// 		Return(nil) // Предполагаем, что обновление прошло успешно.
+	request := &proto.Category{
+		Id:          expectedID.String(),
+		UserId:      expectedUserID.String(),
+		ParentId:    expectedParentID.String(),
+		Name:        "UpdatedTag",
+		ShowIncome:  true,
+		ShowOutcome: false,
+		Regular:     true,
+	}
 
-// 	categoryGRPC := NewCategoryGRPC(mockCategoryServices, *logger.NewLogger(context.TODO()))
+	mockCategoryServices := mocks.NewMockUsecase(ctrl)
+	mockCategoryServices.EXPECT().
+		UpdateTag(gomock.Any(), gomock.Any()).
+		Return(nil) // Предполагаем, что обновление прошло успешно.
 
-// 	response, err := categoryGRPC.UpdateTag(context.Background(), request)
+	categoryGRPC := NewCategoryGRPC(mockCategoryServices, *logger.NewLogger(context.TODO()))
 
-// 	assert.NoError(t, err)
-// 	assert.NotNil(t, response)
+	response, err := categoryGRPC.UpdateTag(context.Background(), request)
 
-// 	// Проверим, что возвращенные данные соответствуют ожидаемым.
-// 	assert.Equal(t, expectedID.String(), response.Id)
-// 	assert.Equal(t, expectedUserID.String(), response.UserId)
-// 	assert.Equal(t, expectedParentID.String(), response.ParentId)
-// 	assert.Equal(t, request.Name, response.Name)
-// 	assert.Equal(t, request.ShowIncome, response.ShowIncome)
-// 	assert.Equal(t, request.ShowOutcome, response.ShowOutcome)
-// 	assert.Equal(t, request.Regular, response.Regular)
-// }
+	assert.NoError(t, err)
+	assert.NotNil(t, response)
 
-// func TestDeleteTag(t *testing.T) {
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
+	// Проверим, что возвращенные данные соответствуют ожидаемым.
+	assert.Equal(t, expectedID.String(), response.Id)
+	assert.Equal(t, expectedUserID.String(), response.UserId)
+	assert.Equal(t, expectedParentID.String(), response.ParentId)
+	assert.Equal(t, request.Name, response.Name)
+	assert.Equal(t, request.ShowIncome, response.ShowIncome)
+	assert.Equal(t, request.ShowOutcome, response.ShowOutcome)
+	assert.Equal(t, request.Regular, response.Regular)
+}
 
-// 	expectedTagID := uuid.New()
-// 	expectedUserID := uuid.New()
+func TestDeleteTag(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-// 	request := &proto.DeleteRequest{
-// 		TagId:  expectedTagID.String(),
-// 		UserId: expectedUserID.String(),
-// 	}
+	expectedTagID := uuid.New()
+	expectedUserID := uuid.New()
 
-// 	mockCategoryServices := mocks.NewMockUsecase(ctrl)
-// 	mockCategoryServices.EXPECT().
-// 		DeleteTag(gomock.Any(), expectedTagID, expectedUserID).
-// 		Return(nil) // Предполагаем, что удаление прошло успешно.
+	request := &proto.DeleteRequest{
+		TagId:  expectedTagID.String(),
+		UserId: expectedUserID.String(),
+	}
 
-// 	categoryGRPC := NewCategoryGRPC(mockCategoryServices, *logger.NewLogger(context.TODO()))
+	mockCategoryServices := mocks.NewMockUsecase(ctrl)
+	mockCategoryServices.EXPECT().
+		DeleteTag(gomock.Any(), expectedTagID, expectedUserID).
+		Return(nil) // Предполагаем, что удаление прошло успешно.
 
-// 	response, err := categoryGRPC.DeleteTag(context.Background(), request)
+	categoryGRPC := NewCategoryGRPC(mockCategoryServices, *logger.NewLogger(context.TODO()))
 
-// 	assert.NoError(t, err)
-// 	assert.NotNil(t, response)
+	response, err := categoryGRPC.DeleteTag(context.Background(), request)
 
-// 	// Проверим, что возвращенные данные соответствуют ожидаемым.
-// 	assert.Equal(t, &empty.Empty{}, response)
-// }
+	assert.NoError(t, err)
+	assert.NotNil(t, response)
+
+	// Проверим, что возвращенные данные соответствуют ожидаемым.
+	assert.Equal(t, &empty.Empty{}, response)
+}

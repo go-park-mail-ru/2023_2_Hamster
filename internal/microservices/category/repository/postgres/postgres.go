@@ -34,8 +34,6 @@ const (
 						SELECT "name" FROM category 
 						WHERE user_id = $1 AND id = $2
 					);`
-
-	// transactionAssociationDelete = "DELETE FROM TransactionCategory WHERE category_id = $1;"
 )
 
 type Repository struct {
@@ -76,16 +74,6 @@ func (r *Repository) CreateTag(ctx context.Context, tag models.Category) (uuid.U
 }
 
 func (r *Repository) UpdateTag(ctx context.Context, tag *models.Category) error {
-	/*var exists bool
-
-	row := r.db.QueryRow(ctx, CategoryGet, tag.ID)
-	err := row.Scan(&exists)
-	if errors.Is(err, sql.ErrNoRows) {
-		return fmt.Errorf("[repo] Error tag doesn't exist: %w", err)
-	} else if err != nil {
-		return fmt.Errorf("[repo] failed request db %s, %w", CategoryGet, err)
-	} */
-
 	var parentID interface{}
 	if tag.ParentID != uuid.Nil {
 		parentID = tag.ParentID
@@ -107,17 +95,6 @@ func (r *Repository) UpdateTag(ctx context.Context, tag *models.Category) error 
 }
 
 func (r *Repository) DeleteTag(ctx context.Context, tagId uuid.UUID) error {
-	/*var exists bool
-
-	row := r.db.QueryRow(ctx, CategoryGet, tagId)
-	err := row.Scan(&exists)
-	if errors.Is(err, sql.ErrNoRows) {
-		return fmt.Errorf("[repo] tag doesn't exist Error: %v", err)
-	} else if err != nil {
-		return fmt.Errorf("[repo] failed request db %s, %w", CategoryGet, err)
-	}
-	*/
-
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
 		return fmt.Errorf("[repo] failed to start db transaction: %w", err)
@@ -130,10 +107,6 @@ func (r *Repository) DeleteTag(ctx context.Context, tagId uuid.UUID) error {
 			}
 		}
 	}()
-
-	//if err = r.deleteTransactionAssociations(ctx, tx, tagId); err != nil {
-	//	return err
-	//}
 
 	_, err = r.db.Exec(ctx, CategoryDelete, tagId)
 	if err != nil {
@@ -148,6 +121,7 @@ func (r *Repository) DeleteTag(ctx context.Context, tagId uuid.UUID) error {
 
 func (r *Repository) GetTags(ctx context.Context, userID uuid.UUID) ([]models.Category, error) {
 	var categories []models.Category
+	var imageId int
 
 	rows, err := r.db.Query(ctx, CategoeyAll, userID)
 	if err != nil {
@@ -161,13 +135,15 @@ func (r *Repository) GetTags(ctx context.Context, userID uuid.UUID) ([]models.Ca
 			&tag.UserID,
 			&tag.ParentID,
 			&tag.Name,
-			&tag.Image,
+			&imageId,
 			&tag.ShowIncome,
 			&tag.ShowOutcome,
 			&tag.Regular,
 		); err != nil {
 			return nil, err
 		}
+
+		tag.Image = int32(imageId)
 
 		categories = append(categories, tag)
 	}
@@ -207,12 +183,3 @@ func (r *Repository) CheckExist(ctx context.Context, userId uuid.UUID, tagId uui
 	}
 	return true, nil
 }
-
-//
-// func (r *Repository) deleteTransactionAssociations(ctx context.Context, tx pgx.Tx, tagID uuid.UUID) error {
-// 	_, err := tx.Exec(ctx, transactionAssociationDelete, tagID)
-// 	if err != nil {
-// 		return fmt.Errorf("[repo] failed to delete existing transaction associations: %w", err)
-// 	}
-// 	return nil
-// }
