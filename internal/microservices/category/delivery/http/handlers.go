@@ -66,7 +66,7 @@ func (h *Handler) CreateTag(w http.ResponseWriter, r *http.Request) {
 		ShowIncome:  tag.ShowIncome,
 		ShowOutcome: tag.ShowOutcome,
 		Regular:     tag.Regular,
-		Image:       int32(tag.Image),
+		Image:       tag.Image,
 	})
 	if err != nil {
 		h.log.WithField(
@@ -178,7 +178,7 @@ func (h *Handler) UpdateTag(w http.ResponseWriter, r *http.Request) {
 		ShowIncome:  tag.ShowIncome,
 		ShowOutcome: tag.ShowOutcome,
 		Regular:     tag.Regular,
-		Image:       int32(tag.Image),
+		Image:       tag.Image,
 	})
 	if err != nil {
 		h.log.WithField(

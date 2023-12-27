@@ -10,7 +10,7 @@ services:
     image: postgres:latest
     restart: always
     env_file:
-      - .local.env
+      - .env
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}

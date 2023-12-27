@@ -40,6 +40,7 @@ func (c *categoryGRPC) CreateTag(ctx context.Context, in *proto.CreateTagRequest
 		Regular:     in.Regular,
 		Image:       in.Image,
 	}
+
 	id, err := c.CategoryServices.CreateTag(ctx, request)
 
 	return &proto.CreateTagResponse{TagId: id.String()}, err
@@ -101,7 +102,7 @@ func (c *categoryGRPC) UpdateTag(ctx context.Context, in *proto.Category) (*prot
 		ShowIncome:  tag.ShowIncome,
 		ShowOutcome: tag.ShowOutcome,
 		Regular:     tag.Regular,
-		Image:       int32(tag.Image),
+		Image:       tag.Image,
 	}
 
 	return updatedProtoCategory, err

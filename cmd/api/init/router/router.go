@@ -76,7 +76,7 @@ func InitRouter(auth *auth.Handler,
 
 	accountRouter := apiRouter.PathPrefix("/account").Subrouter()
 	accountRouter.Use(authMid.Authentication)
-	accountRouter.Use(csrfMid.CheckCSRF)
+	//accountRouter.Use(csrfMid.CheckCSRF)
 	{
 		accountRouter.Methods("POST").Path("/create").HandlerFunc(account.Create)
 		accountRouter.Methods("PUT").Path("/update").HandlerFunc(account.Update)
@@ -85,7 +85,7 @@ func InitRouter(auth *auth.Handler,
 
 	userRouter := apiRouter.PathPrefix("/user").Subrouter()
 	userRouter.Use(authMid.Authentication)
-	userRouter.Use(csrfMid.CheckCSRF)
+	//userRouter.Use(csrfMid.CheckCSRF)
 	{
 		userRouter.Methods("PUT").Path("/updatePhoto").HandlerFunc(user.UpdatePhoto)
 		userRouter.Methods("PUT").Path("/update").HandlerFunc(user.Update)
@@ -107,7 +107,7 @@ func InitRouter(auth *auth.Handler,
 
 	transactionRouter := apiRouter.PathPrefix("/transaction").Subrouter()
 	transactionRouter.Use(authMid.Authentication)
-	transactionRouter.Use(csrfMid.CheckCSRF)
+	//transactionRouter.Use(csrfMid.CheckCSRF)
 	{
 		// 	transactionRouter.Methods("GET").Path("/{transaction_id}/").HandlerFunc(transaction.Get)
 		transactionRouter.Methods("POST").Path("/create").HandlerFunc(transaction.Create)
@@ -123,7 +123,7 @@ func InitRouter(auth *auth.Handler,
 
 	categoryRouter := apiRouter.PathPrefix("/tag").Subrouter()
 	categoryRouter.Use(authMid.Authentication)
-	categoryRouter.Use(csrfMid.CheckCSRF)
+	//categoryRouter.Use(csrfMid.CheckCSRF)
 	{
 		categoryRouter.Methods("POST").Path("/create").HandlerFunc(category.CreateTag)
 		categoryRouter.Methods("GET").Path("/all").HandlerFunc(category.GetTags)

@@ -38,6 +38,7 @@ func (u *Usecase) CreateTag(ctx context.Context, tag category.TagInput) (uuid.UU
 	newTag.ShowIncome = tag.ShowIncome
 	newTag.ShowIncome = tag.ShowIncome
 	newTag.UserID = tag.UserId
+	newTag.Image = tag.Image
 
 	id, err := u.categoryRepo.CreateTag(ctx, newTag)
 	if err != nil {
