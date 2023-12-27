@@ -21,8 +21,9 @@ type Transaction struct {
 }
 
 type CategoryName struct {
-	ID   uuid.UUID `json:"id"`
-	Name string    `json:"category_name"`
+	ID    uuid.UUID `json:"id"`
+	Name  string    `json:"category_name"`
+	Image int32     `json:"image_id" valid:"-"`
 }
 
 type TransactionTransfer struct {

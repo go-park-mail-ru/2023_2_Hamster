@@ -36,7 +36,7 @@ const (
 	transactionGet            = "SELECT income, outcome, account_income, account_outcome FROM transaction WHERE id = $1;"
 	TransactionGetUserByID    = "SELECT user_id FROM transaction WHERE id = $1;"
 	transactionDelete         = "DELETE FROM transaction WHERE id = $1;"
-	transactionGetCategory    = "SELECT tc.category_id, c.name AS category_name FROM TransactionCategory tc JOIN category c ON tc.category_id = c.id WHERE tc.transaction_id = $1;"
+	transactionGetCategory    = "SELECT tc.category_id, c.name, c.image_id AS category_name FROM TransactionCategory tc JOIN category c ON tc.category_id = c.id WHERE tc.transaction_id = $1;"
 	transactionCreateCategory = "INSERT INTO transactionCategory (transaction_id, category_id) VALUES ($1, $2);"
 	transactionDeleteCategory = "DELETE FROM transactionCategory WHERE transaction_id = $1;"
 	transactionUpdateAccount  = "UPDATE accounts SET balance = balance - $1 WHERE id = $2;"
@@ -180,7 +180,7 @@ func (r *transactionRep) getCategoriesForTransaction(ctx context.Context, transa
 
 	for rows.Next() {
 		var categoryID models.CategoryName
-		if err := rows.Scan(&categoryID.ID, &categoryID.Name); err != nil {
+		if err := rows.Scan(&categoryID.ID, &categoryID.Name, &categoryID.Image); err != nil {
 			return nil, err
 		}
 		categoryIDs = append(categoryIDs, categoryID)
