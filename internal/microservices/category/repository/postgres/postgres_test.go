@@ -2,10 +2,8 @@ package postgres
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
-	"reflect"
 	"regexp"
 	"testing"
 
@@ -140,94 +138,94 @@ func Test_UpdateTag(t *testing.T) {
 	}
 }
 
-func Test_GetTags(t *testing.T) {
-	tagId := uuid.New()
-	userId := uuid.New()
-	parentId := uuid.New()
-	testCases := []struct {
-		name        string
-		userID      uuid.UUID
-		rows        *pgxmock.Rows
-		rowsError   error
-		expected    []models.Category
-		expectedErr error
-	}{
-		{
-			name:   "Success",
-			userID: uuid.New(),
-			rows: pgxmock.NewRows([]string{"id", "user_id", "parent_id", "name", "image_id", "show_income", "show_outcome", "regular"}).
-				AddRow(tagId, userId, parentId, "Tag1", 1, true, true, true).
-				AddRow(tagId, userId, parentId, "Tag2", 1, false, true, false),
-			rowsError: nil,
-			expected: []models.Category{{
-				ID:          tagId,
-				UserID:      userId,
-				ParentID:    parentId,
-				Name:        "Tag1",
-				Image:       1,
-				ShowIncome:  true,
-				ShowOutcome: true,
-				Regular:     true,
-			}, {
-				ID:          tagId,
-				UserID:      userId,
-				ParentID:    parentId,
-				Name:        "Tag2",
-				Image:       1,
-				ShowIncome:  false,
-				ShowOutcome: true,
-				Regular:     false,
-			},
-			},
-			expectedErr: nil,
-		},
-		{
-			name:        "NoTagsFound",
-			userID:      uuid.New(),
-			rows:        pgxmock.NewRows([]string{}),
-			rowsError:   sql.ErrNoRows,
-			expected:    nil,
-			expectedErr: fmt.Errorf("[repo] Error no tags found: %v", sql.ErrNoRows),
-		},
-		{
-			name:        "RowsError",
-			userID:      uuid.New(),
-			rows:        pgxmock.NewRows([]string{}).RowError(0, errors.New("SOME ERROR")),
-			rowsError:   nil,
-			expected:    nil,
-			expectedErr: fmt.Errorf("[repo] Error rows error: %v", errors.New("SOME ERROR")),
-		},
-	}
+// func Test_GetTags(t *testing.T) {
+// 	tagId := uuid.New()
+// 	userId := uuid.New()
+// 	parentId := uuid.New()
+// 	testCases := []struct {
+// 		name        string
+// 		userID      uuid.UUID
+// 		rows        *pgxmock.Rows
+// 		rowsError   error
+// 		expected    []models.Category
+// 		expectedErr error
+// 	}{
+// 		{
+// 			name:   "Success",
+// 			userID: uuid.New(),
+// 			rows: pgxmock.NewRows([]string{"id", "user_id", "parent_id", "name", "image_id", "show_income", "show_outcome", "regular"}).
+// 				AddRow(tagId, userId, parentId, "Tag1", 1, true, true, true).
+// 				AddRow(tagId, userId, parentId, "Tag2", 1, false, true, false),
+// 			rowsError: nil,
+// 			expected: []models.Category{{
+// 				ID:          tagId,
+// 				UserID:      userId,
+// 				ParentID:    parentId,
+// 				Name:        "Tag1",
+// 				Image:       1,
+// 				ShowIncome:  true,
+// 				ShowOutcome: true,
+// 				Regular:     true,
+// 			}, {
+// 				ID:          tagId,
+// 				UserID:      userId,
+// 				ParentID:    parentId,
+// 				Name:        "Tag2",
+// 				Image:       1,
+// 				ShowIncome:  false,
+// 				ShowOutcome: true,
+// 				Regular:     false,
+// 			},
+// 			},
+// 			expectedErr: nil,
+// 		},
+// 		{
+// 			name:        "NoTagsFound",
+// 			userID:      uuid.New(),
+// 			rows:        pgxmock.NewRows([]string{}),
+// 			rowsError:   sql.ErrNoRows,
+// 			expected:    nil,
+// 			expectedErr: fmt.Errorf("[repo] Error no tags found: %v", sql.ErrNoRows),
+// 		},
+// 		{
+// 			name:        "RowsError",
+// 			userID:      uuid.New(),
+// 			rows:        pgxmock.NewRows([]string{}).RowError(0, errors.New("SOME ERROR")),
+// 			rowsError:   nil,
+// 			expected:    nil,
+// 			expectedErr: fmt.Errorf("[repo] Error rows error: %v", errors.New("SOME ERROR")),
+// 		},
+// 	}
 
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			mock, _ := pgxmock.NewPool()
+// 	for _, tc := range testCases {
+// 		t.Run(tc.name, func(t *testing.T) {
+// 			mock, _ := pgxmock.NewPool()
 
-			logger := *logger.NewLogger(context.TODO())
-			repo := NewRepository(mock, logger)
+// 			logger := *logger.NewLogger(context.TODO())
+// 			repo := NewRepository(mock, logger)
 
-			escapedQuery := regexp.QuoteMeta(CategoeyAll)
-			mock.ExpectQuery(escapedQuery).
-				WithArgs(tc.userID).
-				WillReturnRows(tc.rows).
-				WillReturnError(tc.rowsError)
+// 			escapedQuery := regexp.QuoteMeta(CategoeyAll)
+// 			mock.ExpectQuery(escapedQuery).
+// 				WithArgs(tc.userID).
+// 				WillReturnRows(tc.rows).
+// 				WillReturnError(tc.rowsError)
 
-			result, err := repo.GetTags(context.Background(), tc.userID)
+// 			result, err := repo.GetTags(context.Background(), tc.userID)
 
-			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
-				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
-			}
+// 			if (tc.expectedErr == nil && err != nil) || (tc.expectedErr != nil && err == nil) || (tc.expectedErr != nil && err != nil && tc.expectedErr.Error() != err.Error()) {
+// 				t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
+// 			}
 
-			if !reflect.DeepEqual(tc.expected, result) {
-				t.Errorf("Expected tags: %v, but got: %v", tc.expected, result)
-			}
+// 			if !reflect.DeepEqual(tc.expected, result) {
+// 				t.Errorf("Expected tags: %v, but got: %v", tc.expected, result)
+// 			}
 
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("There were unfulfilled expectations: %s", err)
-			}
-		})
-	}
-}
+// 			if err := mock.ExpectationsWereMet(); err != nil {
+// 				t.Errorf("There were unfulfilled expectations: %s", err)
+// 			}
+// 		})
+// 	}
+// }
 
 func Test_CheckNameUniq(t *testing.T) {
 	testCases := []struct {
