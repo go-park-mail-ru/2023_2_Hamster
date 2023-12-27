@@ -229,6 +229,7 @@ func (h *Handler) ImportTransactions(w http.ResponseWriter, r *http.Request) {
 				ShowIncome:  gtag.ShowIncome,
 				ShowOutcome: gtag.ShowOutcome,
 				Regular:     gtag.Regular,
+				Image:       gtag.Image,
 			}
 			tags[i] = tag
 		}
@@ -237,12 +238,13 @@ func (h *Handler) ImportTransactions(w http.ResponseWriter, r *http.Request) {
 	tagCache := sync.Map{}
 	if len(tags) != 0 {
 		for _, tag := range tags {
-			accountCache.Store(tag.Name, tag.ID)
+			tagCache.Store(tag.Name, tag.ID)
 		}
 	}
 
+	var i int
 	// Iterate through the records
-	for {
+	for i = 0; true; i++ {
 		// Read each record from csv
 		record, err := reader.Read()
 		if err == io.EOF {
@@ -253,18 +255,33 @@ func (h *Handler) ImportTransactions(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		if len(record) < 7 {
+			response.ErrorResponse(w, http.StatusBadRequest, err, "wrong format not enough args for transaction", h.logger)
+			return
+		}
+
+		if len(record) > 8 {
+			response.ErrorResponse(w, http.StatusBadRequest, err, "wrong format too much args for transaction", h.logger)
+			return
+		}
+
 		accountIncome := record[0]
 		accountOutcome := record[1]
 
 		income, err := strconv.ParseFloat(record[2], 64)
 		if err != nil {
-			response.ErrorResponse(w, http.StatusBadRequest, err, "Error converting the amount to float", h.logger)
+			response.ErrorResponse(w, http.StatusBadRequest, err, "Error converting the income amount to float", h.logger)
 			return
 		}
 
 		outcome, err := strconv.ParseFloat(record[3], 64)
 		if err != nil {
-			response.ErrorResponse(w, http.StatusBadRequest, err, "Error converting the amount to float", h.logger)
+			response.ErrorResponse(w, http.StatusBadRequest, err, "Error converting the outcome amount to float", h.logger)
+			return
+		}
+
+		if (income == 0) == (outcome == 0) {
+			response.ErrorResponse(w, http.StatusBadRequest, err, "transaction can be consumables or profitable", h.logger)
 			return
 		}
 
@@ -324,6 +341,7 @@ func (h *Handler) ImportTransactions(w http.ResponseWriter, r *http.Request) {
 			tag, err := h.tagService.CreateTag(r.Context(), &generated.CreateTagRequest{
 				UserId:      user.ID.String(),
 				Name:        tagName,
+				Image:       0,
 				ShowIncome:  false,
 				Regular:     false,
 				ShowOutcome: true,
@@ -360,6 +378,11 @@ func (h *Handler) ImportTransactions(w http.ResponseWriter, r *http.Request) {
 			response.ErrorResponse(w, http.StatusInternalServerError, err, "Error creating the transaction", h.logger)
 			return
 		}
+	}
+
+	if i == 0 {
+		response.ErrorResponse(w, http.StatusBadRequest, err, "empty file", h.logger)
+		return
 	}
 
 	response.SuccessResponse(w, http.StatusOK, "Successfully imported transactions")
