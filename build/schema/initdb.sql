@@ -92,20 +92,20 @@ DECLARE
     accountCashID UUID;
     accountCardID UUID;
 BEGIN
-    INSERT INTO category (user_id, parent_tag, "name", show_income, show_outcome, regular)
-    VALUES  (NEW.id, NULL, 'Дети',                     false, true,  false),
-            (NEW.id, NULL, 'Забота о себе',            false, true,  false),
-            (NEW.id, NULL, 'Зарплата',                 true,  false, true),
-            (NEW.id, NULL, 'Здоровье и фитнес',         false, true,  false),
-            (NEW.id, NULL, 'Кафе и рестораны',         false, true,  false),
-            (NEW.id, NULL, 'Машина',                   false, true,  false),
-            (NEW.id, NULL, 'Образование',              false, true,  false),
-            (NEW.id, NULL, 'Отдых и развлечения',      false, true,  false),
-            (NEW.id, NULL, 'Подарки',                  false, true,  false),
-            (NEW.id, NULL, 'Покупки: одежда, техника', false, true,  false),
-            (NEW.id, NULL, 'Проезд',                   false, true,  false),
-            (NEW.id, NULL, 'Подписки',                 false, true,  true),
-            (NEW.id, NULL, 'Продукты',                 false, true, false);
+    INSERT INTO category (user_id, parent_tag, "name", image_id, show_income, show_outcome, regular)
+    VALUES  (NEW.id, NULL, 'Дети',                     29, false, true,  false),
+            (NEW.id, NULL, 'Забота о себе',            22, false, true,  false),
+            (NEW.id, NULL, 'Зарплата',                 0, true,  false, true),
+            (NEW.id, NULL, 'Здоровье и фитнес',        27, false, true,  false),
+            (NEW.id, NULL, 'Кафе и рестораны',         14, false, true,  false),
+            (NEW.id, NULL, 'Машина',                   18, false, true,  false),
+            (NEW.id, NULL, 'Образование',              23, false, true,  false),
+            (NEW.id, NULL, 'Отдых и развлечения',      15, false, true,  false),
+            (NEW.id, NULL, 'Подарки',                  1, false, true,  false),
+            (NEW.id, NULL, 'Покупки: одежда, техника', 20, false, true,  false),
+            (NEW.id, NULL, 'Проезд',                   17, false, true,  false),
+            (NEW.id, NULL, 'Подписки',                 25, false, true,  true),
+            (NEW.id, NULL, 'Продукты',                 21, false, true, false);
     
     SELECT id INTO categoryID FROM category WHERE name = 'Продукты' AND user_id = NEW.id;
 
