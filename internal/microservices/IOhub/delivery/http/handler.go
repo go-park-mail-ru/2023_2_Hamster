@@ -367,10 +367,14 @@ func (h *Handler) ImportTransactions(w http.ResponseWriter, r *http.Request) {
 			Description:      description,
 		}
 
-		transaction.Categories = append(transaction.Categories, models.CategoryName{
-			ID:   tagId,
-			Name: tagName,
-		})
+		if tagName != "" {
+			transaction.Categories = append(transaction.Categories, models.CategoryName{
+				ID:   tagId,
+				Name: tagName,
+			})
+		} else {
+			transaction.Categories = nil
+		}
 
 		// Create the transaction in the database
 		_, err = h.transactionService.CreateTransaction(r.Context(), &transaction)
