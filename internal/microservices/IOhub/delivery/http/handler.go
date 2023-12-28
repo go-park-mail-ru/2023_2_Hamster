@@ -257,14 +257,10 @@ func (h *Handler) ImportTransactions(w http.ResponseWriter, r *http.Request) {
 
 		if len(record) < 8 {
 			continue
-			// response.ErrorResponse(w, http.StatusBadRequest, err, "wrong format not enough args for transaction", h.logger)
-			// return
 		}
 
 		if len(record) > 9 {
 			continue
-			// response.ErrorResponse(w, http.StatusBadRequest, err, "wrong format too much args for transaction", h.logger)
-			// return
 		}
 
 		accountIncome := record[0]
@@ -340,21 +336,23 @@ func (h *Handler) ImportTransactions(w http.ResponseWriter, r *http.Request) {
 		if value, ok := tagCache.Load(tagName); ok {
 			tagId = value.(uuid.UUID)
 		} else {
-			tag, err := h.tagService.CreateTag(r.Context(), &generated.CreateTagRequest{
-				UserId:      user.ID.String(),
-				Name:        tagName,
-				Image:       0,
-				ShowIncome:  false,
-				Regular:     false,
-				ShowOutcome: true,
-			})
-			if err != nil {
-				response.ErrorResponse(w, http.StatusInternalServerError, err, "Import error tag add failed", h.logger)
-				return
-			}
+			if tagName != "" {
+				tag, err := h.tagService.CreateTag(r.Context(), &generated.CreateTagRequest{
+					UserId:      user.ID.String(),
+					Name:        tagName,
+					Image:       0,
+					ShowIncome:  false,
+					Regular:     false,
+					ShowOutcome: true,
+				})
+				if err != nil {
+					response.ErrorResponse(w, http.StatusInternalServerError, err, "Import error tag add failed", h.logger)
+					return
+				}
 
-			tagId, _ = uuid.Parse(tag.TagId)
-			tagCache.Store(tagName, tagId)
+				tagId, _ = uuid.Parse(tag.TagId)
+				tagCache.Store(tagName, tagId)
+			}
 		}
 
 		// Parse the record to a Transaction struct
