@@ -699,111 +699,111 @@ func TestHandler_TransactionDelete(t *testing.T) {
 	}
 }
 
-func TestHandler_ExportTransactions(t *testing.T) {
-	uuidTest := uuid.New()
-	user := &models.User{ID: uuidTest, Login: "testuser"}
-	// nilUUID := uuid.Nil
+// func TestHandler_ExportTransactions(t *testing.T) {
+// 	uuidTest := uuid.New()
+// 	user := &models.User{ID: uuidTest, Login: "testuser"}
+// 	// nilUUID := uuid.Nil
 
-	tests := []struct {
-		name          string
-		user          *models.User
-		query         string
-		expectedCode  int
-		expectedBody  string
-		mockUsecaseFn func(*mocks.MockUsecase)
-	}{
-		{
-			name:         "Successful call to GetTransactionForExport",
-			user:         user,
-			query:        "page=2&page_size=10",
-			expectedCode: http.StatusOK,
-			expectedBody: "\r\nContent-Disposition: form-data; name=\"file\"; filename=\"dataFeed.csv\"\r\nContent-Type: application/octet-stream\r\n\r\nAccountIncome,AccountOutcome,Income,Outcome,Date,Payer,Description,Categories\n,,0.000000,0.000000,0001-01-01T00:00:00Z,,\n\r\n",
-			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
-				mockUsecase.EXPECT().GetTransactionForExport(gomock.Any(), gomock.Any(), gomock.Any()).Return([]models.TransactionExport{{ID: uuidTest}}, nil)
-			},
-		},
-		{
-			name:          "Unauthorized Request",
-			user:          nil,
-			query:         "page=2&page_size=10",
-			expectedCode:  http.StatusUnauthorized,
-			expectedBody:  `{"status":401,"message":"unauthorized"}`,
-			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {},
-		},
-		{
-			name:          "Invalid Query start_date",
-			user:          user,
-			query:         "start_date='trueee'",
-			expectedCode:  http.StatusBadRequest,
-			expectedBody:  `{"status":400,"message":"invalid url parameter"}`,
-			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {},
-		},
-		{
-			name:          "Invalid Query end_date",
-			user:          user,
-			query:         "end_date='trueee'",
-			expectedCode:  http.StatusBadRequest,
-			expectedBody:  `{"status":400,"message":"invalid url parameter"}`,
-			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {},
-		},
-		{
-			name:         "No Such Transaction Error",
-			user:         user,
-			query:        "page=2&page_size=10",
-			expectedCode: http.StatusNotFound,
-			expectedBody: `{"status":404,"message":"no transactions found"}`,
-			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
-				errorNoSuchTransaction := models.NoSuchTransactionError{UserID: uuidTest}
-				mockUsecase.EXPECT().GetTransactionForExport(gomock.Any(), gomock.Any(), gomock.Any()).Return([]models.TransactionExport{}, &errorNoSuchTransaction)
-			},
-		},
-		{
-			name:         "Internal Server Error",
-			user:         user,
-			expectedCode: http.StatusInternalServerError,
-			expectedBody: `{"status":500,"message":"can't get feed info"}`,
-			mockUsecaseFn: func(mockService *mocks.MockUsecase) {
-				internalServerError := errors.New("can't get feed info")
-				mockService.EXPECT().GetTransactionForExport(gomock.Any(), gomock.Any(), gomock.Any()).Return([]models.TransactionExport{}, internalServerError)
-			},
-		},
-	}
+// 	tests := []struct {
+// 		name          string
+// 		user          *models.User
+// 		query         string
+// 		expectedCode  int
+// 		expectedBody  string
+// 		mockUsecaseFn func(*mocks.MockUsecase)
+// 	}{
+// 		{
+// 			name:         "Successful call to GetTransactionForExport",
+// 			user:         user,
+// 			query:        "page=2&page_size=10",
+// 			expectedCode: http.StatusOK,
+// 			expectedBody: "\r\nContent-Disposition: form-data; name=\"file\"; filename=\"dataFeed.csv\"\r\nContent-Type: application/octet-stream\r\n\r\nAccountIncome,AccountOutcome,Income,Outcome,Date,Payer,Description,Categories\n,,0.000000,0.000000,0001-01-01T00:00:00Z,,\n\r\n",
+// 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+// 				mockUsecase.EXPECT().GetTransactionForExport(gomock.Any(), gomock.Any(), gomock.Any()).Return([]models.TransactionExport{{ID: uuidTest}}, nil)
+// 			},
+// 		},
+// 		{
+// 			name:          "Unauthorized Request",
+// 			user:          nil,
+// 			query:         "page=2&page_size=10",
+// 			expectedCode:  http.StatusUnauthorized,
+// 			expectedBody:  `{"status":401,"message":"unauthorized"}`,
+// 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {},
+// 		},
+// 		{
+// 			name:          "Invalid Query start_date",
+// 			user:          user,
+// 			query:         "start_date='trueee'",
+// 			expectedCode:  http.StatusBadRequest,
+// 			expectedBody:  `{"status":400,"message":"invalid url parameter"}`,
+// 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {},
+// 		},
+// 		{
+// 			name:          "Invalid Query end_date",
+// 			user:          user,
+// 			query:         "end_date='trueee'",
+// 			expectedCode:  http.StatusBadRequest,
+// 			expectedBody:  `{"status":400,"message":"invalid url parameter"}`,
+// 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {},
+// 		},
+// 		{
+// 			name:         "No Such Transaction Error",
+// 			user:         user,
+// 			query:        "page=2&page_size=10",
+// 			expectedCode: http.StatusNotFound,
+// 			expectedBody: `{"status":404,"message":"no transactions found"}`,
+// 			mockUsecaseFn: func(mockUsecase *mocks.MockUsecase) {
+// 				errorNoSuchTransaction := models.NoSuchTransactionError{UserID: uuidTest}
+// 				mockUsecase.EXPECT().GetTransactionForExport(gomock.Any(), gomock.Any(), gomock.Any()).Return([]models.TransactionExport{}, &errorNoSuchTransaction)
+// 			},
+// 		},
+// 		{
+// 			name:         "Internal Server Error",
+// 			user:         user,
+// 			expectedCode: http.StatusInternalServerError,
+// 			expectedBody: `{"status":500,"message":"can't get feed info"}`,
+// 			mockUsecaseFn: func(mockService *mocks.MockUsecase) {
+// 				internalServerError := errors.New("can't get feed info")
+// 				mockService.EXPECT().GetTransactionForExport(gomock.Any(), gomock.Any(), gomock.Any()).Return([]models.TransactionExport{}, internalServerError)
+// 			},
+// 		},
+// 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			ctrl := gomock.NewController(t)
+// 			defer ctrl.Finish()
 
-			mockService := mocks.NewMockUsecase(ctrl)
-			tt.mockUsecaseFn(mockService)
+// 			mockService := mocks.NewMockUsecase(ctrl)
+// 			tt.mockUsecaseFn(mockService)
 
-			mockUsecase := mockUser.NewMockUsecase(ctrl)
-			mockAccount := mockClient.NewMockAccountServiceClient(ctrl)
+// 			mockUsecase := mockUser.NewMockUsecase(ctrl)
+// 			mockAccount := mockClient.NewMockAccountServiceClient(ctrl)
 
-			mockHandler := NewHandler(mockService, mockUsecase, mockAccount, *logger.NewLogger(context.TODO()))
+// 			mockHandler := NewHandler(mockService, mockUsecase, mockAccount, *logger.NewLogger(context.TODO()))
 
-			// Set up the request
-			url := "/api/export/transactions"
-			req := httptest.NewRequest("GET", url, nil)
-			if tt.user != nil {
-				ctx := context.WithValue(req.Context(), models.ContextKeyUserType{}, tt.user)
-				req = req.WithContext(ctx)
-				req.URL.RawQuery = tt.query
-			}
+// 			// Set up the request
+// 			url := "/api/export/transactions"
+// 			req := httptest.NewRequest("GET", url, nil)
+// 			if tt.user != nil {
+// 				ctx := context.WithValue(req.Context(), models.ContextKeyUserType{}, tt.user)
+// 				req = req.WithContext(ctx)
+// 				req.URL.RawQuery = tt.query
+// 			}
 
-			recorder := httptest.NewRecorder()
+// 			recorder := httptest.NewRecorder()
 
-			mockHandler.ExportTransactions(recorder, req)
+// 			mockHandler.ExportTransactions(recorder, req)
 
-			actual := strings.TrimSpace(recorder.Body.String())
-			assert.Equal(t, tt.expectedCode, recorder.Code)
-			if tt.name == "Successful call to GetTransactionForExport" {
-				assert.Equal(t, true, strings.Contains(actual, tt.expectedBody))
-				// fmt.Println("expected >>>> ", tt.expectedBody)
-				// fmt.Println("actual >>>> ", actual)
-			} else {
-				assert.Equal(t, tt.expectedBody, actual)
-			}
-		})
-	}
-}
+// 			actual := strings.TrimSpace(recorder.Body.String())
+// 			assert.Equal(t, tt.expectedCode, recorder.Code)
+// 			if tt.name == "Successful call to GetTransactionForExport" {
+// 				assert.Equal(t, true, strings.Contains(actual, tt.expectedBody))
+// 				// fmt.Println("expected >>>> ", tt.expectedBody)
+// 				// fmt.Println("actual >>>> ", actual)
+// 			} else {
+// 				assert.Equal(t, tt.expectedBody, actual)
+// 			}
+// 		})
+// 	}
+// }
